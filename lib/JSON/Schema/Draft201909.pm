@@ -70,7 +70,8 @@ such as C<http> are referenced.
 =head2 base_uri
 
 Must be an absolute URI or an absolute filename. Used as the base URI for resolving relative URIs when no other
-base URI is suitable for use.  Defaults to the directory corresponding to the local working directory.
+base URI is suitable for use.  Defaults to the directory corresponding to the local working directory when
+C<load_from_disk> is true, or undefined otherwise.
 
 =head2 output_format
 
@@ -85,8 +86,8 @@ Evaluates the provided instance data against the known schema document.  The res
 the following formats, as configured with L</output_format>:
 
 =for :list
-* L<flag|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.1>
-- a true/false result indicating whether the data is valid against the schema,
+* L<flag|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.1> -
+  a true/false result indicating whether the data is valid against the schema,
 * L<basic|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.2> (not yet supported)
 * L<detailed|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.3> (not yet supported)
 * L<verbose|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.4> (not yet supported)
@@ -99,7 +100,7 @@ The minimum extensible JSON Schema implementation requirements involve:
 
 =for :list
 * identifying, organizing, and linking schemas (with keywords such as C<$ref>, C<$id>, C<$schema>, C<$anchor>,
-C<$defs>)
+  C<$defs>)
 * providing an interface to evaluate assertions
 * providing an interface to collect annotations
 * applying subschemas to instances and combining assertion results and annotation data accordingly.
