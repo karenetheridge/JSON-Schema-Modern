@@ -28,6 +28,7 @@ __END__
         load_from_network => 0,
         base_uri => 'https://evilgeniuses.org',
         output_format => 'flag',
+        annotate => 0,
     );
 
     $js->base_uri('https://insane-asylum.org/ward_one/');
@@ -55,11 +56,11 @@ All of these options can be set via the constructor, or altered later on an inst
 =head2 strict
 
 Boolean; defaults to false. When true, unrecognized keywords or unexpected layout in the schema document
-will generate an error at the instance location (or cause validation to fail if C<output_format> is C<flag>).
+will generate an error at the instance location, which will cause validation to fail.
 
 =head2 short_circuit
 
-Boolean; defaults to true when C<output_format> is C<flag>, or false otherwise. When true, evaluation
+Boolean; is always true when C<output_format> is C<flag>, or defaults to false otherwise. When true, evaluation
 returns as soon as validation is known to fail, without collecting all possible errors.
 
 =head2 load_from_disk
@@ -75,12 +76,17 @@ such as C<http> are referenced.
 
 Must be an absolute URI or an absolute filename. Used as the base URI for resolving relative URIs when no other
 base URI is suitable for use.  Defaults to the directory corresponding to the local working directory when
-C<load_from_disk> is true, or undefined otherwise.
+C<load_from_disk> is true, or undefined otherwise (which will generate an error if used).
 
 =head2 output_format
 
 Must be one of the following values: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<flag>.
 See L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.2> for detailed description.
+
+=head2 annotate
+
+Boolean; is always false when C<output_format> is C<flag>. When true, collects annotations on validating
+(sub-)schemas in the result.
 
 =head1 METHODS
 
@@ -158,6 +164,12 @@ referenced:
 * L<https://json-schema.org/draft/2019-09/meta/format>
 * L<https://json-schema.org/draft/2019-09/meta/content>
 
+=head1 TYPE SEMANTICS
+
+TBD. Explain how perl types and JSON types are mostly interchangeable and how one maps to the other for the purpose
+of JSON Schema evaluation. Of particular concern are distinguishing strings from numbers, and booleans from strings
+or numbers.
+
 =head1 LIMITATIONS
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
@@ -185,6 +197,10 @@ To date, missing components include most of these. More specifically, features t
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
 * use of C<$recursiveRef>
 * use of plain-name fragments with C<$anchor>
+* support (either in annotations or validation of formats
+  (L<https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7>)
+* support for string-encoded data keywords: C<contentEncoding>, C<contentMediaType>, C<contentSchema>
+  (L<https://json-schema.org/draft/2019-09/json-schema-validation.html#content>)
 
 =head1 SEE ALSO
 
