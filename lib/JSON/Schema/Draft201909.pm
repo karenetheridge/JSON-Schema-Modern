@@ -30,8 +30,12 @@ __END__
         output_format => 'flag',
     );
 
+    $js->base_uri('https://insane-asylum.org/ward_one/');
+
     $js->add_schema($schema_data);
-    $js->add_schema($id_string => $data);   # TODO
+    $js->add_schema($schema_document);
+    $js->add_schema($id_string => $schema_data);
+    $js->add_schema($id_string);
 
     $result = $js->evaluate($instance_data);
     $result = $js->evaluate($instance_data, $id_string);    # TODO
@@ -46,7 +50,7 @@ version of the specification.
 
 =head1 CONFIGURATION OPTIONS
 
-All of these options can be set via the constructor, or altered later on an instance.
+All of these options can be set via the constructor, or altered later on an instance using accessor methods.
 
 =head2 strict
 
@@ -80,6 +84,54 @@ See L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10
 
 =head1 METHODS
 
+=head2 new
+
+    JSON::Schema::Draft201909->new(
+        strict => 0,
+        load_from_disk => 1,
+        base_uri => 'https://nohello.com',
+    );
+
+Accepts all documented L<configuration options|/CONFIGURATION OPTIONS>. Additionally, can accept one
+or more schemas to be added directly:
+
+    JSON::Schema::Draft201909->new(schema => $schema_data);
+    JSON::Schema::Draft201909->new(schema => $schema_document);
+    JSON::Schema::Draft201909->new(schema => $id_string);
+    JSON::Schema::Draft201909->new(schema => { $id_string => $schema_data });
+    JSON::Schema::Draft201909->new(schema => [ $schema_data,
+                                               $schema_document,
+                                               $id_string,
+                                               { $id_string => $schema_data },
+                                             ]);
+
+=head2 add_schema
+
+Makes the provided schema available to the evaluator. Can be called in multiple ways:
+
+=over 4
+
+=item * C<< $jv->add_schema($schema_data) >>
+
+Must be recognizable as schema data (i.e. a boolean or a hashref). Its canonical URI will be parsed out of the
+root C<$id> keyword, and resolved against L</base_uri> if not absolute.
+
+=item * C<< $jv->add_schema($schema_document) >>
+
+Add an existing L<JSON::Schema::Document> object.
+
+-item * C<< $js->add_schema($id_string) >>
+
+Fetches the schema document referenced by C<$id_string>. Will require either L</load_from_disk> or
+L</load_from_network> to be enabled, if the document is not L<cached|/CACHED DOCUMENTS>.
+
+=item * C<< $jv->add_schema($id_string => $schema_data) >>
+
+As C<< $jv->add_schema($schema_data) >>, but uses the provided C<$id_string> as the base URI (which is resolved
+against L</base_uri> if not absolute).
+
+=back
+
 =head2 evaluate
 
 Evaluates the provided instance data against the known schema document.  The result is returned one of
@@ -92,7 +144,21 @@ the following formats, as configured with L</output_format>:
 * L<detailed|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.3> (not yet supported)
 * L<verbose|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.4> (not yet supported)
 
-=head2 LIMITATIONS
+=head1 CACHED DOCUMENTS
+
+The following schema documents are cached by this module, and do not need to be fetched from the network when
+referenced:
+
+=for :list
+* L<https://json-schema.org/draft/2019-09/schema>
+* L<https://json-schema.org/draft/2019-09/meta/core>
+* L<https://json-schema.org/draft/2019-09/meta/applicator>
+* L<https://json-schema.org/draft/2019-09/meta/validation>
+* L<https://json-schema.org/draft/2019-09/meta/meta-data>
+* L<https://json-schema.org/draft/2019-09/meta/format>
+* L<https://json-schema.org/draft/2019-09/meta/content>
+
+=head1 LIMITATIONS
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
