@@ -1,0 +1,6 @@
+/.ackrc
+/.build/
+!/.gitignore
+/.latest
+/JSON-Schema-Draft201909-*/
+/JSON-Schema-Draft201909-*.tar.gz

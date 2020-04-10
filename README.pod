@@ -1,0 +1,28 @@
+=pod
+
+=head1 SYNOPSIS
+
+    use JSON::Schema::Draft201909;
+
+    ...
+
+=head1 DESCRIPTION
+
+...
+
+=head1 FUNCTIONS/METHODS
+
+=head2 C<foo>
+
+...
+
+=head1 ACKNOWLEDGEMENTS
+
+...
+
+=head1 SEE ALSO
+
+=for :list
+* L<foo>
+
+=cut
