@@ -1,13 +1,68 @@
 use strict;
 use warnings;
-no if "$]" >= 5.031009, feature => 'indirect';
 package JSON::Schema::Draft201909;
-# vim: set ts=8 sts=4 sw=4 tw=100 et :
+# vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Validate data against a schema
 # KEYWORDS: JSON Schema data validation structure specification
 
 our $VERSION = '0.001';
 
+no if "$]" >= 5.031009, feature => 'indirect';
+use Moo;
+use experimental 'signatures';
+use Types::Standard qw(HashRef Ref);
+use MooX::HandlesVia;
+use JSON::MaybeXS 'is_bool';
+
+# use JSON::Schema::Draft201909::Document;
+
+# these attributes not yet fully implemented, so we hardcode their values for now
+sub annotate { 0 }
+sub base_uri { '' } # use cwd when load_from_disk is true
+sub load_from_disk { 0 }
+sub load_from_network { 0 }
+sub output_format { 'flag' }
+sub short_circuit { 1 }
+sub strict { 0 }
+
+has schemas => (
+  is => 'bare',
+  # isa => HashRef[InstanceOf['JSON::Schema::Draft201909::Document']],
+  isa => HashRef[Ref],  # just store the raw document for now
+  handles_via => 'Hash',
+  handles => {
+    _get_schema => 'get',
+    _set_schema => 'set',
+    _all_schema_uris => 'keys'
+  },
+);
+
+sub evaluate ($self, $instance_data, $schema) {
+  # figure out what document is to be evaluated.
+  # - schema = undef: use the schema document we know. die if more than one.
+  # - schema = raw data: ->add_schema(..)
+  # - schema = id str: if known, fetch the doc; otherwise, ->add_schema(..)
+
+  return $self->_evaluate($instance_data, $schema, {});
+}
+
+sub _evaluate ($self, $instance_data, $schema, $state) {
+  # this is the recursive sub. we keep a hash of state data to track json pointers to
+  # where we are in instance data and schema data, to be used for error generation.
+  # We also need to store the schema document object, where we store information that
+  # might affect evaluation behaviour (such as vocabulary support, or draft-07 compatibility).
+  # we will likely localize some config options depending on the keyword - e.g. when
+  # evaluating the 'not' keyword, we can set short_circuit = true and annotate = false.
+
+  # TODO: check short_circuit before returning
+  # TODO: create error object, if output_format ne 'flag'
+  return $schema if is_bool($schema);
+
+  # for now, we do not understand anything but the schemas true and false.
+
+  # for now, we recognize no keywords.
+  # for now, we collect no annotations.
+}
 
 1;
 __END__
@@ -53,15 +108,16 @@ version of the specification.
 
 All of these options can be set via the constructor, or altered later on an instance using accessor methods.
 
-=head2 strict
+=head2 annotate
 
-Boolean; defaults to false. When true, unrecognized keywords or unexpected layout in the schema document
-will generate an error at the instance location, which will cause validation to fail.
+Boolean; is always false when C<output_format> is C<flag>. When true, collects annotations on validating
+(sub-)schemas in the result.
 
-=head2 short_circuit
+=head2 base_uri
 
-Boolean; is always true when C<output_format> is C<flag>, or defaults to false otherwise. When true, evaluation
-returns as soon as validation is known to fail, without collecting all possible errors.
+Must be an absolute URI or an absolute filename. Used as the base URI for resolving relative URIs when no other
+base URI is suitable for use.  Defaults to the directory corresponding to the local working directory when
+C<load_from_disk> is true; otherwise, the empty string is used.
 
 =head2 load_from_disk
 
@@ -72,21 +128,20 @@ Boolean; not yet supported. When true, permits loading referenced schemas from l
 Boolean; not yet supported. When true, permits loading referenced schemas from the network when URIs using a scheme
 such as C<http> are referenced.
 
-=head2 base_uri
-
-Must be an absolute URI or an absolute filename. Used as the base URI for resolving relative URIs when no other
-base URI is suitable for use.  Defaults to the directory corresponding to the local working directory when
-C<load_from_disk> is true, or undefined otherwise (which will generate an error if used).
-
 =head2 output_format
 
 Must be one of the following values: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<flag>.
 See L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.2> for detailed description.
 
-=head2 annotate
+=head2 short_circuit
 
-Boolean; is always false when C<output_format> is C<flag>. When true, collects annotations on validating
-(sub-)schemas in the result.
+Boolean; is always true when C<output_format> is C<flag>, or defaults to false otherwise. When true, evaluation
+returns as soon as validation is known to fail, without collecting all possible errors or annotations.
+
+=head2 strict
+
+Boolean; defaults to false. When true, unrecognized keywords or unexpected layout in the schema document
+will generate an error at the instance location, which will cause validation to fail.
 
 =head1 METHODS
 
@@ -124,17 +179,23 @@ root C<$id> keyword, and resolved against L</base_uri> if not absolute.
 
 =item * C<< $jv->add_schema($schema_document) >>
 
-Add an existing L<JSON::Schema::Document> object.
+B<Not yet implemented.>
+
+Add an existing L<JSON::Schema::Draft201909::Document> object.
 
 -item * C<< $js->add_schema($id_string) >>
+
+B<Not yet implemented.>
 
 Fetches the schema document referenced by C<$id_string>. Will require either L</load_from_disk> or
 L</load_from_network> to be enabled, if the document is not L<cached|/CACHED DOCUMENTS>.
 
-=item * C<< $jv->add_schema($id_string => $schema_data) >>
+=item * C<< $jv->add_schema($id_string => $schema_data | $schema_document) >>
 
-As C<< $jv->add_schema($schema_data) >>, but uses the provided C<$id_string> as the base URI (which is resolved
-against L</base_uri> if not absolute).
+B<Not yet implemented.>
+
+As C<< $jv->add_schema($schema_data) >> or C<< $jv->add_schema($schema_document) >>, but uses the
+provided C<$id_string> as a base URI (which is resolved against L</base_uri> if not absolute).
 
 =back
 
@@ -166,9 +227,16 @@ referenced:
 
 =head1 TYPE SEMANTICS
 
-TBD. Explain how perl types and JSON types are mostly interchangeable and how one maps to the other for the purpose
-of JSON Schema evaluation. Of particular concern are distinguishing strings from numbers, and booleans from strings
-or numbers.
+Perl types and JSON types are mostly interchangeable, and JSON encoders/decoders do a good job of
+mapping one to the other while preserving type. The main sticky points are differentiating between
+boolean, numeric and string scalar values.  For now, this JSON Schema evaluator will use the same
+heuristics as L<JSON::MaybeXS> and L<Mojo::JSON> (via L<Cpanel::JSON::XS>) do:
+
+=for :list
+* a value is a boolean if and only if it isa L<JSON::PP::Boolean>
+* a value is a number if and only if it is stored as an SvIV or SvNV (see L<perlguts>).
+
+If your document passed through a JSON decoder, everything should work out just fine.
 
 =head1 LIMITATIONS
 
