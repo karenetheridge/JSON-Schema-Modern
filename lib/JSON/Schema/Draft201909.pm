@@ -25,7 +25,7 @@ sub output_format { 'flag' }
 sub short_circuit { 1 }
 sub strict { 0 }
 
-has schemas => (
+has documents => (
   is => 'bare',
   # isa => HashRef[InstanceOf['JSON::Schema::Draft201909::Document']],
   isa => HashRef[Ref],  # just store the raw document for now
@@ -37,13 +37,50 @@ has schemas => (
   },
 );
 
+# this collects schema resources which may be a schema root, or
+# a subschema.  the key should be an absolute uri; the value
+# should be either just a reference to the raw 'data' so identified,
+# but possibly also the document that this data resides within as well as a json pointer string
+# showing the location within the document.
+has resources => ( is => 'ro', HashRef );
+
+#around BUILDARGS => sub ($orig, $class, %args) {
+#  if (my $documents = delete $args{document}) {
+#    die 'documents argument not yet supported';
+#  }
+#
+#  return $class->$orig(%args);
+#};
+#
+#    # one arg, non-ref (id string - load the schema)
+#    # one arg, JSON::Schema::Draft201909::Document
+#    # two args, non-ref: $id => data|doc
+# https://json-schema.org/draft/2019-09/json-schema-core.html#root
+# "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
+#sub add_document($self, @args) {
+#  # one arg, non-ref (id string - load the schema)
+#  # one arg, JSON::Schema::Draft201909::Document
+#  # two args, non-ref: $id => data|doc
+#  # one arg, unblessed ref: a raw document. use base uri as id.
+#
+#    # -> here I am.
+#  # die if this schema is already stored - https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.2.4.5
+#
+#  # ... _set_schema(..)
+#}
+
 sub evaluate ($self, $instance_data, $schema) {
   # figure out what document is to be evaluated.
   # - schema = undef: use the schema document we know. die if more than one.
   # - schema = raw data: ->add_schema(..)
   # - schema = id str: if known, fetch the doc; otherwise, ->add_schema(..)
 
-  return $self->_evaluate($instance_data, $schema, {});
+  # state collects localized configs, current instance_location, schema_location, and the errors/annotations.
+
+  # XXX wrap in a try/catch and turn exception into an error
+  my $results = $self->_evaluate($instance_data, $schema, {});
+
+  # collect boolean result, errors and annotations into a ::Result object
 }
 
 sub _evaluate ($self, $instance_data, $schema, $state) {
@@ -57,11 +94,29 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
   # TODO: check short_circuit before returning
   # TODO: create error object, if output_format ne 'flag'
   return $schema if is_bool($schema);
+  return false;
 
-  # for now, we do not understand anything but the schemas true and false.
+#  die 'bad structure' if ref $schema ne 'HASH';
+#
+#  die 'illegal $schema'
+#    if exists $schema->{'$schema'} and $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
+#
+#  my $result = true;
 
-  # for now, we recognize no keywords.
+  # consider assertion keywords against the current data instance
+  # consider applicator keywords against the current data instance (call _evaluate recursively)
+  # consider applicator keywords against a child data instance (call _evaluate recursively)
+  # --> for now, we recognize no keywords.
+
+  # return state as well? or the set of errors and annotations collected from children?
+  return $result if not $result;
+
+  # collect annotations in the current subschema
+  # combine with annotations from results from recursive calls against child data instances
   # for now, we collect no annotations.
+
+  # return state as well? or the set of errors and annotations collected from children?
+  return true;
 }
 
 1;
@@ -154,47 +209,47 @@ will generate an error at the instance location, which will cause validation to 
     );
 
 Accepts all documented L<configuration options|/CONFIGURATION OPTIONS>. Additionally, can accept one
-or more schemas to be added directly:
+or more schema documents to be added directly:
 
-    JSON::Schema::Draft201909->new(schema => $schema_data);
-    JSON::Schema::Draft201909->new(schema => $schema_document);
-    JSON::Schema::Draft201909->new(schema => $id_string);
-    JSON::Schema::Draft201909->new(schema => { $id_string => $schema_data });
-    JSON::Schema::Draft201909->new(schema => [ $schema_data,
+    JSON::Schema::Draft201909->new(document => $schema_data);
+    JSON::Schema::Draft201909->new(document => $schema_document);
+    JSON::Schema::Draft201909->new(document => $id_string);
+    JSON::Schema::Draft201909->new(document => { $id_string => $schema_data });
+    JSON::Schema::Draft201909->new(document => [ $schema_data,
                                                $schema_document,
                                                $id_string,
                                                { $id_string => $schema_data },
                                              ]);
 
-=head2 add_schema
+=head2 add_document
 
-Makes the provided schema available to the evaluator. Can be called in multiple ways:
+Makes the provided schema document available to the evaluator. Can be called in multiple ways:
 
 =over 4
 
-=item * C<< $jv->add_schema($schema_data) >>
+=item * C<< $jv->add_document($schema_data) >>
 
 Must be recognizable as schema data (i.e. a boolean or a hashref). Its canonical URI will be parsed out of the
 root C<$id> keyword, and resolved against L</base_uri> if not absolute.
 
-=item * C<< $jv->add_schema($schema_document) >>
+=item * C<< $jv->add_document($schema_document) >>
 
 B<Not yet implemented.>
 
 Add an existing L<JSON::Schema::Draft201909::Document> object.
 
--item * C<< $js->add_schema($id_string) >>
+-item * C<< $js->add_document($id_string) >>
 
 B<Not yet implemented.>
 
 Fetches the schema document referenced by C<$id_string>. Will require either L</load_from_disk> or
 L</load_from_network> to be enabled, if the document is not L<cached|/CACHED DOCUMENTS>.
 
-=item * C<< $jv->add_schema($id_string => $schema_data | $schema_document) >>
+=item * C<< $jv->add_document($id_string => $schema_data | $schema_document) >>
 
 B<Not yet implemented.>
 
-As C<< $jv->add_schema($schema_data) >> or C<< $jv->add_schema($schema_document) >>, but uses the
+As C<< $jv->add_document($schema_data) >> or C<< $jv->add_document($schema_document) >>, but uses the
 provided C<$id_string> as a base URI (which is resolved against L</base_uri> if not absolute).
 
 =back
@@ -240,7 +295,9 @@ If your document passed through a JSON decoder, everything should work out just 
 
 =head1 LIMITATIONS
 
-Until version 1.000 is released, this implementation is not fully specification-compliant.
+Until version 1.000 is released, this implementation is not fully specification-compliant,
+and public interfaces are subject to change. Internal interfaces (private and undocumented methods)
+may change at any time and should not be relied upon.
 
 The minimum extensible JSON Schema implementation requirements involve:
 
