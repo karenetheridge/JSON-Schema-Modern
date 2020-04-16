@@ -8,11 +8,12 @@ our $VERSION = '0.001';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use Moo;
+use MooX::TypeTiny;
 use Types::Standard 'Str';
 
 # these are json pointers
 has [ qw(keyword_location keyword_absolute_location instance_location) ] => ( is => 'ro', isa => Str );
-has error => ( is => 'ro', isa => Str );
+has error => ( is => 'ro', isa => Str );  # needs to handle stringables - e.g. Mojo::Exception
 
 # need a hashref of error types => strings
 
@@ -33,7 +34,7 @@ __END__
 
 =head1 SYNOPSIS
 
-    use JSON::Schema::Draft2019::Error;
+    use JSON::Schema::Draft201909::Error;
 
     ...
 

@@ -10,20 +10,26 @@ our $VERSION = '0.001';
 no if "$]" >= 5.031009, feature => 'indirect';
 use Moo;
 use experimental 'signatures';
-use Types::Standard qw(HashRef Ref);
 use MooX::HandlesVia;
+use MooX::TypeTiny;
+use Types::Standard qw(HashRef Ref);
+use Types::TypeTiny 'StringLike';
 use JSON::MaybeXS 'is_bool';
+use Syntax::Keyword::Try;
 
 # use JSON::Schema::Draft201909::Document;
 
 # these attributes not yet fully implemented, so we hardcode their values for now
-sub annotate { 0 }
-sub base_uri { '' } # use cwd when load_from_disk is true
-sub load_from_disk { 0 }
-sub load_from_network { 0 }
-sub output_format { 'flag' }
-sub short_circuit { 1 }
-sub strict { 0 }
+# maybe move these into a config hash, for easier localization during traversal.
+# then the attribute can be set up with a Dict constraint with handles-via accessors.
+#sub annotate { 0 }
+#sub base_uri { '' } # use cwd when load_from_disk is true
+#sub load_from_disk { 0 }
+#sub load_from_network { 0 }
+sub output_format { 'flag' }  # should not be required to be set at all - it can be determined later
+                              # by setting it on the ::Result object
+sub short_circuit { 1 } # cannot be true when annotate is true
+#sub strict { 0 }
 
 has documents => (
   is => 'bare',
@@ -42,7 +48,7 @@ has documents => (
 # should be either just a reference to the raw 'data' so identified,
 # but possibly also the document that this data resides within as well as a json pointer string
 # showing the location within the document.
-has resources => ( is => 'ro', HashRef );
+has resources => ( is => 'ro', isa => HashRef );
 
 #around BUILDARGS => sub ($orig, $class, %args) {
 #  if (my $documents = delete $args{document}) {
@@ -63,6 +69,12 @@ has resources => ( is => 'ro', HashRef );
 #  # two args, non-ref: $id => data|doc
 #  # one arg, unblessed ref: a raw document. use base uri as id.
 #
+# if we want to add a document that is already known, but under a new uri,
+# we need to tell that document object its new name as well (i.e. there is an index in *two* places,
+# which must always be consistent.)
+# whenever we add a pre-constructed ::Document, we should suck in all its uris and add them to our
+# global registry.
+#
 #    # -> here I am.
 #  # die if this schema is already stored - https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.2.4.5
 #
@@ -75,12 +87,42 @@ sub evaluate ($self, $instance_data, $schema) {
   # - schema = raw data: ->add_schema(..)
   # - schema = id str: if known, fetch the doc; otherwise, ->add_schema(..)
 
-  # state collects localized configs, current instance_location, schema_location, and the errors/annotations.
+  # state collects localized configs, current instance_location, schema_location
+  #
+  # errors and annotations are collected locally and returned to the caller
+  # to be merged and returned recursively to the root.
 
-  # XXX wrap in a try/catch and turn exception into an error
-  my $results = $self->_evaluate($instance_data, $schema, {});
+  my ($result, @errors) = $self->_try_evaluate(
+    $instance_data, $schema,
+    {
+      instance_path => '/',
+      schema_path => '/',
+      short_circuit => $self->short_circuit,
+    }
+  );
 
-  # collect boolean result, errors and annotations into a ::Result object
+  return JSON::Schema::Draft201909::Result->new(
+    result => $result,
+    errors => \@errors,
+    output_format => $self->output_format,
+    instance_data => $instance_data,
+  );
+}
+
+sub _try_evaluate ($self, $instance_data, $schema, $state) {
+  my ($result, @errors);
+  try {
+    ($result, @errors) = $self->_evaluate($instance_data, $schema, $state);
+  }
+  catch my $e {
+    $result = 0;
+    push @errors, JSON::Schema::Draft201909::Error->new(
+      instance_location => $state->{instance_path},
+      keyword_location => $state->{schema_path},
+      keyword_absolute_location => $state->{absolute_schema_path} // $state->{schema_path},
+      error => $e,
+    );
+  }
 }
 
 sub _evaluate ($self, $instance_data, $schema, $state) {
@@ -104,8 +146,16 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
 #  my $result = true;
 
   # consider assertion keywords against the current data instance
+  # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6
+  #   type, enum, const, <numeric>, <string>, <array>, <object>
+
   # consider applicator keywords against the current data instance (call _evaluate recursively)
+  #   $ref, $recursiveRef:
+  #     if reference is unknown, or not loaded and !load_from_*, generate an error but continue.
+
   # consider applicator keywords against a child data instance (call _evaluate recursively)
+  #   not, if/then/else, allOf, oneOf, anyOf, properties, items, ...
+
   # --> for now, we recognize no keywords.
 
   # return state as well? or the set of errors and annotations collected from children?
@@ -118,6 +168,42 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
   # return state as well? or the set of errors and annotations collected from children?
   return true;
 }
+
+#sub _load_from_disk ($self, $absolute_filename) {
+#  1;
+#  # must always be passed an absolute filename. if a Path::Tiny or Mojo::File object,
+#  # we will use it to load and to check if abs.
+#  # checks cache before checking load_from_disk.
+#  # calls ::Document->new with the results (which figures out the canonical uri for the caller).
+#}
+#
+#has useragent => ( is => 'ro' );
+#sub _load_from_network ($class, $absolute_uri) {
+#  1;
+#  # must always be passed an absolute uri.
+#  # makes use of a URI or Mojo::URL object to check if abs.
+#  # if scheme eq 'file' (a 'file:///...' uri), call _load_from_disk with the correct components.
+#  # checks cache before checking load_from_*.
+#  # calls ::Document->new with the results (which figures out the canonical uri for the caller).
+#  # will use the provided useragent attribute if one is given (which you should set up
+#  # if custom headers e.g. Authorization should be passed).
+#  # check spec about Content-Type - perhaps warn if res->ct ne 'application/schema+json'.
+#}
+#
+#has custom_document_load => ( is => 'ro', isa => CodeRef );
+#sub _load_from_other ($class, $uri, $subref) {
+#  1;
+#  # used to load all other resources if uri is not an absolute filename
+#  # or absolute uri (or if load_from_* options are not enabled).
+#  # calls the provided subref to fetch the document. must return an inflated
+#  # perl datastructure (bool or hash). can be used to configure additional ways of getting documents
+#  # into the system (e.g. via Mojo app, or custom data format). if this interface is to be used
+#  # solely for all data loading (i.e. not using disk or network), then set those load_from_* options
+#  # to false.
+#  this coderef must (die? return undef?) if the document cannot be found or cannot be loaded
+#  or is corrupt or...  - die with an exception ending in \n so it does not have a line number.
+#}
+
 
 1;
 __END__
