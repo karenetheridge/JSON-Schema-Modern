@@ -12,10 +12,16 @@ use MooX::TypeTiny;
 use Types::Standard 'Str';
 
 # these are json pointers
+# TODO: add alias accessors instance_path, schema_path -- and document.
 has [ qw(keyword_location keyword_absolute_location instance_location) ] => ( is => 'ro', isa => Str );
 has error => ( is => 'ro', isa => Str );  # needs to handle stringables - e.g. Mojo::Exception
 
 # need a hashref of error types => strings
+
+# TODO: when we support $ref, we need to track absolute_schema_path
+# around BUILDARGS => sub ($self) {
+#    only set absolute_schema_path if exists $args->{absolute_schema_path} and  ne $args->{schema_path}
+# }
 
 sub TO_JSON ($self) {
   return +{

@@ -92,12 +92,17 @@ sub evaluate ($self, $instance_data, $schema) {
   # errors and annotations are collected locally and returned to the caller
   # to be merged and returned recursively to the root.
 
-  my ($result, @errors) = $self->_try_evaluate(
+  my $result = $self->_try_evaluate(
     $instance_data, $schema,
     {
-      instance_path => '/',
-      schema_path => '/',
-      short_circuit => $self->short_circuit,
+      instance_path => '',
+      schema_path => '',
+      errors => [],
+      $self->_has_short_circuit ? ( short_circuit => $self->short_circuit ) : (),
+      $self->_has_no_collect_errors ? ( no_collect_errors => $self->no_collect_errors ) : (),
+      # XXX ^^ need to structure this so the option is intuitive for the user to set, but also
+      # lets us keep the value as undef when not set *and* default to collect_errors => 1.
+      # we only set the option in $state when it has been explicitly set.
     }
   );
 
@@ -112,17 +117,22 @@ sub evaluate ($self, $instance_data, $schema) {
 sub _try_evaluate ($self, $instance_data, $schema, $state) {
   my ($result, @errors);
   try {
-    ($result, @errors) = $self->_evaluate($instance_data, $schema, $state);
+    $result = $self->_evaluate($instance_data, $schema, { $state->%*, errors => \@errors });
   }
   catch my $e {
     $result = 0;
     push @errors, JSON::Schema::Draft201909::Error->new(
       instance_location => $state->{instance_path},
       keyword_location => $state->{schema_path},
-      keyword_absolute_location => $state->{absolute_schema_path} // $state->{schema_path},
+      # for now, we do not support $ref, therefore absolute_schema_path is redundant
+      #keyword_absolute_location => $state->{absolute_schema_path} // $state->{schema_path},
+      #$state->{absolute_schema_path} eq $state->{schema_path} ? () : ( keyword_absolute_location => ),
       error => $e,
     );
   }
+
+  push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
+  return $result;
 }
 
 sub _evaluate ($self, $instance_data, $schema, $state) {
@@ -165,9 +175,143 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
   # combine with annotations from results from recursive calls against child data instances
   # for now, we collect no annotations.
 
+  # whenever we look at subschemas for applicator keywords (allOf, anyOf, oneOf, not),
+  # call _try_evaluate with collect_errors = 0, collect_annotations => 0, short_circuit => 1 ??
+  # not quite -- anyOf requires checking more than the first success path for annotations, and more
+  # than the first failure path for errors -- unless short_circuit => 1 is already set.
+
   # return state as well? or the set of errors and annotations collected from children?
   return true;
+
+
+  # this applicator keyword list should be in a sub so roles/subclasses can alter it.
+  foreach my $keyword (qw(not if anyOf allOf oneOf dependentSchemas)) {
+    next if not exists $schema->{$keyword};
+    my $result = $self->${\ '_evaluate_keyword_'.$kewyord }($instance_data, $schema->{$keyword},
+        { $state->%*, schema_path => $state->{schema_path}.'/'.$keyword, errors => (my $errors = []) });
+use Data::Dumper;
+local $Data::Dumper::Sortkeys = 1;
+local $Data::Dumper::Maxdepth = 2;
+# TODO: turn this into a DDC ::Dwarn that I can uncomment, but fix the formatting options.
+print STDERR "### from keyword '$keyword', got result $result, errors ", Dumper($errors);
+
+    next if $result;
+
+    # is this necessary? just trust the calling function to use this config option properly.
+    # (TODO: we can test the _evaluate_keyword* subs individually to verify this.)
+    # edit: no.. *something* needs to check it.. either the caller or the callee?
+    push $state->{errors}->@*, $errors->@* if not $state->{no_collect_errors};
+    return $result if $state->{short_circuit};
+  }
 }
+
+sub _evaluate_keyword_not ($self, $instance_data, $schema, $state) {
+  my $result = $self->_try_evaluate(
+    $instance_data, $schema,
+    {
+      instance_path => $state->{instance_path},
+      schema_path => $state->{schema_path},
+      errors => [], # do not need to save this reference
+      short_circuit => 1,
+      no_collect_errors => 1,
+    },
+  );
+  return $result if $result or $state->{no_collect_errors};
+  push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
+    instance_location => $state->{instance_path},
+    keyword_location => $state->{schema_path},
+    error => 'subschema evaluated to false',
+  );
+  return $result;
+}
+
+sub _evaluate_keyword_if ($self, $instance_data, $schema, $state) {
+  # TODO: must evaluate 'if' subschema anyway if collecting annotations
+  return 1 if not exists $schema->{then} and not exists $schema->{else};
+
+  my $result = $self->_try_evaluate(
+    $instance_data, $schema,
+    {
+      $state->%*, # ? just in case there are other values we aren't overriding (like what?)
+      instance_path => $state->{instance_path},
+      schema_path => $state->{schema_path},
+      errors => [], # do not need to save this reference
+      short_circuit => 1,
+      no_collect_errors => 1,
+    },
+  );
+
+  # for the 'then' or 'else' schema: short-circuit default, errors default, annotations default.
+  # schema path is ../then or ../else
+  my $keyword = $result ? 'then' : 'else';
+  $state->{schema_path} =~ s{if$}{$keyword}r;
+  my $result = $self->_try_evaluate(
+    $instance_data, $schema->{$keyword},
+    {
+      $state->%*,
+      errors => (my $errors = []),
+    },
+  );
+
+  return $result if $result or $state->{no_collect_errors};
+  push $state->{errors}->@*, $errors->@*;
+  return $result;
+}
+
+sub _evaluate_keyword_allOf ($self, $instance_data, $schema, $state) {
+  my $successes;
+  foreach my $index (0.. $schema->$#*) {
+    my $result = $self->_try_evaluate($instance_data, $schema->{$keyword}[$index],
+      +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
+
+    ++$successes if $result;
+    push $state->{errors}->@*, $errors->@* if not $result;;
+    return $result if not $result and $state->{short_circuit};
+  }
+  return $successes == $schema->$#* ? 1 : 0;
+}
+
+sub _evaluate_keyword_anyOf ($self, $instance_data, $schema, $state) {
+  my $successes;
+  foreach my $index (0.. $schema->$#*) {
+    my $result = $self->_try_evaluate($instance_data, $schema->{$keyword}[$index],
+      +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
+
+    ++$successes if $result;
+    push $state->{errors}->@*, $errors->@* if not $result;
+    return $result if $result and $state->{short_circuit};
+  }
+  return $successes ? 1 : 0;
+}
+
+sub _evaluate_keyword_oneOf ($self, $instance_data, $schema, $state) {
+  my $successes;
+  foreach my $index (0.. $schema->$#*) {
+    my $result = $self->_try_evaluate($instance_data, $schema->{$keyword}[$index],
+      +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
+
+    ++$successes if $result;
+    push $state->{errors}->@*, $errors->@* if not $result;
+    return $result if $successes > 1 and $state->{short_circuit};
+  }
+  return $successes == 1 ? 1 : 0;
+}
+
+sub _evaluate_keyword_dependentSchemas ($self, $instance_data, $schema, $state) {
+  return 1 if ref $instance_data ne 'HASH';
+  my $result = 1;
+  foreach my $property (keys $schema->%*) {
+    next if not exists $instance_data->{$property};
+
+    $result &&= $self->_try_evaluate($instance_data, $schema->{$property},
+      +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$property, (my $errors = []) });
+    push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
+    return $result if not $result and $state->{short_circuit};
+  }
+
+  return $result;
+}
+
 
 #sub _load_from_disk ($self, $absolute_filename) {
 #  1;
