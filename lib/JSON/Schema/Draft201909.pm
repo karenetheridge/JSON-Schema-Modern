@@ -323,7 +323,7 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
   my $result = 1;
   my $last_index; # the annotation result
 
-  # The value of "items" MUST be either a valid JSON Schema or an array of valid JSON Schemas. 
+  # The value of "items" MUST be either a valid JSON Schema or an array of valid JSON Schemas
   if (ref $schema->{items} eq 'ARRAY') {
     # If "items" is an array of schemas, validation succeeds if each element of the instance validates against the schema at the same position, if any.
     foreach my $index (0 .. $instance_data->$#*) {
