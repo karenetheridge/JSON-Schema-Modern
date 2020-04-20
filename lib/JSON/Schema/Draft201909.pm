@@ -371,6 +371,148 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
   return $result;
 }
 
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.1.3 
+sub _evaluate_keyword_unevaluatedItems ($self, $instance_data, $schema, $state) {
+    push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
+      instance_location => $state->{instance_path},
+      keyword_location => $state->{schema_path},
+      error => 'annotation collection is disabled: presence of unevaluatedItems is invalid',
+    ) if not $state->{no_collect_errors};
+    return 0;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.1.4
+sub _evaluate_keyword_contains ($self, $instance_data, $schema, $state) {
+  return 1 if ref $instance_data ne 'ARRAY';  # TODO use _is_instance_type('array') ?
+
+  my $result = 1;
+  foreach my $index (0 .. $instance_data->$#*) {
+    $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{contains},
+      +{ $state->%*, instance_path => $state->{instance_path}.'/'.$index, (my $errors = []) });
+
+    push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
+    last if not $result and $state->{short_circuit};
+  }
+  return $result;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.2.1
+sub _evaluate_keyword_properties ($self, $instance_data, $schema, $state) {
+  return 1 if ref $instance_data ne 'HASH';  # TODO use _is_instance_type('object') ?
+
+  my $result = 1;
+  foreach my $property (sort keys $schema->{properties}->%*) {
+    next if not exists $instance_data->{$property};
+    $result &&= $self->_try_evaluate($instance_data->{$property}, $schema->{properties}{$property},
+      +{
+        $state->%*,
+        instance_path => $state->{instance_path}.'/'.$property,
+        schema_path => $staet->{schema_path}.'/'.$property,
+        (my $errors = []),
+      });
+
+    push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
+    last if not $result and $state->{short_circuit};
+  }
+  return $result;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.2.2
+sub _evaluate_keyword_patternProperties ($self, $instance_data, $schema, $state) {
+  return 1 if ref $instance_data ne 'HASH';  # TODO use _is_instance_type('object') ?
+
+  my $result = 1;
+  # Validation succeeds if, for each instance name that matches any regular expressions that appear as a property name in this keyword's value, the child instance for that name successfully validates against each schema that corresponds to a matching regular expression.
+  foreach my $property (sort keys $instance_data->%*) {
+    foreach my $property_pattern (sort keys $schema->{patternProperties}->%*) {
+      try {
+        next if $property !~ /$property_pattern/;
+      }
+      catch my $e {
+        push @errors, JSON::Schema::Draft201909::Error->new(
+          instance_location => $state->{instance_path}.'/'.$property,
+          keyword_location => $state->{schema_path}.'/'.$property_pattern,
+          # for now, we do not support $ref, therefore absolute_schema_path is redundant
+          #keyword_absolute_location => $state->{absolute_schema_path} // $state->{schema_path},
+          #$state->{absolute_schema_path} eq $state->{schema_path} ? () : ( keyword_absolute_location => ),
+          error => 'an error occurred during evaluation: '.$e,
+        );
+      }
+
+      $result &&= $self->_try_evaluate($instance_data->{$property}, $schema->{patternProperties}{$property_pattern},
+        +{
+          $state->%*,
+          instance_path => $state->{instance_path}.'/'.$property,
+          schema_path => $state->{schema_path}.'/'.$property_pattern,
+          errors => (my $errors = []),
+        });
+
+      push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
+      return $result if not $result and $state->{short_circuit};
+    }
+  }
+
+  return $result;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.2.3
+sub _evaluate_keyword_additionalProperties ($self, $instance_data, $schema, $state) {
+  return 1 if ref $instance_data ne 'HASH';  # TODO use _is_instance_type('object') ?
+
+  my $result = 1;
+  # Validation with "additionalProperties" applies only to the child values of instance names that do not appear in the annotation results of either "properties" or "patternProperties". 
+  foreach my $property (sort keys $instance_data->%*) {
+    next if exists $schema->{$property};
+    foreach my $property_pattern (sort keys $schema->{patternProperties}->%*) {
+      try { next if $property =~ /$property_pattern/; } catch { next; }
+    }
+
+    $result &&= $self->_try_evaluate($instance_data->{$property}, $schema->{additionalProperties},
+      +{ $state->%*, instance_path => $state->{instance_path}.'/'.$property, errors => (my $errors = []) });
+
+    push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
+    return $result if not $result and $state->{short_circuit};
+  }
+
+  return $result;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.2.4
+sub _evaluate_keyword_unevaluatedProperties($self, $instance_data, $schema, $state) {
+    push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
+      instance_location => $state->{instance_path},
+      keyword_location => $state->{schema_path},
+      error => 'annotation collection is disabled: presence of unevaluatedProperties is invalid',
+    ) if not $state->{no_collect_errors};
+    return 0;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.2.5
+sub _evaluate_keyword_propertyNames($self, $instance_data, $schema, $state) {
+  return 1 if ref $instance_data ne 'HASH';  # TODO use _is_instance_type('object') ?
+
+  my $result = 1;
+  foreach my $property (sort keys $instance_data->%*) {
+    $result &&= $self->_try_evaluate($property, $schema->{propertyNames},
+      +{ $state->%*, instance_path => $state->{instance_path}.'/'.$property, errors => (my $errors = []) });
+
+    push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
+    return $result if not $result and $state->{short_circuit};
+  }
+
+  return $result;
+}
+
+
+
+
+
+
+
+
+
+
+
 #sub _load_from_disk ($self, $absolute_filename) {
 #  1;
 #  # must always be passed an absolute filename. if a Path::Tiny or Mojo::File object,
