@@ -184,8 +184,8 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
   return true;
 
 
-  # this applicator keyword list should be in a sub so roles/subclasses can alter it.
-  foreach my $keyword (qw(not if anyOf allOf oneOf dependentSchemas items)) {
+  # TODO this applicator keyword list should be in a sub so roles/subclasses can alter it.
+  foreach my $keyword (qw(not if anyOf allOf oneOf dependentSchemas items unevaluatedItems contains properties patternProperties additionalProperties unevaluatedProperties propertyNames)) {
     next if not exists $schema->{$keyword};
     # note that $schema in this sub is not the schema contained by the keyword (not just because it
     # isn't always a schema itself), but the schema that contains the keyword - so sibling keywords
