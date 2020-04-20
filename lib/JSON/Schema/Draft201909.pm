@@ -216,8 +216,7 @@ sub _evaluate_keyword_not ($self, $instance_data, $schema, $state) {
   my $result = $self->_try_evaluate(
     $instance_data, $schema->{not},
     {
-      instance_path => $state->{instance_path},
-      schema_path => $state->{schema_path},
+      $state->%*,
       errors => [], # do not need to save this reference
       short_circuit => 1,
       no_collect_errors => 1,
@@ -290,7 +289,7 @@ sub _evaluate_keyword_anyOf ($self, $instance_data, $schema, $state) {
 
 sub _evaluate_keyword_oneOf ($self, $instance_data, $schema, $state) {
   my $successes;
-  foreach my $index (0.. $schema{oneOf}->$#*) {
+  foreach my $index (0.. $schema->{oneOf}->$#*) {
     my $result = $self->_try_evaluate($instance_data, $schema->{oneOf}[$index],
       +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
 
