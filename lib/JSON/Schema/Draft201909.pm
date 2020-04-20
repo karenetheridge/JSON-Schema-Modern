@@ -318,13 +318,14 @@ sub _evaluate_keyword_dependentSchemas ($self, $instance_data, $schema, $state) 
 
 # https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.1.1
 sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
-  return 1 if ref $instance_data ne 'ARRAY';
+  return 1 if ref $instance_data ne 'ARRAY';  # TODO use _is_instance_type('array') ?
 
-  # TODO: produce an annotation at the last index evaluated
+  my $result = 1;
+  my $last_index; # the annotation result
+
   # The value of "items" MUST be either a valid JSON Schema or an array of valid JSON Schemas. 
   if (ref $schema->{items} eq 'ARRAY') {
     # If "items" is an array of schemas, validation succeeds if each element of the instance validates against the schema at the same position, if any.
-    my $result = 1;
     foreach my $index (0 .. $instance_data->$#*) {
       last if $index > $schema->{items}->$#*;
       $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{items}[$index],
@@ -332,10 +333,10 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
           instance_path => $state->{instance_path}.'/'.$index,
           schema_path => $state->{schema_path}.'/'.$index, (my $errors = []) });
 
+      $last_index = $index;
       push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
-      return $result if not $result and $state->{short_circuit};
+      last if not $result and $state->{short_circuit};
     }
-    return $result;
   }
   else { # must be a valid JSON Schema - boolean or object
     # If "items" is a schema, validation succeeds if all elements in the array successfully validate against that schema.
@@ -344,11 +345,30 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
       $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{items},
         +{ $state->%*, instance_path => $state->{instance_path}.'/'.$index, (my $errors = []) });
 
+      $last_index = $index;
       push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
-      return $result if not $result and $state->{short_circuit};
+      last if not $result and $state->{short_circuit};
     }
-    return $result;
   }
+
+  # https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.3.1.2
+  if ($result and exists $schema->{additionalItems}) {
+    # If "items" is present, and its annotation result is a number, validation succeeds if every instance element at an index greater than that number validates against "additionalItems". 
+    # TODO: test on instance data with empty array
+    foreach my $index ($last_index+1 .. $instance_data->$#*) {
+      $state->{schema_path} =~ s/items$/additionalItems/r;
+      $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{additionalItems},
+        +{
+          $state->%*,
+          instance_path => $state->{instance_path}.'/'.$index,
+          (my $errors = []) });
+
+      push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
+      last if not $result and $state->{short_circuit};
+    }
+  }
+
+  return $result;
 }
 
 #sub _load_from_disk ($self, $absolute_filename) {
