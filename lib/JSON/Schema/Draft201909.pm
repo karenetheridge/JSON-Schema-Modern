@@ -187,8 +187,15 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
   # this applicator keyword list should be in a sub so roles/subclasses can alter it.
   foreach my $keyword (qw(not if anyOf allOf oneOf dependentSchemas items)) {
     next if not exists $schema->{$keyword};
-    my $result = $self->${\ '_evaluate_keyword_'.$kewyord }($instance_data, $schema->{$keyword},
-        { $state->%*, schema_path => $state->{schema_path}.'/'.$keyword, errors => (my $errors = []) });
+    # note that $schema in this sub is not the schema contained by the keyword (not just because it
+    # isn't always a schema itself), but the schema that contains the keyword - so sibling keywords
+    # are visible and can be accessed.
+    my $result = $self->${\ '_evaluate_keyword_'.$kewyord }($instance_data, $schema,
+        {
+          $state->%*,
+          schema_path => $state->{schema_path}.'/'.$keyword,
+          errors => (my $errors = []),
+        });
 use Data::Dumper;
 local $Data::Dumper::Sortkeys = 1;
 local $Data::Dumper::Maxdepth = 2;
@@ -207,7 +214,7 @@ print STDERR "### from keyword '$keyword', got result $result, errors ", Dumper(
 
 sub _evaluate_keyword_not ($self, $instance_data, $schema, $state) {
   my $result = $self->_try_evaluate(
-    $instance_data, $schema,
+    $instance_data, $schema->{not},
     {
       instance_path => $state->{instance_path},
       schema_path => $state->{schema_path},
@@ -230,12 +237,10 @@ sub _evaluate_keyword_if ($self, $instance_data, $schema, $state) {
   return 1 if not exists $schema->{then} and not exists $schema->{else};
 
   my $result = $self->_try_evaluate(
-    $instance_data, $schema,
+    $instance_data, $schema->{if},
     {
       $state->%*, # ? just in case there are other values we aren't overriding (like what?)
-      instance_path => $state->{instance_path},
-      schema_path => $state->{schema_path},
-      errors => [], # do not need to save this reference
+      errors => [], # do not need to save errors from here
       short_circuit => 1,
       no_collect_errors => 1,
     },
@@ -244,7 +249,7 @@ sub _evaluate_keyword_if ($self, $instance_data, $schema, $state) {
   # for the 'then' or 'else' schema: short-circuit default, errors default, annotations default.
   # schema path is ../then or ../else
   my $keyword = $result ? 'then' : 'else';
-  $state->{schema_path} =~ s{if$}{$keyword}r;
+  $state->{schema_path} =~ s/if$/$keyword/r;
   my $result = $self->_try_evaluate(
     $instance_data, $schema->{$keyword},
     {
@@ -260,8 +265,8 @@ sub _evaluate_keyword_if ($self, $instance_data, $schema, $state) {
 
 sub _evaluate_keyword_allOf ($self, $instance_data, $schema, $state) {
   my $result = 1;
-  foreach my $index (0.. $schema->$#*) {
-    $result &&= $self->_try_evaluate($instance_data, $schema->[$index],
+  foreach my $index (0.. $schema->{allOf}->$#*) {
+    $result &&= $self->_try_evaluate($instance_data, $schema->{allOf}[$index],
       +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
 
     push $state->{errors}->@*, $errors->@* if not $result;  # do we check no_collect_errors? if so, pivot to using $success count?
@@ -272,8 +277,8 @@ sub _evaluate_keyword_allOf ($self, $instance_data, $schema, $state) {
 
 sub _evaluate_keyword_anyOf ($self, $instance_data, $schema, $state) {
   my $successes;
-  foreach my $index (0.. $schema->$#*) {
-    my $result = $self->_try_evaluate($instance_data, $schema->[$index],
+  foreach my $index (0.. $schema->{anyOf}->$#*) {
+    my $result = $self->_try_evaluate($instance_data, $schema->{anyOf}[$index],
       +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
 
     ++$successes if $result;
@@ -285,8 +290,8 @@ sub _evaluate_keyword_anyOf ($self, $instance_data, $schema, $state) {
 
 sub _evaluate_keyword_oneOf ($self, $instance_data, $schema, $state) {
   my $successes;
-  foreach my $index (0.. $schema->$#*) {
-    my $result = $self->_try_evaluate($instance_data, $schema->[$index],
+  foreach my $index (0.. $schema{oneOf}->$#*) {
+    my $result = $self->_try_evaluate($instance_data, $schema->{oneOf}[$index],
       +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$index, (my $errors = []) });
 
     ++$successes if $result;
@@ -297,12 +302,12 @@ sub _evaluate_keyword_oneOf ($self, $instance_data, $schema, $state) {
 }
 
 sub _evaluate_keyword_dependentSchemas ($self, $instance_data, $schema, $state) {
-  return 1 if ref $instance_data ne 'HASH';
+  return 1 if ref $instance_data ne 'HASH'; # TODO use _is_instance_type('object') ?
   my $result = 1;
-  foreach my $property (keys $schema->%*) {
+  foreach my $property (keys $schema->{dependentSchemas}->%*) {
     next if not exists $instance_data->{$property};
 
-    $result &&= $self->_try_evaluate($instance_data, $schema->{$property},
+    $result &&= $self->_try_evaluate($instance_data, $schema->{dependentSchemas}{$property},
       +{ $state->%*, keyword_location => $state->{schema_path}.'/'.$property, (my $errors = []) });
     push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
     return $result if not $result and $state->{short_circuit};
@@ -317,13 +322,14 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
 
   # TODO: produce an annotation at the last index evaluated
   # The value of "items" MUST be either a valid JSON Schema or an array of valid JSON Schemas. 
-  if (ref $schema eq 'ARRAY') {
+  if (ref $schema->{items} eq 'ARRAY') {
     # If "items" is an array of schemas, validation succeeds if each element of the instance validates against the schema at the same position, if any.
     my $result = 1;
     foreach my $index (0 .. $instance_data->$#*) {
-      last if $index > $schema->$#*;
-      $result &&= $self->_try_evaluate($instance_data->[$index], $schema->[$index],
-        +{ $state->%*, instance_path => $state->{instance_path}.'/'.$index,
+      last if $index > $schema->{items}->$#*;
+      $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{items}[$index],
+        +{ $state->%*,
+          instance_path => $state->{instance_path}.'/'.$index,
           schema_path => $state->{schema_path}.'/'.$index, (my $errors = []) });
 
       push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
@@ -333,10 +339,9 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
   }
   else { # must be a valid JSON Schema - boolean or object
     # If "items" is a schema, validation succeeds if all elements in the array successfully validate against that schema.
-    my $index;
     my $result = 1;
     foreach my $index (0 .. $instance_data->$#*) {
-      $result &&= $self->_try_evaluate($instance_data->[$index], $schema,
+      $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{items},
         +{ $state->%*, instance_path => $state->{instance_path}.'/'.$index, (my $errors = []) });
 
       push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
