@@ -15,7 +15,8 @@ use MooX::TypeTiny;
 use Types::Standard qw(HashRef Ref);
 use Types::TypeTiny 'StringLike';
 use JSON::MaybeXS 'is_bool';
-use Syntax::Keyword::Try;
+use Syntax::Keyword::Try 0.11_001;
+use JSON::PP;
 
 # use JSON::Schema::Draft201909::Document;
 
