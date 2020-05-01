@@ -1,13 +1,13 @@
 use strict;
 use warnings;
-no if "$]" >= 5.031008, feature => 'indirect';
 package JSON::Schema::Draft201909;
-# vim: set ts=8 sts=4 sw=4 tw=115 et :
+# vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: ...
 # KEYWORDS: ...
 
 our $VERSION = '0.001';
 
+no if "$]" >= 5.031009, feature => 'indirect';
 
 1;
 __END__
@@ -26,7 +26,7 @@ __END__
 
 =head1 FUNCTIONS/METHODS
 
-=head2 C<foo>
+=head2 foo
 
 ...
 
