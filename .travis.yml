@@ -19,6 +19,8 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
+matrix:
+  fast_finish: 1
 env:
   global:
     - PERL_USE_UNSAFE_INC=0

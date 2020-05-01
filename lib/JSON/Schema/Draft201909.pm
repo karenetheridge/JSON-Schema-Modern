@@ -17,6 +17,7 @@ use Types::TypeTiny 'StringLike';
 use JSON::MaybeXS 'is_bool';
 use Syntax::Keyword::Try 0.11_001;
 use JSON::PP;
+use List::Util 'any';
 
 # use JSON::Schema::Draft201909::Document;
 
@@ -82,6 +83,9 @@ has resources => ( is => 'ro', isa => HashRef );
 #  # ... _set_schema(..)
 #}
 
+sub true () { JSON::PP::true }
+sub false () { JSON::PP::false }
+
 sub evaluate ($self, $instance_data, $schema) {
   # figure out what document is to be evaluated.
   # - schema = undef: use the schema document we know. die if more than one.
@@ -98,7 +102,7 @@ sub evaluate ($self, $instance_data, $schema) {
     {
       instance_path => '',
       schema_path => '',
-      errors => [],
+      errors => (my $errors = []),
       $self->_has_short_circuit ? ( short_circuit => $self->short_circuit ) : (),
       $self->_has_no_collect_errors ? ( no_collect_errors => $self->no_collect_errors ) : (),
       # XXX ^^ need to structure this so the option is intuitive for the user to set, but also
@@ -109,30 +113,34 @@ sub evaluate ($self, $instance_data, $schema) {
 
   return JSON::Schema::Draft201909::Result->new(
     result => $result,
-    errors => \@errors,
+    errors => $errors,
     output_format => $self->output_format,
     instance_data => $instance_data,
   );
 }
 
+# TODO: test an explosion, like an invalid schema and we do $schema->{$keyword} when it's [] see
+# last tests in device-report.t
+# otherwise, if we can't prove that this wrapper is necessary, we should remove it until we can
 sub _try_evaluate ($self, $instance_data, $schema, $state) {
-  my ($result, @errors);
+  my $result;
   try {
-    $result = $self->_evaluate($instance_data, $schema, { $state->%*, errors => \@errors });
+    # TODO maybe just pass instance_data and schema as state variables too.
+    # and if we pass as a hash then we guarantee we don't alter callers' state at a distance.
+    $result = $self->_evaluate($instance_data, $schema, $state);
   }
   catch my $e {
     $result = 0;
-    push @errors, JSON::Schema::Draft201909::Error->new(
+    push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
       instance_location => $state->{instance_path},
       keyword_location => $state->{schema_path},
       # for now, we do not support $ref, therefore absolute_schema_path is redundant
       #keyword_absolute_location => $state->{absolute_schema_path} // $state->{schema_path},
       #$state->{absolute_schema_path} eq $state->{schema_path} ? () : ( keyword_absolute_location => ),
-      error => $e,
+      error => 'an error occurred during evaluation: '.$e,
     );
   }
 
-  push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
   return $result;
 }
 
@@ -146,18 +154,25 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
 
   # TODO: check short_circuit before returning
   # TODO: create error object, if output_format ne 'flag'
-  return $schema if is_bool($schema);
-  return false;
+  if (is_bool($schema)) {
+    push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
+      instance_location => $state->{instance_path},
+      keyword_location => $state->{schema_path},
+      error => 'schema is false',
+    ) if not $schema and not $state->{no_collect_errors};
+    return $schema ? 1 : 0;
+  }
 
-#  die 'bad structure' if ref $schema ne 'HASH';
-#
+  die 'invalid schema type (expected boolean or object; got '.lc reftype $schema
+    if ref $schema ne 'HASH';
+
 #  die 'illegal $schema'
 #    if exists $schema->{'$schema'} and $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
-#
-#  my $result = true;
+
+  my $result = 1;
 
   # consider assertion keywords against the current data instance
-  # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6
+  # https://json-schema.org/draft/2019-09/json-schema-validationr.html#rfc.section.6
   #   type, enum, const, <numeric>, <string>, <array>, <object>
 
   # consider applicator keywords against the current data instance (call _evaluate recursively)
@@ -184,14 +199,30 @@ sub _evaluate ($self, $instance_data, $schema, $state) {
   # return state as well? or the set of errors and annotations collected from children?
   return true;
 
+  # TODO this validator keyword list should be in a sub so roles/subclasses can alter it.
+  foreach my $keyword (qw(type enum const)) {
+    next if not exists $schema->{$keyword};
+    # note the schema is not passed, but the value at the schema keyword!
+    my $result = $self->${\ '_evaluate_keyword_'.$keyword }($instance_data, $value,
+        {
+          $state->%*,
+          schema_path => $state->{schema_path}.'/'.$keyword,
+          errors => (my $errors = []),
+        });
+
+    next if $result;
+    push $state->{errors}->@*, $errors->@*;
+    return $result if $state->{short_circuit};
+  }
 
   # TODO this applicator keyword list should be in a sub so roles/subclasses can alter it.
+  # ! these are all part of the 'core' $vocabulary.
   foreach my $keyword (qw(not if anyOf allOf oneOf dependentSchemas items unevaluatedItems contains properties patternProperties additionalProperties unevaluatedProperties propertyNames)) {
     next if not exists $schema->{$keyword};
     # note that $schema in this sub is not the schema contained by the keyword (not just because it
     # isn't always a schema itself), but the schema that contains the keyword - so sibling keywords
     # are visible and can be accessed.
-    my $result = $self->${\ '_evaluate_keyword_'.$kewyord }($instance_data, $schema,
+    my $result = $self->${\ '_evaluate_keyword_'.$keyword }($instance_data, $schema,
         {
           $state->%*,
           schema_path => $state->{schema_path}.'/'.$keyword,
@@ -208,9 +239,49 @@ print STDERR "### from keyword '$keyword', got result $result, errors ", Dumper(
     # is this necessary? just trust the calling function to use this config option properly.
     # (TODO: we can test the _evaluate_keyword* subs individually to verify this.)
     # edit: no.. *something* needs to check it.. either the caller or the callee?
+    # I would check it primarily when generating an ::Error object, and also "check it"
+    # (i.e. it is known to be false, so we do not push) just after coming back from a recursive
+    # call where we set it to 0.
     push $state->{errors}->@*, $errors->@* if not $state->{no_collect_errors};
     return $result if $state->{short_circuit};
   }
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6.1.1
+sub _evaluate_keyword_type ($self, $instance_data, $value, $state) {
+  # XXX figure out type of instance data
+  # and compare to all possible options for type.
+  # compose an error
+  1;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6.1.2
+sub _evaluate_keyword_enum ($self, $instance_data, $value, $state) {
+  return 1 if any { $self->_is_data_equal($instance_data, $_) } $->@*;
+  push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
+    instance_location => $state->{instance_path},
+    keyword_location => $state->{schema_path},
+    error => 'value does not match',
+  ) if not $state->{no_collect_errors};
+  return 0;
+}
+
+# https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6.1.3
+sub _evaluate_keyword_const ($self, $instance_data, $value, $state) {
+  return 1 if $self->_is_data_equal($instance_data, $schema->@*;
+  push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
+    instance_location => $state->{instance_path},
+    keyword_location => $state->{schema_path},
+    error => 'value does not match',
+  ) if not $state->{no_collect_errors};
+  return 0;
+  1;
+}
+
+sub _is_data_equal ($self, $left, $right) {
+  # find a way of doing this efficiently. maybe compare the ref of both first,
+  # and then json-encode them both to compare.
+  1;
 }
 
 sub _evaluate_keyword_not ($self, $instance_data, $schema, $state) {
@@ -223,12 +294,11 @@ sub _evaluate_keyword_not ($self, $instance_data, $schema, $state) {
       no_collect_errors => 1,
     },
   );
-  return $result if $result or $state->{no_collect_errors};
   push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{instance_path},
     keyword_location => $state->{schema_path},
     error => 'subschema evaluated to false',
-  );
+  ) if not $result and not $state->{no_collect_errors};
   return $result;
 }
 
@@ -249,8 +319,8 @@ sub _evaluate_keyword_if ($self, $instance_data, $schema, $state) {
   # for the 'then' or 'else' schema: short-circuit default, errors default, annotations default.
   # schema path is ../then or ../else
   my $keyword = $result ? 'then' : 'else';
-  $state->{schema_path} =~ s/if$/$keyword/r;
-  my $result = $self->_try_evaluate(
+  $state->{schema_path} =~ s/if$/$keyword/;
+  $result = $self->_try_evaluate(
     $instance_data, $schema->{$keyword},
     {
       $state->%*,
@@ -258,8 +328,10 @@ sub _evaluate_keyword_if ($self, $instance_data, $schema, $state) {
     },
   );
 
-  return $result if $result or $state->{no_collect_errors};
-  push $state->{errors}->@*, $errors->@*;
+  # XXX do we need to check !$result here? if we don't, and just push blindly,
+  # we can save time by not passing a separate errors listref to the recursive call above
+  # (just pass the state hash directly)
+  push $state->{errors}->@*, $errors->@* and not $result;
   return $result;
 }
 
@@ -356,7 +428,7 @@ sub _evaluate_keyword_items ($self, $instance_data, $schema, $state) {
     # If "items" is present, and its annotation result is a number, validation succeeds if every instance element at an index greater than that number validates against "additionalItems". 
     # TODO: test on instance data with empty array
     foreach my $index ($last_index+1 .. $instance_data->$#*) {
-      $state->{schema_path} =~ s/items$/additionalItems/r;
+      $state->{schema_path} =~ s/items$/additionalItems/;
       $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{additionalItems},
         +{
           $state->%*,
@@ -385,14 +457,30 @@ sub _evaluate_keyword_unevaluatedItems ($self, $instance_data, $schema, $state) 
 sub _evaluate_keyword_contains ($self, $instance_data, $schema, $state) {
   return 1 if ref $instance_data ne 'ARRAY';  # TODO use _is_instance_type('array') ?
 
-  my $result = 1;
+  my $result = 0;
+  my $match_count = 0;
+  my @errors;
   foreach my $index (0 .. $instance_data->$#*) {
-    $result &&= $self->_try_evaluate($instance_data->[$index], $schema->{contains},
-      +{ $state->%*, instance_path => $state->{instance_path}.'/'.$index, (my $errors = []) });
+    my $match = $self->_try_evaluate($instance_data->[$index], $schema->{contains},
+      +{ $state->%*, instance_path => $state->{instance_path}.'/'.$index, errors => \@errors });
+    $result = 1 if $match;
+    ++$match_count if $match;
 
-    push $state->{errors}->@*, $errors->@* if not $result;  # see no_collect_errors not in anyOf
-    last if not $result and $state->{short_circuit};
+    last if $result and $state->{short_circuit}
+      and not exists $schema->{minContains} and not exists $schema->{maxContains};
   }
+
+  push $state->{errors}->@*, $errors->@* if not $result;
+
+  if (exists $schema->{minContains} and $match_count < $schema->{minContains}) {
+    # TODO generate error if required
+    $result = 0;
+  }
+  if (exists $schema->{maxContains} and $match_count > $schema->{maxContains}) {
+    # TODO generate error if required
+    $result = 0;
+  }
+
   return $result;
 }
 
@@ -407,7 +495,7 @@ sub _evaluate_keyword_properties ($self, $instance_data, $schema, $state) {
       +{
         $state->%*,
         instance_path => $state->{instance_path}.'/'.$property,
-        schema_path => $staet->{schema_path}.'/'.$property,
+        schema_path => $state->{schema_path}.'/'.$property,
         (my $errors = []),
       });
 
@@ -429,14 +517,16 @@ sub _evaluate_keyword_patternProperties ($self, $instance_data, $schema, $state)
         next if $property !~ /$property_pattern/;
       }
       catch my $e {
-        push @errors, JSON::Schema::Draft201909::Error->new(
+        push $state->{errors}->@*, JSON::Schema::Draft201909::Error->new(
           instance_location => $state->{instance_path}.'/'.$property,
           keyword_location => $state->{schema_path}.'/'.$property_pattern,
           # for now, we do not support $ref, therefore absolute_schema_path is redundant
           #keyword_absolute_location => $state->{absolute_schema_path} // $state->{schema_path},
           #$state->{absolute_schema_path} eq $state->{schema_path} ? () : ( keyword_absolute_location => ),
           error => 'an error occurred during evaluation: '.$e,
-        );
+        ) if not $state->{no_collect_errors};
+        $result = 0;
+        next;
       }
 
       $result &&= $self->_try_evaluate($instance_data->{$property}, $schema->{patternProperties}{$property_pattern},
@@ -444,7 +534,7 @@ sub _evaluate_keyword_patternProperties ($self, $instance_data, $schema, $state)
           $state->%*,
           instance_path => $state->{instance_path}.'/'.$property,
           schema_path => $state->{schema_path}.'/'.$property_pattern,
-          errors => (my $errors = []),
+          errors => (my $errors = []),   # FIXME: can we just send along $state->{errors} rather than collecting separately and pushing later?
         });
 
       push $state->{errors}->@*, $errors->@* if not $result and not $state->{no_collect_errors};
@@ -763,5 +853,7 @@ To date, missing components include most of these. More specifically, features t
 * L<https://json-schema.org/>
 * L<Test::JSON::Schema::Acceptance>
 * L<JSON::Validator>
+* L<JSON::Schema>
+* L<JSV::Validator>
 
 =cut
