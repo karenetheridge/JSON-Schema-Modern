@@ -9,8 +9,29 @@ our $VERSION = '0.001';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use JSON::MaybeXS 1.004001 'is_bool';
+use Syntax::Keyword::Try;
 use Moo;
+use MooX::TypeTiny 0.002002;
+use Types::Standard 1.010002 'HasMethods';
 use namespace::clean;
+
+has _json_decoder => (
+  is => 'ro',
+  isa => HasMethods[qw(encode decode)],
+  lazy => 1,
+  default => sub { JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1) },
+);
+
+sub evaluate_json_string {
+  my ($self, $json_data, $schema) = @_;
+  my ($data, $exception);
+  try { $data = $self->_json_decoder->decode($json_data) }
+  catch { $exception = $@ }
+
+  # TODO: turn exception into an error to be returned
+  return 0 if defined $exception;
+  return $self->evaluate($data, $schema);
+}
 
 sub evaluate {
   my ($self, $data, $schema) = @_;
@@ -52,6 +73,20 @@ version of the specification.
 None are supported at this time.
 
 =head1 METHODS
+
+=head2 evaluate_json_string
+
+  $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
+
+Evaluates the provided instance data against the known schema document.
+
+The data is in the form of a JSON-encoded string (in accordance with
+L<RFC8259|https://tools.ietf.org/html/rfc8259>. B<The string is expected to be UTF-8 encoded.>
+
+The schema is in the form of a Perl data structure, representing a JSON Schema
+that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+
+The result is a boolean.
 
 =head2 evaluate
 
@@ -102,6 +137,7 @@ To date, missing components include most of these. More specifically, features t
 
 =for :list
 * L<https://json-schema.org/>
+* L<RFC8259|https://tools.ietf.org/html/rfc8259>
 * L<Test::JSON::Schema::Acceptance>
 * L<JSON::Validator>
 
