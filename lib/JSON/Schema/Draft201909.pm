@@ -45,7 +45,7 @@ sub evaluate {
 
   foreach my $keyword (
     # VALIDATOR KEYWORDS
-    qw(type),
+    qw(type enum const),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -60,6 +60,18 @@ sub _evaluate_keyword_type {
 
   return any { $self->_is_type($_, $data) }
     (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type})
+}
+
+sub _evaluate_keyword_enum {
+  my ($self, $data, $schema) = @_;
+
+  return any { $self->_is_equal($data, $_) } @{$schema->{enum}};
+}
+
+sub _evaluate_keyword_const {
+  my ($self, $data, $schema) = @_;
+
+  return $self->_is_equal($data, $schema->{const});
 }
 
 sub _is_type {
@@ -116,6 +128,37 @@ sub _get_type {
   }
 
   croak sprintf('ambiguous type for %s', $self->_json_decoder->encode($value));
+}
+
+# compares two arbitrary data payloads for equality, as per
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.4.2.3
+sub _is_equal {
+  my ($self, $x, $y) = @_;
+
+  my @types = map $self->_get_type($_), $x, $y;
+  return 0 if $types[0] ne $types[1];
+  return 1 if $types[0] eq 'null';
+  return $x eq $y if $types[0] eq 'string';
+  return $x == $y if $types[0] eq 'boolean' or $types[0] eq 'number';
+
+  if ($types[0] eq 'object') {
+    return 0 if keys %$x != keys %$y;
+    return 0 if not $self->_is_equal([ sort keys %$x ], [ sort keys %$y ]);
+    foreach my $property (keys %$x) {
+      return 0 if not $self->_is_equal($x->{$property}, $y->{$property});
+    }
+    return 1;
+  }
+
+  if ($types[0] eq 'array') {
+    return 0 if @$x != @$y;
+    foreach my $idx (0..$#{$x}) {
+      return 0 if not $self->_is_equal($x->[$idx], $y->[$idx]);
+    }
+    return 1;
+  }
+
+  return 0; # should never get here
 }
 
 1;
