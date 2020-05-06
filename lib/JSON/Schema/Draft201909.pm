@@ -10,6 +10,7 @@ our $VERSION = '0.001';
 no if "$]" >= 5.031009, feature => 'indirect';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try;
+use Carp 'croak';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use Types::Standard 1.010002 'HasMethods';
@@ -44,6 +45,62 @@ sub evaluate {
   return 0 if ref $schema ne 'HASH';
 
   return 1;
+}
+
+sub _is_type {
+  my ($self, $type, $value) = @_;
+
+  if ($type eq 'null') {
+    return !(defined $value);
+  }
+  if ($type eq 'boolean') {
+    return is_bool($value);
+  }
+  if ($type eq 'object') {
+    return ref $value eq 'HASH';
+  }
+  if ($type eq 'array') {
+    return ref $value eq 'ARRAY';
+  }
+
+  if ($type eq 'string' or $type eq 'number' or $type eq 'integer') {
+    return 0 if not defined $value or ref $value;
+    my $flags = B::svref_2object(\$value)->FLAGS;
+
+    if ($type eq 'string') {
+      return $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
+    }
+
+    if ($type eq 'number') {
+      return !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+    }
+
+    if ($type eq 'integer') {
+      return !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK))
+        && int($value) == $value;
+    }
+  }
+
+  croak sprintf('unknown type "%s"', $type);
+}
+
+# only the core six types are reported (integers are numbers)
+# use _is_type('integer') to differentiate numbers from integers.
+sub _get_type {
+  my ($self, $value) = @_;
+
+  return 'null' if not defined $value;
+  return 'object' if ref $value eq 'HASH';
+  return 'array' if ref $value eq 'ARRAY';
+  return 'boolean' if is_bool($value);
+
+  if (not ref $value) {
+    my $flags = B::svref_2object(\$value)->FLAGS;
+    return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
+    return 'number' if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+  }
+
+  croak sprintf('ambiguous type for %s', $self->_json_decoder->encode($value));
 }
 
 1;
@@ -101,6 +158,19 @@ The schema is in the form of a Perl data structure, representing a JSON Schema
 that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
 
 The result is a boolean.
+
+=head2 CAVEATS
+
+=head3 TYPES
+
+Perl is a more loosely-typed language than JSON. This module delves into a value's internal
+representation in an attempt to derive the true "intended" type of the value. However, if a value is
+used in another context (for example, a numeric value is concatenated into a string, or a numeric
+string is used in an arithmetic operation), additional flags can be added onto the variable causing
+it to resemble the other type. This should not be an issue if data validation is occurring
+immediately after decoding a JSON payload, or if the JSON string itself is passed to this module.
+
+For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 =head2 LIMITATIONS
 
