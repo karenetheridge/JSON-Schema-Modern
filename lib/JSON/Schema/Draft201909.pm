@@ -11,6 +11,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try;
 use Carp 'croak';
+use List::Util 1.33 'any';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use Types::Standard 1.010002 'HasMethods';
@@ -42,7 +43,23 @@ sub evaluate {
 
   die sprintf('unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
 
+  foreach my $keyword (
+    # VALIDATOR KEYWORDS
+    qw(type),
+  ) {
+    next if not exists $schema->{$keyword};
+    my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
+    return 0 if not $result;
+  }
+
   return 1;
+}
+
+sub _evaluate_keyword_type {
+  my ($self, $data, $schema) = @_;
+
+  return any { $self->_is_type($_, $data) }
+    (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type})
 }
 
 sub _is_type {

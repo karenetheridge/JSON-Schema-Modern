@@ -30,13 +30,19 @@ $accepter->acceptance(
     $result;
   },
   # TODO: dump our errors on unexpected failure.
-  tests => { file => 'boolean_schema.json' },
+  tests => { file => [
+      'boolean_schema.json',
+      'type.json',
+    ],
+  },
 );
 
 # date        Test::JSON::Schema::Acceptance version
 #                    result count of running *all* tests
 # ----        -----  --------------------------------------
 # 2020-05-02  0.991  Looks like you failed 272 tests of 739.
+# 2020-05-05  0.991  Looks like you failed 211 tests of 739.
+# 2020-05-05  0.992  Looks like you failed 225 tests of 775.
 
 
 END {
