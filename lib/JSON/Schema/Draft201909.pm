@@ -46,7 +46,8 @@ sub evaluate {
   foreach my $keyword (
     # VALIDATOR KEYWORDS
     qw(type enum const
-      multipleOf maximum exclusiveMaximum minimum exclusiveMinimum),
+      multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
+      maxLength minLength pattern),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -125,6 +126,37 @@ sub _evaluate_keyword_exclusiveMinimum {
     if not $self->_is_type('number', $schema->{exclusiveMinimum});
 
   return $data > $schema->{exclusiveMinimum};
+}
+
+sub _evaluate_keyword_maxLength {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('string', $data);
+  die sprintf('%s is not an integer', $schema->{maxLength})
+    if not $self->_is_type('integer', $schema->{maxLength});
+  die sprintf('%s is not a non-negative integer', $schema->{maxLength})
+    if $schema->{maxLength} < 0;
+
+  return length($data) <= $schema->{maxLength};
+}
+
+sub _evaluate_keyword_minLength {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('string', $data);
+  die sprintf('%s is not an integer', $schema->{minLength})
+    if not $self->_is_type('integer', $schema->{minLength});
+  die sprintf('%s is not a non-negative integer', $schema->{minLength})
+    if $schema->{minLength} < 0;
+
+  return length($data) >= $schema->{minLength};
+}
+
+sub _evaluate_keyword_pattern {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('string', $data);
+  return $data =~ qr/$schema->{pattern}/;
 }
 
 sub _is_type {
