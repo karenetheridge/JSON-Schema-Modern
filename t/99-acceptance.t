@@ -14,7 +14,7 @@ BEGIN {
     if not -d '.git' and not grep $ENV{$_}, @variables;
 }
 
-use Test::Warnings;
+use Test::Warnings 0.027 ':fail_on_warning';
 use Test::JSON::Schema::Acceptance;
 use JSON::Schema::Draft201909;
 
