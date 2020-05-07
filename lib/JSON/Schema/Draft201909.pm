@@ -46,7 +46,7 @@ sub evaluate {
   foreach my $keyword (
     # VALIDATOR KEYWORDS
     qw(type enum const
-      multipleOf),
+      multipleOf maximum exclusiveMaximum minimum exclusiveMinimum),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -85,6 +85,46 @@ sub _evaluate_keyword_multipleOf {
 
   my $quotient = $data / $schema->{multipleOf};
   return int($quotient) == $quotient;
+}
+
+sub _evaluate_keyword_maximum {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('number', $data);
+  die sprintf('%s is not a number', $schema->{maximum})
+    if not $self->_is_type('number', $schema->{maximum});
+
+  return $data <= $schema->{maximum};
+}
+
+sub _evaluate_keyword_exclusiveMaximum {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('number', $data);
+  die sprintf('%s is not a number', $schema->{exclusiveMaximum})
+    if not $self->_is_type('number', $schema->{exclusiveMaximum});
+
+  return $data < $schema->{exclusiveMaximum};
+}
+
+sub _evaluate_keyword_minimum {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('number', $data);
+  die sprintf('%s is not a number', $schema->{minimum})
+    if not $self->_is_type('number', $schema->{minimum});
+
+  return $data >= $schema->{minimum};
+}
+
+sub _evaluate_keyword_exclusiveMinimum {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('number', $data);
+  die sprintf('%s is not a number', $schema->{exclusiveMinimum})
+    if not $self->_is_type('number', $schema->{exclusiveMinimum});
+
+  return $data > $schema->{exclusiveMinimum};
 }
 
 sub _is_type {

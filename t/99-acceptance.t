@@ -36,6 +36,10 @@ $accepter->acceptance(
       'enum.json',
       'const.json',
       'multipleOf.json',
+      'maximum.json',
+      'exclusiveMaximum.json',
+      'minimum.json',
+      'exclusiveMinimum.json',
     ],
   },
   todo_tests => [
@@ -51,6 +55,7 @@ $accepter->acceptance(
 # 2020-05-05  0.992  Looks like you failed 225 tests of 775.
 # 2020-05-06  0.992  Looks like you failed 193 tests of 775.
 # 2020-05-06  0.992  Looks like you failed 190 tests of 775.
+# 2020-05-06  0.992  Looks like you failed 181 tests of 775.
 
 
 END {
