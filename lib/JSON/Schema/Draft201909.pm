@@ -47,7 +47,8 @@ sub evaluate {
     # VALIDATOR KEYWORDS
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
-      maxLength minLength pattern),
+      maxLength minLength pattern
+      maxItems minItems uniqueItems),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -159,6 +160,40 @@ sub _evaluate_keyword_pattern {
   return $data =~ qr/$schema->{pattern}/;
 }
 
+sub _evaluate_keyword_maxItems {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('array', $data);
+  die sprintf('%s is not an integer', $schema->{maxItems})
+    if not $self->_is_type('integer', $schema->{maxItems});
+  die sprintf('%s is not a non-negative integer', $schema->{maxItems}) if $schema->{maxItems} < 0;
+
+  return @$data <= $schema->{maxItems};
+}
+
+sub _evaluate_keyword_minItems {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('array', $data);
+  die sprintf('%s is not an integer', $schema->{minItems})
+    if not $self->_is_type('integer', $schema->{minItems});
+  die sprintf('%s is not a non-negative integer', $schema->{minItems})
+    if $schema->{minItems} < 0;
+
+  return @$data >= $schema->{minItems};
+}
+
+sub _evaluate_keyword_uniqueItems {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('array', $data);
+  die sprintf('%s is not a boolean', $schema->{uniqueItems})
+    if not $self->_is_type('boolean', $schema->{uniqueItems});
+
+  return 1 if not $schema->{uniqueItems};
+  return $self->_is_elements_unique($data);
+}
+
 sub _is_type {
   my ($self, $type, $value) = @_;
 
@@ -244,6 +279,17 @@ sub _is_equal {
   }
 
   return 0; # should never get here
+}
+
+# checks array elements for uniqueness
+sub _is_elements_unique {
+  my ($self, $array) = @_;
+  foreach my $idx0 (0..$#{$array}-1) {
+    foreach my $idx1 ($idx0+1 .. $#{$array}) {
+      return 0 if $self->_is_equal($array->[$idx0], $array->[$idx1]);
+    }
+  }
+  return 1;
 }
 
 1;

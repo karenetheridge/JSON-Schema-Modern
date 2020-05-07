@@ -43,10 +43,19 @@ $accepter->acceptance(
       'maxLength.json',
       'minLength.json',
       'pattern.json',
+      'maxItems.json',
+      'minItems.json',
+      'uniqueItems.json',
     ],
   },
   todo_tests => [
     { file => 'enum.json', group_description => 'enums in properties' },
+    { file => 'uniqueItems.json', group_description => [
+        'uniqueItems with an array of items', # requires "items"
+        'uniqueItems with an array of items and additionalItems=false', # requires "items", "additionalItems"
+        'uniqueItems=false with an array of items', # requires "items"
+        'uniqueItems=false with an array of items and additionalItems=false', # requires "items", "additionalItems"
+      ] },
   ],
 );
 
@@ -60,6 +69,7 @@ $accepter->acceptance(
 # 2020-05-06  0.992  Looks like you failed 190 tests of 775.
 # 2020-05-06  0.992  Looks like you failed 181 tests of 775.
 # 2020-05-07  0.992  Looks like you failed 177 tests of 775.
+# 2020-05-07  0.992  Looks like you failed 163 tests of 775.
 
 
 END {
