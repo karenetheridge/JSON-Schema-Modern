@@ -49,7 +49,7 @@ sub evaluate {
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
       maxLength minLength pattern
       maxItems minItems uniqueItems
-      maxProperties minProperties),
+      maxProperties minProperties required dependentRequired),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -217,6 +217,39 @@ sub _evaluate_keyword_minProperties {
     if $schema->{minProperties} < 0;
 
   return keys %$data >= $schema->{minProperties};
+}
+
+sub _evaluate_keyword_required {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die '"required" value is not an array' if not $self->_is_type('array', $schema->{required});
+  die '"required" element is not a string'
+    if any { !$self->_is_type('string', $_) } @{$schema->{required}};
+
+  return 0 if any { !exists $data->{$_} } @{$schema->{required}};
+  return 1;
+}
+
+sub _evaluate_keyword_dependentRequired {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die '"dependentRequired" value is not an object'
+    if not $self->_is_type('object', $schema->{dependentRequired});
+  die '"dependentRequired" property is not an array'
+    if any { !$self->_is_type('array', $schema->{dependentRequired}{$_}) }
+      keys %{$schema->{dependentRequired}};
+  die '"dependentRequired" property elements are not unique'
+    if any { !$self->_is_elements_unique($schema->{dependentRequired}{$_}) }
+      keys %{$schema->{dependentRequired}};
+
+  foreach my $property (keys %{$schema->{dependentRequired}}) {
+    return 0
+      if exists $data->{$property}
+        and any { !exists $data->{$_} } @{ $schema->{dependentRequired}{$property} };
+  }
+  return 1;
 }
 
 sub _is_type {
