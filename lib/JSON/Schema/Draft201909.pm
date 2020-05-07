@@ -45,7 +45,8 @@ sub evaluate {
 
   foreach my $keyword (
     # VALIDATOR KEYWORDS
-    qw(type enum const),
+    qw(type enum const
+      multipleOf),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -72,6 +73,18 @@ sub _evaluate_keyword_const {
   my ($self, $data, $schema) = @_;
 
   return $self->_is_equal($data, $schema->{const});
+}
+
+sub _evaluate_keyword_multipleOf {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('number', $data);
+  die sprintf('%s is not a number', $schema->{multipleOf})
+    if not $self->_is_type('number', $schema->{multipleOf});
+  die sprintf('%s is not a positive number', $schema->{multipleOf}) if $schema->{multipleOf} <= 0;
+
+  my $quotient = $data / $schema->{multipleOf};
+  return int($quotient) == $quotient;
 }
 
 sub _is_type {
