@@ -46,6 +46,8 @@ $accepter->acceptance(
       'maxItems.json',
       'minItems.json',
       'uniqueItems.json',
+      'maxProperties.json',
+      'minProperties.json',
     ],
   },
   todo_tests => [
@@ -70,6 +72,7 @@ $accepter->acceptance(
 # 2020-05-06  0.992  Looks like you failed 181 tests of 775.
 # 2020-05-07  0.992  Looks like you failed 177 tests of 775.
 # 2020-05-07  0.992  Looks like you failed 163 tests of 775.
+# 2020-05-07  0.992  Looks like you failed 161 tests of 775.
 
 
 END {

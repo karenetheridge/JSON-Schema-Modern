@@ -48,7 +48,8 @@ sub evaluate {
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
       maxLength minLength pattern
-      maxItems minItems uniqueItems),
+      maxItems minItems uniqueItems
+      maxProperties minProperties),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -192,6 +193,30 @@ sub _evaluate_keyword_uniqueItems {
 
   return 1 if not $schema->{uniqueItems};
   return $self->_is_elements_unique($data);
+}
+
+sub _evaluate_keyword_maxProperties {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die sprintf('%s is not an integer', $schema->{maxProperties})
+    if not $self->_is_type('integer', $schema->{maxProperties});
+  die sprintf('%s is not a non-negative integer', $schema->{maxProperties})
+    if $schema->{maxProperties} < 0;
+
+  return keys %$data <= $schema->{maxProperties};
+}
+
+sub _evaluate_keyword_minProperties {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die sprintf('%s is not an integer', $schema->{minProperties})
+    if not $self->_is_type('integer', $schema->{minProperties});
+  die sprintf('%s is not a non-negative integer', $schema->{minProperties})
+    if $schema->{minProperties} < 0;
+
+  return keys %$data >= $schema->{minProperties};
 }
 
 sub _is_type {
