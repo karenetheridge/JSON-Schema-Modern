@@ -53,7 +53,7 @@ sub evaluate {
     # APPLICATOR KEYWORDS
     qw(allOf anyOf oneOf not if dependentSchemas
       items unevaluatedItems contains
-    ),
+      properties patternProperties additionalProperties unevaluatedProperties propertyNames),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -396,6 +396,68 @@ sub _evaluate_keyword_contains {
   }
 
   return $num_valid > 0;
+}
+
+sub _evaluate_keyword_properties {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die '"properties" value is not an object' if not $self->_is_type('object', $schema->{properties});
+
+  foreach my $property (keys %{$schema->{properties}}) {
+    next if not exists $data->{$property};
+    return 0 if not $self->evaluate($data->{$property}, $schema->{properties}{$property});
+  }
+
+  return 1;
+}
+
+sub _evaluate_keyword_patternProperties {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die '"patternProperties" value is not an object'
+    if not $self->_is_type('object', $schema->{patternProperties});
+
+  foreach my $property_pattern (keys %{$schema->{patternProperties}}) {
+    my @property_matches = grep /$property_pattern/, keys %$data;
+
+    next if not @property_matches;
+    my $subschema = $schema->{patternProperties}{$property_pattern};
+    return 0 if any { !$self->evaluate($data->{$_}, $subschema) } @property_matches;
+  }
+
+  return 1;
+}
+
+sub _evaluate_keyword_additionalProperties {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+
+  foreach my $property (keys %$data) {
+    next if exists $schema->{properties} and exists $schema->{properties}{$property};
+    next if exists $schema->{patternProperties}
+      and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
+
+    return 0 if not $self->evaluate($data->{$property}, $schema->{additionalProperties});
+  }
+
+  return 1;
+}
+
+sub _evaluate_keyword_unevaluatedProperties {
+  my ($self, $data, $schema) = @_;
+
+  die '"unevaluatedProperties" keyword present, but annotation collection is not supported';
+}
+
+sub _evaluate_keyword_propertyNames {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  return 0 if any { !$self->evaluate($_, $schema->{propertyNames}) } keys %$data;
+  return 1;
 }
 
 sub _is_type {
