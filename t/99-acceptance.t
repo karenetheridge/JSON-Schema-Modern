@@ -30,54 +30,21 @@ $accepter->acceptance(
     $result;
   },
   # TODO: dump our errors on unexpected failure.
-  tests => { file => [
-      'boolean_schema.json',
-      'type.json',
-      'enum.json',
-      'const.json',
-      'multipleOf.json',
-      'maximum.json',
-      'exclusiveMaximum.json',
-      'minimum.json',
-      'exclusiveMinimum.json',
-      'maxLength.json',
-      'minLength.json',
-      'pattern.json',
-      'maxItems.json',
-      'minItems.json',
-      'uniqueItems.json',
-      'maxProperties.json',
-      'minProperties.json',
-      'required.json',
-      'dependentRequired.json',
-      'allOf.json',
-      'anyOf.json',
-      'oneOf.json',
-      'not.json',
-      'if-then-else.json',
-      'dependentSchemas.json',
-      'items.json',
-      'additionalItems.json',
-      'unevaluatedItems.json',
-      'contains.json',
-      'maxContains.json', # does not exist yet
-      'minContains.json', # ""
-      'properties.json',
-      'patternProperties.json',
-      'additionalProperties.json',
-      'unevaluatedProperties.json',
-      'propertyNames.json',
-    ],
-  },
   todo_tests => [
     { file => 'items.json', group_description => 'items and subitems' }, # $ref
-    { file => 'unevaluatedItems.json' },
-    { file => 'unevaluatedProperties.json' },
+    { file => [
+        'anchor.json',                # $anchor, $ref, $id
+        'defs.json',                  # $ref
+        'ref.json',                   # $ref, $id
+        'refRemote.json',             # $ref, $id, loading external file
+        'unevaluatedItems.json',
+        'unevaluatedProperties.json',
+      ] },
   ],
 );
 
 # date        Test::JSON::Schema::Acceptance version
-#                    result count of running *all* tests
+#                    result count of running *all* tests (with no TODOs)
 # ----        -----  --------------------------------------
 # 2020-05-02  0.991  Looks like you failed 272 tests of 739.
 # 2020-05-05  0.991  Looks like you failed 211 tests of 739.
