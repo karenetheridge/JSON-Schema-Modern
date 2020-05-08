@@ -51,7 +51,9 @@ sub evaluate {
       maxItems minItems uniqueItems
       maxProperties minProperties required dependentRequired),
     # APPLICATOR KEYWORDS
-    qw(allOf anyOf oneOf not if dependentSchemas),
+    qw(allOf anyOf oneOf not if dependentSchemas
+      items unevaluatedItems
+    ),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -326,6 +328,39 @@ sub _evaluate_keyword_dependentSchemas {
       and not $self->evaluate($data, $schema->{dependentSchemas}{$property});
   }
   return 1;
+}
+
+sub _evaluate_keyword_items {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('array', $data);
+
+  if (ref $schema->{items} ne 'ARRAY') {
+    return ! any { !$self->evaluate($data->[$_], $schema->{items}) } 0..$#{$data};
+  }
+
+  die '"items" array is empty' if not @{$schema->{items}};
+
+  my $last_index = -1;
+  foreach my $idx (0..$#{$data}) {
+    last if $idx > $#{$schema->{items}};
+    return 0 if not $self->evaluate($data->[$idx], $schema->{items}[$idx]);
+    $last_index = $idx;
+  }
+
+  return 1 if not exists $schema->{additionalItems} or $last_index == $#{$data};
+
+  foreach my $idx ($last_index+1 .. $#{$data}) {
+    return 0 if not $self->evaluate($data->[$idx], $schema->{additionalItems});
+  }
+
+  return 1;
+}
+
+sub _evaluate_keyword_unevaluatedItems {
+  my ($self, $data, $schema) = @_;
+
+  die '"unevaluatedItems" keyword present, but annotation collection is not supported';
 }
 
 sub _is_type {
