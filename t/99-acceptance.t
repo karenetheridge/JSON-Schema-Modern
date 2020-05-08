@@ -15,10 +15,10 @@ BEGIN {
 }
 
 use Test::Warnings 0.027 ':fail_on_warning';
-use Test::JSON::Schema::Acceptance;
+use Test::JSON::Schema::Acceptance 0.993;
 use JSON::Schema::Draft201909;
 
-my $accepter = Test::JSON::Schema::Acceptance->new(specification => 'draft2019-09');
+my $accepter = Test::JSON::Schema::Acceptance->new(specification => 'draft2019-09', verbose => 1);
 my $js = JSON::Schema::Draft201909->new;
 
 $accepter->acceptance(
@@ -76,6 +76,7 @@ $accepter->acceptance(
 # 2020-05-07  0.992  Looks like you failed 163 tests of 775.
 # 2020-05-07  0.992  Looks like you failed 161 tests of 775.
 # 2020-05-07  0.992  Looks like you failed 150 tests of 775.
+# 2020-05-08  0.993  Looks like you failed 150 tests of 776.
 
 
 END {
