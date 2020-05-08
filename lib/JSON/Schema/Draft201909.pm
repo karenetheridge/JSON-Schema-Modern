@@ -51,7 +51,7 @@ sub evaluate {
       maxItems minItems uniqueItems
       maxProperties minProperties required dependentRequired),
     # APPLICATOR KEYWORDS
-    qw(allOf anyOf oneOf not),
+    qw(allOf anyOf oneOf not if dependentSchemas),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -298,6 +298,34 @@ sub _evaluate_keyword_oneOf {
 sub _evaluate_keyword_not {
   my ($self, $data, $schema) = @_;
   return !$self->evaluate($data, $schema->{not});
+}
+
+sub _evaluate_keyword_if {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not exists $schema->{then} and not exists $schema->{else};
+  if ($self->evaluate($data, $schema->{if})) {
+    return 1 if not exists $schema->{then};
+    return $self->evaluate($data, $schema->{then});
+  }
+  else {
+    return 1 if not exists $schema->{else};
+    return $self->evaluate($data, $schema->{else});
+  }
+}
+
+sub _evaluate_keyword_dependentSchemas {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('object', $data);
+  die '"dependentSchemas" value is not an object'
+    if not $self->_is_type('object', $schema->{dependentSchemas});
+
+  foreach my $property (keys %{$schema->{dependentSchemas}}) {
+    return 0 if exists $data->{$property}
+      and not $self->evaluate($data, $schema->{dependentSchemas}{$property});
+  }
+  return 1;
 }
 
 sub _is_type {

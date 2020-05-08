@@ -54,6 +54,8 @@ $accepter->acceptance(
       'anyOf.json',
       'oneOf.json',
       'not.json',
+      'if-then-else.json',
+      'dependentSchemas.json',
     ],
   },
   todo_tests => [
@@ -67,6 +69,7 @@ $accepter->acceptance(
     { file => 'allOf.json', group_description => 'allOf', test_description => 'wrong type' },
     { file => 'anyOf.json', group_description => 'anyOf complex types', test_description => 'neither anyOf valid (complex)' },
     { file => 'not.json', group_description => [ 'not more complex schema', 'forbidden property' ] },
+    { file => 'dependentSchemas.json', group_description => 'single dependency' },
   ],
 );
 
@@ -85,6 +88,7 @@ $accepter->acceptance(
 # 2020-05-07  0.992  Looks like you failed 150 tests of 775.
 # 2020-05-08  0.993  Looks like you failed 150 tests of 776.
 # 2020-05-08  0.993  Looks like you failed 117 tests of 776.
+# 2020-05-08  0.993  Looks like you failed 107 tests of 776.
 
 
 END {
