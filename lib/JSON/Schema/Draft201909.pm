@@ -50,6 +50,8 @@ sub evaluate {
       maxLength minLength pattern
       maxItems minItems uniqueItems
       maxProperties minProperties required dependentRequired),
+    # APPLICATOR KEYWORDS
+    qw(allOf anyOf oneOf not),
   ) {
     next if not exists $schema->{$keyword};
     my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
@@ -250,6 +252,52 @@ sub _evaluate_keyword_dependentRequired {
         and any { !exists $data->{$_} } @{ $schema->{dependentRequired}{$property} };
   }
   return 1;
+}
+
+sub _evaluate_keyword_allOf {
+  my ($self, $data, $schema) = @_;
+
+  die '"allOf" value is not an array' if not $self->_is_type('array', $schema->{allOf});
+  die '"allOf" array is empty' if not @{$schema->{allOf}};
+
+  foreach my $subschema (@{$schema->{allOf}}) {
+    return 0 if not $self->evaluate($data, $subschema);
+  }
+
+  return 1;
+}
+
+sub _evaluate_keyword_anyOf {
+  my ($self, $data, $schema) = @_;
+
+  die '"anyOf" value is not an array' if not $self->_is_type('array', $schema->{anyOf});
+  die '"anyOf" array is empty' if not @{$schema->{anyOf}};
+
+  foreach my $subschema (@{$schema->{anyOf}}) {
+    return 1 if $self->evaluate($data, $subschema);
+  }
+
+  return 0;
+}
+
+sub _evaluate_keyword_oneOf {
+  my ($self, $data, $schema) = @_;
+
+  die '"oneOf" value is not an array' if not $self->_is_type('array', $schema->{oneOf});
+  die '"oneOf" array is empty' if not @{$schema->{oneOf}};
+
+  my $valid = 0;
+  foreach my $subschema (@{$schema->{oneOf}}) {
+    ++$valid if $self->evaluate($data, $subschema);
+    return 0 if $valid > 1;
+  }
+
+  return $valid == 1;
+}
+
+sub _evaluate_keyword_not {
+  my ($self, $data, $schema) = @_;
+  return !$self->evaluate($data, $schema->{not});
 }
 
 sub _is_type {
