@@ -52,7 +52,7 @@ sub evaluate {
       maxProperties minProperties required dependentRequired),
     # APPLICATOR KEYWORDS
     qw(allOf anyOf oneOf not if dependentSchemas
-      items unevaluatedItems
+      items unevaluatedItems contains
     ),
   ) {
     next if not exists $schema->{$keyword};
@@ -361,6 +361,41 @@ sub _evaluate_keyword_unevaluatedItems {
   my ($self, $data, $schema) = @_;
 
   die '"unevaluatedItems" keyword present, but annotation collection is not supported';
+}
+
+sub _evaluate_keyword_contains {
+  my ($self, $data, $schema) = @_;
+
+  return 1 if not $self->_is_type('array', $data);
+
+  my $num_valid = 0;
+  foreach my $idx (0.. $#{$data}) {
+    if ($self->evaluate($data->[$idx], $schema->{contains})) {
+      ++$num_valid;
+      return 1 if not exists $schema->{maxContains} and not exists $schema->{minContains};
+    }
+  }
+
+  if (exists $schema->{maxContains}) {
+    die sprintf('%s is not an integer', $schema->{maxContains})
+      if not $self->_is_type('integer', $schema->{maxContains});
+    die sprintf('%s is not a non-negative integer', $schema->{maxContains})
+      if $schema->{maxContains} < 0;
+
+    return 0 if $num_valid > $schema->{maxContains};
+  }
+
+  if (exists $schema->{minContains}) {
+    die sprintf('%s is not an integer', $schema->{minContains})
+      if not $self->_is_type('integer', $schema->{minContains});
+    die sprintf('%s is not a non-negative integer', $schema->{minContains})
+      if $schema->{minContains} < 0;
+
+    # contains=0 is valid when minContains=0
+    return $num_valid >= $schema->{minContains};
+  }
+
+  return $num_valid > 0;
 }
 
 sub _is_type {

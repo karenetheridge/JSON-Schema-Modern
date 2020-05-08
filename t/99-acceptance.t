@@ -59,6 +59,9 @@ $accepter->acceptance(
       'items.json',
       'additionalItems.json',
       'unevaluatedItems.json',
+      'contains.json',
+      'maxContains.json', # does not exist yet
+      'minContains.json', # ""
     ],
   },
   todo_tests => [
@@ -89,6 +92,7 @@ $accepter->acceptance(
 # 2020-05-08  0.993  Looks like you failed 117 tests of 776.
 # 2020-05-08  0.993  Looks like you failed 107 tests of 776.
 # 2020-05-08  0.993  Looks like you failed 116 tests of 776.
+# 2020-05-08  0.993  Looks like you failed 110 tests of 776.
 
 
 END {
