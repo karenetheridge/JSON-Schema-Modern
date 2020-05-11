@@ -31,14 +31,17 @@ $accepter->acceptance(
   },
   # TODO: dump our errors on unexpected failure.
   $ENV{NO_TODO} ? () : ( todo_tests => [
-    { file => 'items.json', group_description => 'items and subitems' }, # $ref
     { file => [
         'anchor.json',                # $anchor, $ref, $id
-        'defs.json',                  # $ref
-        'ref.json',                   # $ref, $id
+        'defs.json',                  # $ref to (cached?) metaschema
         'refRemote.json',             # $ref, $id, loading external file
         'unevaluatedItems.json',
         'unevaluatedProperties.json',
+      ] },
+    { file => 'ref.json', group_description => [
+        'remote ref, containing refs itself',
+        'Recursive references between schemas',
+        'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
       ] },
   ] ),
 );
@@ -63,6 +66,7 @@ $accepter->acceptance(
 # 2020-05-08  0.993  Looks like you failed 110 tests of 776.
 # 2020-05-08  0.993  Looks like you failed 97 tests of 776.
 # 2020-05-11  0.993  Looks like you failed 126 tests of 776.
+# 2020-05-11  0.993  Looks like you failed 98 tests of 776.
 
 
 END {
