@@ -69,6 +69,25 @@ sub evaluate {
   return 1;
 }
 
+sub _evaluate_keyword_comment {
+  my ($self, $data, $schema) = @_;
+  die '"$comment" value is not a string' if not $self->_is_type('string', $schema->{'$comment'});
+  # we do nothing with this keyword, including not collecting its value for annotations.
+  return 1;
+}
+
+sub _evaluate_keyword_defs {
+  # we do nothing directly with this keyword, including not collecting its value for annotations.
+  return 1;
+}
+
+sub _evaluate_keyword_schema {
+  my ($self, $data, $schema) = @_;
+
+  die 'custom $schema references are not yet supported'
+    if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
+}
+
 sub _evaluate_keyword_type {
   my ($self, $data, $schema) = @_;
 

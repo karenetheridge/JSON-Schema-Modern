@@ -7,7 +7,7 @@ use JSON::Schema::Draft201909;
 
 my $js = JSON::Schema::Draft201909->new;
 
-foreach my $keyword (qw($id $schema $anchor $ref $recursiveRef $recursiveAnchor $vocabulary $comment $defs)) {
+foreach my $keyword (qw($id $anchor $ref $recursiveRef $recursiveAnchor $vocabulary)) {
   like(
     exception { $js->evaluate('hello', { $keyword => 'something' }) },
     qr/^unsupported keyword "\Q$keyword\E"/,
