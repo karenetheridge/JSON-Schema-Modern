@@ -44,6 +44,8 @@ sub evaluate {
   die sprintf('unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
 
   foreach my $keyword (
+    # CORE KEYWORDS
+    qw($schema $ref $id $anchor $recursiveRef $recursiveAnchor $vocabulary $comment $defs),
     # VALIDATOR KEYWORDS
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
@@ -56,7 +58,11 @@ sub evaluate {
       properties patternProperties additionalProperties unevaluatedProperties propertyNames),
   ) {
     next if not exists $schema->{$keyword};
-    my $result = $self->${\"_evaluate_keyword_$keyword"}($data, $schema);
+
+    my $method = '_evaluate_keyword_'.($keyword =~ s/^\$//r);
+    die 'unsupported keyword "'.$keyword.'"' if not $self->can($method);
+    my $result = $self->$method($data, $schema);
+
     return 0 if not $result;
   }
 
