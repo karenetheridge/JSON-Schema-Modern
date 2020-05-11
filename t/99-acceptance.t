@@ -30,7 +30,7 @@ $accepter->acceptance(
     $result;
   },
   # TODO: dump our errors on unexpected failure.
-  todo_tests => [
+  $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => 'items.json', group_description => 'items and subitems' }, # $ref
     { file => [
         'anchor.json',                # $anchor, $ref, $id
@@ -40,7 +40,7 @@ $accepter->acceptance(
         'unevaluatedItems.json',
         'unevaluatedProperties.json',
       ] },
-  ],
+  ] ),
 );
 
 # date        Test::JSON::Schema::Acceptance version
