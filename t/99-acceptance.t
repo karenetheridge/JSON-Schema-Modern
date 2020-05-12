@@ -15,10 +15,14 @@ BEGIN {
 }
 
 use Test::Warnings 0.027 ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 0.993;
+use Test::JSON::Schema::Acceptance 0.994;
 use JSON::Schema::Draft201909;
 
-my $accepter = Test::JSON::Schema::Acceptance->new(specification => 'draft2019-09', verbose => 1);
+my $accepter = Test::JSON::Schema::Acceptance->new(
+  specification => 'draft2019-09',
+  include_optional => 1,
+  verbose => 1,
+);
 my $js = JSON::Schema::Draft201909->new;
 
 $accepter->acceptance(
@@ -37,6 +41,29 @@ $accepter->acceptance(
         'refRemote.json',             # $ref, $id, loading external file
         'unevaluatedItems.json',
         'unevaluatedProperties.json',
+        'optional/bignum.json',
+        'optional/content.json',
+        qw(
+          optional/ecmascript-regex.json
+          optional/format/date-time.json
+          optional/format/date.json
+          optional/format/duration.json
+          optional/format/email.json
+          optional/format/hostname.json
+          optional/format/idn-email.json
+          optional/format/idn-hostname.json
+          optional/format/ipv4.json
+          optional/format/ipv6.json
+          optional/format/iri-reference.json
+          optional/format/iri.json
+          optional/format/json-pointer.json
+          optional/format/regex.json
+          optional/format/relative-json-pointer.json
+          optional/format/time.json
+          optional/format/uri-reference.json
+          optional/format/uri-template.json
+          optional/format/uri.json
+        ),
       ] },
     { file => 'ref.json', group_description => [
         'remote ref, containing refs itself',
@@ -67,6 +94,7 @@ $accepter->acceptance(
 # 2020-05-08  0.993  Looks like you failed 97 tests of 776.
 # 2020-05-11  0.993  Looks like you failed 126 tests of 776.
 # 2020-05-11  0.993  Looks like you failed 98 tests of 776.
+# 2020-05-12  0.994  Looks like you failed 171 tests of 959.
 
 
 END {
