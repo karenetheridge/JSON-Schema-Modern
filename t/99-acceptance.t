@@ -44,10 +44,10 @@ $accepter->acceptance(
         'optional/bignum.json',
         'optional/content.json',
         qw(
-          optional/ecmascript-regex.json
           optional/format/date-time.json
           optional/format/date.json
           optional/format/duration.json
+          optional/format/ecmascript-regex.json
           optional/format/email.json
           optional/format/hostname.json
           optional/format/idn-email.json
@@ -95,6 +95,7 @@ $accepter->acceptance(
 # 2020-05-11  0.993  Looks like you failed 126 tests of 776.
 # 2020-05-11  0.993  Looks like you failed 98 tests of 776.
 # 2020-05-12  0.994  Looks like you failed 171 tests of 959.
+# 2020-05-13  0.995  Looks like you failed 171 tests of 959.
 
 
 END {
