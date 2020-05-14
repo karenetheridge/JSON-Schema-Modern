@@ -11,6 +11,8 @@ use JSON::Schema::Draft201909;
 my $accepter = Test::JSON::Schema::Acceptance->new(test_dir => 't/additional-tests', verbose => 1);
 my $js = JSON::Schema::Draft201909->new;
 
+plan skip_all => 'no tests in this directory to test' if not @{$accepter->_test_data};
+
 $accepter->acceptance(
   validate_data => sub {
     my ($schema, $instance_data) = @_;
