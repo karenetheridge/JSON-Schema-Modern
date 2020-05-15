@@ -38,6 +38,16 @@ sub evaluate_json_string {
 }
 
 sub evaluate {
+  my ($self, $data, $schema) = @_;
+
+  my $state = {
+    root_schema => Mojo::JSON::Pointer->new($schema),
+  };
+
+  my $result = $self->_eval($data, $schema, $state);
+}
+
+sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
   my $schema_type = $self->_get_type($schema);
@@ -64,7 +74,7 @@ sub evaluate {
   ) {
     next if not exists $schema->{$keyword};
 
-    my $method = '_evaluate_keyword_'.($keyword =~ s/^\$//r);
+    my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
     die 'unsupported keyword "'.$keyword.'"' if not $self->can($method);
     my $result = $self->$method($data, $schema, $state);
 
@@ -74,26 +84,26 @@ sub evaluate {
   return 1;
 }
 
-sub _evaluate_keyword_comment {
+sub _eval_keyword_comment {
   my ($self, $data, $schema) = @_;
   die '"$comment" value is not a string' if not $self->_is_type('string', $schema->{'$comment'});
   # we do nothing with this keyword, including not collecting its value for annotations.
   return 1;
 }
 
-sub _evaluate_keyword_defs {
+sub _eval_keyword_defs {
   # we do nothing directly with this keyword, including not collecting its value for annotations.
   return 1;
 }
 
-sub _evaluate_keyword_schema {
+sub _eval_keyword_schema {
   my ($self, $data, $schema) = @_;
 
   die 'custom $schema references are not yet supported'
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 }
 
-sub _evaluate_keyword_ref {
+sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
   die 'only same-document JSON pointers are supported in $ref' if $schema->{'$ref'} !~ m{^#(/|$)};
@@ -103,29 +113,29 @@ sub _evaluate_keyword_ref {
 
   my $subschema = $state->{root_schema}->get($fragment);
   die sprintf('unable to resolve ref "%s"', $schema->{'$ref'}) if not defined $subschema;
-  return $self->evaluate($data, $subschema, $state);
+  return $self->_eval($data, $subschema, $state);
 }
 
-sub _evaluate_keyword_type {
+sub _eval_keyword_type {
   my ($self, $data, $schema) = @_;
 
   return any { $self->_is_type($_, $data) }
     (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type})
 }
 
-sub _evaluate_keyword_enum {
+sub _eval_keyword_enum {
   my ($self, $data, $schema) = @_;
 
   return any { $self->_is_equal($data, $_) } @{$schema->{enum}};
 }
 
-sub _evaluate_keyword_const {
+sub _eval_keyword_const {
   my ($self, $data, $schema) = @_;
 
   return $self->_is_equal($data, $schema->{const});
 }
 
-sub _evaluate_keyword_multipleOf {
+sub _eval_keyword_multipleOf {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('number', $data);
@@ -137,7 +147,7 @@ sub _evaluate_keyword_multipleOf {
   return int($quotient) == $quotient;
 }
 
-sub _evaluate_keyword_maximum {
+sub _eval_keyword_maximum {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('number', $data);
@@ -147,7 +157,7 @@ sub _evaluate_keyword_maximum {
   return $data <= $schema->{maximum};
 }
 
-sub _evaluate_keyword_exclusiveMaximum {
+sub _eval_keyword_exclusiveMaximum {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('number', $data);
@@ -157,7 +167,7 @@ sub _evaluate_keyword_exclusiveMaximum {
   return $data < $schema->{exclusiveMaximum};
 }
 
-sub _evaluate_keyword_minimum {
+sub _eval_keyword_minimum {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('number', $data);
@@ -167,7 +177,7 @@ sub _evaluate_keyword_minimum {
   return $data >= $schema->{minimum};
 }
 
-sub _evaluate_keyword_exclusiveMinimum {
+sub _eval_keyword_exclusiveMinimum {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('number', $data);
@@ -177,7 +187,7 @@ sub _evaluate_keyword_exclusiveMinimum {
   return $data > $schema->{exclusiveMinimum};
 }
 
-sub _evaluate_keyword_maxLength {
+sub _eval_keyword_maxLength {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('string', $data);
@@ -189,7 +199,7 @@ sub _evaluate_keyword_maxLength {
   return length($data) <= $schema->{maxLength};
 }
 
-sub _evaluate_keyword_minLength {
+sub _eval_keyword_minLength {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('string', $data);
@@ -201,14 +211,14 @@ sub _evaluate_keyword_minLength {
   return length($data) >= $schema->{minLength};
 }
 
-sub _evaluate_keyword_pattern {
+sub _eval_keyword_pattern {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('string', $data);
   return $data =~ qr/$schema->{pattern}/;
 }
 
-sub _evaluate_keyword_maxItems {
+sub _eval_keyword_maxItems {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('array', $data);
@@ -219,7 +229,7 @@ sub _evaluate_keyword_maxItems {
   return @$data <= $schema->{maxItems};
 }
 
-sub _evaluate_keyword_minItems {
+sub _eval_keyword_minItems {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('array', $data);
@@ -231,7 +241,7 @@ sub _evaluate_keyword_minItems {
   return @$data >= $schema->{minItems};
 }
 
-sub _evaluate_keyword_uniqueItems {
+sub _eval_keyword_uniqueItems {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('array', $data);
@@ -242,7 +252,7 @@ sub _evaluate_keyword_uniqueItems {
   return $self->_is_elements_unique($data);
 }
 
-sub _evaluate_keyword_maxProperties {
+sub _eval_keyword_maxProperties {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -254,7 +264,7 @@ sub _evaluate_keyword_maxProperties {
   return keys %$data <= $schema->{maxProperties};
 }
 
-sub _evaluate_keyword_minProperties {
+sub _eval_keyword_minProperties {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -266,7 +276,7 @@ sub _evaluate_keyword_minProperties {
   return keys %$data >= $schema->{minProperties};
 }
 
-sub _evaluate_keyword_required {
+sub _eval_keyword_required {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -278,7 +288,7 @@ sub _evaluate_keyword_required {
   return 1;
 }
 
-sub _evaluate_keyword_dependentRequired {
+sub _eval_keyword_dependentRequired {
   my ($self, $data, $schema) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -299,33 +309,33 @@ sub _evaluate_keyword_dependentRequired {
   return 1;
 }
 
-sub _evaluate_keyword_allOf {
+sub _eval_keyword_allOf {
   my ($self, $data, $schema, $state) = @_;
 
   die '"allOf" value is not an array' if not $self->_is_type('array', $schema->{allOf});
   die '"allOf" array is empty' if not @{$schema->{allOf}};
 
   foreach my $subschema (@{$schema->{allOf}}) {
-    return 0 if not $self->evaluate($data, $subschema, $state);
+    return 0 if not $self->_eval($data, $subschema, $state);
   }
 
   return 1;
 }
 
-sub _evaluate_keyword_anyOf {
+sub _eval_keyword_anyOf {
   my ($self, $data, $schema, $state) = @_;
 
   die '"anyOf" value is not an array' if not $self->_is_type('array', $schema->{anyOf});
   die '"anyOf" array is empty' if not @{$schema->{anyOf}};
 
   foreach my $subschema (@{$schema->{anyOf}}) {
-    return 1 if $self->evaluate($data, $subschema, $state);
+    return 1 if $self->_eval($data, $subschema, $state);
   }
 
   return 0;
 }
 
-sub _evaluate_keyword_oneOf {
+sub _eval_keyword_oneOf {
   my ($self, $data, $schema, $state) = @_;
 
   die '"oneOf" value is not an array' if not $self->_is_type('array', $schema->{oneOf});
@@ -333,33 +343,33 @@ sub _evaluate_keyword_oneOf {
 
   my $valid = 0;
   foreach my $subschema (@{$schema->{oneOf}}) {
-    ++$valid if $self->evaluate($data, $subschema, $state);
+    ++$valid if $self->_eval($data, $subschema, $state);
     return 0 if $valid > 1;
   }
 
   return $valid == 1;
 }
 
-sub _evaluate_keyword_not {
+sub _eval_keyword_not {
   my ($self, $data, $schema, $state) = @_;
-  return !$self->evaluate($data, $schema->{not}, $state);
+  return !$self->_eval($data, $schema->{not}, $state);
 }
 
-sub _evaluate_keyword_if {
+sub _eval_keyword_if {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not exists $schema->{then} and not exists $schema->{else};
-  if ($self->evaluate($data, $schema->{if}, $state)) {
+  if ($self->_eval($data, $schema->{if}, $state)) {
     return 1 if not exists $schema->{then};
-    return $self->evaluate($data, $schema->{then}, $state);
+    return $self->_eval($data, $schema->{then}, $state);
   }
   else {
     return 1 if not exists $schema->{else};
-    return $self->evaluate($data, $schema->{else}, $state);
+    return $self->_eval($data, $schema->{else}, $state);
   }
 }
 
-sub _evaluate_keyword_dependentSchemas {
+sub _eval_keyword_dependentSchemas {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -368,18 +378,18 @@ sub _evaluate_keyword_dependentSchemas {
 
   foreach my $property (keys %{$schema->{dependentSchemas}}) {
     return 0 if exists $data->{$property}
-      and not $self->evaluate($data, $schema->{dependentSchemas}{$property}, $state);
+      and not $self->_eval($data, $schema->{dependentSchemas}{$property}, $state);
   }
   return 1;
 }
 
-sub _evaluate_keyword_items {
+sub _eval_keyword_items {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
 
   if (ref $schema->{items} ne 'ARRAY') {
-    return ! any { !$self->evaluate($data->[$_], $schema->{items}, $state) } 0..$#{$data};
+    return ! any { !$self->_eval($data->[$_], $schema->{items}, $state) } 0..$#{$data};
   }
 
   die '"items" array is empty' if not @{$schema->{items}};
@@ -387,33 +397,33 @@ sub _evaluate_keyword_items {
   my $last_index = -1;
   foreach my $idx (0..$#{$data}) {
     last if $idx > $#{$schema->{items}};
-    return 0 if not $self->evaluate($data->[$idx], $schema->{items}[$idx], $state);
+    return 0 if not $self->_eval($data->[$idx], $schema->{items}[$idx], $state);
     $last_index = $idx;
   }
 
   return 1 if not exists $schema->{additionalItems} or $last_index == $#{$data};
 
   foreach my $idx ($last_index+1 .. $#{$data}) {
-    return 0 if not $self->evaluate($data->[$idx], $schema->{additionalItems}, $state);
+    return 0 if not $self->_eval($data->[$idx], $schema->{additionalItems}, $state);
   }
 
   return 1;
 }
 
-sub _evaluate_keyword_unevaluatedItems {
+sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
   die '"unevaluatedItems" keyword present, but annotation collection is not supported';
 }
 
-sub _evaluate_keyword_contains {
+sub _eval_keyword_contains {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
 
   my $num_valid = 0;
   foreach my $idx (0.. $#{$data}) {
-    if ($self->evaluate($data->[$idx], $schema->{contains}, $state)) {
+    if ($self->_eval($data->[$idx], $schema->{contains}, $state)) {
       ++$num_valid;
       return 1 if not exists $schema->{maxContains} and not exists $schema->{minContains};
     }
@@ -441,7 +451,7 @@ sub _evaluate_keyword_contains {
   return $num_valid > 0;
 }
 
-sub _evaluate_keyword_properties {
+sub _eval_keyword_properties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -449,13 +459,13 @@ sub _evaluate_keyword_properties {
 
   foreach my $property (keys %{$schema->{properties}}) {
     next if not exists $data->{$property};
-    return 0 if not $self->evaluate($data->{$property}, $schema->{properties}{$property}, $state);
+    return 0 if not $self->_eval($data->{$property}, $schema->{properties}{$property}, $state);
   }
 
   return 1;
 }
 
-sub _evaluate_keyword_patternProperties {
+sub _eval_keyword_patternProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -467,13 +477,13 @@ sub _evaluate_keyword_patternProperties {
 
     next if not @property_matches;
     my $subschema = $schema->{patternProperties}{$property_pattern};
-    return 0 if any { !$self->evaluate($data->{$_}, $subschema, $state) } @property_matches;
+    return 0 if any { !$self->_eval($data->{$_}, $subschema, $state) } @property_matches;
   }
 
   return 1;
 }
 
-sub _evaluate_keyword_additionalProperties {
+sub _eval_keyword_additionalProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
@@ -483,23 +493,23 @@ sub _evaluate_keyword_additionalProperties {
     next if exists $schema->{patternProperties}
       and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
 
-    return 0 if not $self->evaluate($data->{$property}, $schema->{additionalProperties}, $state);
+    return 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties}, $state);
   }
 
   return 1;
 }
 
-sub _evaluate_keyword_unevaluatedProperties {
+sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
 
   die '"unevaluatedProperties" keyword present, but annotation collection is not supported';
 }
 
-sub _evaluate_keyword_propertyNames {
+sub _eval_keyword_propertyNames {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  return 0 if any { !$self->evaluate($_, $schema->{propertyNames}, $state) } keys %$data;
+  return 0 if any { !$self->_eval($_, $schema->{propertyNames}, $state) } keys %$data;
   return 1;
 }
 
