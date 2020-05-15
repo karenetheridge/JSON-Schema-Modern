@@ -16,8 +16,23 @@ use Mojo::JSON::Pointer;
 use Mojo::URL;
 use Moo;
 use MooX::TypeTiny 0.002002;
-use Types::Standard 1.010002 'HasMethods';
+use Types::Standard 1.010002 qw(Bool HasMethods Enum);
+use JSON::Schema::Draft201909::Error;
+use JSON::Schema::Draft201909::Result;
 use namespace::clean;
+
+has output_format => (
+  is => 'ro',
+  isa => Enum[qw(flag basic detailed verbose)],
+  default => 'basic',
+);
+
+has short_circuit => (
+  is => 'ro',
+  isa => Bool,
+  lazy => 1,
+  default => sub { $_[0]->output_format eq 'flag' },
+);
 
 has _json_decoder => (
   is => 'ro',
@@ -42,21 +57,34 @@ sub evaluate {
 
   my $state = {
     root_schema => Mojo::JSON::Pointer->new($schema),
+    short_circuit => $self->short_circuit,
+    data_path => '',
+    traversed_schema_path => '',  # the accumulated path up to the last $ref traversal
+    absolute_schema_path => '',   # the absolute path of the last traversed $ref
+    schema_path => '',            # the rest of the path, since the last traversed $ref
+    errors => [],
   };
 
   my $result = $self->_eval($data, $schema, $state);
+
+  return JSON::Schema::Draft201909::Result->new(
+    output_format => $self->output_format,
+    result => $result,
+    errors => $state->{errors},
+  );
 }
 
 sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
+  delete $state->{keyword};
+
   my $schema_type = $self->_get_type($schema);
-  return $schema if $schema_type eq 'boolean';
+  return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
 
   die sprintf('unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
 
-  $state //= {};
-  $state->{root_schema} = Mojo::JSON::Pointer->new($schema) if not exists $state->{root_schema};
+  my $result = 1;
 
   foreach my $keyword (
     # CORE KEYWORDS
@@ -76,12 +104,12 @@ sub _eval {
 
     my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
     die 'unsupported keyword "'.$keyword.'"' if not $self->can($method);
-    my $result = $self->$method($data, $schema, $state);
+    $result = 0 if not $self->$method($data, $schema, +{ %$state, keyword => $keyword });
 
-    return 0 if not $result;
+    return 0 if not $result and $state->{short_circuit};
   }
 
-  return 1;
+  return $result;
 }
 
 sub _eval_keyword_comment {
@@ -113,30 +141,44 @@ sub _eval_keyword_ref {
 
   my $subschema = $state->{root_schema}->get($fragment);
   die sprintf('unable to resolve ref "%s"', $schema->{'$ref'}) if not defined $subschema;
-  return $self->_eval($data, $subschema, $state);
+
+  # for now, the base_uri of the schema is always '' (yes I know this is not an absolute uri)
+  # TODO: we need to track the base_uri of the schema resource that we are referencing.
+  # absolute_schema_path may not look anything like the contents of the $ref keyword.
+  return $self->_eval($data, $subschema,
+    +{ %$state,
+      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
+      absolute_schema_path => $url->to_string,
+      schema_path => '',
+    });
 }
 
 sub _eval_keyword_type {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
-  return any { $self->_is_type($_, $data) }
-    (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type})
+  return 1 if any { $self->_is_type($_, $data) }
+    (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type});
+
+  return E($state, 'wrong type (expected %s)',
+    ref $schema->{type} eq 'ARRAY' ? ('one of '.join(', ', @{$schema->{type}})) : $schema->{type});
 }
 
 sub _eval_keyword_enum {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
-  return any { $self->_is_equal($data, $_) } @{$schema->{enum}};
+  return 1 if any { $self->_is_equal($data, $_) } @{$schema->{enum}};
+  return E($state, 'value does not match');
 }
 
 sub _eval_keyword_const {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
-  return $self->_is_equal($data, $schema->{const});
+  return 1 if $self->_is_equal($data, $schema->{const});
+  return E($state, 'value does not match');
 }
 
 sub _eval_keyword_multipleOf {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
   die sprintf('%s is not a number', $schema->{multipleOf})
@@ -144,51 +186,56 @@ sub _eval_keyword_multipleOf {
   die sprintf('%s is not a positive number', $schema->{multipleOf}) if $schema->{multipleOf} <= 0;
 
   my $quotient = $data / $schema->{multipleOf};
-  return int($quotient) == $quotient;
+  return 1 if int($quotient) == $quotient;
+  return E($state, 'value is not a multiple of %d', $schema->{multipleOf});
 }
 
 sub _eval_keyword_maximum {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
   die sprintf('%s is not a number', $schema->{maximum})
     if not $self->_is_type('number', $schema->{maximum});
 
-  return $data <= $schema->{maximum};
+  return 1 if $data <= $schema->{maximum};
+  return E($state, 'value is larger than %d', $schema->{maximum});
 }
 
 sub _eval_keyword_exclusiveMaximum {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
   die sprintf('%s is not a number', $schema->{exclusiveMaximum})
     if not $self->_is_type('number', $schema->{exclusiveMaximum});
 
-  return $data < $schema->{exclusiveMaximum};
+  return 1 if $data < $schema->{exclusiveMaximum};
+  return E($state, 'value is equal to or larger than %d', $schema->{exclusiveMaximum});
 }
 
 sub _eval_keyword_minimum {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
   die sprintf('%s is not a number', $schema->{minimum})
     if not $self->_is_type('number', $schema->{minimum});
 
-  return $data >= $schema->{minimum};
+  return 1 if $data >= $schema->{minimum};
+  return E($state, 'value is smaller than %d', $schema->{minimum});
 }
 
 sub _eval_keyword_exclusiveMinimum {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
   die sprintf('%s is not a number', $schema->{exclusiveMinimum})
     if not $self->_is_type('number', $schema->{exclusiveMinimum});
 
-  return $data > $schema->{exclusiveMinimum};
+  return 1 if $data > $schema->{exclusiveMinimum};
+  return E($state, 'value is equal to or smaller than %d', $schema->{exclusiveMinimum});
 }
 
 sub _eval_keyword_maxLength {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
   die sprintf('%s is not an integer', $schema->{maxLength})
@@ -196,11 +243,12 @@ sub _eval_keyword_maxLength {
   die sprintf('%s is not a non-negative integer', $schema->{maxLength})
     if $schema->{maxLength} < 0;
 
-  return length($data) <= $schema->{maxLength};
+  return 1 if length($data) <= $schema->{maxLength};
+  return E($state, 'length is greater than %d', $schema->{maxLength});
 }
 
 sub _eval_keyword_minLength {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
   die sprintf('%s is not an integer', $schema->{minLength})
@@ -208,29 +256,33 @@ sub _eval_keyword_minLength {
   die sprintf('%s is not a non-negative integer', $schema->{minLength})
     if $schema->{minLength} < 0;
 
-  return length($data) >= $schema->{minLength};
+  return 1 if length($data) >= $schema->{minLength};
+  return E($state, 'length is less than %d', $schema->{minLength});
 }
 
 sub _eval_keyword_pattern {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
-  return $data =~ qr/$schema->{pattern}/;
+
+  return 1 if $data =~ qr/$schema->{pattern}/;
+  return E($state, 'pattern does not match');
 }
 
 sub _eval_keyword_maxItems {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
   die sprintf('%s is not an integer', $schema->{maxItems})
     if not $self->_is_type('integer', $schema->{maxItems});
   die sprintf('%s is not a non-negative integer', $schema->{maxItems}) if $schema->{maxItems} < 0;
 
-  return @$data <= $schema->{maxItems};
+  return 1 if @$data <= $schema->{maxItems};
+  return E($state, 'more than %d items', $schema->{maxItems});
 }
 
 sub _eval_keyword_minItems {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
   die sprintf('%s is not an integer', $schema->{minItems})
@@ -238,22 +290,24 @@ sub _eval_keyword_minItems {
   die sprintf('%s is not a non-negative integer', $schema->{minItems})
     if $schema->{minItems} < 0;
 
-  return @$data >= $schema->{minItems};
+  return 1 if @$data >= $schema->{minItems};
+  return E($state, 'fewer than %d items', $schema->{minItems});
 }
 
 sub _eval_keyword_uniqueItems {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
   die sprintf('%s is not a boolean', $schema->{uniqueItems})
     if not $self->_is_type('boolean', $schema->{uniqueItems});
 
   return 1 if not $schema->{uniqueItems};
-  return $self->_is_elements_unique($data);
+  return 1 if $self->_is_elements_unique($data, my $equal_indices = []);
+  return E($state, 'items at indices %d and %d are not unique', @$equal_indices);
 }
 
 sub _eval_keyword_maxProperties {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
   die sprintf('%s is not an integer', $schema->{maxProperties})
@@ -261,11 +315,12 @@ sub _eval_keyword_maxProperties {
   die sprintf('%s is not a non-negative integer', $schema->{maxProperties})
     if $schema->{maxProperties} < 0;
 
-  return keys %$data <= $schema->{maxProperties};
+  return 1 if keys %$data <= $schema->{maxProperties};
+  return E($state, 'more than %d properties', $schema->{maxProperties});
 }
 
 sub _eval_keyword_minProperties {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
   die sprintf('%s is not an integer', $schema->{minProperties})
@@ -273,23 +328,25 @@ sub _eval_keyword_minProperties {
   die sprintf('%s is not a non-negative integer', $schema->{minProperties})
     if $schema->{minProperties} < 0;
 
-  return keys %$data >= $schema->{minProperties};
+  return 1 if keys %$data >= $schema->{minProperties};
+  return E($state, 'fewer than %d properties', $schema->{minProperties});
 }
 
 sub _eval_keyword_required {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
   die '"required" value is not an array' if not $self->_is_type('array', $schema->{required});
   die '"required" element is not a string'
     if any { !$self->_is_type('string', $_) } @{$schema->{required}};
 
-  return 0 if any { !exists $data->{$_} } @{$schema->{required}};
-  return 1;
+  my @missing = grep !exists $data->{$_}, @{$schema->{required}};
+  return 1 if not @missing;
+  return E($state, 'missing propert'.(@missing > 1 ? 'ies' : 'y').': '.join(', ', @missing));
 }
 
 sub _eval_keyword_dependentRequired {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
   die '"dependentRequired" value is not an object'
@@ -301,12 +358,12 @@ sub _eval_keyword_dependentRequired {
     if any { !$self->_is_elements_unique($schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
 
-  foreach my $property (keys %{$schema->{dependentRequired}}) {
-    return 0
-      if exists $data->{$property}
-        and any { !exists $data->{$_} } @{ $schema->{dependentRequired}{$property} };
-  }
-  return 1;
+  my @missing = grep
+    +(exists $data->{$_} && any { !exists $data->{$_} } @{ $schema->{dependentRequired}{$_} }),
+    keys %{$schema->{dependentRequired}};
+
+  return 1 if not @missing;
+  return E($state, 'missing propert'.(@missing > 1 ? 'ies' : 'y').': '.join(', ', @missing));
 }
 
 sub _eval_keyword_allOf {
@@ -315,11 +372,18 @@ sub _eval_keyword_allOf {
   die '"allOf" value is not an array' if not $self->_is_type('array', $schema->{allOf});
   die '"allOf" array is empty' if not @{$schema->{allOf}};
 
-  foreach my $subschema (@{$schema->{allOf}}) {
-    return 0 if not $self->_eval($data, $subschema, $state);
+  my @invalid;
+  foreach my $idx (0 .. $#{$schema->{allOf}}) {
+    next if $self->_eval($data, $schema->{allOf}[$idx],
+      +{ %$state, schema_path => $state->{schema_path}.'/allOf/'.$idx });
+
+    push @invalid, $idx;
+    last if $state->{short_circuit};
   }
 
-  return 1;
+  return 1 if @invalid == 0;
+  my $pl = @invalid > 1;
+  return E($state, 'subschema'.($pl?'s ':' ').join(', ', @invalid).($pl?' are':' is').' not valid');
 }
 
 sub _eval_keyword_anyOf {
@@ -328,11 +392,18 @@ sub _eval_keyword_anyOf {
   die '"anyOf" value is not an array' if not $self->_is_type('array', $schema->{anyOf});
   die '"anyOf" array is empty' if not @{$schema->{anyOf}};
 
-  foreach my $subschema (@{$schema->{anyOf}}) {
-    return 1 if $self->_eval($data, $subschema, $state);
+  my $valid = 0;
+  my @errors;
+  foreach my $idx (0 .. $#{$schema->{anyOf}}) {
+    next if not $self->_eval($data, $schema->{anyOf}[$idx],
+      +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/anyOf/'.$idx });
+    ++$valid;
+    last if $state->{short_circuit};
   }
 
-  return 0;
+  return 1 if $valid;
+  push @{$state->{errors}}, @errors;
+  return E($state, 'no subschemas are valid');
 }
 
 sub _eval_keyword_oneOf {
@@ -341,31 +412,52 @@ sub _eval_keyword_oneOf {
   die '"oneOf" value is not an array' if not $self->_is_type('array', $schema->{oneOf});
   die '"oneOf" array is empty' if not @{$schema->{oneOf}};
 
-  my $valid = 0;
-  foreach my $subschema (@{$schema->{oneOf}}) {
-    ++$valid if $self->_eval($data, $subschema, $state);
-    return 0 if $valid > 1;
+  my (@valid, @errors);
+  foreach my $idx (0 .. $#{$schema->{oneOf}}) {
+    push @valid, $idx if $self->_eval($data, $schema->{oneOf}[$idx],
+      +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/oneOf/'.$idx });
+    last if @valid > 1 and $state->{short_circuit};
   }
 
-  return $valid == 1;
+  return 1 if @valid == 1;
+
+  if (not @valid) {
+    push @{$state->{errors}}, @errors;
+    return E($state, 'no subschemas are valid');
+  }
+  else {
+    return E($state, 'multiple subschemas are valid: '.join(', ', @valid));
+  }
 }
 
 sub _eval_keyword_not {
   my ($self, $data, $schema, $state) = @_;
-  return !$self->_eval($data, $schema->{not}, $state);
+  return 1 if not $self->_eval($data, $schema->{not},
+    +{ %$state, schema_path => $state->{schema_path}.'/not', short_circuit => 1, errors => [] });
+
+  return E($state, 'subschema is valid');
 }
 
 sub _eval_keyword_if {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not exists $schema->{then} and not exists $schema->{else};
-  if ($self->_eval($data, $schema->{if}, $state)) {
+  if ($self->_eval($data, $schema->{if},
+      +{ %$state,
+        schema_path => $state->{schema_path}.'/if',
+        short_circuit => 1, # for now, until annotations are collected
+        errors => [],
+      })) {
     return 1 if not exists $schema->{then};
-    return $self->_eval($data, $schema->{then}, $state);
+    return 1 if $self->_eval($data, $schema->{then},
+      +{ %$state, schema_path => $state->{schema_path}.'/then' });
+    return E({ %$state, keyword => 'then' }, 'subschema is not valid');
   }
   else {
     return 1 if not exists $schema->{else};
-    return $self->_eval($data, $schema->{else}, $state);
+    return 1 if $self->_eval($data, $schema->{else},
+      +{ %$state, schema_path => $state->{schema_path}.'/else' });
+    return E({ %$state, keyword => 'else' }, 'subschema is not valid');
   }
 }
 
@@ -376,11 +468,18 @@ sub _eval_keyword_dependentSchemas {
   die '"dependentSchemas" value is not an object'
     if not $self->_is_type('object', $schema->{dependentSchemas});
 
+  my $valid = 1;
   foreach my $property (keys %{$schema->{dependentSchemas}}) {
-    return 0 if exists $data->{$property}
-      and not $self->_eval($data, $schema->{dependentSchemas}{$property}, $state);
+    next if not exists $data->{$property}
+      or $self->_eval($data, $schema->{dependentSchemas}{$property},
+        +{ %$state, schema_path => $state->{schema_path}.'/dependentSchemas/'.$property });
+
+    $valid = 0;
+    last if $state->{short_circuit};
   }
-  return 1;
+
+  return 1 if $valid;
+  return E($state, 'not all subschemas are valid');
 }
 
 sub _eval_keyword_items {
@@ -389,25 +488,55 @@ sub _eval_keyword_items {
   return 1 if not $self->_is_type('array', $data);
 
   if (ref $schema->{items} ne 'ARRAY') {
-    return ! any { !$self->_eval($data->[$_], $schema->{items}, $state) } 0..$#{$data};
+    my $valid = 1;
+    foreach my $idx (0 .. $#{$data}) {
+      next if $self->_eval($data->[$idx], $schema->{items},
+        +{ %$state,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/items',
+        });
+      $valid = 0;
+      last if $state->{short_circuit};
+    }
+
+    return 1 if $valid;
+    return E($state, 'subschema is not valid against all items');
   }
 
   die '"items" array is empty' if not @{$schema->{items}};
 
   my $last_index = -1;
+  my $valid = 1;
   foreach my $idx (0..$#{$data}) {
     last if $idx > $#{$schema->{items}};
-    return 0 if not $self->_eval($data->[$idx], $schema->{items}[$idx], $state);
+
     $last_index = $idx;
+    next if $self->_eval($data->[$idx], $schema->{items}[$idx],
+      +{ %$state,
+        data_path => $state->{data_path}.'/'.$idx,
+        schema_path => $state->{schema_path}.'/items/'.$idx,
+      },
+    );
+    $valid = 0;
+    last if $state->{short_circuit} and not exists $schema->{additionalItems};
   }
 
-  return 1 if not exists $schema->{additionalItems} or $last_index == $#{$data};
+  E($state, 'a subschema is not valid') if not $valid;
+  return $valid if not $valid or not exists $schema->{additionalItems} or $last_index == $#{$data};
 
   foreach my $idx ($last_index+1 .. $#{$data}) {
-    return 0 if not $self->_eval($data->[$idx], $schema->{additionalItems}, $state);
+    next if $self->_eval($data->[$idx], $schema->{additionalItems},
+      +{ %$state,
+        data_path => $state->{data_path}.'/'.$idx,
+        schema_path => $state->{schema_path}.'/additionalitems',
+      });
+
+    $valid = 0;
+    last if $state->{short_circuit};
   }
 
-  return 1;
+  return 1 if $valid;
+  return E({ %$state, keyword => 'additionalItems' }, 'subschema is not valid');
 }
 
 sub _eval_keyword_unevaluatedItems {
@@ -422,11 +551,36 @@ sub _eval_keyword_contains {
   return 1 if not $self->_is_type('array', $data);
 
   my $num_valid = 0;
+  my @errors;
   foreach my $idx (0.. $#{$data}) {
-    if ($self->_eval($data->[$idx], $schema->{contains}, $state)) {
+    if ($self->_eval($data->[$idx], $schema->{contains},
+        +{ %$state,
+          errors => \@errors,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/contains',
+        })
+    ) {
       ++$num_valid;
-      return 1 if not exists $schema->{maxContains} and not exists $schema->{minContains};
+      last if $state->{short_circuit}
+        and (not exists $schema->{maxContains} or $num_valid > $schema->{maxContains})
+        and ($num_valid >= ($schema->{minContains} // 1));
     }
+  }
+
+  if (exists $schema->{minContains}) {
+    die sprintf('%s is not an integer', $schema->{minContains})
+      if not $self->_is_type('integer', $schema->{minContains});
+    die sprintf('%s is not a non-negative integer', $schema->{minContains})
+      if $schema->{minContains} < 0;
+  }
+
+  my $valid = 1;
+  # note: no items contained is only valid when minContains=0
+  if (not $num_valid and ($schema->{minContains} // 1) > 0) {
+    $valid = 0;
+    push @{$state->{errors}}, @errors;
+    E($state, 'subschema is not valid against any item');
+    return 0 if $state->{short_circuit};
   }
 
   if (exists $schema->{maxContains}) {
@@ -435,20 +589,20 @@ sub _eval_keyword_contains {
     die sprintf('%s is not a non-negative integer', $schema->{maxContains})
       if $schema->{maxContains} < 0;
 
-    return 0 if $num_valid > $schema->{maxContains};
+    if ($num_valid > $schema->{maxContains}) {
+      $valid = 0;
+      E({ %$state, keyword => 'maxContains' }, 'contains too many matching items');
+      return 0 if $state->{short_circuit};
+    }
   }
 
-  if (exists $schema->{minContains}) {
-    die sprintf('%s is not an integer', $schema->{minContains})
-      if not $self->_is_type('integer', $schema->{minContains});
-    die sprintf('%s is not a non-negative integer', $schema->{minContains})
-      if $schema->{minContains} < 0;
-
-    # contains=0 is valid when minContains=0
-    return $num_valid >= $schema->{minContains};
+  if ($num_valid < ($schema->{minContains} // 1)) {
+    $valid = 0;
+    E({ %$state, keyword => 'minContains' }, 'contains too few matching items');
+    return 0 if $state->{short_circuit};
   }
 
-  return $num_valid > 0;
+  return $valid;
 }
 
 sub _eval_keyword_properties {
@@ -457,12 +611,19 @@ sub _eval_keyword_properties {
   return 1 if not $self->_is_type('object', $data);
   die '"properties" value is not an object' if not $self->_is_type('object', $schema->{properties});
 
+  my $valid = 1;
   foreach my $property (keys %{$schema->{properties}}) {
     next if not exists $data->{$property};
-    return 0 if not $self->_eval($data->{$property}, $schema->{properties}{$property}, $state);
+    $valid = 0 if not $self->_eval($data->{$property}, $schema->{properties}{$property},
+        +{ %$state,
+          data_path => $state->{data_path}.'/'.$property,
+          schema_path => $state->{schema_path}.'/properties/'.$property,
+        });
+    last if not $valid and $state->{short_circuit};
   }
 
-  return 1;
+  return 1 if $valid;
+  return E($state, 'not all properties are valid');
 }
 
 sub _eval_keyword_patternProperties {
@@ -472,15 +633,22 @@ sub _eval_keyword_patternProperties {
   die '"patternProperties" value is not an object'
     if not $self->_is_type('object', $schema->{patternProperties});
 
+  my $valid = 1;
   foreach my $property_pattern (keys %{$schema->{patternProperties}}) {
     my @property_matches = grep /$property_pattern/, keys %$data;
-
-    next if not @property_matches;
-    my $subschema = $schema->{patternProperties}{$property_pattern};
-    return 0 if any { !$self->_eval($data->{$_}, $subschema, $state) } @property_matches;
+    foreach my $property (@property_matches) {
+      $valid = 0
+        if not $self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
+          +{ %$state,
+            data_path => $state->{data_path}.'/'.$property,
+            schema_path => $state->{schema_path}.'/patternProperties/'.$property_pattern,
+          });
+      last if not $valid and $state->{short_circuit};
+    }
   }
 
-  return 1;
+  return 1 if $valid;
+  return E($state, 'not all properties are valid');
 }
 
 sub _eval_keyword_additionalProperties {
@@ -488,15 +656,22 @@ sub _eval_keyword_additionalProperties {
 
   return 1 if not $self->_is_type('object', $data);
 
+  my $valid = 1;
   foreach my $property (keys %$data) {
     next if exists $schema->{properties} and exists $schema->{properties}{$property};
     next if exists $schema->{patternProperties}
       and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
 
-    return 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties}, $state);
+    $valid = 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties},
+      +{ %$state,
+        data_path => $state->{data_path}.'/'.$property,
+        schema_path => $state->{schema_path}.'/additionalProperties',
+      });
+    last if not $valid and $state->{short_circuit};
   }
 
-  return 1;
+  return 1 if $valid;
+  return E($state, 'not all properties are valid');
 }
 
 sub _eval_keyword_unevaluatedProperties {
@@ -509,8 +684,19 @@ sub _eval_keyword_propertyNames {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  return 0 if any { !$self->_eval($_, $schema->{propertyNames}, $state) } keys %$data;
-  return 1;
+
+  my $valid = 1;
+  foreach my $property (keys %$data) {
+    $valid = 0 if not $self->_eval($property, $schema->{propertyNames},
+      +{ %$state,
+        data_path => $state->{data_path}.'/'.$property,
+        schema_path => $state->{schema_path}.'/propertyNames',
+      });
+    last if not $valid and $state->{short_circuit};
+  }
+
+  return 1 if $valid;
+  return E($state, 'not all property names are valid');
 }
 
 sub _is_type {
@@ -601,14 +787,35 @@ sub _is_equal {
 }
 
 # checks array elements for uniqueness
+# if second arrayref is provided, it is populated with the indices of unique items
 sub _is_elements_unique {
-  my ($self, $array) = @_;
+  my ($self, $array, $equal_indices) = @_;
   foreach my $idx0 (0..$#{$array}-1) {
     foreach my $idx1 ($idx0+1 .. $#{$array}) {
-      return 0 if $self->_is_equal($array->[$idx0], $array->[$idx1]);
+      if ($self->_is_equal($array->[$idx0], $array->[$idx1])) {
+        push @$equal_indices, $idx0, $idx1 if defined $equal_indices;
+        return 0;
+      }
     }
   }
   return 1;
+}
+
+# shorthand for creating error objects
+use namespace::clean 'E';
+sub E {
+  my ($state, $error_string, @args) = @_;
+
+  my $suffix = $state->{keyword} ? '/'.$state->{keyword} : '';
+  push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
+    instance_location => $state->{data_path},
+    keyword_location => $state->{traversed_schema_path}.$state->{schema_path}.$suffix,
+    !$state->{absolute_schema_path} ? ()
+      : ( absolute_keyword_location => $state->{absolute_schema_path}.$state->{schema_path}.$suffix ),
+    error => @args ? sprintf($error_string, @args) : $error_string,
+  );
+
+  return 0;
 }
 
 1;
@@ -635,7 +842,17 @@ version of the specification.
 
 =head1 CONFIGURATION OPTIONS
 
-None are supported at this time.
+=head2 output_format
+
+One of: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<basic>. Passed to
+L<JSON::Schema::Draft201909::Result/output_format>.
+
+=head2 short_circuit
+
+When true, evaluation will immediately return upon encountering the first validation failure, rather
+than continuing to find all errors.
+
+Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
 =head1 METHODS
 
@@ -651,7 +868,7 @@ L<RFC8259|https://tools.ietf.org/html/rfc8259>. B<The string is expected to be U
 The schema is in the form of a Perl data structure, representing a JSON Schema
 that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
 
-The result is a boolean.
+The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
 
@@ -665,7 +882,7 @@ allows (null, boolean, string, number, object, array).
 The schema is in the form of a Perl data structure, representing a JSON Schema
 that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
 
-The result is a boolean.
+The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
 =head2 CAVEATS
 
@@ -700,7 +917,6 @@ To date, missing components include most of these. More specifically, features t
 =for :list
 * recognition of C<$id>
 * loading multiple schema documents, and registration of a schema against a canonical base URI
-* collection of validation errors (as opposed to a short-circuited true/false result)
 * collection of annotations
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>
 * multiple output formats
