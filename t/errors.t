@@ -624,4 +624,67 @@ subtest 'errors with $refs' => sub {
   );
 };
 
+subtest 'exceptions' => sub {
+  cmp_deeply(
+    $js->evaluate_json_string('[ 1, 2, 3, wargarbl ]', true)->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => re(qr/malformed JSON string/),
+        },
+      ],
+    },
+    'attempting to evaluate a json string returns the exception as an error',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { x => 'hello' },
+      {
+        allOf => [
+          { properties => { x => 1 } },
+          { properties => { x => false } },
+        ],
+      }
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/x',
+          keywordLocation => '/allOf/0/properties/x',
+          error => 'EXCEPTION: unrecognized schema type "number"',
+        },
+      ],
+    },
+    'a subschema of an invalid type returns an error at the right position, and evaluation aborts',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        allOf => [
+          { type => 'whargarbl' },
+          false,
+        ],
+      }
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/type',
+          error => 'EXCEPTION: unrecognized type "whargarbl"',
+        },
+      ],
+    },
+    'invalid argument to "type" returns an error at the right position, and evaluation aborts',
+  );
+};
+
 done_testing;

@@ -43,12 +43,24 @@ has _json_decoder => (
 
 sub evaluate_json_string {
   my ($self, $json_data, $schema) = @_;
-  my ($data, $exception);
-  try { $data = $self->_json_decoder->decode($json_data) }
-  catch { $exception = $@ }
+  my $data;
+  try {
+    $data = $self->_json_decoder->decode($json_data)
+  }
+  catch {
+    return JSON::Schema::Draft201909::Result->new(
+      output_format => $self->output_format,
+      result => 0,
+      errors => [
+        JSON::Schema::Draft201909::Error->new(
+          instance_location => '',
+          keyword_location => '',
+          error => $@,
+        )
+      ],
+    );
+  }
 
-  # TODO: turn exception into an error to be returned
-  return 0 if defined $exception;
   return $self->evaluate($data, $schema);
 }
 
@@ -65,7 +77,14 @@ sub evaluate {
     errors => [],
   };
 
-  my $result = $self->_eval($data, $schema, $state);
+  my $result;
+  try {
+    $result = $self->_eval($data, $schema, $state);
+  }
+  catch {
+    E($state, 'EXCEPTION: '.$@) if $@ ne "ABORT\n";
+    $result = 0;
+  }
 
   return JSON::Schema::Draft201909::Result->new(
     output_format => $self->output_format,
@@ -82,7 +101,7 @@ sub _eval {
   my $schema_type = $self->_get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
 
-  die sprintf('unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
+  abort($state, 'unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
 
   my $result = 1;
 
@@ -103,7 +122,7 @@ sub _eval {
     next if not exists $schema->{$keyword};
 
     my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
-    die 'unsupported keyword "'.$keyword.'"' if not $self->can($method);
+    abort($state, 'unsupported keyword "%s"', $keyword) if not $self->can($method);
     $result = 0 if not $self->$method($data, $schema, +{ %$state, keyword => $keyword });
 
     return 0 if not $result and $state->{short_circuit};
@@ -113,8 +132,9 @@ sub _eval {
 }
 
 sub _eval_keyword_comment {
-  my ($self, $data, $schema) = @_;
-  die '"$comment" value is not a string' if not $self->_is_type('string', $schema->{'$comment'});
+  my ($self, $data, $schema, $state) = @_;
+  abort($state, '"$comment" value is not a string')
+    if not $self->_is_type('string', $schema->{'$comment'});
   # we do nothing with this keyword, including not collecting its value for annotations.
   return 1;
 }
@@ -125,22 +145,23 @@ sub _eval_keyword_defs {
 }
 
 sub _eval_keyword_schema {
-  my ($self, $data, $schema) = @_;
+  my ($self, $data, $schema, $state) = @_;
 
-  die 'custom $schema references are not yet supported'
+  abort($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 }
 
 sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
-  die 'only same-document JSON pointers are supported in $ref' if $schema->{'$ref'} !~ m{^#(/|$)};
+  abort($state, 'only same-document JSON pointers are supported in $ref')
+    if $schema->{'$ref'} !~ m{^#(/|$)};
 
   my $url = Mojo::URL->new($schema->{'$ref'});
   my $fragment = $url->fragment;
 
   my $subschema = $state->{root_schema}->get($fragment);
-  die sprintf('unable to resolve ref "%s"', $schema->{'$ref'}) if not defined $subschema;
+  abort($state, 'unable to resolve ref "%s"', $schema->{'$ref'}) if not defined $subschema;
 
   # for now, the base_uri of the schema is always '' (yes I know this is not an absolute uri)
   # TODO: we need to track the base_uri of the schema resource that we are referencing.
@@ -156,8 +177,11 @@ sub _eval_keyword_ref {
 sub _eval_keyword_type {
   my ($self, $data, $schema, $state) = @_;
 
-  return 1 if any { $self->_is_type($_, $data) }
-    (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type});
+  foreach my $type (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type}) {
+    abort($state, 'unrecognized type "%s"', $type)
+      if not any { $type eq $_ } qw(null boolean object array string number integer);
+    return 1 if $self->_is_type($type, $data);
+  }
 
   return E($state, 'wrong type (expected %s)',
     ref $schema->{type} eq 'ARRAY' ? ('one of '.join(', ', @{$schema->{type}})) : $schema->{type});
@@ -181,9 +205,9 @@ sub _eval_keyword_multipleOf {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  die sprintf('%s is not a number', $schema->{multipleOf})
+  abort($state, '%s is not a number', $schema->{multipleOf})
     if not $self->_is_type('number', $schema->{multipleOf});
-  die sprintf('%s is not a positive number', $schema->{multipleOf}) if $schema->{multipleOf} <= 0;
+  abort($state, '%s is not a positive number', $schema->{multipleOf}) if $schema->{multipleOf} <= 0;
 
   my $quotient = $data / $schema->{multipleOf};
   return 1 if int($quotient) == $quotient;
@@ -194,7 +218,7 @@ sub _eval_keyword_maximum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  die sprintf('%s is not a number', $schema->{maximum})
+  abort($state, '%s is not a number', $schema->{maximum})
     if not $self->_is_type('number', $schema->{maximum});
 
   return 1 if $data <= $schema->{maximum};
@@ -205,7 +229,7 @@ sub _eval_keyword_exclusiveMaximum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  die sprintf('%s is not a number', $schema->{exclusiveMaximum})
+  abort($state, '%s is not a number', $schema->{exclusiveMaximum})
     if not $self->_is_type('number', $schema->{exclusiveMaximum});
 
   return 1 if $data < $schema->{exclusiveMaximum};
@@ -216,7 +240,7 @@ sub _eval_keyword_minimum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  die sprintf('%s is not a number', $schema->{minimum})
+  abort($state, '%s is not a number', $schema->{minimum})
     if not $self->_is_type('number', $schema->{minimum});
 
   return 1 if $data >= $schema->{minimum};
@@ -227,7 +251,7 @@ sub _eval_keyword_exclusiveMinimum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  die sprintf('%s is not a number', $schema->{exclusiveMinimum})
+  abort($state, '%s is not a number', $schema->{exclusiveMinimum})
     if not $self->_is_type('number', $schema->{exclusiveMinimum});
 
   return 1 if $data > $schema->{exclusiveMinimum};
@@ -238,9 +262,9 @@ sub _eval_keyword_maxLength {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
-  die sprintf('%s is not an integer', $schema->{maxLength})
+  abort($state, '%s is not an integer', $schema->{maxLength})
     if not $self->_is_type('integer', $schema->{maxLength});
-  die sprintf('%s is not a non-negative integer', $schema->{maxLength})
+  abort($state, '%s is not a non-negative integer', $schema->{maxLength})
     if $schema->{maxLength} < 0;
 
   return 1 if length($data) <= $schema->{maxLength};
@@ -251,9 +275,9 @@ sub _eval_keyword_minLength {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
-  die sprintf('%s is not an integer', $schema->{minLength})
+  abort($state, '%s is not an integer', $schema->{minLength})
     if not $self->_is_type('integer', $schema->{minLength});
-  die sprintf('%s is not a non-negative integer', $schema->{minLength})
+  abort($state, '%s is not a non-negative integer', $schema->{minLength})
     if $schema->{minLength} < 0;
 
   return 1 if length($data) >= $schema->{minLength};
@@ -273,9 +297,10 @@ sub _eval_keyword_maxItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
-  die sprintf('%s is not an integer', $schema->{maxItems})
+  abort($state, '%s is not an integer', $schema->{maxItems})
     if not $self->_is_type('integer', $schema->{maxItems});
-  die sprintf('%s is not a non-negative integer', $schema->{maxItems}) if $schema->{maxItems} < 0;
+  abort($state, '%s is not a non-negative integer', $schema->{maxItems})
+    if $schema->{maxItems} < 0;
 
   return 1 if @$data <= $schema->{maxItems};
   return E($state, 'more than %d items', $schema->{maxItems});
@@ -285,9 +310,9 @@ sub _eval_keyword_minItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
-  die sprintf('%s is not an integer', $schema->{minItems})
+  abort($state, '%s is not an integer', $schema->{minItems})
     if not $self->_is_type('integer', $schema->{minItems});
-  die sprintf('%s is not a non-negative integer', $schema->{minItems})
+  abort($state, '%s is not a non-negative integer', $schema->{minItems})
     if $schema->{minItems} < 0;
 
   return 1 if @$data >= $schema->{minItems};
@@ -298,7 +323,7 @@ sub _eval_keyword_uniqueItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
-  die sprintf('%s is not a boolean', $schema->{uniqueItems})
+  abort($state, '%s is not a boolean', $schema->{uniqueItems})
     if not $self->_is_type('boolean', $schema->{uniqueItems});
 
   return 1 if not $schema->{uniqueItems};
@@ -310,9 +335,9 @@ sub _eval_keyword_maxProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die sprintf('%s is not an integer', $schema->{maxProperties})
+  abort($state, '%s is not an integer', $schema->{maxProperties})
     if not $self->_is_type('integer', $schema->{maxProperties});
-  die sprintf('%s is not a non-negative integer', $schema->{maxProperties})
+  abort($state, '%s is not a non-negative integer', $schema->{maxProperties})
     if $schema->{maxProperties} < 0;
 
   return 1 if keys %$data <= $schema->{maxProperties};
@@ -323,9 +348,9 @@ sub _eval_keyword_minProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die sprintf('%s is not an integer', $schema->{minProperties})
+  abort($state, '%s is not an integer', $schema->{minProperties})
     if not $self->_is_type('integer', $schema->{minProperties});
-  die sprintf('%s is not a non-negative integer', $schema->{minProperties})
+  abort($state, '%s is not a non-negative integer', $schema->{minProperties})
     if $schema->{minProperties} < 0;
 
   return 1 if keys %$data >= $schema->{minProperties};
@@ -336,8 +361,9 @@ sub _eval_keyword_required {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die '"required" value is not an array' if not $self->_is_type('array', $schema->{required});
-  die '"required" element is not a string'
+  abort($state, '"required" value is not an array')
+    if not $self->_is_type('array', $schema->{required});
+  abort($state, '"required" element is not a string')
     if any { !$self->_is_type('string', $_) } @{$schema->{required}};
 
   my @missing = grep !exists $data->{$_}, @{$schema->{required}};
@@ -349,12 +375,12 @@ sub _eval_keyword_dependentRequired {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die '"dependentRequired" value is not an object'
+  abort($state, '"dependentRequired" value is not an object')
     if not $self->_is_type('object', $schema->{dependentRequired});
-  die '"dependentRequired" property is not an array'
+  abort($state, '"dependentRequired" property is not an array')
     if any { !$self->_is_type('array', $schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
-  die '"dependentRequired" property elements are not unique'
+  abort($state, '"dependentRequired" property elements are not unique')
     if any { !$self->_is_elements_unique($schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
 
@@ -369,8 +395,8 @@ sub _eval_keyword_dependentRequired {
 sub _eval_keyword_allOf {
   my ($self, $data, $schema, $state) = @_;
 
-  die '"allOf" value is not an array' if not $self->_is_type('array', $schema->{allOf});
-  die '"allOf" array is empty' if not @{$schema->{allOf}};
+  abort($state, '"allOf" value is not an array') if not $self->_is_type('array', $schema->{allOf});
+  abort($state, '"allOf" array is empty') if not @{$schema->{allOf}};
 
   my @invalid;
   foreach my $idx (0 .. $#{$schema->{allOf}}) {
@@ -389,8 +415,8 @@ sub _eval_keyword_allOf {
 sub _eval_keyword_anyOf {
   my ($self, $data, $schema, $state) = @_;
 
-  die '"anyOf" value is not an array' if not $self->_is_type('array', $schema->{anyOf});
-  die '"anyOf" array is empty' if not @{$schema->{anyOf}};
+  abort($state, '"anyOf" value is not an array') if not $self->_is_type('array', $schema->{anyOf});
+  abort($state, '"anyOf" array is empty') if not @{$schema->{anyOf}};
 
   my $valid = 0;
   my @errors;
@@ -409,8 +435,8 @@ sub _eval_keyword_anyOf {
 sub _eval_keyword_oneOf {
   my ($self, $data, $schema, $state) = @_;
 
-  die '"oneOf" value is not an array' if not $self->_is_type('array', $schema->{oneOf});
-  die '"oneOf" array is empty' if not @{$schema->{oneOf}};
+  abort($state, '"oneOf" value is not an array') if not $self->_is_type('array', $schema->{oneOf});
+  abort($state, '"oneOf" array is empty') if not @{$schema->{oneOf}};
 
   my (@valid, @errors);
   foreach my $idx (0 .. $#{$schema->{oneOf}}) {
@@ -465,7 +491,7 @@ sub _eval_keyword_dependentSchemas {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die '"dependentSchemas" value is not an object'
+  abort($state, '"dependentSchemas" value is not an object')
     if not $self->_is_type('object', $schema->{dependentSchemas});
 
   my $valid = 1;
@@ -503,7 +529,7 @@ sub _eval_keyword_items {
     return E($state, 'subschema is not valid against all items');
   }
 
-  die '"items" array is empty' if not @{$schema->{items}};
+  abort($state, '"items" array is empty') if not @{$schema->{items}};
 
   my $last_index = -1;
   my $valid = 1;
@@ -542,7 +568,7 @@ sub _eval_keyword_items {
 sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
-  die '"unevaluatedItems" keyword present, but annotation collection is not supported';
+  abort($state, '"unevaluatedItems" keyword present, but annotation collection is not supported');
 }
 
 sub _eval_keyword_contains {
@@ -568,9 +594,9 @@ sub _eval_keyword_contains {
   }
 
   if (exists $schema->{minContains}) {
-    die sprintf('%s is not an integer', $schema->{minContains})
+    abort($state, '%s is not an integer', $schema->{minContains})
       if not $self->_is_type('integer', $schema->{minContains});
-    die sprintf('%s is not a non-negative integer', $schema->{minContains})
+    abort($state, '%s is not a non-negative integer', $schema->{minContains})
       if $schema->{minContains} < 0;
   }
 
@@ -584,9 +610,9 @@ sub _eval_keyword_contains {
   }
 
   if (exists $schema->{maxContains}) {
-    die sprintf('%s is not an integer', $schema->{maxContains})
+    abort($state, '%s is not an integer', $schema->{maxContains})
       if not $self->_is_type('integer', $schema->{maxContains});
-    die sprintf('%s is not a non-negative integer', $schema->{maxContains})
+    abort($state, '%s is not a non-negative integer', $schema->{maxContains})
       if $schema->{maxContains} < 0;
 
     if ($num_valid > $schema->{maxContains}) {
@@ -609,7 +635,8 @@ sub _eval_keyword_properties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die '"properties" value is not an object' if not $self->_is_type('object', $schema->{properties});
+  abort($state, '"properties" value is not an object')
+    if not $self->_is_type('object', $schema->{properties});
 
   my $valid = 1;
   foreach my $property (keys %{$schema->{properties}}) {
@@ -630,7 +657,7 @@ sub _eval_keyword_patternProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  die '"patternProperties" value is not an object'
+  abort($state, '"patternProperties" value is not an object')
     if not $self->_is_type('object', $schema->{patternProperties});
 
   my $valid = 1;
@@ -677,7 +704,7 @@ sub _eval_keyword_additionalProperties {
 sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
 
-  die '"unevaluatedProperties" keyword present, but annotation collection is not supported';
+  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is not supported');
 }
 
 sub _eval_keyword_propertyNames {
@@ -816,6 +843,13 @@ sub E {
   );
 
   return 0;
+}
+
+# creates an error object, but also aborts evaluation immediately
+use namespace::clean 'abort';
+sub abort {
+  E($_[0], 'EXCEPTION: '.$_[1], @_[2..$#_]);
+  die "ABORT\n";
 }
 
 1;

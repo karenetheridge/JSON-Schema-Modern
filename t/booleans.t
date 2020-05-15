@@ -5,6 +5,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Fatal;
+use Test::Deep;
 use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
@@ -31,10 +32,19 @@ foreach my $test (@tests) {
   );
 }
 
-like(
-  exception { $js->evaluate('hello', 'foo') },
-  qr/unrecognized schema type "string"/,
-  'got exception with invalid schema type',
+cmp_deeply(
+  $js->evaluate('hello', 'foo')->TO_JSON,
+  {
+    valid => bool(0),
+    errors => [
+      {
+        instanceLocation => '',
+        keywordLocation => '',
+        error => 'EXCEPTION: unrecognized schema type "string"',
+      },
+    ],
+  },
+  'invalid schema type results in error',
 );
 
 done_testing;
