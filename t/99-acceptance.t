@@ -33,6 +33,7 @@ $accepter->acceptance(
     # for now, result is already a boolean, so we just return that.
     $result;
   },
+  @ARGV ? (tests => { file => \@ARGV }) : (),
   # TODO: dump our errors on unexpected failure.
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
