@@ -190,15 +190,20 @@ sub _eval_keyword_type {
 sub _eval_keyword_enum {
   my ($self, $data, $schema, $state) = @_;
 
-  return 1 if any { $self->_is_equal($data, $_) } @{$schema->{enum}};
-  return E($state, 'value does not match');
+  my @s; my $idx = 0;
+  return 1 if any { $self->_is_equal($data, $_, $s[$idx++] = {}) } @{$schema->{enum}};
+
+  return E($state, 'value does not match'
+    .(!(grep $_->{path}, @s) ? ''
+      : ' (differences start '.join(', ', map 'from #'.$_.' at "'.$s[$_]->{path}.'"', 0..$#s).')'));
 }
 
 sub _eval_keyword_const {
   my ($self, $data, $schema, $state) = @_;
 
-  return 1 if $self->_is_equal($data, $schema->{const});
-  return E($state, 'value does not match');
+  return 1 if $self->_is_equal($data, $schema->{const}, my $s = {});
+  return E($state, 'value does not match'
+    .($s->{path} ? ' (differences start at "'.$s->{path}.'")' : ''));
 }
 
 sub _eval_keyword_multipleOf {
@@ -785,7 +790,8 @@ sub _get_type {
 # compares two arbitrary data payloads for equality, as per
 # https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.4.2.3
 sub _is_equal {
-  my ($self, $x, $y) = @_;
+  my ($self, $x, $y, $state) = @_;
+  $state->{path} //= '';
 
   my @types = map $self->_get_type($_), $x, $y;
   return 0 if $types[0] ne $types[1];
@@ -793,11 +799,13 @@ sub _is_equal {
   return $x eq $y if $types[0] eq 'string';
   return $x == $y if $types[0] eq 'boolean' or $types[0] eq 'number';
 
+  my $path = $state->{path};
   if ($types[0] eq 'object') {
     return 0 if keys %$x != keys %$y;
     return 0 if not $self->_is_equal([ sort keys %$x ], [ sort keys %$y ]);
     foreach my $property (keys %$x) {
-      return 0 if not $self->_is_equal($x->{$property}, $y->{$property});
+      $state->{path} = $path.'/'.$property;
+      return 0 if not $self->_is_equal($x->{$property}, $y->{$property}, $state);
     }
     return 1;
   }
@@ -805,7 +813,8 @@ sub _is_equal {
   if ($types[0] eq 'array') {
     return 0 if @$x != @$y;
     foreach my $idx (0..$#{$x}) {
-      return 0 if not $self->_is_equal($x->[$idx], $y->[$idx]);
+      $state->{path} = $path.'/'.$idx;
+      return 0 if not $self->_is_equal($x->[$idx], $y->[$idx], $state);
     }
     return 1;
   }

@@ -624,6 +624,50 @@ subtest 'errors with $refs' => sub {
   );
 };
 
+subtest 'const and enum' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      { foo => { a => { b => { c => { d => 1 } } } } },
+      {
+        properties => {
+          foo => {
+            allOf => [
+              { const => { a => { b => { c => { d => 2 } } } } },
+              { enum => [ 0, 'whargarbl', { a => { b => { c => { d => 2 } } } } ] },
+            ],
+          }
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/allOf/0/const',
+          error => 'value does not match (differences start at "/a/b/c/d")',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/allOf/1/enum',
+          error => 'value does not match (differences start from #0 at "", from #1 at "", from #2 at "/a/b/c/d")',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/allOf',
+          error => 'subschemas 0, 1 are not valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'got details about object differences in errors from const and enum',
+  );
+};
+
 subtest 'exceptions' => sub {
   cmp_deeply(
     $js->evaluate_json_string('[ 1, 2, 3, wargarbl ]', true)->TO_JSON,
