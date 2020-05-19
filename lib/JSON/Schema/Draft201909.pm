@@ -37,12 +37,10 @@ sub evaluate_json_string {
 sub evaluate {
   my ($self, $data, $schema) = @_;
 
-  if (is_bool($schema)) {
-    return $schema;
-  }
+  my $schema_type = $self->_get_type($schema);
+  return $schema if $schema_type eq 'boolean';
 
-  # TODO: die 'unrecognized schema format ', ref $schema
-  return 0 if ref $schema ne 'HASH';
+  die sprintf('unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
 
   return 1;
 }

@@ -17,7 +17,6 @@ my @tests = (
   { schema => false, result => false },
   { schema => true, result => true },
   { schema => {}, result => true },
-  { schema => 'foo', result => false },
 );
 
 foreach my $test (@tests) {
@@ -31,5 +30,11 @@ foreach my $test (@tests) {
     'no exceptions in evaluate',
   );
 }
+
+like(
+  exception { $js->evaluate('hello', 'foo') },
+  qr/unrecognized schema type "string"/,
+  'got exception with invalid schema type',
+);
 
 done_testing;
