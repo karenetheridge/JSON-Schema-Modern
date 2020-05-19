@@ -64,7 +64,8 @@ $accepter->acceptance(
     note $encoder->encode($result_short) if $result xor $result_short;
 
     die 'results inconsistent between short_circuit = false and true'
-      if $result xor $result_short;
+      if ($result xor $result_short)
+        and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
     # if any errors contain an exception, propage at that upwards as an exception so we can be sure
     # to count that as a failure.
