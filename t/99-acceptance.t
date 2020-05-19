@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 no if "$]" >= 5.031009, feature => 'indirect';
+use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use List::Util 1.50 'head';
@@ -24,17 +25,25 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
   verbose => 1,
 );
 my $js = JSON::Schema::Draft201909->new;
+my $js_short_circuit = JSON::Schema::Draft201909->new(short_circuit => 1);
+
+my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
+$encoder->indent_length(2) if $encoder->can('indent_length');
 
 $accepter->acceptance(
   validate_data => sub {
     my ($schema, $instance_data) = @_;
     my $result = $js->evaluate($instance_data, $schema);
+    my $result_short = $js_short_circuit->evaluate($instance_data, $schema);
 
-    # for now, result is already a boolean, so we just return that.
+    note $encoder->encode($result);
+
+    die 'results inconsistent between short_circuit = false and true'
+      if $result xor $result_short;
+
     $result;
   },
   @ARGV ? (tests => { file => \@ARGV }) : (),
-  # TODO: dump our errors on unexpected failure.
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
         'anchor.json',                # $anchor, $ref, $id

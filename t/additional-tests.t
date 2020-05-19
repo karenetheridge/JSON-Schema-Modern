@@ -9,16 +9,19 @@ use Test::JSON::Schema::Acceptance 0.993;
 use JSON::Schema::Draft201909;
 
 my $accepter = Test::JSON::Schema::Acceptance->new(test_dir => 't/additional-tests', verbose => 1);
-my $js = JSON::Schema::Draft201909->new;
 
 plan skip_all => 'no tests in this directory to test' if not @{$accepter->_test_data};
+
+my $js = JSON::Schema::Draft201909->new;
+my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
+$encoder->indent_length(2) if $encoder->can('indent_length');
 
 $accepter->acceptance(
   validate_data => sub {
     my ($schema, $instance_data) = @_;
     my $result = $js->evaluate($instance_data, $schema);
 
-    # for now, result is already a boolean, so we just return that.
+    note $encoder->encode($result);
     $result;
   },
 );
