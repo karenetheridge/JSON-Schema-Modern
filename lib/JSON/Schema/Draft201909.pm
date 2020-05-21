@@ -41,6 +41,32 @@ has _json_decoder => (
   default => sub { JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1) },
 );
 
+add schema_index => (
+  is => 'bare',
+  # ... this is a dict of canonical uris (in string form) => ::Documents
+
+);
+
+sub add_document {
+  my ($self, $document) = @_;
+
+  # XXX document must be a ::Document
+  # add to our attribute list
+  # and then we ask for the ids and add them to our index
+}
+
+sub add_schema {
+  my $self = shift;
+
+  # if one arg, it is $schema
+  # if two args, it is $id => $schema
+
+  # construct a ::Document with these args
+  # which will traverse the schema looking for ids
+  # and then we ask for the ids and add them to our index
+
+}
+
 sub evaluate_json_string {
   my ($self, $json_data, $schema) = @_;
   my $data;
@@ -66,6 +92,21 @@ sub evaluate_json_string {
 
 sub evaluate {
   my ($self, $data, $schema) = @_;
+
+  # if $schema is data, turn it into a document object first:
+  #   ->new(data => ...)  and then BUILD will figure out the URI
+  # if $schema is a uri,
+  #   - look in schema index to find it
+  #   - if not found, check our cache of official specs
+  #   - if not found, die (for now)
+  #  ** what if we are passed a uri with fragment? this should be fair game.
+  #       we get the document first, then seek to the proper object node.
+  #       store the path to get to it in $state.
+  # if $schema is a document object, we are good to go. start at the root.
+
+  # once we have the document object and its contained data, we can proceed:
+  # - save the main document in state.
+  # - ...
 
   my $state = {
     root_schema => Mojo::JSON::Pointer->new($schema),
