@@ -18,6 +18,9 @@ my $js_short_circuit = JSON::Schema::Draft201909->new(short_circuit => 1);
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
 $encoder->indent_length(2) if $encoder->can('indent_length');
 
+#use JSON::Validator;
+#my $jv = JSON::Validator->new(version => 7);
+
 $accepter->acceptance(
   validate_data => sub {
     my ($schema, $instance_data) = @_;
@@ -30,6 +33,10 @@ $accepter->acceptance(
       if $result xor $result_short;
 
     $result;
+
+    #my @errors = $jv->validate($instance_data, $schema);
+    #note $_ foreach @errors;
+    #return !@errors;
   },
 );
 

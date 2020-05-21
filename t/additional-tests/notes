@@ -1,0 +1,125 @@
+use strict;
+use warnings;
+
+# data format:
+# {
+#   $type => { $keyword => { schema => $schema_value, data => [ $failing, $passing ] } },
+#   ...,
+# }
+
+my $data = {
+  number => {
+    multipleOf => { schema => 2, data => [ 1, 2 ] },
+    maximum => { schema => 2, data => [ 3, 2 ] },
+    exclusiveMaximum => { schema => 2, data => [ 2, 1 ] },
+    minimum => { schema => 2, data => [ 1, 2 ] },
+    exclusiveMinimum => { schema => 2, data => [ 2, 3 ] },
+  },
+  string => {
+    maxLength => { schema => 2, data => [ "hello", "hi" ] },
+    minLength => { schema => 2, data => [ "x", "hi" ] },
+    pattern => { schema => "hi", data => [ "hello", "hihi" ] },
+  },
+  array => {
+    maxItems => { schema => 1, data => [ [1,2], [1] ] },
+    minItems => { schema => 2, data => [ [1], [1,2] ] },
+    uniqueItems => { schema => \1, data => [ [ 1, 1 ], [1] ] },
+    items => { schema => \0, data => [ [1], [] ] },
+    contains => { schema => \1, data => [ [], [1] ] },
+  },
+  object => {
+    maxProperties => { schema => 1, data => [ {x=>1,y=>2}, { x=>1 } ] },
+    minProperties => { schema => 1, data => [ {}, { x=>1 } ] },
+    required => { schema => ['x'], data => [ {}, {x=>1} ] },
+    dependentRequired => { schema => {x=>['y']}, data => [ {x=>1}, {x=>1,y=>2} ] },
+    dependentSchemas => { schema => {x=>\0}, data => [ {x=>1}, {} ] },
+    properties => { schema => {x=>\0}, data => [ {x=>1}, {} ] },
+    patternProperties => { schema => {hi=>\0}, data => [ {hihi=>1}, {hello=>1} ] },
+    additionalProperties => { schema => \0, data => [ {x=>1}, {} ] },
+    propertyNames => { schema => \0, data => [ {x=>1}, {} ] },
+  },
+};
+
+my @tests;
+
+foreach my $type1 (sort keys %$data) {
+  foreach my $type2 (sort keys %$data) {
+    next if ($type1 cmp $type2) < 1;
+
+    foreach my $keyword1 (sort keys %{$data->{$type1}}) {
+      foreach my $keyword2 (sort keys %{$data->{$type2}}) {
+        push @tests, {
+          description => "$keyword1 + $keyword2",
+          schema => {
+            $keyword1 => $data->{$type1}{$keyword1}{schema},
+            $keyword2 => $data->{$type2}{$keyword2}{schema},
+          },
+          tests => [
+            map {
+              my $keyword = $_;
+              my $type = $keyword eq $keyword1 ? $type1 : $type2;
+              map {
+                my $valid = $_;
+                +{
+                  description => "$keyword, ".($valid?'':'in').'valid',
+                  data => $data->{$type}{$keyword}{data}[$valid],
+                  valid => $valid ? \1 : \0,
+                }
+              } 0, 1
+            } $keyword1, $keyword2
+          ],
+        },
+      }
+    }
+  }
+}
+
+use JSON::MaybeXS;
+print JSON::MaybeXS->new(canonical => 1, pretty => 1, indent_length => 4)->encode(\@tests);
+
+
+__END__
+we really need to do a cross of all keywords (as long as they are indicating
+different instance types),
+with one passing and one failing test in each combination,
+for each instance type that they could correspond to. (that's four tests for each)
+
+we should be able to generate much of the data for this programmatically.
+write some passing and failing schemas, and passing and failing data, for each
+combination of keywords,
+and then generate the json for all of it..
+and then we can include the code for this right in the commit that adds it.
+(don't forget to copy all these to previous drafts as well, setting validity
+as appropriate.)
+
+keywords that make implications about data type:
+
+multipleOf
+maximum
+exclusiveMaximum
+minimum
+exclusiveMinimum
+
+maxLength
+minLength
+pattern
+
+maxItems
+minItems
+uniqueItems
+
+maxProperties
+minProperties
+required
+dependentRequired
+
+dependentSchemas
+items
+unevaluatedItems
+contains
+properties
+patternProperties
+additionalProperties
+unevaluatedProperties
+propertyNames
+
