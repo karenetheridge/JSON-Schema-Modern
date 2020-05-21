@@ -1,28 +1,197 @@
 =pod
 
+=encoding UTF-8
+
+=for stopwords schema subschema metaschema validator evaluator
+
+=head1 NAME
+
+JSON::Schema::Draft201909 - Validate data against a schema
+
+=head1 VERSION
+
+version 0.001
+
 =head1 SYNOPSIS
 
-    use JSON::Schema::Draft201909;
+  use JSON::Schema::Draft201909;
 
-    ...
+  $js = JSON::Schema::Draft2019->new;
+  $result = $js->evaluate($instance_data, $schema_data);
 
 =head1 DESCRIPTION
 
-...
+This module aims to be a fully-compliant L<JSON Schema|https://json-schema.org/> evaluator and
+validator, targeting the currently-latest
+L<Draft 2019-09|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>
+version of the specification.
 
-=head1 FUNCTIONS/METHODS
+=head1 CONFIGURATION OPTIONS
 
-=head2 C<foo>
+=head2 output_format
 
-...
+One of: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<basic>. Passed to
+L<JSON::Schema::Draft201909::Result/output_format>.
 
-=head1 ACKNOWLEDGEMENTS
+=head2 short_circuit
 
-...
+When true, evaluation will immediately return upon encountering the first validation failure, rather
+than continuing to find all errors.
+
+Defaults to true when C<output_format> is C<flag>, and false otherwise.
+
+=head1 METHODS
+
+=head2 evaluate_json_string
+
+  $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
+
+Evaluates the provided instance data against the known schema document.
+
+The data is in the form of a JSON-encoded string (in accordance with
+L<RFC8259|https://tools.ietf.org/html/rfc8259>. B<The string is expected to be UTF-8 encoded.>
+
+The schema is in the form of a Perl data structure, representing a JSON Schema
+that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+
+The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
+
+=head2 evaluate
+
+  $result = $js->evaluate($instance_data, $schema_data);
+
+Evaluates the provided instance data against the known schema document.
+
+The data is in the form of an unblessed nested Perl data structure representing any type that JSON
+allows (null, boolean, string, number, object, array).
+
+The schema is in the form of a Perl data structure, representing a JSON Schema
+that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+
+The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
+
+=head2 CAVEATS
+
+=head3 TYPES
+
+Perl is a more loosely-typed language than JSON. This module delves into a value's internal
+representation in an attempt to derive the true "intended" type of the value. However, if a value is
+used in another context (for example, a numeric value is concatenated into a string, or a numeric
+string is used in an arithmetic operation), additional flags can be added onto the variable causing
+it to resemble the other type. This should not be an issue if data validation is occurring
+immediately after decoding a JSON payload, or if the JSON string itself is passed to this module.
+
+For more information, see L<Cpanel::JSON::XS/MAPPING>.
+
+=head2 LIMITATIONS
+
+Until version 1.000 is released, this implementation is not fully specification-compliant.
+
+The minimum extensible JSON Schema implementation requirements involve:
+
+=over 4
+
+=item *
+
+identifying, organizing, and linking schemas (with keywords such as C<$ref>, C<$id>, C<$schema>, C<$anchor>, C<$defs>)
+
+=item *
+
+providing an interface to evaluate assertions
+
+=item *
+
+providing an interface to collect annotations
+
+=item *
+
+applying subschemas to instances and combining assertion results and annotation data accordingly.
+
+=item *
+
+support for all vocabularies required by the Draft 2019-09 metaschema, L<https://json-schema.org/draft/2019-09/schema>
+
+=back
+
+To date, missing components include most of these. More specifically, features to be added include:
+
+=over 4
+
+=item *
+
+recognition of C<$id>
+
+=item *
+
+loading multiple schema documents, and registration of a schema against a canonical base URI
+
+=item *
+
+collection of annotations (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>
+
+=item *
+
+multiple output formats (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
+
+=item *
+
+loading schema documents from disk
+
+=item *
+
+loading schema documents from the network
+
+=item *
+
+loading schema documents from a local web application (e.g. L<Mojolicious>)
+
+=item *
+
+use of C<$recursiveRef> and C<$recursiveAnchor>
+
+=item *
+
+use of plain-name fragments with C<$anchor>
+
+=back
 
 =head1 SEE ALSO
 
-=for :list
-* L<foo>
+=over 4
+
+=item *
+
+L<https://json-schema.org/>
+
+=item *
+
+L<RFC8259|https://tools.ietf.org/html/rfc8259>
+
+=item *
+
+L<Test::JSON::Schema::Acceptance>
+
+=item *
+
+L<JSON::Validator>
+
+=back
+
+=head1 SUPPORT
+
+Bugs may be submitted through L<https://github.com/karenetheridge/JSON-Schema-Draft201909/issues>.
+
+I am also usually active on irc, as 'ether' at C<irc.perl.org> and C<irc.freenode.org>.
+
+=head1 AUTHOR
+
+Karen Etheridge <ether@cpan.org>
+
+=head1 COPYRIGHT AND LICENCE
+
+This software is copyright (c) 2020 by Karen Etheridge.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
