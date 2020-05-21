@@ -53,7 +53,7 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        'anchor.json',                # $anchor, $ref, $id
+        'anchor.json',                # local $anchor, $ref, $id
         'defs.json',                  # $ref to (cached?) metaschema
         'refRemote.json',             # $ref, $id, loading external file
         'unevaluatedItems.json',
@@ -83,8 +83,8 @@ $accepter->acceptance(
         ),
       ] },
     { file => 'ref.json', group_description => [
-        'remote ref, containing refs itself',
-        'Recursive references between schemas',
+        'remote ref, containing refs itself',               # cached metaschema
+        'Recursive references between schemas',             # $id in local schemas
         'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
       ] },
   ] ),
