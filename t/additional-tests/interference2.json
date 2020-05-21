@@ -8,24 +8,24 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -39,24 +39,24 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -70,12 +70,12 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             },
             {
@@ -83,14 +83,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -104,19 +104,19 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -124,7 +124,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -138,12 +138,12 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             },
             {
@@ -151,14 +151,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -172,24 +172,24 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -203,24 +203,24 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -234,12 +234,12 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             },
             {
@@ -247,14 +247,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -268,19 +268,19 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -288,7 +288,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -302,12 +302,12 @@
         "tests" : [
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             },
             {
@@ -315,14 +315,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -336,24 +336,24 @@
         "tests" : [
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -367,24 +367,24 @@
         "tests" : [
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -398,12 +398,12 @@
         "tests" : [
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             },
             {
@@ -411,14 +411,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -432,19 +432,19 @@
         "tests" : [
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -452,7 +452,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -466,12 +466,12 @@
         "tests" : [
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             },
             {
@@ -479,14 +479,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -500,24 +500,24 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -531,24 +531,24 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -562,12 +562,12 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             },
             {
@@ -575,14 +575,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -596,19 +596,19 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -616,7 +616,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -630,12 +630,12 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             },
             {
@@ -643,14 +643,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -664,24 +664,24 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -695,24 +695,24 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -726,12 +726,12 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             },
             {
@@ -739,14 +739,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -760,19 +760,19 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -780,7 +780,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -794,12 +794,12 @@
         "tests" : [
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             },
             {
@@ -807,14 +807,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -830,24 +830,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -863,24 +863,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -896,12 +896,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
@@ -909,14 +909,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -932,19 +932,19 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -952,7 +952,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -968,12 +968,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
@@ -981,14 +981,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -1008,7 +1008,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -1016,19 +1016,19 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -1048,7 +1048,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -1056,19 +1056,19 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -1088,7 +1088,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -1096,7 +1096,7 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
@@ -1104,14 +1104,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -1131,7 +1131,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -1139,14 +1139,14 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -1154,7 +1154,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -1174,7 +1174,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -1182,7 +1182,7 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
@@ -1190,14 +1190,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -1215,24 +1215,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -1250,24 +1250,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -1285,12 +1285,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
@@ -1298,14 +1298,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -1323,19 +1323,19 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -1343,7 +1343,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -1361,12 +1361,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
@@ -1374,14 +1374,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -1398,26 +1398,26 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -1434,26 +1434,26 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -1470,14 +1470,14 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
@@ -1485,14 +1485,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -1509,21 +1509,21 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -1531,7 +1531,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -1548,14 +1548,14 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
@@ -1563,14 +1563,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -1584,26 +1584,26 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -1617,26 +1617,26 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -1650,14 +1650,14 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
@@ -1665,14 +1665,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -1686,21 +1686,21 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -1708,7 +1708,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -1722,14 +1722,14 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
@@ -1737,14 +1737,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -1762,26 +1762,26 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -1799,26 +1799,26 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -1836,14 +1836,14 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
@@ -1851,14 +1851,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -1876,21 +1876,21 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -1898,7 +1898,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -1916,14 +1916,14 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
@@ -1931,14 +1931,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -1956,24 +1956,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -1991,24 +1991,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -2026,12 +2026,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
@@ -2039,14 +2039,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -2064,19 +2064,19 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -2084,7 +2084,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -2102,12 +2102,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
@@ -2115,14 +2115,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -2138,24 +2138,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -2171,24 +2171,24 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -2204,12 +2204,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
@@ -2217,14 +2217,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -2240,19 +2240,19 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -2260,7 +2260,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -2276,12 +2276,12 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
@@ -2289,14 +2289,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -2312,26 +2312,26 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -2347,26 +2347,26 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -2382,14 +2382,14 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
@@ -2397,14 +2397,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -2420,21 +2420,21 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -2442,7 +2442,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -2458,14 +2458,14 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
@@ -2473,14 +2473,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -2496,22 +2496,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -2527,22 +2527,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -2558,22 +2558,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -2589,22 +2589,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -2620,22 +2620,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -2655,7 +2655,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -2663,17 +2663,17 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -2693,7 +2693,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -2701,17 +2701,17 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -2731,7 +2731,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -2739,17 +2739,17 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -2769,7 +2769,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -2777,17 +2777,17 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -2807,7 +2807,7 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -2815,17 +2815,17 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -2843,22 +2843,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -2876,22 +2876,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -2909,22 +2909,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -2942,22 +2942,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -2975,22 +2975,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3007,24 +3007,24 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -3041,24 +3041,24 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -3075,24 +3075,24 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -3109,24 +3109,24 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -3143,24 +3143,24 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3174,24 +3174,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -3205,24 +3205,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -3236,24 +3236,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -3267,24 +3267,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -3298,24 +3298,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3333,24 +3333,24 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -3368,24 +3368,24 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -3403,24 +3403,24 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -3438,24 +3438,24 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -3473,24 +3473,24 @@
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3508,22 +3508,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -3541,22 +3541,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -3574,22 +3574,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -3607,22 +3607,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -3640,22 +3640,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3671,22 +3671,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -3702,22 +3702,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -3733,22 +3733,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -3764,22 +3764,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -3795,22 +3795,22 @@
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3826,24 +3826,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -3859,24 +3859,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -3892,24 +3892,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -3925,24 +3925,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -3958,24 +3958,24 @@
         "tests" : [
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -3989,24 +3989,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -4020,24 +4020,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -4051,12 +4051,12 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
@@ -4064,14 +4064,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -4085,19 +4085,19 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -4105,7 +4105,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -4119,12 +4119,12 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
@@ -4132,14 +4132,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -4153,24 +4153,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -4184,24 +4184,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -4215,12 +4215,12 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
@@ -4228,14 +4228,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -4249,19 +4249,19 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -4269,7 +4269,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -4283,12 +4283,12 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
@@ -4296,14 +4296,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -4317,24 +4317,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : [],
-                "description" : "contains, invalid",
+                "description" : "array, contains invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "contains, valid",
+                "description" : "array, contains valid",
                 "valid" : true
             }
         ]
@@ -4348,24 +4348,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "items, invalid",
+                "description" : "array, items invalid",
                 "valid" : false
             },
             {
                 "data" : [],
-                "description" : "items, valid",
+                "description" : "array, items valid",
                 "valid" : true
             }
         ]
@@ -4379,12 +4379,12 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
@@ -4392,14 +4392,14 @@
                     1,
                     2
                 ],
-                "description" : "maxItems, invalid",
+                "description" : "array, maxItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "maxItems, valid",
+                "description" : "array, maxItems valid",
                 "valid" : true
             }
         ]
@@ -4413,19 +4413,19 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "minItems, invalid",
+                "description" : "array, minItems invalid",
                 "valid" : false
             },
             {
@@ -4433,7 +4433,7 @@
                     1,
                     2
                 ],
-                "description" : "minItems, valid",
+                "description" : "array, minItems valid",
                 "valid" : true
             }
         ]
@@ -4447,12 +4447,12 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
@@ -4460,14 +4460,14 @@
                     1,
                     1
                 ],
-                "description" : "uniqueItems, invalid",
+                "description" : "array, uniqueItems invalid",
                 "valid" : false
             },
             {
                 "data" : [
                     1
                 ],
-                "description" : "uniqueItems, valid",
+                "description" : "array, uniqueItems valid",
                 "valid" : true
             }
         ]
@@ -4481,22 +4481,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -4510,22 +4510,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -4539,22 +4539,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -4568,22 +4568,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -4597,22 +4597,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -4626,22 +4626,22 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -4655,22 +4655,22 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -4684,22 +4684,22 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -4713,22 +4713,22 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -4742,22 +4742,22 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -4771,22 +4771,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMaximum, invalid",
+                "description" : "number, exclusiveMaximum invalid",
                 "valid" : false
             },
             {
                 "data" : 1,
-                "description" : "exclusiveMaximum, valid",
+                "description" : "number, exclusiveMaximum valid",
                 "valid" : true
             }
         ]
@@ -4800,22 +4800,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : 2,
-                "description" : "exclusiveMinimum, invalid",
+                "description" : "number, exclusiveMinimum invalid",
                 "valid" : false
             },
             {
                 "data" : 3,
-                "description" : "exclusiveMinimum, valid",
+                "description" : "number, exclusiveMinimum valid",
                 "valid" : true
             }
         ]
@@ -4829,22 +4829,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : 3,
-                "description" : "maximum, invalid",
+                "description" : "number, maximum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "maximum, valid",
+                "description" : "number, maximum valid",
                 "valid" : true
             }
         ]
@@ -4858,22 +4858,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "minimum, invalid",
+                "description" : "number, minimum invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "minimum, valid",
+                "description" : "number, minimum valid",
                 "valid" : true
             }
         ]
@@ -4887,22 +4887,22 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : 1,
-                "description" : "multipleOf, invalid",
+                "description" : "number, multipleOf invalid",
                 "valid" : false
             },
             {
                 "data" : 2,
-                "description" : "multipleOf, valid",
+                "description" : "number, multipleOf valid",
                 "valid" : true
             }
         ]
@@ -4916,24 +4916,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             }
         ]
@@ -4951,19 +4951,19 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -4971,7 +4971,7 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             }
         ]
@@ -4987,24 +4987,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             }
         ]
@@ -5018,12 +5018,12 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
@@ -5031,14 +5031,14 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             }
         ]
@@ -5052,24 +5052,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             }
         ]
@@ -5085,26 +5085,26 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             }
         ]
@@ -5120,24 +5120,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             }
         ]
@@ -5151,24 +5151,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             }
         ]
@@ -5184,24 +5184,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "maxLength, invalid",
+                "description" : "string, maxLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "maxLength, valid",
+                "description" : "string, maxLength valid",
                 "valid" : true
             },
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             }
         ]
@@ -5215,24 +5215,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             }
         ]
@@ -5250,19 +5250,19 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -5270,7 +5270,7 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             }
         ]
@@ -5286,24 +5286,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             }
         ]
@@ -5317,12 +5317,12 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
@@ -5330,14 +5330,14 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             }
         ]
@@ -5351,24 +5351,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             }
         ]
@@ -5384,26 +5384,26 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             }
         ]
@@ -5419,24 +5419,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             }
         ]
@@ -5450,24 +5450,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             }
         ]
@@ -5483,24 +5483,24 @@
         "tests" : [
             {
                 "data" : "x",
-                "description" : "minLength, invalid",
+                "description" : "string, minLength invalid",
                 "valid" : false
             },
             {
                 "data" : "hi",
-                "description" : "minLength, valid",
+                "description" : "string, minLength valid",
                 "valid" : true
             },
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             }
         ]
@@ -5514,24 +5514,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "additionalProperties, invalid",
+                "description" : "object, additionalProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "additionalProperties, valid",
+                "description" : "object, additionalProperties valid",
                 "valid" : true
             }
         ]
@@ -5549,19 +5549,19 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentRequired, invalid",
+                "description" : "object, dependentRequired invalid",
                 "valid" : false
             },
             {
@@ -5569,7 +5569,7 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "dependentRequired, valid",
+                "description" : "object, dependentRequired valid",
                 "valid" : true
             }
         ]
@@ -5585,24 +5585,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "dependentSchemas, invalid",
+                "description" : "object, dependentSchemas invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "dependentSchemas, valid",
+                "description" : "object, dependentSchemas valid",
                 "valid" : true
             }
         ]
@@ -5616,12 +5616,12 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
@@ -5629,14 +5629,14 @@
                     "x" : 1,
                     "y" : 2
                 },
-                "description" : "maxProperties, invalid",
+                "description" : "object, maxProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "maxProperties, valid",
+                "description" : "object, maxProperties valid",
                 "valid" : true
             }
         ]
@@ -5650,24 +5650,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {},
-                "description" : "minProperties, invalid",
+                "description" : "object, minProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "minProperties, valid",
+                "description" : "object, minProperties valid",
                 "valid" : true
             }
         ]
@@ -5683,26 +5683,26 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "hihi" : 1
                 },
-                "description" : "patternProperties, invalid",
+                "description" : "object, patternProperties invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "hello" : 1
                 },
-                "description" : "patternProperties, valid",
+                "description" : "object, patternProperties valid",
                 "valid" : true
             }
         ]
@@ -5718,24 +5718,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "properties, invalid",
+                "description" : "object, properties invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "properties, valid",
+                "description" : "object, properties valid",
                 "valid" : true
             }
         ]
@@ -5749,24 +5749,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "propertyNames, invalid",
+                "description" : "object, propertyNames invalid",
                 "valid" : false
             },
             {
                 "data" : {},
-                "description" : "propertyNames, valid",
+                "description" : "object, propertyNames valid",
                 "valid" : true
             }
         ]
@@ -5782,24 +5782,24 @@
         "tests" : [
             {
                 "data" : "hello",
-                "description" : "pattern, invalid",
+                "description" : "string, pattern invalid",
                 "valid" : false
             },
             {
                 "data" : "hihi",
-                "description" : "pattern, valid",
+                "description" : "string, pattern valid",
                 "valid" : true
             },
             {
                 "data" : {},
-                "description" : "required, invalid",
+                "description" : "object, required invalid",
                 "valid" : false
             },
             {
                 "data" : {
                     "x" : 1
                 },
-                "description" : "required, valid",
+                "description" : "object, required valid",
                 "valid" : true
             }
         ]

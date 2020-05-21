@@ -16,9 +16,9 @@ my $data = {
     exclusiveMinimum => { schema => 2, data => [ 2, 3 ] },
   },
   string => {
-    maxLength => { schema => 2, data => [ "hello", "hi" ] },
-    minLength => { schema => 2, data => [ "x", "hi" ] },
-    pattern => { schema => "hi", data => [ "hello", "hihi" ] },
+    maxLength => { schema => 2, data => [ 'hello', 'hi' ] },
+    minLength => { schema => 2, data => [ 'x', 'hi' ] },
+    pattern => { schema => 'hi', data => [ 'hello', 'hihi' ] },
   },
   array => {
     maxItems => { schema => 1, data => [ [1,2], [1] ] },
@@ -61,7 +61,7 @@ foreach my $type1 (sort keys %$data) {
               map {
                 my $valid = $_;
                 +{
-                  description => "$keyword, ".($valid?'':'in').'valid',
+                  description => "$type, $keyword ".($valid?'':'in').'valid',
                   data => $data->{$type}{$keyword}{data}[$valid],
                   valid => $valid ? \1 : \0,
                 }
