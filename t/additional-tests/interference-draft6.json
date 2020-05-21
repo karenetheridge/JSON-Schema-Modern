@@ -1,0 +1,5807 @@
+[
+    {
+        "description" : "exclusiveMaximum + contains",
+        "schema" : {
+            "contains" : true,
+            "exclusiveMaximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMaximum + items",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "items" : false
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMaximum + maxItems",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "maxItems" : 1
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMaximum + minItems",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMaximum + uniqueItems",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMinimum + contains",
+        "schema" : {
+            "contains" : true,
+            "exclusiveMinimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMinimum + items",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "items" : false
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMinimum + maxItems",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "maxItems" : 1
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMinimum + minItems",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "exclusiveMinimum + uniqueItems",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maximum + contains",
+        "schema" : {
+            "contains" : true,
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maximum + items",
+        "schema" : {
+            "items" : false,
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maximum + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maximum + minItems",
+        "schema" : {
+            "maximum" : 2,
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maximum + uniqueItems",
+        "schema" : {
+            "maximum" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minimum + contains",
+        "schema" : {
+            "contains" : true,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minimum + items",
+        "schema" : {
+            "items" : false,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minimum + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minimum + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minimum + uniqueItems",
+        "schema" : {
+            "minimum" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "multipleOf + contains",
+        "schema" : {
+            "contains" : true,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "multipleOf + items",
+        "schema" : {
+            "items" : false,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "multipleOf + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "multipleOf + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "multipleOf + uniqueItems",
+        "schema" : {
+            "multipleOf" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + contains",
+        "schema" : {
+            "additionalProperties" : false,
+            "contains" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + items",
+        "schema" : {
+            "additionalProperties" : false,
+            "items" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + maxItems",
+        "schema" : {
+            "additionalProperties" : false,
+            "maxItems" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + minItems",
+        "schema" : {
+            "additionalProperties" : false,
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + uniqueItems",
+        "schema" : {
+            "additionalProperties" : false,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + contains",
+        "schema" : {
+            "contains" : true,
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + items",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "items" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + maxItems",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "maxItems" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + minItems",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + uniqueItems",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + contains",
+        "schema" : {
+            "contains" : true,
+            "dependentSchemas" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + items",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "items" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + maxItems",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "maxItems" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + minItems",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + uniqueItems",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + contains",
+        "schema" : {
+            "contains" : true,
+            "maxProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + items",
+        "schema" : {
+            "items" : false,
+            "maxProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "maxProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + minItems",
+        "schema" : {
+            "maxProperties" : 1,
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + uniqueItems",
+        "schema" : {
+            "maxProperties" : 1,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + contains",
+        "schema" : {
+            "contains" : true,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + items",
+        "schema" : {
+            "items" : false,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + uniqueItems",
+        "schema" : {
+            "minProperties" : 1,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + contains",
+        "schema" : {
+            "contains" : true,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + items",
+        "schema" : {
+            "items" : false,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + uniqueItems",
+        "schema" : {
+            "patternProperties" : {
+                "hi" : false
+            },
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + contains",
+        "schema" : {
+            "contains" : true,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + items",
+        "schema" : {
+            "items" : false,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + uniqueItems",
+        "schema" : {
+            "properties" : {
+                "x" : false
+            },
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + contains",
+        "schema" : {
+            "contains" : true,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + items",
+        "schema" : {
+            "items" : false,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + uniqueItems",
+        "schema" : {
+            "propertyNames" : false,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + contains",
+        "schema" : {
+            "contains" : true,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + items",
+        "schema" : {
+            "items" : false,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + uniqueItems",
+        "schema" : {
+            "required" : [
+                "x"
+            ],
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + exclusiveMaximum",
+        "schema" : {
+            "additionalProperties" : false,
+            "exclusiveMaximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + exclusiveMinimum",
+        "schema" : {
+            "additionalProperties" : false,
+            "exclusiveMinimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + maximum",
+        "schema" : {
+            "additionalProperties" : false,
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + minimum",
+        "schema" : {
+            "additionalProperties" : false,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "additionalProperties + multipleOf",
+        "schema" : {
+            "additionalProperties" : false,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + exclusiveMaximum",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "exclusiveMaximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + exclusiveMinimum",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "exclusiveMinimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + maximum",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + minimum",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentRequired + multipleOf",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + exclusiveMaximum",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "exclusiveMaximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + exclusiveMinimum",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "exclusiveMinimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + maximum",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + minimum",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "dependentSchemas + multipleOf",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "maxProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "maxProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + maximum",
+        "schema" : {
+            "maxProperties" : 1,
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + minimum",
+        "schema" : {
+            "maxProperties" : 1,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxProperties + multipleOf",
+        "schema" : {
+            "maxProperties" : 1,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + minimum",
+        "schema" : {
+            "minProperties" : 1,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minProperties + multipleOf",
+        "schema" : {
+            "minProperties" : 1,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + minimum",
+        "schema" : {
+            "minimum" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "patternProperties + multipleOf",
+        "schema" : {
+            "multipleOf" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + minimum",
+        "schema" : {
+            "minimum" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "properties + multipleOf",
+        "schema" : {
+            "multipleOf" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + minimum",
+        "schema" : {
+            "minimum" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "propertyNames + multipleOf",
+        "schema" : {
+            "multipleOf" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + minimum",
+        "schema" : {
+            "minimum" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "required + multipleOf",
+        "schema" : {
+            "multipleOf" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + contains",
+        "schema" : {
+            "contains" : true,
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + items",
+        "schema" : {
+            "items" : false,
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + minItems",
+        "schema" : {
+            "maxLength" : 2,
+            "minItems" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + uniqueItems",
+        "schema" : {
+            "maxLength" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + contains",
+        "schema" : {
+            "contains" : true,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + items",
+        "schema" : {
+            "items" : false,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + uniqueItems",
+        "schema" : {
+            "minLength" : 2,
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + contains",
+        "schema" : {
+            "contains" : true,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : [],
+                "description" : "array, contains invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, contains valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + items",
+        "schema" : {
+            "items" : false,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, items invalid",
+                "valid" : false
+            },
+            {
+                "data" : [],
+                "description" : "array, items valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + maxItems",
+        "schema" : {
+            "maxItems" : 1,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, maxItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, maxItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + minItems",
+        "schema" : {
+            "minItems" : 2,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, minItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1,
+                    2
+                ],
+                "description" : "array, minItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + uniqueItems",
+        "schema" : {
+            "pattern" : "hi",
+            "uniqueItems" : true
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : [
+                    1,
+                    1
+                ],
+                "description" : "array, uniqueItems invalid",
+                "valid" : false
+            },
+            {
+                "data" : [
+                    1
+                ],
+                "description" : "array, uniqueItems valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + maximum",
+        "schema" : {
+            "maxLength" : 2,
+            "maximum" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + minimum",
+        "schema" : {
+            "maxLength" : 2,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + multipleOf",
+        "schema" : {
+            "maxLength" : 2,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + minimum",
+        "schema" : {
+            "minLength" : 2,
+            "minimum" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + multipleOf",
+        "schema" : {
+            "minLength" : 2,
+            "multipleOf" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + exclusiveMaximum",
+        "schema" : {
+            "exclusiveMaximum" : 2,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMaximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 1,
+                "description" : "number, exclusiveMaximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + exclusiveMinimum",
+        "schema" : {
+            "exclusiveMinimum" : 2,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : 2,
+                "description" : "number, exclusiveMinimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 3,
+                "description" : "number, exclusiveMinimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + maximum",
+        "schema" : {
+            "maximum" : 2,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : 3,
+                "description" : "number, maximum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, maximum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + minimum",
+        "schema" : {
+            "minimum" : 2,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, minimum invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, minimum valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + multipleOf",
+        "schema" : {
+            "multipleOf" : 2,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : 1,
+                "description" : "number, multipleOf invalid",
+                "valid" : false
+            },
+            {
+                "data" : 2,
+                "description" : "number, multipleOf valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + additionalProperties",
+        "schema" : {
+            "additionalProperties" : false,
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + dependentRequired",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + dependentSchemas",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "maxLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + maxProperties",
+        "schema" : {
+            "maxLength" : 2,
+            "maxProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + minProperties",
+        "schema" : {
+            "maxLength" : 2,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + patternProperties",
+        "schema" : {
+            "maxLength" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + properties",
+        "schema" : {
+            "maxLength" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + propertyNames",
+        "schema" : {
+            "maxLength" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "maxLength + required",
+        "schema" : {
+            "maxLength" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, maxLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, maxLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + additionalProperties",
+        "schema" : {
+            "additionalProperties" : false,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + dependentRequired",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + dependentSchemas",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + maxProperties",
+        "schema" : {
+            "maxProperties" : 1,
+            "minLength" : 2
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + minProperties",
+        "schema" : {
+            "minLength" : 2,
+            "minProperties" : 1
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + patternProperties",
+        "schema" : {
+            "minLength" : 2,
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + properties",
+        "schema" : {
+            "minLength" : 2,
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + propertyNames",
+        "schema" : {
+            "minLength" : 2,
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "minLength + required",
+        "schema" : {
+            "minLength" : 2,
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : "x",
+                "description" : "string, minLength invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hi",
+                "description" : "string, minLength valid",
+                "valid" : true
+            },
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + additionalProperties",
+        "schema" : {
+            "additionalProperties" : false,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, additionalProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, additionalProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + dependentRequired",
+        "schema" : {
+            "dependentRequired" : {
+                "x" : [
+                    "y"
+                ]
+            },
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentRequired invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, dependentRequired valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + dependentSchemas",
+        "schema" : {
+            "dependentSchemas" : {
+                "x" : false
+            },
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, dependentSchemas invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, dependentSchemas valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + maxProperties",
+        "schema" : {
+            "maxProperties" : 1,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1,
+                    "y" : 2
+                },
+                "description" : "object, maxProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, maxProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + minProperties",
+        "schema" : {
+            "minProperties" : 1,
+            "pattern" : "hi"
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {},
+                "description" : "object, minProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, minProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + patternProperties",
+        "schema" : {
+            "pattern" : "hi",
+            "patternProperties" : {
+                "hi" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "hihi" : 1
+                },
+                "description" : "object, patternProperties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "hello" : 1
+                },
+                "description" : "object, patternProperties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + properties",
+        "schema" : {
+            "pattern" : "hi",
+            "properties" : {
+                "x" : false
+            }
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, properties invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, properties valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + propertyNames",
+        "schema" : {
+            "pattern" : "hi",
+            "propertyNames" : false
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, propertyNames invalid",
+                "valid" : false
+            },
+            {
+                "data" : {},
+                "description" : "object, propertyNames valid",
+                "valid" : true
+            }
+        ]
+    },
+    {
+        "description" : "pattern + required",
+        "schema" : {
+            "pattern" : "hi",
+            "required" : [
+                "x"
+            ]
+        },
+        "tests" : [
+            {
+                "data" : "hello",
+                "description" : "string, pattern invalid",
+                "valid" : false
+            },
+            {
+                "data" : "hihi",
+                "description" : "string, pattern valid",
+                "valid" : true
+            },
+            {
+                "data" : {},
+                "description" : "object, required invalid",
+                "valid" : false
+            },
+            {
+                "data" : {
+                    "x" : 1
+                },
+                "description" : "object, required valid",
+                "valid" : true
+            }
+        ]
+    }
+]

@@ -11,9 +11,7 @@ my $data = {
   number => {
     multipleOf => { schema => 2, data => [ 1, 2 ] },
     maximum => { schema => 2, data => [ 3, 2 ] },
-    exclusiveMaximum => { schema => 2, data => [ 2, 1 ] },
     minimum => { schema => 2, data => [ 1, 2 ] },
-    exclusiveMinimum => { schema => 2, data => [ 2, 3 ] },
   },
   string => {
     maxLength => { schema => 2, data => [ 'hello', 'hi' ] },
@@ -25,18 +23,15 @@ my $data = {
     minItems => { schema => 2, data => [ [1], [1,2] ] },
     uniqueItems => { schema => \1, data => [ [ 1, 1 ], [1] ] },
     items => { schema => \0, data => [ [1], [] ] },
-    contains => { schema => \1, data => [ [], [1] ] },
   },
   object => {
     maxProperties => { schema => 1, data => [ {x=>1,y=>2}, { x=>1 } ] },
     minProperties => { schema => 1, data => [ {}, { x=>1 } ] },
     required => { schema => ['x'], data => [ {}, {x=>1} ] },
-    dependentRequired => { schema => {x=>['y']}, data => [ {x=>1}, {x=>1,y=>2} ] },
-    dependentSchemas => { schema => {x=>\0}, data => [ {x=>1}, {} ] },
+    dependencies => { schema => {x=>\0}, data => [ {x=>1}, {} ] },
     properties => { schema => {x=>\0}, data => [ {x=>1}, {} ] },
     patternProperties => { schema => {hi=>\0}, data => [ {hihi=>1}, {hello=>1} ] },
     additionalProperties => { schema => \0, data => [ {x=>1}, {} ] },
-    propertyNames => { schema => \0, data => [ {x=>1}, {} ] },
   },
 };
 
