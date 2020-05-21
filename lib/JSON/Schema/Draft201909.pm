@@ -906,7 +906,7 @@ Defaults to true when C<output_format> is C<flag>, and false otherwise.
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of a JSON-encoded string (in accordance with
-L<RFC8259|https://tools.ietf.org/html/rfc8259>. B<The string is expected to be UTF-8 encoded.>
+L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
 The schema is in the form of a Perl data structure, representing a JSON Schema
 that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
@@ -961,7 +961,7 @@ To date, missing components include most of these. More specifically, features t
 * recognition of C<$id>
 * loading multiple schema documents, and registration of a schema against a canonical base URI
 * collection of annotations
-  (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>
+  (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>)
 * multiple output formats
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
 * loading schema documents from disk
