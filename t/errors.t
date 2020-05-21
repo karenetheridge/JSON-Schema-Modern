@@ -14,6 +14,7 @@ my $js_short = JSON::Schema::Draft201909->new(short_circuit => 1);
 subtest 'multiple types' => sub {
   my $result = $js->evaluate(true, { type => ['string','number'] });
   ok(!$result, 'type returned false');
+  is($result, 1, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -50,6 +51,7 @@ subtest 'multiple types' => sub {
 subtest 'multipleOf' => sub {
   my $result = $js->evaluate(3, { multipleOf => 2 });
   ok(!$result, 'multipleOf returned false');
+  is($result, 1, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -86,6 +88,7 @@ subtest 'multipleOf' => sub {
 subtest 'uniqueItems' => sub {
   my $result = $js->evaluate([qw(a b c d c)], { uniqueItems => true });
   ok(!$result, 'uniqueItems returned false');
+  is($result, 1, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -125,6 +128,7 @@ subtest 'allOf, not, and false schema' => sub {
     my $schema = { allOf => [ true, false, { not => { not => false } } ] },
   );
   ok(!$result, 'allOf returned false');
+  is($result, 3, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -206,6 +210,7 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
     my $schema = { anyOf => [ false, false ] },
   );
   ok(!$result, 'anyOf returned false');
+  is($result, 3, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -263,6 +268,7 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
 
   $result = $js->evaluate(1, { anyOf => [ false, true ], not => true });
   ok(!$result, 'anyOf returned false');
+  is($result, 1, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -282,6 +288,7 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
 
   $result = $js->evaluate(1, { anyOf => [ false, true ] });
   ok($result, 'anyOf returned true');
+  is($result, 0, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],
@@ -304,6 +311,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
   );
 
   ok(!$result, 'items returned false');
+  is($result, 6, 'got error count');
 
 # - evaluate /items on instance ''
 #   - evaluate /items on instance /0
@@ -451,6 +459,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
   );
 
   ok(!$result, 'evaluation returned false');
+  is($result, 1, 'got error count');
 
 # - evaluate /not on instance ''
 #   - evaluate subschema "true" - PASS
@@ -540,6 +549,7 @@ subtest 'errors with $refs' => sub {
   );
 
   ok(!$result, 'evaluation returned false');
+  is($result, 11, 'got error count');
 
   # evaluation order:
   # /items/properties/x/$ref (mydef) /$ref (myint) /multipleOf

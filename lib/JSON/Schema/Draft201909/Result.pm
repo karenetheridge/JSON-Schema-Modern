@@ -18,6 +18,7 @@ use namespace::clean;
 
 use overload
   'bool'  => sub { $_[0]->result },
+  '0+'    => sub { $_[0]->count },
   fallback => 1;
 
 has result => (
@@ -59,6 +60,8 @@ sub format {
 
   die 'unsupported output format';
 }
+
+sub count { 0+ ($_[0]->result ? 0 : $_[0]->errors) }
 
 sub TO_JSON {
   my $self = shift;
@@ -121,5 +124,9 @@ formats at this time are C<flag> and C<basic>.
 =head2 TO_JSON
 
 Calls L</format> with the style configured in L</output_format>.
+
+=head2 count
+
+Returns the number of errors, when the result is false.
 
 =cut
