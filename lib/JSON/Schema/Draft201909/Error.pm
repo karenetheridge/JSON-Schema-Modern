@@ -4,7 +4,7 @@ package JSON::Schema::Draft201909::Error;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Contains a single error from a JSON Schema evaluation
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use Moo;

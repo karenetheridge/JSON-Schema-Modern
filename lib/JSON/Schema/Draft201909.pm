@@ -5,7 +5,7 @@ package JSON::Schema::Draft201909;
 # ABSTRACT: Validate data against a schema
 # KEYWORDS: JSON Schema data validation structure specification
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use JSON::MaybeXS 1.004001 'is_bool';
