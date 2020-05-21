@@ -822,8 +822,8 @@ sub _is_equal {
   return 0; # should never get here
 }
 
-# checks array elements for uniqueness
-# if second arrayref is provided, it is populated with the indices of unique items
+# checks array elements for uniqueness. short-circuits on first pair of matching elements
+# if second arrayref is provided, it is populated with the indices of identical items
 sub _is_elements_unique {
   my ($self, $array, $equal_indices) = @_;
   foreach my $idx0 (0..$#{$array}-1) {
