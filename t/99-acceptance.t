@@ -41,6 +41,13 @@ $accepter->acceptance(
     die 'results inconsistent between short_circuit = false and true'
       if $result xor $result_short;
 
+    # if any errors contain an exception, propage at that upwards as an exception so we can be sure
+    # to count that as a failure.
+    # (This might change if tests are added that are expected to produce exceptions.)
+    if (my ($e) = grep $_->error =~ /^EXCEPTION/, $result->errors) {
+      die $e->error;
+    }
+
     $result;
   },
   @ARGV ? (tests => { file => \@ARGV }) : (),
