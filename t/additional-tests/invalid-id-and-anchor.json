@@ -1,0 +1,43 @@
+[
+    {
+        "description": "",
+        "schema": {
+            "$id": "foo.json",
+            "$defs": {
+                "bad_id": {
+                    "$id": "foo.json#/foo/bar"
+                },
+                "bad_anchor": {
+                    "$anchor": "my$foo"
+                }
+            },
+            "if": { "const": "skip errors" },
+            "then": true,
+            "else" : {
+                "if": { "const": "check id" },
+                "then": { "$ref": "foo.json#/$defs/bad_id" },
+                "else": {
+                    "if": { "const": "check anchor" },
+                    "then": { "$ref": "#/$defs/bad_anchor" }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "skip all bad identifiers for a valid result",
+                "data": "skip errors",
+                "valid": true
+            },
+            {
+                "description": "bad $anchor should be found and removed",
+                "data": "check anchor",
+                "valid": false
+            },
+            {
+                "description": "bad $id should be found and removed",
+                "data": "check id",
+                "valid": false
+            }
+        ]
+    }
+]

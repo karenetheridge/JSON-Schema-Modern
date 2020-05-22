@@ -1,0 +1,34 @@
+[
+    {
+        "description": "object that is not a schema containing an $id property",
+        "schema": {
+            "$defs": {
+                "const_not_id": {
+                    "$comment": "note: when traversing to this location, the bad $id should be recognized and removed from any master identifier index",
+                    "const": {
+                        "$id": "not_a_real_id"
+                    }
+                }
+            },
+            "if": {
+                "const": "skip not_a_real_id"
+            },
+            "then": true,
+            "else" : {
+                "$ref": "#/$defs/const_not_id"
+            }
+        },
+        "tests": [
+            {
+                "description": "skip traversing definition for a valid result",
+                "data": "skip not_a_real_id",
+                "valid": true
+            },
+            {
+                "description": "const at const_not_id does not match",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
