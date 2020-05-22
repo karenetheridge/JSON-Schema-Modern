@@ -72,7 +72,7 @@ sub evaluate {
     short_circuit => $self->short_circuit,
     data_path => '',
     traversed_schema_path => '',  # the accumulated path up to the last $ref traversal
-    absolute_schema_path => '',   # the absolute path of the last traversed $ref
+    absolute_schema_uri => undef, # the absolute path of the last traversed $ref; always a Mojo::URL
     schema_path => '',            # the rest of the path, since the last traversed $ref
     errors => [],
   };
@@ -166,11 +166,11 @@ sub _eval_keyword_ref {
 
   # for now, the base_uri of the schema is always '' (yes I know this is not an absolute uri)
   # TODO: we need to track the base_uri of the schema resource that we are referencing.
-  # absolute_schema_path may not look anything like the contents of the $ref keyword.
+  # absolute_schema_uri may not look anything like the contents of the $ref keyword.
   return $self->_eval($data, $subschema,
     +{ %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      absolute_schema_path => $url->to_string,
+      absolute_schema_uri => $url,
       schema_path => '',
     });
 }
@@ -847,8 +847,11 @@ sub E {
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$state->{schema_path}.$suffix,
-    !$state->{absolute_schema_path} ? ()
-      : ( absolute_keyword_location => $state->{absolute_schema_path}.$state->{schema_path}.$suffix ),
+    !$state->{absolute_schema_uri} ? () : ( absolute_keyword_location => do {
+      my $abs = $state->{absolute_schema_uri}->clone;
+      $abs->fragment($abs->fragment.$state->{schema_path}.$suffix);
+      $abs;
+    } ),
     error => @args ? sprintf($error_string, @args) : $error_string,
   );
 
