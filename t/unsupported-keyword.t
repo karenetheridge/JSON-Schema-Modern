@@ -14,7 +14,13 @@ foreach my $keyword (qw($id $anchor $recursiveRef $recursiveAnchor $vocabulary))
   subtest 'keyword: '.$keyword => sub {
     is(
       exception {
-        my $result = $js->evaluate('hello', { $keyword => 'something' });
+        my $result = $js->evaluate(
+          'hello',
+          {
+            '$schema' => 'https://json-schema.org/draft/2019-09/schema',
+            $keyword => 'something',
+          },
+        );
         cmp_deeply(
           $result->TO_JSON,
           {
@@ -22,7 +28,7 @@ foreach my $keyword (qw($id $anchor $recursiveRef $recursiveAnchor $vocabulary))
             errors => [
               {
                 instanceLocation => '',
-                keywordLocation => '',
+                keywordLocation => "/$keyword",
                 error => 'EXCEPTION: unsupported keyword "'.$keyword.'"',
               },
             ],
@@ -31,7 +37,7 @@ foreach my $keyword (qw($id $anchor $recursiveRef $recursiveAnchor $vocabulary))
         );
       },
       undef,
-      'did not get no exception',
+      'got an exception',
     );
   };
 }

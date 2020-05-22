@@ -121,6 +121,7 @@ sub _eval {
   ) {
     next if not exists $schema->{$keyword};
 
+    $state->{keyword} = $keyword;
     my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
     abort($state, 'unsupported keyword "%s"', $keyword) if not $self->can($method);
     $result = 0 if not $self->$method($data, $schema, +{ %$state, keyword => $keyword });
