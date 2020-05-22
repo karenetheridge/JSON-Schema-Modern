@@ -743,4 +743,94 @@ subtest 'exceptions' => sub {
   );
 };
 
+subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$defs' => {
+          def1 => {
+            '$id' => 'def1.json',
+            '$ref' => '#/$defs/myint',
+            type => 'integer',
+            maximum => -1,
+            minimum => 5,
+          },
+          myint => {
+            '$id' => 'def2.json',
+            '$ref' => '#my_not',
+            multipleOf => 5,
+            exclusiveMaximum => 1,
+          },
+          mynot => {
+            '$anchor' => 'my_not',
+            '$ref' => 'https://localhost:4242/object.json',
+            not => true,
+          },
+          myobject => {
+            '$id' => 'https://localhost:4242/object.json',
+            type => 'object',
+            anyOf => [ false ],
+          },
+        },
+        '$ref' => '#/$defs/def1',
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/$ref/$ref/type',
+          absoluteKeywordLocation => 'https://localhost:4242/object.json#/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/$ref/$ref/anyOf/0',
+          absoluteKeywordLocation => 'https://localhost:4242/object.json#/anyOf/0',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/$ref/$ref/anyOf',
+          absoluteKeywordLocation => 'https://localhost:4242/object.json#/anyOf',
+          error => 'no subschemas are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/$ref/not',
+          absoluteKeywordLocation => '#/$defs/mynot/not',
+          error => 'subschema is valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/multipleOf',
+          absoluteKeywordLocation => 'def2.json#/multipleOf',
+          error => 'value is not a multiple of 5',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/exclusiveMaximum',
+          absoluteKeywordLocation => 'def2.json#/exclusiveMaximum',
+          error => 'value is equal to or larger than 1',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/maximum',
+          absoluteKeywordLocation => 'def1.json#/maximum',
+          error => 'value is larger than -1',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/minimum',
+          absoluteKeywordLocation => 'def1.json#/minimum',
+          error => 'value is smaller than 5',
+        },
+      ],
+    },
+    'errors have correct absolute keyword location via $ref',
+  );
+};
+
 done_testing;
