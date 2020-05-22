@@ -15,9 +15,18 @@ use namespace::clean;
 has [qw(
   instance_location
   keyword_location
-  absolute_keyword_location
   error
-)] => ( is => 'ro', isa => Str );
+)] => (
+  is => 'ro',
+  isa => Str,
+  required => 1,
+);
+
+has absolute_keyword_location => (
+  is => 'ro',
+  isa => Str, # always a uri (absolute uri or uri reference)
+  coerce => sub { "$_[0]" },
+);
 
 sub TO_JSON {
   my $self = shift;
