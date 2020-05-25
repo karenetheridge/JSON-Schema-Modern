@@ -694,8 +694,10 @@ subtest 'exceptions' => sub {
     'attempting to evaluate a json string returns the exception as an error',
   );
 
+use Devel::DDCWarn;
+
   cmp_deeply(
-    $js->evaluate(
+    Derr $js->evaluate(
       { x => 'hello' },
       {
         allOf => [
