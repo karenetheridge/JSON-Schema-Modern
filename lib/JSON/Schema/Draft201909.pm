@@ -197,10 +197,7 @@ sub _eval_keyword_id {
     if not $self->_is_type('string', $schema->{'$id'});
 
   my $uri = Mojo::URL->new($schema->{'$id'})->base($state->{base_uri})->to_abs;
-  if (length $uri->fragment) {
-    $self->remove_resource($uri);
-    abort($state, '%s cannot have a non-empty fragment', $schema->{'$id'});
-  }
+  abort($state, '%s cannot have a non-empty fragment', $schema->{'$id'}) if length $uri->fragment;
 
   $state->{base_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
@@ -217,8 +214,7 @@ sub _eval_keyword_anchor {
     if not $self->_is_type('string', $schema->{'$anchor'});
 
   if ($schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
-    my $uri = Mojo::URL->new->base($state->{base_uri})->fragment($schema->{'$anchor'});
-    $self->remove_resource($uri);
+    $self->remove_resource($state->{base_uri}->clone->fragment($schema->{'$anchor'}));
     abort($state, '%s does not match required syntax', $schema->{'$anchor'});
   }
 
@@ -937,13 +933,13 @@ sub _find_all_identifiers {
         0.. $#{$data};
     }
     elsif (ref $data eq 'HASH') {
-      if (exists $data->{'$id'}) {
+      if (exists $data->{'$id'} and _is_type(undef, 'string', $data->{'$id'})) {
         $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
-        die sprintf('%s cannot have a non-empty fragment', $data->{'$id'})
-          if length $canonical_uri->fragment;
-        $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri };
+        # this might not be a real $id... wait for it to be encountered at runtime before dying
+        $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri }
+          if not length $canonical_uri->fragment;
       }
-      if (exists $data->{'$anchor'}) {
+      if (exists $data->{'$anchor'} and _is_type(undef, 'string', $data->{'$anchor'})) {
         # we cannot change the canonical uri, or we won't be able to properly identify
         # paths within this resource
         my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});

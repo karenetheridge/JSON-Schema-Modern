@@ -161,4 +161,136 @@ subtest 'anchors' => sub {
   );
 };
 
+subtest '$id and $anchor as properties' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  $js->_find_all_identifiers(
+    {
+      type => 'object',
+      properties => {
+        '$id' => { type => 'string' },
+        '$anchor' => { type => 'string' },
+      },
+    }
+  );
+
+  cmp_deeply(
+    $js->{resource_index},
+    {
+    },
+    'did not index the $id and $anchor properties as if they were identifier keywords',
+  );
+};
+
+subtest 'invalid $id and $anchor' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      my $schema = {
+        '$id' => 'foo.json',
+        '$defs' => {
+          bad_id => {
+            '$id' => 'foo.json#/foo/bar',
+          },
+          bad_anchor => {
+            '$anchor' => 'my$foo',
+          },
+          const_not_id => {
+            const => {
+              '$id' => 'not_a_real_id',
+            },
+          },
+          const_not_anchor => {
+            const => {
+              '$anchor' => 'not_a_real_anchor',
+            },
+          },
+        },
+        allOf => [
+          {
+            if => { const => 'check id' },
+            then => { '$ref' => 'foo.json#/$defs/bad_id' },
+            else => {
+              if => { const => 'check anchor' },
+              then => { '$ref' => '#/$defs/bad_anchor' },
+            },
+          },
+          { '$ref' => '#/$defs/const_not_id' },
+          { '$ref' => '#/$defs/const_not_anchor' },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/$ref/const',
+          absoluteKeywordLocation => 'foo.json#/$defs/const_not_id/const',
+          error => 'value does not match',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/2/$ref/const',
+          absoluteKeywordLocation => 'foo.json#/$defs/const_not_anchor/const',
+          error => 'value does not match',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          absoluteKeywordLocation => 'foo.json#/allOf',
+          error => 'subschemas 1, 2 are not valid',
+        },
+      ],
+    },
+    'schema is evaluatable if bad definitions are not traversed',
+  );
+
+  ok($js->get_resource('foo.json#my$foo'), '$anchor resource has not been verified yet');
+
+  cmp_deeply(
+    $js->evaluate(
+      'check anchor',
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/else/then/$ref/$anchor',
+          absoluteKeywordLocation => 'foo.json#/$defs/bad_anchor/$anchor',
+          error => 'EXCEPTION: my$foo does not match required syntax',
+        }
+      ],
+    },
+    'evaluation gives an error if bad $anchor is traversed',
+  );
+
+  ok(!$js->get_resource('foo.json#my$foo'), '$anchor resource found to be bad, and removed');
+
+  cmp_deeply(
+    $js->evaluate(
+      'check id',
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/then/$ref/$id',
+          absoluteKeywordLocation => 'foo.json#/$defs/bad_id/$id',
+          error => 'EXCEPTION: foo.json#/foo/bar cannot have a non-empty fragment',
+        }
+      ],
+    },
+    'evaluation gives an error if bad $id is traversed',
+  );
+
+  # TODO: bad $anchor should still be absent, because when we have ::Document objects we won't
+  # re-parse a document for $id and $anchors for each evaluation.
+};
+
 done_testing;
