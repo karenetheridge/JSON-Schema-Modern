@@ -109,7 +109,7 @@ sub evaluate {
   $self->_find_all_identifiers($schema);
 
   my $state = {
-    base_uri => Mojo::URL->new,                       # ""
+    base_uri => Mojo::URL->new,                   # TODO: will be set by a global attribute
     short_circuit => $self->short_circuit,
     data_path => '',
     traversed_schema_path => '',  # the accumulated path up to the last $ref traversal
