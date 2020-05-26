@@ -9,6 +9,7 @@ our $VERSION = '0.002';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use feature qw(current_sub state);
+use experimental 'lexical_subs';  # needed for <5.26 only
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try;
 use Carp 'croak';
