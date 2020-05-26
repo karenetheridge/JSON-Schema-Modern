@@ -953,7 +953,7 @@ sub _find_all_identifiers {
       return
         %identifiers,
         map __SUB__->($data->{$_}, $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
-          keys $data->%*;
+          keys %$data;
     }
 
     return ();
