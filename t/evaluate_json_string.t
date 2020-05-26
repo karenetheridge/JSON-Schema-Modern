@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 no if "$]" >= 5.031009, feature => 'indirect';
+use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
