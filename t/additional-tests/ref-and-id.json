@@ -6,12 +6,12 @@
             "$ref": "#bigint",
             "$defs": {
                 "bigint": {
-                    "$comment": "a valid URI for this location: /base.json#bigint",
+                    "$comment": "canonical uri: /base.json/$defs/bigint; another valid uri for this location: /base.json#bigint",
                     "$anchor": "bigint",
                     "maximum": 10
                 },
                 "smallint": {
-                    "$comment": "a valid URI for this location: /#bigint",
+                    "$comment": "canonical uri: /#/$defs/smallint; another valid uri for this location: /#bigint",
                     "$id": "/",
                     "$anchor": "bigint",
                     "maximum": 2
@@ -38,12 +38,12 @@
             "$ref": "int.json",
             "$defs": {
                 "bigint": {
-                    "$comment": "a valid URI for this location: /base/int.json",
+                    "$comment": "canonical uri: /base/int.json",
                     "$id": "int.json",
                     "maximum": 10
                 },
                 "smallint": {
-                    "$comment": "a valid URI for this location: /int.json",
+                    "$comment": "canonical uri: /int.json",
                     "$id": "/int.json",
                     "maximum": 2
                 }

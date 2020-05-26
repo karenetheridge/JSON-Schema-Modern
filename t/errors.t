@@ -751,6 +751,7 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
         '$id' => 'base.json',
         '$defs' => {
           def1 => {
+            '$comment' => 'canonical uri: "def1.json"',
             '$id' => 'def1.json',
             '$ref' => 'base.json#/$defs/myint',
             type => 'integer',
@@ -758,12 +759,14 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
             minimum => 5,
           },
           myint => {
+            '$comment' => 'canonical uri: "def2.json"',
             '$id' => 'def2.json',
             '$ref' => 'base.json#my_not',
             multipleOf => 5,
             exclusiveMaximum => 1,
           },
           mynot => {
+            '$comment' => 'canonical uri: "base.json#/$defs/mynot"',
             '$anchor' => 'my_not',
             '$ref' => 'http://localhost:4242/object.json',
             not => true,
