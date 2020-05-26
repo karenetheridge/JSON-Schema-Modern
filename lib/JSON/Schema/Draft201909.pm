@@ -58,9 +58,13 @@ before add_resources => sub {
   my $self = shift;
   foreach my $pair (pairs @_) {
     my ($key, $value) = @$pair;
+    # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
+    # schemas that lack all identifiers altogether
     if (my $existing = $self->get_resource($key)) {
       die 'a schema resource is already indexed with uri "'.$key.'"'
-        if $existing->{ref} != $value->{ref} or $existing->{canonical_uri} ne $value->{canonical_uri};
+        if ($key ne '' and $existing->{canonical_uri} ne '')
+          and $existing->{ref} != $value->{ref}
+            or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
 
     die sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
@@ -104,7 +108,6 @@ sub evaluate {
   $self->_find_all_identifiers($schema);
 
   my $state = {
-    root_schema => Mojo::JSON::Pointer->new($schema), # TODO: this will be nicer with ::Document
     base_uri => Mojo::URL->new,                       # ""
     short_circuit => $self->short_circuit,
     data_path => '',
@@ -233,8 +236,7 @@ sub _eval_keyword_ref {
   # TODO: this will get less ugly when we move to actual document objects
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
-    my $document = $base eq '' ? $state->{root_schema}
-      : Mojo::JSON::Pointer->new(($self->get_resource($base) // {})->{ref});
+    my $document = Mojo::JSON::Pointer->new(($self->get_resource($base) // {})->{ref});
     $subschema = $document->get($fragment);
     $absolute_uri = $uri;
   }
@@ -957,6 +959,8 @@ sub _find_all_identifiers {
 
   my $base_uri = Mojo::URL->new;  # TODO: $self->base_uri->clone
   my %identifiers = traverse_for_identifiers($schema, $base_uri);
+
+  $identifiers{''} = { ref => $schema, canonical_uri => $base_uri } if not "$base_uri";
 
   $self->add_resources(%identifiers);
 }

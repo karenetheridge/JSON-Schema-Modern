@@ -13,7 +13,7 @@ use Helper;
 subtest '_find_all_identifiers' => sub {
   my $js = JSON::Schema::Draft201909->new;
   $js->_find_all_identifiers(
-    {
+    my $schema = {
       '$defs' => {
         foo => my $foo_definition = {
           '$id' => 'my_foo',
@@ -27,6 +27,7 @@ subtest '_find_all_identifiers' => sub {
   cmp_deeply(
     $js->{resource_index},
     {
+      '' => { ref => $schema, canonical_uri => str('') },
       'my_foo' => {
         ref => $foo_definition,
         canonical_uri => str('my_foo'),
@@ -41,7 +42,7 @@ subtest '$id sets canonical uri' => sub {
   cmp_deeply(
     $js->evaluate(
       1,
-      {
+      my $schema = {
         '$defs' => {
           foo => my $foo_definition = {
             '$id' => 'http://localhost:4242/my_foo',
@@ -68,6 +69,7 @@ subtest '$id sets canonical uri' => sub {
   cmp_deeply(
     $js->{resource_index},
     {
+      '' => { ref => $schema, canonical_uri => str('') },
       'http://localhost:4242/my_foo' => {
         ref => $foo_definition,
         canonical_uri => str('http://localhost:4242/my_foo'),
@@ -140,6 +142,7 @@ subtest 'anchors' => sub {
   cmp_deeply(
     $js->{resource_index},
     {
+      '' => { ref => $schema, canonical_uri => str('') },
       'http://localhost:4242' => {
         ref => $schema,
         canonical_uri => str('http://localhost:4242'),
@@ -164,7 +167,7 @@ subtest 'anchors' => sub {
 subtest '$id and $anchor as properties' => sub {
   my $js = JSON::Schema::Draft201909->new;
   $js->_find_all_identifiers(
-    {
+    my $schema = {
       type => 'object',
       properties => {
         '$id' => { type => 'string' },
@@ -176,6 +179,7 @@ subtest '$id and $anchor as properties' => sub {
   cmp_deeply(
     $js->{resource_index},
     {
+      '' => { ref => $schema, canonical_uri => str('') },
     },
     'did not index the $id and $anchor properties as if they were identifier keywords',
   );
