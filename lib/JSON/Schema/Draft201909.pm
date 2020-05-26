@@ -59,10 +59,10 @@ before add_resources => sub {
   my $self = shift;
   foreach my $pair (pairs @_) {
     my ($key, $value) = @$pair;
-    # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
-    # schemas that lack all identifiers altogether
     if (my $existing = $self->get_resource($key)) {
       die 'a schema resource is already indexed with uri "'.$key.'"'
+        # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
+        # schemas that lack all identifiers altogether
         if ($key ne '' and $existing->{canonical_uri} ne '')
           and $existing->{ref} != $value->{ref}
             or $existing->{canonical_uri} ne $value->{canonical_uri};
@@ -961,7 +961,8 @@ sub _find_all_identifiers {
   my $base_uri = Mojo::URL->new;  # TODO: $self->base_uri->clone
   my %identifiers = traverse_for_identifiers($schema, $base_uri);
 
-  $identifiers{''} = { ref => $schema, canonical_uri => $base_uri } if not "$base_uri";
+  $identifiers{''} = { ref => $schema, canonical_uri => $base_uri }
+    if not "$base_uri" and ref $schema eq 'HASH' and not exists $schema->{'$id'};
 
   $self->add_resources(%identifiers);
 }

@@ -142,7 +142,6 @@ subtest 'anchors' => sub {
   cmp_deeply(
     $js->{resource_index},
     {
-      '' => { ref => $schema, canonical_uri => str('') },
       'http://localhost:4242' => {
         ref => $schema,
         canonical_uri => str('http://localhost:4242'),
@@ -158,6 +157,50 @@ subtest 'anchors' => sub {
       'http://localhost:4242#my_not' => {
         ref => $not_definition,
         canonical_uri => str('http://localhost:4242#/allOf/2/not'),
+      },
+    },
+    'internal resource index is correct',
+  );
+};
+
+subtest '$anchor at root without $id' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      my $schema = {
+        '$anchor' => 'root',
+        '$defs' => {
+          foo => my $foo_definition = {
+            '$anchor' => 'my_foo',
+            const => 'foo value',
+          },
+        },
+        '$ref' => '#my_foo',
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/const',
+          absoluteKeywordLocation => '#/$defs/foo/const',
+          error => 'value does not match',
+        },
+      ],
+    },
+    '$id without anchor was recognized - absolute locations use json paths, not anchors',
+  );
+
+  cmp_deeply(
+    $js->{resource_index},
+    {
+      '' => { ref => $schema, canonical_uri => str('') },
+      '#root' => { ref => $schema, canonical_uri => str('') },
+      '#my_foo' => {
+        ref => $foo_definition,
+        canonical_uri => str('#/$defs/foo'),
       },
     },
     'internal resource index is correct',
