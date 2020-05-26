@@ -38,7 +38,7 @@ has short_circuit => (
   default => sub { $_[0]->output_format eq 'flag' },
 );
 
-has resource_index => (
+has _resource_index => (
   is => 'bare',
   isa => HashRef[Dict[
       # see JSON::MaybeXS::is_bool
@@ -47,19 +47,20 @@ has resource_index => (
     ]],
   handles_via => 'Hash',
   handles => {
-    add_resources => 'set',
-    get_resource => 'get',
-    remove_resource => 'delete',
+    _add_resources => 'set',
+    _get_resource => 'get',
+    _remove_resource => 'delete',
+    _resource_index => 'elements',
   },
   lazy => 1,
   default => sub { {} },
 );
 
-before add_resources => sub {
+before _add_resources => sub {
   my $self = shift;
   foreach my $pair (pairs @_) {
     my ($key, $value) = @$pair;
-    if (my $existing = $self->get_resource($key)) {
+    if (my $existing = $self->_get_resource($key)) {
       die 'a schema resource is already indexed with uri "'.$key.'"'
         # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
         # schemas that lack all identifiers altogether
@@ -218,7 +219,7 @@ sub _eval_keyword_anchor {
     if not $self->_is_type('string', $schema->{'$anchor'});
 
   if ($schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
-    $self->remove_resource($state->{base_uri}->clone->fragment($schema->{'$anchor'}));
+    $self->_remove_resource($state->{base_uri}->clone->fragment($schema->{'$anchor'}));
     abort($state, '%s does not match required syntax', $schema->{'$anchor'});
   }
 
@@ -237,12 +238,12 @@ sub _eval_keyword_ref {
   # TODO: this will get less ugly when we move to actual document objects
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
-    my $document = Mojo::JSON::Pointer->new(($self->get_resource($base) // {})->{ref});
+    my $document = Mojo::JSON::Pointer->new(($self->_get_resource($base) // {})->{ref});
     $subschema = $document->get($fragment);
     $absolute_uri = $uri;
   }
   else {
-    if (my $resource = $self->get_resource($uri)) {
+    if (my $resource = $self->_get_resource($uri)) {
       $subschema = $resource->{ref};
       $absolute_uri = $resource->{canonical_uri}->clone;  # this is *not* the anchor-containing URI
     }
@@ -964,7 +965,7 @@ sub _find_all_identifiers {
   $identifiers{''} = { ref => $schema, canonical_uri => $base_uri }
     if not "$base_uri" and ref $schema eq 'HASH' and not exists $schema->{'$id'};
 
-  $self->add_resources(%identifiers);
+  $self->_add_resources(%identifiers);
 }
 
 # shorthand for creating error objects

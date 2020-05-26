@@ -25,7 +25,7 @@ subtest '_find_all_identifiers' => sub {
   );
 
   cmp_deeply(
-    $js->{resource_index},
+    { $js->_resource_index },
     {
       '' => { ref => $schema, canonical_uri => str('') },
       'my_foo' => {
@@ -67,7 +67,7 @@ subtest '$id sets canonical uri' => sub {
   );
 
   cmp_deeply(
-    $js->{resource_index},
+    { $js->_resource_index },
     {
       '' => { ref => $schema, canonical_uri => str('') },
       'http://localhost:4242/my_foo' => {
@@ -140,7 +140,7 @@ subtest 'anchors' => sub {
   );
 
   cmp_deeply(
-    $js->{resource_index},
+    { $js->_resource_index },
     {
       'http://localhost:4242' => {
         ref => $schema,
@@ -194,7 +194,7 @@ subtest '$anchor at root without $id' => sub {
   );
 
   cmp_deeply(
-    $js->{resource_index},
+    { $js->_resource_index },
     {
       '' => { ref => $schema, canonical_uri => str('') },
       '#root' => { ref => $schema, canonical_uri => str('') },
@@ -220,7 +220,7 @@ subtest '$id and $anchor as properties' => sub {
   );
 
   cmp_deeply(
-    $js->{resource_index},
+    { $js->_resource_index },
     {
       '' => { ref => $schema, canonical_uri => str('') },
     },
@@ -294,7 +294,7 @@ subtest 'invalid $id and $anchor' => sub {
     'schema is evaluatable if bad definitions are not traversed',
   );
 
-  ok($js->get_resource('foo.json#my$foo'), '$anchor resource has not been verified yet');
+  ok($js->_get_resource('foo.json#my$foo'), '$anchor resource has not been verified yet');
 
   cmp_deeply(
     $js->evaluate(
@@ -315,7 +315,7 @@ subtest 'invalid $id and $anchor' => sub {
     'evaluation gives an error if bad $anchor is traversed',
   );
 
-  ok(!$js->get_resource('foo.json#my$foo'), '$anchor resource found to be bad, and removed');
+  ok(!$js->_get_resource('foo.json#my$foo'), '$anchor resource found to be bad, and removed');
 
   cmp_deeply(
     $js->evaluate(
