@@ -8,7 +8,7 @@ package JSON::Schema::Draft201909;
 our $VERSION = '0.002';
 
 no if "$]" >= 5.031009, feature => 'indirect';
-use feature qw(current_sub state);
+use feature 'current_sub';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try;
 use Carp 'croak';
@@ -22,7 +22,6 @@ use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool HasMethods Enum InstanceOf HashRef Dict);
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
-use experimental 'lexical_subs';  # needed for <5.26 only
 use namespace::clean;
 
 has output_format => (
@@ -922,45 +921,44 @@ sub _is_elements_unique {
   return 1;
 }
 
+sub _traverse_for_identifiers {
+  my ($data, $canonical_uri) = @_;
+  my $uri_fragment = $canonical_uri->fragment // '';
+  my %identifiers;
+  if (ref $data eq 'ARRAY') {
+    return map
+      __SUB__->($data->[$_], $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
+      0..$#{$data};
+  }
+  elsif (ref $data eq 'HASH') {
+    if (exists $data->{'$id'} and _is_type(undef, 'string', $data->{'$id'})) {
+      $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
+      # this might not be a real $id... wait for it to be encountered at runtime before dying
+      $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri }
+        if not length $canonical_uri->fragment;
+    }
+    if (exists $data->{'$anchor'} and _is_type(undef, 'string', $data->{'$anchor'})) {
+      # we cannot change the canonical uri, or we won't be able to properly identify
+      # paths within this resource
+      my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
+      $identifiers{$uri} = { ref => $data, canonical_uri => $canonical_uri };
+    }
+
+    return
+      %identifiers,
+      map __SUB__->($data->{$_}, $canonical_uri->clone->fragment($uri_fragment.'/'.$_)), keys %$data;
+  }
+
+  return ();
+}
+
 # traverse a schema document, find all identifiers and add them to the resource index.
 # internal only and subject to change!
 sub _find_all_identifiers {
   my ($self, $schema) = @_;
 
-  state sub traverse_for_identifiers {
-    my ($data, $canonical_uri) = @_;
-    my $uri_fragment = $canonical_uri->fragment // '';
-    my %identifiers;
-    if (ref $data eq 'ARRAY') {
-      return map
-        __SUB__->($data->[$_], $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
-        0.. $#{$data};
-    }
-    elsif (ref $data eq 'HASH') {
-      if (exists $data->{'$id'} and _is_type(undef, 'string', $data->{'$id'})) {
-        $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
-        # this might not be a real $id... wait for it to be encountered at runtime before dying
-        $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri }
-          if not length $canonical_uri->fragment;
-      }
-      if (exists $data->{'$anchor'} and _is_type(undef, 'string', $data->{'$anchor'})) {
-        # we cannot change the canonical uri, or we won't be able to properly identify
-        # paths within this resource
-        my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
-        $identifiers{$uri} = { ref => $data, canonical_uri => $canonical_uri };
-      }
-
-      return
-        %identifiers,
-        map __SUB__->($data->{$_}, $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
-          keys %$data;
-    }
-
-    return ();
-  }
-
   my $base_uri = Mojo::URL->new;  # TODO: $self->base_uri->clone
-  my %identifiers = traverse_for_identifiers($schema, $base_uri);
+  my %identifiers = _traverse_for_identifiers($schema, $base_uri);
 
   $identifiers{''} = { ref => $schema, canonical_uri => $base_uri }
     if not "$base_uri" and ref $schema eq 'HASH' and not exists $schema->{'$id'};
