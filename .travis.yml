@@ -13,12 +13,9 @@ perl:
   - "5.20"
   - "5.18"
   - "5.16"
-  - "5.14"
   - blead   # builds perl from git
   - dev     # latest point release
 jobs:
-  allow_failures:
-    - perl: "5.14"  # Mojolicious 8.50+ requires 5.16
   fast_finish: 1
 env:
   global:
