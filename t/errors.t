@@ -748,27 +748,28 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
     $js->evaluate(
       1,
       {
+        '$id' => 'base.json',
         '$defs' => {
           def1 => {
             '$id' => 'def1.json',
-            '$ref' => '#/$defs/myint',
+            '$ref' => 'base.json#/$defs/myint',
             type => 'integer',
             maximum => -1,
             minimum => 5,
           },
           myint => {
             '$id' => 'def2.json',
-            '$ref' => '#my_not',
+            '$ref' => 'base.json#my_not',
             multipleOf => 5,
             exclusiveMaximum => 1,
           },
           mynot => {
             '$anchor' => 'my_not',
-            '$ref' => 'https://localhost:4242/object.json',
+            '$ref' => 'http://localhost:4242/object.json',
             not => true,
           },
           myobject => {
-            '$id' => 'https://localhost:4242/object.json',
+            '$id' => 'http://localhost:4242/object.json',
             type => 'object',
             anyOf => [ false ],
           },
@@ -782,25 +783,25 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/$ref/type',
-          absoluteKeywordLocation => 'https://localhost:4242/object.json#/type',
+          absoluteKeywordLocation => 'http://localhost:4242/object.json#/type',
           error => 'wrong type (expected object)',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/$ref/anyOf/0',
-          absoluteKeywordLocation => 'https://localhost:4242/object.json#/anyOf/0',
+          absoluteKeywordLocation => 'http://localhost:4242/object.json#/anyOf/0',
           error => 'subschema is false',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/$ref/anyOf',
-          absoluteKeywordLocation => 'https://localhost:4242/object.json#/anyOf',
+          absoluteKeywordLocation => 'http://localhost:4242/object.json#/anyOf',
           error => 'no subschemas are valid',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/not',
-          absoluteKeywordLocation => '#/$defs/mynot/not',
+          absoluteKeywordLocation => 'base.json#/$defs/mynot/not',
           error => 'subschema is valid',
         },
         {
@@ -830,6 +831,56 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
       ],
     },
     'errors have correct absolute keyword location via $ref',
+  );
+};
+
+subtest 'unresolvable $ref' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'http://localhost:4242/foo/bar/top_id.json',
+        '$ref' => '/baz/myint.json',
+        '$defs' => {
+          myint => {
+            '$id' => '/baz/myint.json',
+            '$ref' => 'does-not-exist.json',
+          },
+        },
+        anyOf => [ false ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref',
+          absoluteKeywordLocation => 'http://localhost:4242/baz/myint.json#/$ref',
+          error => 'EXCEPTION: unable to find resource http://localhost:4242/baz/does-not-exist.json',
+        },
+      ],
+    },
+    'error for a bad $ref reports the correct absolute location that was referred to',
+  );
+};
+
+subtest 'unresolvable $ref to plain-name fragment' => sub {
+  cmp_deeply(
+    $js->evaluate(1, { '$ref' => '#nowhere' })->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref',
+          error => 'EXCEPTION: unable to find resource #nowhere',
+        },
+      ],
+    },
+    'properly handled a bad $ref to an anchor',
   );
 };
 

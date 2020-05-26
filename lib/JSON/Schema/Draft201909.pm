@@ -62,6 +62,9 @@ before add_resources => sub {
       die 'a schema resource is already indexed with uri "'.$key.'"'
         if $existing->{ref} != $value->{ref} or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
+
+    die sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
+      if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
   }
 };
 
@@ -142,7 +145,7 @@ sub _eval {
 
   foreach my $keyword (
     # CORE KEYWORDS
-    qw($schema $ref $id $anchor $recursiveRef $recursiveAnchor $vocabulary $comment $defs),
+    qw($schema $id $anchor $ref $recursiveRef $recursiveAnchor $vocabulary $comment $defs),
     # VALIDATOR KEYWORDS
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
@@ -230,27 +233,28 @@ sub _eval_keyword_ref {
   my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
 
   my $fragment = $uri->fragment // '';
-  my $subschema;
+  my ($subschema, $absolute_uri);
   # TODO: this will get less ugly when we move to actual document objects
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
     my $document = $base eq '' ? $state->{root_schema}
       : Mojo::JSON::Pointer->new(($self->get_resource($base) // {})->{ref});
     $subschema = $document->get($fragment);
+    $absolute_uri = $uri;
   }
   else {
-    # looks like we have a plain-name fragment
-    my $resource = $self->get_resource($uri) // {};
-    $subschema = $resource->{ref};
-    $uri = $resource->{canonical_uri}->clone;
+    if (my $resource = $self->get_resource($uri)) {
+      $subschema = $resource->{ref};
+      $absolute_uri = $resource->{canonical_uri}->clone;  # this is *not* the anchor-containing URI
+    }
   }
 
-  abort($state, 'unable to resolve ref "%s"', $schema->{'$ref'}) if not defined $subschema;
+  abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
 
   return $self->_eval($data, $subschema,
     +{ %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      absolute_schema_uri => $uri,
+      absolute_schema_uri => $absolute_uri,
       schema_path => '',
     });
 }
@@ -935,6 +939,8 @@ sub _find_all_identifiers {
     elsif (ref $data eq 'HASH') {
       if (exists $data->{'$id'}) {
         $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
+        die sprintf('%s cannot have a non-empty fragment', $data->{'$id'})
+          if length $canonical_uri->fragment;
         $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri };
       }
       if (exists $data->{'$anchor'}) {
