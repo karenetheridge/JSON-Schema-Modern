@@ -340,4 +340,97 @@ subtest 'invalid $id and $anchor' => sub {
   # re-parse a document for $id and $anchors for each evaluation.
 };
 
+subtest 'nested $ids' => sub {
+  my $js = JSON::Schema::Draft201909->new(short_circuit => 0);
+  $js->_find_all_identifiers(
+    my $schema = {
+      '$id' => '/foo/bar/baz.json',
+      '$ref' => '/foo/bar/baz.json#/properties/alpha',  # not the canonical URI for this location
+      properties => {
+        alpha => my $alpha = {
+          '$id' => 'alpha.json',
+          additionalProperties => false,
+          properties => {
+            beta => my $beta = {
+              '$id' => '/beta/hello.json',
+              properties => {
+                gamma => my $gamma = {
+                  '$id' => 'gamma.json',
+                  const => 'hello',
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+  );
+
+  cmp_deeply(
+    { $js->_resource_index },
+    {
+      '/foo/bar/baz.json' => { ref => $schema, canonical_uri => str('/foo/bar/baz.json') },
+      '/foo/bar/alpha.json' => { ref => $alpha, canonical_uri => str('/foo/bar/alpha.json') },
+      '/beta/hello.json' => { ref => $beta, canonical_uri => str('/beta/hello.json') },
+      '/beta/gamma.json' => { ref => $gamma, canonical_uri => str('/beta/gamma.json') },
+    },
+    'properly resolved all the nested $ids',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        alpha => {
+          beta => {
+            gamma => 'not hello',
+          },
+        },
+      },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/alpha',
+          keywordLocation => '/$ref/additionalProperties',
+          absoluteKeywordLocation => '/foo/bar/alpha.json#/additionalProperties',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/additionalProperties',
+          absoluteKeywordLocation => '/foo/bar/alpha.json#/additionalProperties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '/alpha/beta/gamma',
+          keywordLocation => '/properties/alpha/properties/beta/properties/gamma/const',
+          absoluteKeywordLocation => '/beta/gamma.json#/const',
+          error => 'value does not match',
+        },
+        {
+          instanceLocation => '/alpha/beta',
+          keywordLocation => '/properties/alpha/properties/beta/properties',
+          absoluteKeywordLocation => '/beta/hello.json#/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '/alpha',
+          keywordLocation => '/properties/alpha/properties',
+          absoluteKeywordLocation => '/foo/bar/alpha.json#/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => '/foo/bar/baz.json#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'errors have the correct location',
+  );
+};
+
 done_testing;
