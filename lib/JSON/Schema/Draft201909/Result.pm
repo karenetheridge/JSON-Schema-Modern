@@ -135,6 +135,6 @@ Calls L</format> with the style configured in L</output_format>.
 
 =head2 count
 
-Returns the number of errors, when the result is false.
+Returns the number of errors, when the result is false, or zero otherwise.
 
 =cut
