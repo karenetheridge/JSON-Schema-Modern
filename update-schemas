@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Path::Tiny;
+use HTTP::Tiny;
+
+my %files = (
+  '2019-09/hyper-schema.json'       => 'https://json-schema.org/draft/2019-09/hyper-schema',
+  '2019-09/links.json'              => 'https://json-schema.org/draft/2019-09/links',
+  '2019-09/meta/applicator.json'    => 'https://json-schema.org/draft/2019-09/meta/applicator',
+  '2019-09/meta/content.json'       => 'https://json-schema.org/draft/2019-09/meta/content',
+  '2019-09/meta/core.json'          => 'https://json-schema.org/draft/2019-09/meta/core',
+  '2019-09/meta/format.json'        => 'https://json-schema.org/draft/2019-09/meta/format',
+  '2019-09/meta/hyper-schema.json'  => 'https://json-schema.org/draft/2019-09/meta/hyper-schema',
+  '2019-09/meta/meta-data.json'     => 'https://json-schema.org/draft/2019-09/meta/meta-data',
+  '2019-09/meta/validation.json'    => 'https://json-schema.org/draft/2019-09/meta/validation',
+  '2019-09/output/hyper-schema.json'=> 'https://json-schema.org/draft/2019-09/output/hyper-schema',
+  '2019-09/output/schema.json'      => 'https://json-schema.org/draft/2019-09/output/schema',
+  '2019-09/schema.json'             => 'https://json-schema.org/draft/2019-09/schema',
+);
+
+foreach my $target (keys %files) {
+  my $source = $files{$target};
+  $target = path('share', $target);
+  $target->parent->mkpath;
+
+  my $response = HTTP::Tiny->new->get($source);
+  $target->spew($response->{content});
+}
