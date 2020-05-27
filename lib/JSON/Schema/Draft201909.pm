@@ -538,7 +538,7 @@ sub _eval_keyword_items {
 
   my $last_index = -1;
   my $valid = 1;
-  foreach my $idx (0..$#{$data}) {
+  foreach my $idx (0 .. $#{$data}) {
     last if $idx > $#{$schema->{items}};
 
     $last_index = $idx;
@@ -583,7 +583,7 @@ sub _eval_keyword_contains {
 
   my $num_valid = 0;
   my @errors;
-  foreach my $idx (0.. $#{$data}) {
+  foreach my $idx (0 .. $#{$data}) {
     if ($self->_eval($data->[$idx], $schema->{contains},
         +{ %$state,
           errors => \@errors,
@@ -818,7 +818,7 @@ sub _is_equal {
 
   if ($types[0] eq 'array') {
     return 0 if @$x != @$y;
-    foreach my $idx (0..$#{$x}) {
+    foreach my $idx (0 .. $#{$x}) {
       $state->{path} = $path.'/'.$idx;
       return 0 if not $self->_is_equal($x->[$idx], $y->[$idx], $state);
     }
@@ -832,7 +832,7 @@ sub _is_equal {
 # if second arrayref is provided, it is populated with the indices of identical items
 sub _is_elements_unique {
   my ($self, $array, $equal_indices) = @_;
-  foreach my $idx0 (0..$#{$array}-1) {
+  foreach my $idx0 (0 .. $#{$array}-1) {
     foreach my $idx1 ($idx0+1 .. $#{$array}) {
       if ($self->_is_equal($array->[$idx0], $array->[$idx1])) {
         push @$equal_indices, $idx0, $idx1 if defined $equal_indices;
