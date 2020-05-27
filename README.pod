@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -49,7 +49,7 @@ Defaults to true when C<output_format> is C<flag>, and false otherwise.
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of a JSON-encoded string (in accordance with
-L<RFC8259|https://tools.ietf.org/html/rfc8259>. B<The string is expected to be UTF-8 encoded.>
+L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
 The schema is in the form of a Perl data structure, representing a JSON Schema
 that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
@@ -127,7 +127,7 @@ loading multiple schema documents, and registration of a schema against a canoni
 
 =item *
 
-collection of annotations (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>
+collection of annotations (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>)
 
 =item *
 
