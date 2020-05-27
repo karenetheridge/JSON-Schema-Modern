@@ -191,6 +191,8 @@ sub _eval_keyword_schema {
 
   abort($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
+
+  return 1;
 }
 
 sub _eval_keyword_id {
