@@ -35,6 +35,7 @@ has errors => (
   handles_via => 'Array',
   handles => {
     errors => 'elements',
+    error_count => 'count',
   },
 );
 
@@ -61,7 +62,7 @@ sub format {
   die 'unsupported output format';
 }
 
-sub count { 0+ ($_[0]->result ? 0 : $_[0]->errors) }
+sub count { $_[0]->result ? 0 : $_[0]->error_count }
 
 sub TO_JSON {
   my $self = shift;
