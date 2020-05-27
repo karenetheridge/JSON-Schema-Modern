@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
+{{$NEXT}}
+
 0.002     2020-05-27 22:28:15Z
           - fix incorrect prereq needed for tests
           - add support for $id and $anchor in single schema documents
