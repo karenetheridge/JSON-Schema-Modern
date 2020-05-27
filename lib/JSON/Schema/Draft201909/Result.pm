@@ -45,6 +45,11 @@ has output_format => (
   default => 'basic',
 );
 
+sub BUILD {
+  my $self = shift;
+  warn 'result is false but there are no errors' if not $self->result and not $self->error_count;
+}
+
 sub format {
   my ($self, $style) = @_;
   if ($style eq 'flag') {
@@ -114,6 +119,8 @@ Returns an array of L<JSON::Schema::Draft201909::Error> objects.
 One of: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<basic>.
 
 =head1 METHODS
+
+=for Pod::Coverage BUILD
 
 =head2 format
 
