@@ -15,6 +15,7 @@ use Carp 'croak';
 use List::Util 1.33 qw(any pairs);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
+use Safe::Isa;
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
@@ -122,7 +123,13 @@ sub evaluate {
     $result = $self->_eval($data, $schema, $state);
   }
   catch {
-    E($state, 'EXCEPTION: '.$@) if $@ ne "ABORT\n";
+    if ($@->$_isa('JSON::Schema::Draft201909::Error')) {
+      push @{$state->{errors}}, $@;
+    }
+    else {
+      E($state, 'EXCEPTION: '.$@);
+    }
+
     $result = 0;
   }
 
@@ -995,8 +1002,9 @@ sub E {
 # creates an error object, but also aborts evaluation immediately
 use namespace::clean 'abort';
 sub abort {
-  E($_[0], 'EXCEPTION: '.$_[1], @_[2..$#_]);
-  die "ABORT\n";
+  my ($state, $error_string, @args) = @_;
+  E($state, 'EXCEPTION: '.$error_string, @args);
+  die pop @{$state->{errors}};
 }
 
 1;

@@ -887,4 +887,30 @@ subtest 'unresolvable $ref to plain-name fragment' => sub {
   );
 };
 
+subtest 'abort due to a schema error' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        oneOf => [
+          { type => 'number' },
+          { type => 'string' },
+          { type => 'whargarbl' },
+        ],
+      }
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/oneOf/2/type',
+          error => 'EXCEPTION: unrecognized type "whargarbl"',
+        },
+      ],
+    },
+    'exception inside a oneOf (where errors are localized) are still included in the result',
+  );
+};
+
 done_testing;
