@@ -31,6 +31,7 @@ $accepter->acceptance(
 
     $result;
   },
+  @ARGV ? (tests => { file => \@ARGV }) : (),
 );
 
 done_testing;
