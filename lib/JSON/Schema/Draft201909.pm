@@ -694,11 +694,17 @@ sub _eval_keyword_additionalProperties {
     next if exists $schema->{patternProperties}
       and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
 
-    $valid = 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties},
-      +{ %$state,
-        data_path => $state->{data_path}.'/'.$property,
-        schema_path => $state->{schema_path}.'/additionalProperties',
-      });
+    if ($self->_is_type('boolean', $schema->{additionalProperties})) {
+      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$property },
+        'additional property not permitted') if not $schema->{additionalProperties};
+    }
+    else {
+      $valid = 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties},
+        +{ %$state,
+          data_path => $state->{data_path}.'/'.$property,
+          schema_path => $state->{schema_path}.'/additionalProperties',
+        });
+    }
     last if not $valid and $state->{short_circuit};
   }
 
