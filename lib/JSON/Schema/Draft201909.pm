@@ -8,7 +8,6 @@ package JSON::Schema::Draft201909;
 our $VERSION = '0.004';
 
 no if "$]" >= 5.031009, feature => 'indirect';
-use feature 'current_sub';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp 'croak';
@@ -19,9 +18,10 @@ use Safe::Isa;
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int HasMethods Enum InstanceOf HashRef Dict);
+use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict);
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
+use JSON::Schema::Draft201909::Document;
 use namespace::clean;
 
 has output_format => (
@@ -69,7 +69,16 @@ sub evaluate_json_string {
 sub evaluate {
   my ($self, $data, $schema) = @_;
 
-  $self->_find_all_identifiers($schema);
+  # TODO: move to $self->add_schema($schema)
+  my $document = JSON::Schema::Draft201909::Document->new(
+    # TODO canonical_uri => $self->base_uri,
+    schema => $schema,
+  );
+
+  $self->_add_resources(
+    map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
+      $document->_resource_pairs
+  );
 
   my $state = {
     base_uri => Mojo::URL->new,                   # TODO: will be set by a global attribute
@@ -212,16 +221,16 @@ sub _fetch_and_eval_ref_uri {
 
   my $fragment = $uri->fragment // '';
   my ($subschema, $canonical_uri);
-  # TODO: this will get less ugly when we move to actual document objects
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
-    my $document = Mojo::JSON::Pointer->new(($self->_get_resource($base) // {})->{ref});
-    $subschema = $document->get($fragment);
-    $canonical_uri = $uri;
+    if (my $resource = $self->_get_resource($base)) {
+      $subschema = $resource->{document}->get($resource->{path}.$fragment);
+      $canonical_uri = $uri;
+    }
   }
   else {
     if (my $resource = $self->_get_resource($uri)) {
-      $subschema = $resource->{ref};
+      $subschema = $resource->{document}->get($resource->{path});
       $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI
     }
   }
@@ -936,59 +945,12 @@ sub _is_elements_unique {
   return 1;
 }
 
-sub _traverse_for_identifiers {
-  my ($data, $canonical_uri) = @_;
-  my $uri_fragment = $canonical_uri->fragment // '';
-  my %identifiers;
-  if (ref $data eq 'ARRAY') {
-    return map
-      __SUB__->($data->[$_], $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
-      0 .. $#{$data};
-  }
-  elsif (ref $data eq 'HASH') {
-    if (exists $data->{'$id'} and _is_type(undef, 'string', $data->{'$id'})) {
-      $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
-      # this might not be a real $id... wait for it to be encountered at runtime before dying
-      if (not length $canonical_uri->fragment) {
-        $canonical_uri->fragment(undef);
-        $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri };
-      };
-    }
-    if (exists $data->{'$anchor'} and _is_type(undef, 'string', $data->{'$anchor'})) {
-      # we cannot change the canonical uri, or we won't be able to properly identify
-      # paths within this resource
-      my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
-      $identifiers{$uri} = { ref => $data, canonical_uri => $canonical_uri };
-    }
-
-    return
-      %identifiers,
-      map __SUB__->($data->{$_}, $canonical_uri->clone->fragment($uri_fragment.'/'.$_)), keys %$data;
-  }
-
-  return ();
-}
-
-# traverse a schema document, find all identifiers and add them to the resource index.
-# internal only and subject to change!
-sub _find_all_identifiers {
-  my ($self, $schema) = @_;
-
-  my $base_uri = Mojo::URL->new;  # TODO: $self->base_uri->clone
-  my %identifiers = _traverse_for_identifiers($schema, $base_uri);
-
-  $identifiers{''} = { ref => $schema, canonical_uri => $base_uri }
-    if not "$base_uri" and ref $schema eq 'HASH' and not exists $schema->{'$id'};
-
-  $self->_add_resources(%identifiers);
-}
-
 has _resource_index => (
   is => 'bare',
   isa => HashRef[Dict[
-      # see JSON::MaybeXS::is_bool
-      ref => InstanceOf[qw(JSON::XS::Boolean Cpanel::JSON::XS::Boolean JSON::PP::Boolean)]|HashRef,
       canonical_uri => InstanceOf['Mojo::URL'],
+      path => Str,
+      document => InstanceOf['JSON::Schema::Draft201909::Document'],
     ]],
   handles_via => 'Hash',
   handles => {
@@ -996,6 +958,7 @@ has _resource_index => (
     _get_resource => 'get',
     _remove_resource => 'delete',
     _resource_index => 'elements',
+    _resource_keys => 'keys',
   },
   lazy => 1,
   default => sub { {} },
@@ -1003,14 +966,18 @@ has _resource_index => (
 
 before _add_resources => sub {
   my $self = shift;
-  foreach my $pair (pairs @_) {
+  foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
     my ($key, $value) = @$pair;
     if (my $existing = $self->_get_resource($key)) {
-      croak 'a schema resource is already indexed with uri "'.$key.'"'
-        # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
-        # schemas that lack all identifiers altogether
+      # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
+      # schemas that lack all identifiers altogether; we drop *all* resources from that document
+      $self->_remove_resource(
+          grep $self->_get_resource($_)->{document} == $existing->{document}, $self->_resource_keys)
+        if $key eq '';
+
+      croak 'uri "'.$key.'" conflicts with an existing schema resource'
         if ($key ne '' and $existing->{canonical_uri} ne '')
-          and $existing->{ref} != $value->{ref}
+          and $existing->{path} ne $value->{path}
             or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
 
