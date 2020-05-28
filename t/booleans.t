@@ -13,8 +13,6 @@ use Helper;
 
 my $js = JSON::Schema::Draft201909->new;
 
-# check constructor args here, when we have some
-
 my @tests = (
   { schema => false, result => false },
   { schema => true, result => true },
