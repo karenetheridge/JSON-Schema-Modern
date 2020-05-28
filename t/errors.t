@@ -682,7 +682,7 @@ subtest 'const and enum' => sub {
 
 subtest 'exceptions' => sub {
   cmp_deeply(
-    $js->evaluate_json_string('[ 1, 2, 3, wargarbl ]', true)->TO_JSON,
+    $js->evaluate_json_string('[ 1, 2, 3, whargarbl ]', true)->TO_JSON,
     {
       valid => bool(0),
       errors => [
