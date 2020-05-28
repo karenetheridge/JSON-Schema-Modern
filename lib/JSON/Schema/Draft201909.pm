@@ -10,7 +10,7 @@ our $VERSION = '0.003';
 no if "$]" >= 5.031009, feature => 'indirect';
 use feature 'current_sub';
 use JSON::MaybeXS 1.004001 'is_bool';
-use Syntax::Keyword::Try;
+use Syntax::Keyword::Try 0.11;
 use Carp 'croak';
 use List::Util 1.33 qw(any pairs);
 use Mojo::JSON::Pointer;
