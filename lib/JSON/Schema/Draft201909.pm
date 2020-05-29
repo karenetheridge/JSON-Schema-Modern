@@ -120,7 +120,7 @@ sub evaluate {
     depth => 0,
     data_path => '',
     traversed_schema_path => '',  # the accumulated path up to the last $ref traversal
-    absolute_schema_uri => undef, # the absolute path of the last traversed $ref; always a Mojo::URL
+    canonical_schema_uri => undef,# the canonical path of the last traversed $ref (Mojo::URL)
     schema_path => '',            # the rest of the path, since the last traversed $ref
     errors => [],
   };
@@ -229,7 +229,7 @@ sub _eval_keyword_id {
 
   $state->{base_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  $state->{absolute_schema_uri} = $uri->clone;
+  $state->{canonical_schema_uri} = $uri->clone;
   $state->{schema_path} = '';
 
   return 1;
@@ -246,7 +246,7 @@ sub _eval_keyword_anchor {
   }
 
   # we already indexed this uri, so there is nothing more to do.
-  # we explicitly do NOT set $state->{absolute_schema_uri}.
+  # we explicitly do NOT set $state->{canonical_schema_uri}.
   return 1;
 }
 
@@ -258,18 +258,18 @@ sub _eval_keyword_ref {
   my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
 
   my $fragment = $uri->fragment // '';
-  my ($subschema, $absolute_uri);
+  my ($subschema, $canonical_uri);
   # TODO: this will get less ugly when we move to actual document objects
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
     my $document = Mojo::JSON::Pointer->new(($self->_get_resource($base) // {})->{ref});
     $subschema = $document->get($fragment);
-    $absolute_uri = $uri;
+    $canonical_uri = $uri;
   }
   else {
     if (my $resource = $self->_get_resource($uri)) {
       $subschema = $resource->{ref};
-      $absolute_uri = $resource->{canonical_uri}->clone;  # this is *not* the anchor-containing URI
+      $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI
     }
   }
 
@@ -278,7 +278,7 @@ sub _eval_keyword_ref {
   return $self->_eval($data, $subschema,
     +{ %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      absolute_schema_uri => $absolute_uri,
+      canonical_schema_uri => $canonical_uri, # note: not canonical yet until $id is processed
       schema_path => '',
     });
 }
@@ -983,9 +983,9 @@ sub E {
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$state->{schema_path}.$suffix,
-    !$state->{absolute_schema_uri} ? () : ( absolute_keyword_location => do {
-      my $abs = $state->{absolute_schema_uri}->clone;
-      $abs->fragment(($abs->fragment//'').$state->{schema_path}.$suffix);
+    !$state->{canonical_schema_uri} ? () : ( absolute_keyword_location => do {
+      my $uri = $state->{canonical_schema_uri}->clone;
+      $uri->fragment(($uri->fragment//'').$state->{schema_path}.$suffix);
     } ),
     error => @args ? sprintf($error_string, @args) : $error_string,
   );
