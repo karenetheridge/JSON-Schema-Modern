@@ -124,7 +124,7 @@ sub _eval {
 
   foreach my $keyword (
     # CORE KEYWORDS
-    qw($schema $id $anchor $ref $recursiveRef $recursiveAnchor $vocabulary $comment $defs),
+    qw($schema $id $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
     # VALIDATOR KEYWORDS
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
@@ -192,6 +192,21 @@ sub _eval_keyword_anchor {
   return 1;
 }
 
+sub _eval_keyword_recursiveAnchor {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'boolean');
+  return 1 if not $schema->{'$recursiveAnchor'} or exists $state->{recursive_anchor_uri};
+
+  # record the canonical location of the current position, to be used against future resolution
+  # of a $recursiveRef uri -- as if it was the current location when we encounter a $ref.
+  my $uri = $state->{canonical_schema_uri} ? $state->{canonical_schema_uri}->clone : Mojo::URL->new;
+  $uri->fragment(($uri->fragment//'').$state->{schema_path});
+
+  $state->{recursive_anchor_uri} = $uri;
+  return 1;
+}
+
 sub _fetch_and_eval_ref_uri {
   my ($self, $data, $schema, $state, $uri) = @_;
 
@@ -227,6 +242,21 @@ sub _eval_keyword_ref {
   assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
+  return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
+}
+
+sub _eval_keyword_recursiveRef {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  my $uri = Mojo::URL->new($schema->{'$recursiveRef'})
+    ->base($state->{recursive_anchor_uri})->to_abs;
+
+  abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a'
+      .' $recursiveAnchor location with a canonical URI containing a fragment')
+    if $schema->{'$recursiveRef'} ne '#' and $state->{recursive_anchor_uri}->fragment;
+
   return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
 }
 
