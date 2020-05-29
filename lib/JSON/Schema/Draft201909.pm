@@ -502,7 +502,7 @@ sub _eval_keyword_dependentRequired {
     keys %{$schema->{dependentRequired}};
 
   return 1 if not @missing;
-  return E($state, 'missing propert'.(@missing > 1 ? 'ies' : 'y').': '.join(', ', @missing));
+  return E($state, 'missing propert'.(@missing > 1 ? 'ies' : 'y').': '.join(', ', sort @missing));
 }
 
 sub _eval_keyword_allOf {
@@ -607,7 +607,7 @@ sub _eval_keyword_dependentSchemas {
   assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
-  foreach my $property (keys %{$schema->{dependentSchemas}}) {
+  foreach my $property (sort keys %{$schema->{dependentSchemas}}) {
     next if not exists $data->{$property}
       or $self->_eval($data, $schema->{dependentSchemas}{$property},
         +{ %$state, schema_path => $state->{schema_path}.'/dependentSchemas/'.$property });
@@ -748,7 +748,7 @@ sub _eval_keyword_properties {
   assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
-  foreach my $property (keys %{$schema->{properties}}) {
+  foreach my $property (sort keys %{$schema->{properties}}) {
     next if not exists $data->{$property};
     $valid = 0 if not $self->_eval($data->{$property}, $schema->{properties}{$property},
         +{ %$state,
@@ -769,9 +769,8 @@ sub _eval_keyword_patternProperties {
   assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
-  foreach my $property_pattern (keys %{$schema->{patternProperties}}) {
-    my @property_matches = grep /$property_pattern/, keys %$data;
-    foreach my $property (@property_matches) {
+  foreach my $property_pattern (sort keys %{$schema->{patternProperties}}) {
+    foreach my $property (sort grep /$property_pattern/, keys %$data) {
       $valid = 0
         if not $self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
           +{ %$state,
@@ -792,7 +791,7 @@ sub _eval_keyword_additionalProperties {
   return 1 if not $self->_is_type('object', $data);
 
   my $valid = 1;
-  foreach my $property (keys %$data) {
+  foreach my $property (sort keys %$data) {
     next if exists $schema->{properties} and exists $schema->{properties}{$property};
     next if exists $schema->{patternProperties}
       and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
@@ -827,7 +826,7 @@ sub _eval_keyword_propertyNames {
   return 1 if not $self->_is_type('object', $data);
 
   my $valid = 1;
-  foreach my $property (keys %$data) {
+  foreach my $property (sort keys %$data) {
     $valid = 0 if not $self->_eval($property, $schema->{propertyNames},
       +{ %$state,
         data_path => $state->{data_path}.'/'.$property,

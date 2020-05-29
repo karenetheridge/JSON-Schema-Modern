@@ -913,4 +913,55 @@ subtest 'abort due to a schema error' => sub {
   );
 };
 
+subtest 'sorted property names' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1, bar => 1, baz => 1, hello => 1 },
+      {
+        properties => {
+          foo => false,
+          bar => false,
+        },
+        additionalProperties => false,
+      }
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/bar',
+          keywordLocation => '/properties/bar',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '/baz',
+          keywordLocation => '/additionalProperties',
+          error => 'additional property not permitted',
+        },
+        {
+          instanceLocation => '/hello',
+          keywordLocation => '/additionalProperties',
+          error => 'additional property not permitted',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'property names are considered in sorted order',
+  );
+};
+
 done_testing;
