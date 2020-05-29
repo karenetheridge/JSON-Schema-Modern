@@ -45,7 +45,7 @@ __END__
 =pod
 
 =for :header
-=for stopwords schema
+=for stopwords schema fragmentless
 
 =head1 SYNOPSIS
 
@@ -77,10 +77,10 @@ The schema path taken during evaluation to arrive at the error.
 =head2 absolute_keyword_location
 
 The path in the schema where the error occurred (may be different from keyword_location, if a
-C<$ref> was followed).  This is supposed to be an absolute URI (as per
-L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.3.2>) but
-this implementation does not yet track the absolute URIs of schemas, so it is just the fragment
-portion of a URI for now.
+C<$ref> was followed).  Note that this is not actually an absolute (fragmentless) URI in most cases,
+as the indicated error will occur at a path below the position where the most recent identifier had
+been declared in the schema. Further, if the schema never declared an absolute base URI, this URI
+won't contain a scheme either.
 
 =head2 error
 
