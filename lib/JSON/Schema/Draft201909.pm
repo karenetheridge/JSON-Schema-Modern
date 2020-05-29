@@ -711,6 +711,7 @@ sub _eval_keyword_contains {
   }
 
   if (exists $schema->{minContains}) {
+    local $state->{keyword} = 'minContains';
     abort($state, '%s is not an integer', $schema->{minContains})
       if not $self->_is_type('integer', $schema->{minContains});
     abort($state, '%s is not a non-negative integer', $schema->{minContains})
@@ -727,6 +728,7 @@ sub _eval_keyword_contains {
   }
 
   if (exists $schema->{maxContains}) {
+    local $state->{keyword} = 'maxContains';
     abort($state, '%s is not an integer', $schema->{maxContains})
       if not $self->_is_type('integer', $schema->{maxContains});
     abort($state, '%s is not a non-negative integer', $schema->{maxContains})
@@ -734,7 +736,7 @@ sub _eval_keyword_contains {
 
     if ($num_valid > $schema->{maxContains}) {
       $valid = 0;
-      E({ %$state, keyword => 'maxContains' }, 'contains too many matching items');
+      E($state, 'contains too many matching items');
       return 0 if $state->{short_circuit};
     }
   }
