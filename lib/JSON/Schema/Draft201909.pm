@@ -192,12 +192,8 @@ sub _eval_keyword_anchor {
   return 1;
 }
 
-sub _eval_keyword_ref {
-  my ($self, $data, $schema, $state) = @_;
-
-  assert_keyword_type($state, $schema, 'string');
-
-  my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
+sub _fetch_and_eval_ref_uri {
+  my ($self, $data, $schema, $state, $uri) = @_;
 
   my $fragment = $uri->fragment // '';
   my ($subschema, $canonical_uri);
@@ -219,10 +215,19 @@ sub _eval_keyword_ref {
 
   return $self->_eval($data, $subschema,
     +{ %$state,
-      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
+      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},
       canonical_schema_uri => $canonical_uri, # note: not canonical yet until $id is processed
       schema_path => '',
     });
+}
+
+sub _eval_keyword_ref {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
+  return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
 }
 
 sub _eval_keyword_vocabulary {
