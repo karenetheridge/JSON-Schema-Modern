@@ -199,6 +199,12 @@ sub _eval_keyword_comment {
 }
 
 sub _eval_keyword_defs {
+  my ($self, $data, $schema, $state) = @_;
+
+  my $type = $self->_get_type($schema->{'$defs'});
+  abort($state, '$defs value is not an object or boolean')
+    if $type ne 'object' and $type ne 'boolean';
+
   # we do nothing directly with this keyword, including not collecting its value for annotations.
   return 1;
 }
@@ -206,6 +212,8 @@ sub _eval_keyword_defs {
 sub _eval_keyword_schema {
   my ($self, $data, $schema, $state) = @_;
 
+  abort($state, '$schema value is not a string')
+    if not $self->_is_type('string', $schema->{'$schema'});
   abort($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 
@@ -247,6 +255,8 @@ sub _eval_keyword_anchor {
 
 sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
+
+  abort($state, '$ref value is not a string') if not $self->_is_type('string', $schema->{'$ref'});
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
 
