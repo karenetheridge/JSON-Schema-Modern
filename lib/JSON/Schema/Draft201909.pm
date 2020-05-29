@@ -74,8 +74,12 @@ before _add_resources => sub {
             or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
 
+    my $fragment = $value->{canonical_uri}->fragment;
+    croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
+      if defined $fragment and $fragment eq '';
+
     croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
-      if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
+      if ($fragment // '') =~ m{^[^/]};
   }
 };
 
@@ -227,6 +231,7 @@ sub _eval_keyword_id {
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length $uri->fragment;
 
+  $uri->fragment(undef);
   $state->{base_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{canonical_schema_uri} = $uri->clone;
@@ -942,8 +947,10 @@ sub _traverse_for_identifiers {
     if (exists $data->{'$id'} and _is_type(undef, 'string', $data->{'$id'})) {
       $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
       # this might not be a real $id... wait for it to be encountered at runtime before dying
-      $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri }
-        if not length $canonical_uri->fragment;
+      if (not length $canonical_uri->fragment) {
+        $canonical_uri->fragment(undef);
+        $identifiers{$canonical_uri} = { ref => $data, canonical_uri => $canonical_uri };
+      };
     }
     if (exists $data->{'$anchor'} and _is_type(undef, 'string', $data->{'$anchor'})) {
       # we cannot change the canonical uri, or we won't be able to properly identify
@@ -985,7 +992,9 @@ sub E {
     keyword_location => $state->{traversed_schema_path}.$state->{schema_path}.$suffix,
     !$state->{canonical_schema_uri} ? () : ( absolute_keyword_location => do {
       my $uri = $state->{canonical_schema_uri}->clone;
-      $uri->fragment(($uri->fragment//'').$state->{schema_path}.$suffix);
+      $uri->fragment(($uri->fragment//'').$state->{schema_path}.$suffix)
+        if $state->{schema_path} or $suffix;
+      $uri;
     } ),
     error => @args ? sprintf($error_string, @args) : $error_string,
   );

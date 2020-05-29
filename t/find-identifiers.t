@@ -433,4 +433,30 @@ subtest 'nested $ids' => sub {
   );
 };
 
+subtest '$id with an empty fragment' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  $js->_find_all_identifiers(
+    my $schema = {
+      '$defs' => {
+        foo => {
+          '$id' => 'http://localhost:4242/my_foo#',
+          type => 'string',
+        },
+      },
+    },
+  );
+
+  cmp_deeply(
+    { $js->_resource_index },
+    {
+      '' => { canonical_uri => str(''), ref => $schema },
+      'http://localhost:4242/my_foo' => {
+        canonical_uri => str('http://localhost:4242/my_foo'),
+        ref => $schema->{'$defs'}{foo},
+      },
+    },
+    '$id is stored with the empty fragment stripped',
+  );
+};
+
 done_testing;

@@ -5,6 +5,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use Test::Fatal;
+use Test::Deep;
 use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
@@ -75,6 +76,48 @@ subtest 'local anchor' => sub {
     },
     undef,
     'no exception',
+  );
+};
+
+subtest '$id with an empty fragment' => sub {
+  my $js = JSON::Schema::Draft201909->new(max_traversal_depth => 2);
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$defs' => {
+          foo => {
+            '$id' => 'http://localhost:4242/my_foo#',
+            type => 'string',
+          },
+          reference_to_foo => {
+            '$ref' => 'http://localhost:4242/my_foo',
+          },
+        },
+        allOf => [
+          { '$ref' => 'http://localhost:4242/my_foo' },
+          { '$ref' => '#/$defs/reference_to_foo' },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/$ref/type',
+          absoluteKeywordLocation => 'http://localhost:4242/my_foo#/type',
+          error => 'wrong type (expected string)',
+        },
+        {
+          absoluteKeywordLocation => 'http://localhost:4242/my_foo',
+          error => 'EXCEPTION: maximum traversal depth exceeded',
+          instanceLocation => '',
+          keywordLocation => "/allOf/1/\$ref/\$ref",
+        },
+      ],
+    },
+    '$id with empty fragment can be found by $ref that did not include it; fragment not included in error either',
   );
 };
 
