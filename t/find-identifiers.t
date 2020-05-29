@@ -308,7 +308,7 @@ subtest 'invalid $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/0/else/then/$ref/$anchor',
           absoluteKeywordLocation => 'foo.json#/$defs/bad_anchor/$anchor',
-          error => 'EXCEPTION: my$foo does not match required syntax',
+          error => 'EXCEPTION: $anchor value "my$foo" does not match required syntax',
         }
       ],
     },
@@ -329,7 +329,7 @@ subtest 'invalid $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/0/then/$ref/$id',
           absoluteKeywordLocation => 'foo.json#/$defs/bad_id/$id',
-          error => 'EXCEPTION: foo.json#/foo/bar cannot have a non-empty fragment',
+          error => 'EXCEPTION: $id value "foo.json#/foo/bar" cannot have a non-empty fragment',
         }
       ],
     },

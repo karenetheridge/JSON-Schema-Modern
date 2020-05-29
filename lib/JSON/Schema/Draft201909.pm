@@ -224,7 +224,8 @@ sub _eval_keyword_id {
   assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$id'})->base($state->{base_uri})->to_abs;
-  abort($state, '%s cannot have a non-empty fragment', $schema->{'$id'}) if length $uri->fragment;
+  abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
+    if length $uri->fragment;
 
   $state->{base_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
@@ -241,7 +242,7 @@ sub _eval_keyword_anchor {
 
   if ($schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
     $self->_remove_resource($state->{base_uri}->clone->fragment($schema->{'$anchor'}));
-    abort($state, '%s does not match required syntax', $schema->{'$anchor'});
+    abort($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'});
   }
 
   # we already indexed this uri, so there is nothing more to do.
@@ -319,7 +320,7 @@ sub _eval_keyword_multipleOf {
 
   return 1 if not $self->_is_type('number', $data);
   assert_keyword_type($state, $schema, 'number');
-  abort($state, '%s is not a positive number', $schema->{multipleOf}) if $schema->{multipleOf} <= 0;
+  abort($state, 'multipleOf value is not a positive number') if $schema->{multipleOf} <= 0;
 
   my $quotient = $data / $schema->{multipleOf};
   return 1 if int($quotient) == $quotient;
@@ -371,8 +372,7 @@ sub _eval_keyword_maxLength {
 
   return 1 if not $self->_is_type('string', $data);
   assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s is not a non-negative integer', $schema->{maxLength})
-    if $schema->{maxLength} < 0;
+  abort($state, 'maxLength value is not a non-negative integer') if $schema->{maxLength} < 0;
 
   return 1 if length($data) <= $schema->{maxLength};
   return E($state, 'length is greater than %d', $schema->{maxLength});
@@ -383,8 +383,7 @@ sub _eval_keyword_minLength {
 
   return 1 if not $self->_is_type('string', $data);
   assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s is not a non-negative integer', $schema->{minLength})
-    if $schema->{minLength} < 0;
+  abort($state, 'minLength value is not a non-negative integer') if $schema->{minLength} < 0;
 
   return 1 if length($data) >= $schema->{minLength};
   return E($state, 'length is less than %d', $schema->{minLength});
@@ -404,8 +403,7 @@ sub _eval_keyword_maxItems {
 
   return 1 if not $self->_is_type('array', $data);
   assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s is not a non-negative integer', $schema->{maxItems})
-    if $schema->{maxItems} < 0;
+  abort($state, 'maxItems value is not a non-negative integer') if $schema->{maxItems} < 0;
 
   return 1 if @$data <= $schema->{maxItems};
   return E($state, 'more than %d items', $schema->{maxItems});
@@ -416,8 +414,7 @@ sub _eval_keyword_minItems {
 
   return 1 if not $self->_is_type('array', $data);
   assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s is not a non-negative integer', $schema->{minItems})
-    if $schema->{minItems} < 0;
+  abort($state, 'minItems value is not a non-negative integer') if $schema->{minItems} < 0;
 
   return 1 if @$data >= $schema->{minItems};
   return E($state, 'fewer than %d items', $schema->{minItems});
@@ -439,7 +436,7 @@ sub _eval_keyword_maxProperties {
 
   return 1 if not $self->_is_type('object', $data);
   assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s is not a non-negative integer', $schema->{maxProperties})
+  abort($state, 'maxProperties value is not a non-negative integer')
     if $schema->{maxProperties} < 0;
 
   return 1 if keys %$data <= $schema->{maxProperties};
@@ -451,7 +448,7 @@ sub _eval_keyword_minProperties {
 
   return 1 if not $self->_is_type('object', $data);
   assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s is not a non-negative integer', $schema->{minProperties})
+  abort($state, 'minProperties value is not a non-negative integer')
     if $schema->{minProperties} < 0;
 
   return 1 if keys %$data >= $schema->{minProperties};
@@ -694,8 +691,7 @@ sub _eval_keyword_contains {
   if (exists $schema->{minContains}) {
     local $state->{keyword} = 'minContains';
     assert_keyword_type($state, $schema, 'integer');
-    abort($state, '%s is not a non-negative integer', $schema->{minContains})
-      if $schema->{minContains} < 0;
+    abort($state, 'minContains value is not a non-negative integer') if $schema->{minContains} < 0;
   }
 
   my $valid = 1;
@@ -710,8 +706,7 @@ sub _eval_keyword_contains {
   if (exists $schema->{maxContains}) {
     local $state->{keyword} = 'maxContains';
     assert_keyword_type($state, $schema, 'integer');
-    abort($state, '%s is not a non-negative integer', $schema->{maxContains})
-      if $schema->{maxContains} < 0;
+    abort($state, 'maxContains value is not a non-negative integer') if $schema->{maxContains} < 0;
 
     if ($num_valid > $schema->{maxContains}) {
       $valid = 0;
