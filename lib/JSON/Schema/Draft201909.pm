@@ -192,8 +192,7 @@ sub _eval {
 
 sub _eval_keyword_comment {
   my ($self, $data, $schema, $state) = @_;
-  abort($state, '"$comment" value is not a string')
-    if not $self->_is_type('string', $schema->{'$comment'});
+  assert_keyword_type($state, $schema, 'string');
   # we do nothing with this keyword, including not collecting its value for annotations.
   return 1;
 }
@@ -212,8 +211,7 @@ sub _eval_keyword_defs {
 sub _eval_keyword_schema {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '$schema value is not a string')
-    if not $self->_is_type('string', $schema->{'$schema'});
+  assert_keyword_type($state, $schema, 'string');
   abort($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 
@@ -223,8 +221,7 @@ sub _eval_keyword_schema {
 sub _eval_keyword_id {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '%s is not a string', $schema->{'$id'})
-    if not $self->_is_type('string', $schema->{'$id'});
+  assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$id'})->base($state->{base_uri})->to_abs;
   abort($state, '%s cannot have a non-empty fragment', $schema->{'$id'}) if length $uri->fragment;
@@ -240,8 +237,7 @@ sub _eval_keyword_id {
 sub _eval_keyword_anchor {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '%s is not a string', $schema->{'$anchor'})
-    if not $self->_is_type('string', $schema->{'$anchor'});
+  assert_keyword_type($state, $schema, 'string');
 
   if ($schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
     $self->_remove_resource($state->{base_uri}->clone->fragment($schema->{'$anchor'}));
@@ -256,7 +252,7 @@ sub _eval_keyword_anchor {
 sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '$ref value is not a string') if not $self->_is_type('string', $schema->{'$ref'});
+  assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
 
@@ -322,8 +318,7 @@ sub _eval_keyword_multipleOf {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  abort($state, '%s is not a number', $schema->{multipleOf})
-    if not $self->_is_type('number', $schema->{multipleOf});
+  assert_keyword_type($state, $schema, 'number');
   abort($state, '%s is not a positive number', $schema->{multipleOf}) if $schema->{multipleOf} <= 0;
 
   my $quotient = $data / $schema->{multipleOf};
@@ -335,8 +330,7 @@ sub _eval_keyword_maximum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  abort($state, '%s is not a number', $schema->{maximum})
-    if not $self->_is_type('number', $schema->{maximum});
+  assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data <= $schema->{maximum};
   return E($state, 'value is larger than %d', $schema->{maximum});
@@ -346,8 +340,7 @@ sub _eval_keyword_exclusiveMaximum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  abort($state, '%s is not a number', $schema->{exclusiveMaximum})
-    if not $self->_is_type('number', $schema->{exclusiveMaximum});
+  assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data < $schema->{exclusiveMaximum};
   return E($state, 'value is equal to or larger than %d', $schema->{exclusiveMaximum});
@@ -357,8 +350,7 @@ sub _eval_keyword_minimum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  abort($state, '%s is not a number', $schema->{minimum})
-    if not $self->_is_type('number', $schema->{minimum});
+  assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data >= $schema->{minimum};
   return E($state, 'value is smaller than %d', $schema->{minimum});
@@ -368,8 +360,7 @@ sub _eval_keyword_exclusiveMinimum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('number', $data);
-  abort($state, '%s is not a number', $schema->{exclusiveMinimum})
-    if not $self->_is_type('number', $schema->{exclusiveMinimum});
+  assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data > $schema->{exclusiveMinimum};
   return E($state, 'value is equal to or smaller than %d', $schema->{exclusiveMinimum});
@@ -379,8 +370,7 @@ sub _eval_keyword_maxLength {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
-  abort($state, '%s is not an integer', $schema->{maxLength})
-    if not $self->_is_type('integer', $schema->{maxLength});
+  assert_keyword_type($state, $schema, 'integer');
   abort($state, '%s is not a non-negative integer', $schema->{maxLength})
     if $schema->{maxLength} < 0;
 
@@ -392,8 +382,7 @@ sub _eval_keyword_minLength {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
-  abort($state, '%s is not an integer', $schema->{minLength})
-    if not $self->_is_type('integer', $schema->{minLength});
+  assert_keyword_type($state, $schema, 'integer');
   abort($state, '%s is not a non-negative integer', $schema->{minLength})
     if $schema->{minLength} < 0;
 
@@ -414,8 +403,7 @@ sub _eval_keyword_maxItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
-  abort($state, '%s is not an integer', $schema->{maxItems})
-    if not $self->_is_type('integer', $schema->{maxItems});
+  assert_keyword_type($state, $schema, 'integer');
   abort($state, '%s is not a non-negative integer', $schema->{maxItems})
     if $schema->{maxItems} < 0;
 
@@ -427,8 +415,7 @@ sub _eval_keyword_minItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
-  abort($state, '%s is not an integer', $schema->{minItems})
-    if not $self->_is_type('integer', $schema->{minItems});
+  assert_keyword_type($state, $schema, 'integer');
   abort($state, '%s is not a non-negative integer', $schema->{minItems})
     if $schema->{minItems} < 0;
 
@@ -440,8 +427,7 @@ sub _eval_keyword_uniqueItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('array', $data);
-  abort($state, '%s is not a boolean', $schema->{uniqueItems})
-    if not $self->_is_type('boolean', $schema->{uniqueItems});
+  assert_keyword_type($state, $schema, 'boolean');
 
   return 1 if not $schema->{uniqueItems};
   return 1 if $self->_is_elements_unique($data, my $equal_indices = []);
@@ -452,8 +438,7 @@ sub _eval_keyword_maxProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '%s is not an integer', $schema->{maxProperties})
-    if not $self->_is_type('integer', $schema->{maxProperties});
+  assert_keyword_type($state, $schema, 'integer');
   abort($state, '%s is not a non-negative integer', $schema->{maxProperties})
     if $schema->{maxProperties} < 0;
 
@@ -465,8 +450,7 @@ sub _eval_keyword_minProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '%s is not an integer', $schema->{minProperties})
-    if not $self->_is_type('integer', $schema->{minProperties});
+  assert_keyword_type($state, $schema, 'integer');
   abort($state, '%s is not a non-negative integer', $schema->{minProperties})
     if $schema->{minProperties} < 0;
 
@@ -478,8 +462,7 @@ sub _eval_keyword_required {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '"required" value is not an array')
-    if not $self->_is_type('array', $schema->{required});
+  assert_keyword_type($state, $schema, 'array');
   abort($state, '"required" element is not a string')
     if any { !$self->_is_type('string', $_) } @{$schema->{required}};
 
@@ -492,8 +475,7 @@ sub _eval_keyword_dependentRequired {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '"dependentRequired" value is not an object')
-    if not $self->_is_type('object', $schema->{dependentRequired});
+  assert_keyword_type($state, $schema, 'object');
   abort($state, '"dependentRequired" property is not an array')
     if any { !$self->_is_type('array', $schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
@@ -512,7 +494,7 @@ sub _eval_keyword_dependentRequired {
 sub _eval_keyword_allOf {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"allOf" value is not an array') if not $self->_is_type('array', $schema->{allOf});
+  assert_keyword_type($state, $schema, 'array');
   abort($state, '"allOf" array is empty') if not @{$schema->{allOf}};
 
   my @invalid;
@@ -532,7 +514,7 @@ sub _eval_keyword_allOf {
 sub _eval_keyword_anyOf {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"anyOf" value is not an array') if not $self->_is_type('array', $schema->{anyOf});
+  assert_keyword_type($state, $schema, 'array');
   abort($state, '"anyOf" array is empty') if not @{$schema->{anyOf}};
 
   my $valid = 0;
@@ -552,7 +534,7 @@ sub _eval_keyword_anyOf {
 sub _eval_keyword_oneOf {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"oneOf" value is not an array') if not $self->_is_type('array', $schema->{oneOf});
+  assert_keyword_type($state, $schema, 'array');
   abort($state, '"oneOf" array is empty') if not @{$schema->{oneOf}};
 
   my (@valid, @errors);
@@ -608,8 +590,7 @@ sub _eval_keyword_dependentSchemas {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '"dependentSchemas" value is not an object')
-    if not $self->_is_type('object', $schema->{dependentSchemas});
+  assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   foreach my $property (keys %{$schema->{dependentSchemas}}) {
@@ -712,8 +693,7 @@ sub _eval_keyword_contains {
 
   if (exists $schema->{minContains}) {
     local $state->{keyword} = 'minContains';
-    abort($state, '%s is not an integer', $schema->{minContains})
-      if not $self->_is_type('integer', $schema->{minContains});
+    assert_keyword_type($state, $schema, 'integer');
     abort($state, '%s is not a non-negative integer', $schema->{minContains})
       if $schema->{minContains} < 0;
   }
@@ -729,8 +709,7 @@ sub _eval_keyword_contains {
 
   if (exists $schema->{maxContains}) {
     local $state->{keyword} = 'maxContains';
-    abort($state, '%s is not an integer', $schema->{maxContains})
-      if not $self->_is_type('integer', $schema->{maxContains});
+    assert_keyword_type($state, $schema, 'integer');
     abort($state, '%s is not a non-negative integer', $schema->{maxContains})
       if $schema->{maxContains} < 0;
 
@@ -754,8 +733,7 @@ sub _eval_keyword_properties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '"properties" value is not an object')
-    if not $self->_is_type('object', $schema->{properties});
+  assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   foreach my $property (keys %{$schema->{properties}}) {
@@ -776,8 +754,7 @@ sub _eval_keyword_patternProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('object', $data);
-  abort($state, '"patternProperties" value is not an object')
-    if not $self->_is_type('object', $schema->{patternProperties});
+  assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   foreach my $property_pattern (keys %{$schema->{patternProperties}}) {
@@ -852,7 +829,7 @@ sub _eval_keyword_propertyNames {
 }
 
 sub _is_type {
-  my ($self, $type, $value) = @_;
+  my (undef, $type, $value) = @_;
 
   if ($type eq 'null') {
     return !(defined $value);
@@ -1027,6 +1004,14 @@ sub abort {
   my ($state, $error_string, @args) = @_;
   E($state, 'EXCEPTION: '.$error_string, @args);
   die pop @{$state->{errors}};
+}
+
+# one common usecase of abort()
+use namespace::clean 'assert_keyword_type';
+sub assert_keyword_type {
+  my ($state, $schema, $type) = @_;
+  abort($state, $state->{keyword}.' value is not a%s %s', ($type =~ /^[aeiou]/ ? 'n' : ''), $type)
+    if not _is_type(undef, $type, $schema->{$state->{keyword}});
 }
 
 1;
