@@ -10,7 +10,7 @@ use JSON::Schema::Draft201909;
 
 my $js = JSON::Schema::Draft201909->new;
 
-foreach my $keyword (qw($recursiveRef $recursiveAnchor $vocabulary)) {
+foreach my $keyword (qw($recursiveRef $recursiveAnchor)) {
   subtest 'keyword: '.$keyword => sub {
     is(
       exception {

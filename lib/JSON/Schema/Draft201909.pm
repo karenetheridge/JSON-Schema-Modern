@@ -270,6 +270,18 @@ sub _eval_keyword_ref {
     });
 }
 
+sub _eval_keyword_vocabulary {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'object');
+
+  # we do nothing with this keyword yet. When we know we are in a metaschema,
+  # we can scan the URIs included here and either abort if a vocabulary is enabled that we do not
+  # understand, or turn on and off certain keyword behaviours based on the boolean values seen.
+
+  return 1;
+}
+
 sub _eval_keyword_comment {
   my ($self, $data, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'string');
