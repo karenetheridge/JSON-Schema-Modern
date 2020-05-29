@@ -19,7 +19,7 @@ use Safe::Isa;
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool HasMethods Enum InstanceOf HashRef Dict);
+use Types::Standard 1.010002 qw(Bool Int HasMethods Enum InstanceOf HashRef Dict);
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
 use namespace::clean;
@@ -35,6 +35,12 @@ has short_circuit => (
   isa => Bool,
   lazy => 1,
   default => sub { $_[0]->output_format eq 'flag' },
+);
+
+has max_traversal_depth => (
+  is => 'ro',
+  isa => Int,
+  default => 50,
 );
 
 has _resource_index => (
@@ -111,6 +117,7 @@ sub evaluate {
   my $state = {
     base_uri => Mojo::URL->new,                   # TODO: will be set by a global attribute
     short_circuit => $self->short_circuit,
+    depth => 0,
     data_path => '',
     traversed_schema_path => '',  # the accumulated path up to the last $ref traversal
     absolute_schema_uri => undef, # the absolute path of the last traversed $ref; always a Mojo::URL
@@ -145,6 +152,9 @@ sub _eval {
 
   $state = { %$state };     # changes to $state should only affect subschemas, not parents
   delete $state->{keyword};
+
+  abort($state, 'maximum traversal depth exceeded')
+    if $state->{depth}++ > $self->max_traversal_depth;
 
   my $schema_type = $self->_get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
@@ -1042,6 +1052,12 @@ When true, evaluation will immediately return upon encountering the first valida
 than continuing to find all errors.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
+
+=head2 max_traversal_depth
+
+The maximum number of levels deep a schema traversal may go, before evaluation is halted. This is to
+protect against accidental infinite recursion, such as from two subschemas that each reference each
+other. Defaults to 50.
 
 =head1 METHODS
 
