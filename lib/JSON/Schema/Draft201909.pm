@@ -194,24 +194,6 @@ sub _eval {
   return $result;
 }
 
-sub _eval_keyword_comment {
-  my ($self, $data, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
-  # we do nothing with this keyword, including not collecting its value for annotations.
-  return 1;
-}
-
-sub _eval_keyword_defs {
-  my ($self, $data, $schema, $state) = @_;
-
-  my $type = $self->_get_type($schema->{'$defs'});
-  abort($state, '$defs value is not an object or boolean')
-    if $type ne 'object' and $type ne 'boolean';
-
-  # we do nothing directly with this keyword, including not collecting its value for annotations.
-  return 1;
-}
-
 sub _eval_keyword_schema {
   my ($self, $data, $schema, $state) = @_;
 
@@ -286,6 +268,24 @@ sub _eval_keyword_ref {
       canonical_schema_uri => $canonical_uri, # note: not canonical yet until $id is processed
       schema_path => '',
     });
+}
+
+sub _eval_keyword_comment {
+  my ($self, $data, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'string');
+  # we do nothing with this keyword, including not collecting its value for annotations.
+  return 1;
+}
+
+sub _eval_keyword_defs {
+  my ($self, $data, $schema, $state) = @_;
+
+  my $type = $self->_get_type($schema->{'$defs'});
+  abort($state, '$defs value is not an object or boolean')
+    if $type ne 'object' and $type ne 'boolean';
+
+  # we do nothing directly with this keyword, including not collecting its value for annotations.
+  return 1;
 }
 
 sub _eval_keyword_type {
