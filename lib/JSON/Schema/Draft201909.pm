@@ -25,6 +25,7 @@ use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef);
 use JSON::Schema::Draft201909::Error;
+use JSON::Schema::Draft201909::Annotation;
 use JSON::Schema::Draft201909::Result;
 use JSON::Schema::Draft201909::Document;
 use namespace::clean;
@@ -39,7 +40,7 @@ has short_circuit => (
   is => 'ro',
   isa => Bool,
   lazy => 1,
-  default => sub { $_[0]->output_format eq 'flag' },
+  default => sub { $_[0]->output_format eq 'flag' && !$_[0]->collect_annotations },
 );
 
 has max_traversal_depth => (
@@ -52,6 +53,12 @@ has validate_formats => (
   is => 'ro',
   isa => Bool,
   default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
+);
+
+has collect_annotations => (
+  is => 'ro',
+  isa => Bool,
+  default => 0,
 );
 
 sub BUILD {
@@ -138,6 +145,7 @@ sub evaluate_json_string {
       result => 0,
       errors => [
         JSON::Schema::Draft201909::Error->new(
+          keyword => undef,
           instance_location => '',
           keyword_location => '',
           error => $@,
@@ -157,12 +165,14 @@ sub evaluate {
 
   my $state = {
     short_circuit => $self->short_circuit,
+    collect_annotations => $self->collect_annotations,
     depth => 0,
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
+    annotations => [],
     seen => {},
   };
 
@@ -198,7 +208,9 @@ sub evaluate {
   return JSON::Schema::Draft201909::Result->new(
     output_format => $self->output_format,
     result => $result,
-    errors => $state->{errors},
+    $result
+      ? ($self->collect_annotations ? (annotations => $state->{annotations}) : ())
+      : (errors => $state->{errors}),
   );
 }
 
@@ -217,6 +229,7 @@ sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
   $state = { %$state };     # changes to $state should only affect subschemas, not parents
+  my @parent_annotations = @{$state->{annotations}};
   delete $state->{keyword};
 
   abort($state, 'maximum traversal depth exceeded')
@@ -257,9 +270,10 @@ sub _eval {
     abort($state, 'unsupported keyword "%s"', $keyword) if not $self->can($method);
     $result = 0 if not $self->$method($data, $schema, $state);
 
-    return 0 if not $result and $state->{short_circuit};
+    last if not $result and $state->{short_circuit};
   }
 
+  @{$state->{annotations}} = @parent_annotations if not $result;
   return $result;
 }
 
@@ -1337,6 +1351,7 @@ sub E {
     or $uri eq '#'.$state->{traversed_schema_path}.$schema_path;
 
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
+    keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$schema_path,
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
@@ -1344,6 +1359,30 @@ sub E {
   );
 
   return 0;
+}
+
+# shorthand for creating annotations
+use namespace::clean 'A';
+sub A {
+  my ($state, $annotation) = @_;
+  return 1 if not $state->{collect_annotations};
+
+  my $schema_path = $state->{schema_path_rest}
+    // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
+
+  push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
+    keyword => $state->{keyword},
+    instance_location => $state->{data_path},
+    keyword_location => $state->{traversed_schema_path}.$schema_path,
+    !"$state->{canonical_schema_uri}" ? () : ( absolute_keyword_location => do {
+      my $uri = $state->{canonical_schema_uri}->clone;
+      $uri->fragment(($uri->fragment//'').$schema_path) if $schema_path;
+      $uri;
+    } ),
+    annotation => $annotation,
+  );
+
+  return 1;
 }
 
 # creates an error object, but also aborts evaluation immediately
@@ -1397,7 +1436,9 @@ L<JSON::Schema::Draft201909::Result/output_format>.
 =head2 short_circuit
 
 When true, evaluation will return early in any execution path as soon as the outcome can be
-determined, rather than continuing to find all possible errors.
+determined, rather than continuing to find all errors or annotations. Be aware that this can result
+in invalid results in the presence of keywords that depend on annotations, namely
+C<unevaluatedItems> and C<unevaluatedProperties>.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
@@ -1421,6 +1462,12 @@ the format sub is a coderef that takes one argument and returns a boolean result
 be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
 where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
 number, or integer) the instance value must be for the format validation to be considered.
+
+=head2 collect_annotations
+
+When true, annotations are collected from keywords that produce them, when validation succeeds.
+These annotations are available in the returned result (see L<JSON::Schema::Draft201909::Result>).
+Defaults to false.
 
 =head1 METHODS
 
@@ -1549,7 +1596,6 @@ To date, missing components (some of which are optional, but still quite useful)
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
 * multiple output formats
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
-* annotation collection (including the "format", "meta-data" and "content" vocabularies)
 * examination of the C<$schema> keyword for deviation from the standard metaschema, including
   changes to vocabulary behaviour
 
