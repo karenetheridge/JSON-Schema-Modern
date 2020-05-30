@@ -410,6 +410,7 @@ sub _eval_keyword_pattern {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not $self->_is_type('string', $data);
+  assert_keyword_type($state, $schema, 'string');
 
   return 1 if $data =~ qr/$schema->{pattern}/;
   return E($state, 'pattern does not match');
