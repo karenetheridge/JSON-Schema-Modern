@@ -3,7 +3,7 @@ use warnings;
 no if "$]" >= 5.031009, feature => 'indirect';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::More;
+use Test::More 0.96;
 use Test::Fatal;
 use Test::Deep;
 use JSON::Schema::Draft201909;
