@@ -4,7 +4,6 @@
         "schema": {
             "$defs": {
                 "const_not_anchor": {
-                    "$comment": "note: when traversing to this location, the bad $anchor should be recognized and removed from any master identifier index",
                     "const": {
                         "$anchor": "not_a_real_anchor"
                     }

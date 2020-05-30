@@ -1,6 +1,7 @@
 [
     {
-        "description": "",
+        "description": "invalid syntax for $id and $anchor",
+        "comment": "I don't think these are valid tests -- the metaschema should be able to pick up on the bad anchor at the very least, even if the bad id slips past if we don't have format validation turned on for uris",
         "schema": {
             "$id": "foo.json",
             "$defs": {

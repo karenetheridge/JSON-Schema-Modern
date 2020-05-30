@@ -4,7 +4,6 @@
         "schema": {
             "$defs": {
                 "const_not_id": {
-                    "$comment": "note: when traversing to this location, the bad $id should be recognized and removed from any master identifier index",
                     "const": {
                         "$id": "not_a_real_id"
                     }
