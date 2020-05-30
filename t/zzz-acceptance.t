@@ -54,7 +54,7 @@ $accepter->acceptance(
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
         'defs.json',                  # $ref to (cached?) metaschema
-        'refRemote.json',             # $ref, $id, loading external file
+        'refRemote.json',             # adding or loading external file
         'unevaluatedItems.json',
         'unevaluatedProperties.json',
         'optional/bignum.json',
