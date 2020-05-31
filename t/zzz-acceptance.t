@@ -6,6 +6,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use List::Util 1.50 'head';
+use Config;
 
 BEGIN {
   my @variables = qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING);
@@ -85,6 +86,12 @@ $accepter->acceptance(
         'remote ref, containing refs itself',               # cached metaschema
         'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
       ] },
+
+    $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
+      ( file => 'const.json',
+        group_description => 'float and integers are equal up to 64-bit representation limits',
+        test_description => 'float is valid' )
+      : (),
   ] ),
 );
 
