@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -39,6 +39,12 @@ When true, evaluation will immediately return upon encountering the first valida
 than continuing to find all errors.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
+
+=head2 max_traversal_depth
+
+The maximum number of levels deep a schema traversal may go, before evaluation is halted. This is to
+protect against accidental infinite recursion, such as from two subschemas that each reference each
+other. Defaults to 50.
 
 =head1 METHODS
 
@@ -80,6 +86,8 @@ used in another context (for example, a numeric value is concatenated into a str
 string is used in an arithmetic operation), additional flags can be added onto the variable causing
 it to resemble the other type. This should not be an issue if data validation is occurring
 immediately after decoding a JSON payload, or if the JSON string itself is passed to this module.
+If this turns out to be an issue in real environments, I may have to implement a C<lax_scalars>
+option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
