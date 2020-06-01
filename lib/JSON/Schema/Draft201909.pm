@@ -1147,6 +1147,14 @@ To date, missing components include most of these. More specifically, features t
 * use of C<$recursiveRef> and C<$recursiveAnchor>
 * use of plain-name fragments with C<$anchor>
 
+=head1 SECURITY CONSIDERATIONS
+
+The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema.
+No effort is taken (at this time) to sanitize the regular expressions for embedded code or
+potentially pathological constructs that may pose a security risk, either via denial of service
+or by allowing exposure to the internals of your application. B<DO NOT RUN SCHEMAS FROM UNTRUSTED
+SOURCES.>
+
 =head1 SEE ALSO
 
 =for :list
