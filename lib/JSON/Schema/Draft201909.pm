@@ -1102,9 +1102,9 @@ that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
-=head2 CAVEATS
+=head1 LIMITATIONS
 
-=head3 TYPES
+=head2 TYPES
 
 Perl is a more loosely-typed language than JSON. This module delves into a value's internal
 representation in an attempt to derive the true "intended" type of the value. However, if a value is
@@ -1117,7 +1117,7 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
-=head2 LIMITATIONS
+=head2 SPECIFICATION COMPLIANCE
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
