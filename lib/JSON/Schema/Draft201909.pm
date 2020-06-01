@@ -43,53 +43,6 @@ has max_traversal_depth => (
   default => 50,
 );
 
-has _resource_index => (
-  is => 'bare',
-  isa => HashRef[Dict[
-      # see JSON::MaybeXS::is_bool
-      ref => InstanceOf[qw(JSON::XS::Boolean Cpanel::JSON::XS::Boolean JSON::PP::Boolean)]|HashRef,
-      canonical_uri => InstanceOf['Mojo::URL'],
-    ]],
-  handles_via => 'Hash',
-  handles => {
-    _add_resources => 'set',
-    _get_resource => 'get',
-    _remove_resource => 'delete',
-    _resource_index => 'elements',
-  },
-  lazy => 1,
-  default => sub { {} },
-);
-
-before _add_resources => sub {
-  my $self = shift;
-  foreach my $pair (pairs @_) {
-    my ($key, $value) = @$pair;
-    if (my $existing = $self->_get_resource($key)) {
-      croak 'a schema resource is already indexed with uri "'.$key.'"'
-        # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
-        # schemas that lack all identifiers altogether
-        if ($key ne '' and $existing->{canonical_uri} ne '')
-          and $existing->{ref} != $value->{ref}
-            or $existing->{canonical_uri} ne $value->{canonical_uri};
-    }
-
-    my $fragment = $value->{canonical_uri}->fragment;
-    croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
-      if defined $fragment and $fragment eq '';
-
-    croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
-      if ($fragment // '') =~ m{^[^/]};
-  }
-};
-
-has _json_decoder => (
-  is => 'ro',
-  isa => HasMethods[qw(encode decode)],
-  lazy => 1,
-  default => sub { JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1) },
-);
-
 sub evaluate_json_string {
   my ($self, $json_data, $schema) = @_;
   my $data;
@@ -150,6 +103,8 @@ sub evaluate {
     errors => $state->{errors},
   );
 }
+
+######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
 sub _eval {
   my ($self, $data, $schema, $state) = @_;
@@ -992,6 +947,53 @@ sub _find_all_identifiers {
 
   $self->_add_resources(%identifiers);
 }
+
+has _resource_index => (
+  is => 'bare',
+  isa => HashRef[Dict[
+      # see JSON::MaybeXS::is_bool
+      ref => InstanceOf[qw(JSON::XS::Boolean Cpanel::JSON::XS::Boolean JSON::PP::Boolean)]|HashRef,
+      canonical_uri => InstanceOf['Mojo::URL'],
+    ]],
+  handles_via => 'Hash',
+  handles => {
+    _add_resources => 'set',
+    _get_resource => 'get',
+    _remove_resource => 'delete',
+    _resource_index => 'elements',
+  },
+  lazy => 1,
+  default => sub { {} },
+);
+
+before _add_resources => sub {
+  my $self = shift;
+  foreach my $pair (pairs @_) {
+    my ($key, $value) = @$pair;
+    if (my $existing = $self->_get_resource($key)) {
+      croak 'a schema resource is already indexed with uri "'.$key.'"'
+        # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
+        # schemas that lack all identifiers altogether
+        if ($key ne '' and $existing->{canonical_uri} ne '')
+          and $existing->{ref} != $value->{ref}
+            or $existing->{canonical_uri} ne $value->{canonical_uri};
+    }
+
+    my $fragment = $value->{canonical_uri}->fragment;
+    croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
+      if defined $fragment and $fragment eq '';
+
+    croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
+      if ($fragment // '') =~ m{^[^/]};
+  }
+};
+
+has _json_decoder => (
+  is => 'ro',
+  isa => HasMethods[qw(encode decode)],
+  lazy => 1,
+  default => sub { JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1) },
+);
 
 # shorthand for creating error objects
 use namespace::clean 'E';
