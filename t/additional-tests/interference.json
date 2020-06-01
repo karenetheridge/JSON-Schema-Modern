@@ -1,7 +1,10 @@
 [
     {
         "description": "required + minItems",
-        "schema": { "required": ["foo"], "minItems": 1 },
+        "schema": {
+            "minItems": 1,
+            "required": ["foo"]
+        },
         "tests": [
             {
                 "description": "required, valid",
