@@ -18,6 +18,7 @@ BEGIN {
 
 use Test::Warnings 0.027 ':fail_on_warning';
 use Test::JSON::Schema::Acceptance 0.994;
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
 
 my $accepter = Test::JSON::Schema::Acceptance->new(
@@ -54,7 +55,6 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        'defs.json',                  # $ref to (cached?) metaschema
         'refRemote.json',             # adding or loading external file
         'unevaluatedItems.json',
         'unevaluatedProperties.json',
@@ -83,7 +83,6 @@ $accepter->acceptance(
         ),
       ] },
     { file => 'ref.json', group_description => [
-        'remote ref, containing refs itself',               # cached metaschema
         'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
       ] },
 
@@ -121,6 +120,7 @@ $accepter->acceptance(
 # 2020-05-14  0.996  Looks like you failed 171 tests of 992.
 # 2020-05-19  0.997  Looks like you failed 171 tests of 994.
 # 2020-05-22  0.997  Looks like you failed 163 tests of 994.
+# 2020-06-01  0.997  Looks like you failed 159 tests of 994.
 
 
 END {

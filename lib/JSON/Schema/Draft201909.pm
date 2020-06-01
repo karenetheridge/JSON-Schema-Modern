@@ -15,6 +15,8 @@ use List::Util 1.33 qw(any pairs);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
 use Safe::Isa;
+use Path::Tiny;
+use File::ShareDir 'dist_dir';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
@@ -223,7 +225,7 @@ sub _fetch_and_eval_ref_uri {
   my ($subschema, $canonical_uri);
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
-    if (my $resource = $self->_get_resource($base)) {
+    if (my $resource = $self->_get_or_load_resource($base)) {
       $subschema = $resource->{document}->get($resource->{path}.$fragment);
       $canonical_uri = $uri;
     }
@@ -959,6 +961,7 @@ has _resource_index => (
     _remove_resource => 'delete',
     _resource_index => 'elements',
     _resource_keys => 'keys',
+    _add_resources_unsafe => 'set',
   },
   lazy => 1,
   default => sub { {} },
@@ -980,6 +983,9 @@ before _add_resources => sub {
           and $existing->{path} ne $value->{path}
             or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
+    elsif ($self->CACHED_METASCHEMAS->{$key}) {
+      croak 'uri "'.$key.'" conflicts with an existing meta-schema resource';
+    }
 
     my $fragment = $value->{canonical_uri}->fragment;
     croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
@@ -988,6 +994,48 @@ before _add_resources => sub {
     croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
       if ($fragment // '') =~ m{^[^/]};
   }
+};
+
+use constant CACHED_METASCHEMAS => {
+  'https://json-schema.org/draft/2019-09/hyper-schema'        => '2019-09/hyper-schema.json',
+  'https://json-schema.org/draft/2019-09/links'               => '2019-09/links.json',
+  'https://json-schema.org/draft/2019-09/meta/applicator'     => '2019-09/meta/applicator.json',
+  'https://json-schema.org/draft/2019-09/meta/content'        => '2019-09/meta/content.json',
+  'https://json-schema.org/draft/2019-09/meta/core'           => '2019-09/meta/core.json',
+  'https://json-schema.org/draft/2019-09/meta/format'         => '2019-09/meta/format.json',
+  'https://json-schema.org/draft/2019-09/meta/hyper-schema'   => '2019-09/meta/hyper-schema.json',
+  'https://json-schema.org/draft/2019-09/meta/meta-data'      => '2019-09/meta/meta-data.json',
+  'https://json-schema.org/draft/2019-09/meta/validation'     => '2019-09/meta/validation.json',
+  'https://json-schema.org/draft/2019-09/output/hyper-schema' => '2019-09/output/hyper-schema.json',
+  'https://json-schema.org/draft/2019-09/output/schema'       => '2019-09/output/schema.json',
+  'https://json-schema.org/draft/2019-09/schema'              => '2019-09/schema.json',
+};
+
+# returns the same as _get_resource
+sub _get_or_load_resource {
+  my ($self, $uri) = @_;
+
+  my $resource = $self->_get_resource($uri);
+  return $resource if $resource;
+
+  if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
+    my $file = path(dist_dir('JSON-Schema-Draft201909'), $local_filename);
+    my $schema = $self->_json_decoder->decode($file->slurp_raw);
+    my $document = JSON::Schema::Draft201909::Document->new(schema => $schema);
+
+    $self->_add_resources_unsafe(
+      map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
+        $document->_resource_pairs
+    );
+
+    return $self->_get_resource($uri);
+  }
+
+  # TODO:
+  # - load from network or disk
+  # - handle such resources with $anchor fragments
+
+  return;
 };
 
 has _json_decoder => (
