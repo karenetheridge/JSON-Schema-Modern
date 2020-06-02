@@ -415,8 +415,13 @@ sub _eval_keyword_pattern {
   return 1 if not $self->_is_type('string', $data);
   assert_keyword_type($state, $schema, 'string');
 
-  return 1 if $data =~ qr/$schema->{pattern}/;
-  return E($state, 'pattern does not match');
+  try {
+    return 1 if $data =~ m/$schema->{pattern}/;
+    return E($state, 'pattern does not match');
+  }
+  catch {
+    abort($state, $@);
+  };
 }
 
 sub _eval_keyword_maxItems {
@@ -774,7 +779,16 @@ sub _eval_keyword_patternProperties {
 
   my $valid = 1;
   foreach my $property_pattern (sort keys %{$schema->{patternProperties}}) {
-    foreach my $property (sort grep /$property_pattern/, keys %$data) {
+    my @matched_properties;
+    try {
+      @matched_properties = grep m/$property_pattern/, keys %$data;
+    }
+    catch {
+      abort({ %$state,
+        schema_path_rest => $state->{schema_path}.'/patternProperties/'.$property_pattern },
+      $@);
+    };
+    foreach my $property (sort @matched_properties) {
       $valid = 0
         if not $self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
           +{ %$state,
@@ -1062,14 +1076,16 @@ use namespace::clean 'E';
 sub E {
   my ($state, $error_string, @args) = @_;
 
-  my $suffix = $state->{keyword} ? '/'.$state->{keyword} : '';
+  # sometimes the keyword shouldn't be at the very end of the schema path
+  my $schema_path_rest = $state->{schema_path_rest}
+    // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
+
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{data_path},
-    keyword_location => $state->{traversed_schema_path}.$state->{schema_path}.$suffix,
+    keyword_location => $state->{traversed_schema_path}.$schema_path_rest,
     !$state->{canonical_schema_uri} ? () : ( absolute_keyword_location => do {
       my $uri = $state->{canonical_schema_uri}->clone;
-      $uri->fragment(($uri->fragment//'').$state->{schema_path}.$suffix)
-        if $state->{schema_path} or $suffix;
+      $uri->fragment(($uri->fragment//'').$schema_path_rest) if $schema_path_rest;
       $uri;
     } ),
     error => @args ? sprintf($error_string, @args) : $error_string,

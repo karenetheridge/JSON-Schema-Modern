@@ -964,4 +964,57 @@ subtest 'sorted property names' => sub {
   );
 };
 
+subtest 'bad regex in schema' => sub {
+  my $schema = {
+    type => 'object',
+    properties => {
+      my_pattern => {
+        type => 'string',
+        pattern => '(',
+      },
+      my_patternProperties => {
+        type => 'object',
+        patternProperties => { '(' => true },
+        additionalProperties => false,
+      },
+    },
+  };
+
+  cmp_deeply(
+    $js->evaluate(
+      { my_pattern => 'foo' },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/my_pattern',
+          keywordLocation => '/properties/my_pattern/pattern',
+          error => re(qr/EXCEPTION: Unmatched \( in regex/),
+        },
+      ],
+    },
+    'bad "pattern" regex is properly noted in error',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { my_patternProperties => { foo => 1 } },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/my_patternProperties',
+          keywordLocation => '/properties/my_patternProperties/patternProperties/(',
+          error => re(qr/EXCEPTION: Unmatched \( in regex/),
+        },
+      ],
+    },
+    'bad "patternProperties" regex is properly noted in error',
+  );
+};
+
 done_testing;
