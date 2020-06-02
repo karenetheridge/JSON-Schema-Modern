@@ -1199,7 +1199,6 @@ The minimum extensible JSON Schema implementation requirements involve:
 To date, missing components include most of these. More specifically, features to be added include:
 
 =for :list
-* recognition of C<$id>
 * loading multiple schema documents, and registration of a schema against a canonical base URI
 * collection of annotations
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>)
@@ -1208,8 +1207,6 @@ To date, missing components include most of these. More specifically, features t
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
-* use of C<$recursiveRef> and C<$recursiveAnchor>
-* use of plain-name fragments with C<$anchor>
 
 =head1 SECURITY CONSIDERATIONS
 
