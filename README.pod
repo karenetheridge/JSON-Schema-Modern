@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -76,9 +76,9 @@ that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
-=head2 CAVEATS
+=head1 LIMITATIONS
 
-=head3 TYPES
+=head2 TYPES
 
 Perl is a more loosely-typed language than JSON. This module delves into a value's internal
 representation in an attempt to derive the true "intended" type of the value. However, if a value is
@@ -91,7 +91,7 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
-=head2 LIMITATIONS
+=head2 SPECIFICATION COMPLIANCE
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
@@ -162,6 +162,14 @@ use of C<$recursiveRef> and C<$recursiveAnchor>
 use of plain-name fragments with C<$anchor>
 
 =back
+
+=head1 SECURITY CONSIDERATIONS
+
+The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema.
+No effort is taken (at this time) to sanitize the regular expressions for embedded code or
+potentially pathological constructs that may pose a security risk, either via denial of service
+or by allowing exposure to the internals of your application. B<DO NOT RUN SCHEMAS FROM UNTRUSTED
+SOURCES.>
 
 =head1 SEE ALSO
 
