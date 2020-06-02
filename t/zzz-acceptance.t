@@ -88,9 +88,9 @@ $accepter->acceptance(
       ] },
 
     $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
-      ( file => 'const.json',
+      { file => 'const.json',
         group_description => 'float and integers are equal up to 64-bit representation limits',
-        test_description => 'float is valid' )
+        test_description => 'float is valid' }
       : (),
   ] ),
 );
