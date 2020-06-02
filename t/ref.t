@@ -33,6 +33,19 @@ subtest 'local JSON pointer' => sub {
   );
 };
 
+subtest 'fragment with URI-escaped and JSON Pointer-escaped characters' => sub {
+  ok(
+    $js->evaluate(
+      1,
+      {
+        '$defs' => { 'foo-bar-tilde~-slash/-braces{}-def' => true },
+        '$ref' => '#/$defs/foo-bar-tilde~0-slash~1-braces%7B%7D-def',
+      },
+    ),
+    'can follow $ref with escaped components',
+  );
+};
+
 subtest 'local anchor' => sub {
   ok(
     $js->evaluate(
