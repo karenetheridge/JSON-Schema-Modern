@@ -175,7 +175,7 @@ __END__
     use JSON::Schema::Draft201909::Document;
 
     my $document = JSON::Schema::Draft201909::Document->new(
-      canonical_uri => 'https://mycorp.com/v1/schema',
+      canonical_uri => 'https://example.com/v1/schema',
       schema => $schema,
     );
     my $foo_definition = $document->get('/$defs/foo');
