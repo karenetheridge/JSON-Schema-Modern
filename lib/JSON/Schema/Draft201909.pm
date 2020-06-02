@@ -10,7 +10,7 @@ our $VERSION = '0.004';
 no if "$]" >= 5.031009, feature => 'indirect';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
-use Carp 'croak';
+use Carp qw(croak carp);
 use List::Util 1.33 qw(any pairs);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
@@ -146,6 +146,8 @@ sub _eval {
     qw(allOf anyOf oneOf not if dependentSchemas
       items unevaluatedItems contains
       properties patternProperties additionalProperties unevaluatedProperties propertyNames),
+    # DISCONTINUED KEYWORDS
+    qw(definitions dependencies),
   ) {
     next if not exists $schema->{$keyword};
 
@@ -839,6 +841,16 @@ sub _eval_keyword_propertyNames {
 
   return 1 if $valid;
   return E($state, 'not all property names are valid');
+}
+
+sub _eval_keyword_definitions {
+  carp 'no-longer-supported "definitions" keyword present: this should be rewritten as "$defs"';
+  return 1;
+}
+
+sub _eval_keyword_dependencies {
+  carp 'no-longer-supported "dependencies" keyword present: this should be rewritten as "dependentSchemas" or "dependentRequired"';
+  return 1;
 }
 
 sub _is_type {
