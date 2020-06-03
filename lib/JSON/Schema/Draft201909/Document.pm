@@ -101,7 +101,7 @@ sub _traverse_for_identifiers {
       0 .. $#{$data};
   }
   elsif (ref $data eq 'HASH') {
-    if (exists $data->{'$id'} and _is_type(undef, 'string', $data->{'$id'})) {
+    if (exists $data->{'$id'} and not ref($data->{'$id'})) {
       $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
       # this might not be a real $id... wait for it to be encountered at runtime before dying
       if (not length $canonical_uri->fragment) {
@@ -109,7 +109,7 @@ sub _traverse_for_identifiers {
         $identifiers{$canonical_uri} = { path => $uri_fragment, canonical_uri => $canonical_uri };
       };
     }
-    if (exists $data->{'$anchor'} and _is_type(undef, 'string', $data->{'$anchor'})) {
+    if (exists $data->{'$anchor'} and not ref($data->{'$anchor'})) {
       # we cannot change the canonical uri, or we won't be able to properly identify
       # paths within this resource
       my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
@@ -122,44 +122,6 @@ sub _traverse_for_identifiers {
   }
 
   return ();
-}
-
-# copied from JSON::Schema::Draft201909 (ugh)
-sub _is_type {
-  my (undef, $type, $value) = @_;
-
-  if ($type eq 'null') {
-    return !(defined $value);
-  }
-  if ($type eq 'boolean') {
-    return is_bool($value);
-  }
-  if ($type eq 'object') {
-    return ref $value eq 'HASH';
-  }
-  if ($type eq 'array') {
-    return ref $value eq 'ARRAY';
-  }
-
-  if ($type eq 'string' or $type eq 'number' or $type eq 'integer') {
-    return 0 if not defined $value or ref $value;
-    my $flags = B::svref_2object(\$value)->FLAGS;
-
-    if ($type eq 'string') {
-      return $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
-    }
-
-    if ($type eq 'number') {
-      return !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
-    }
-
-    if ($type eq 'integer') {
-      return !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK))
-        && int($value) == $value;
-    }
-  }
-
-  croak sprintf('unknown type "%s"', $type);
 }
 
 1;
