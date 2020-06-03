@@ -266,8 +266,7 @@ sub _eval_keyword_recursiveRef {
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'})
     ->base($state->{recursive_anchor_uri})->to_abs;
 
-  abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a'
-      .' $recursiveAnchor location with a canonical URI containing a fragment')
+  abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
     if $schema->{'$recursiveRef'} ne '#' and $state->{recursive_anchor_uri}->fragment;
 
   return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
