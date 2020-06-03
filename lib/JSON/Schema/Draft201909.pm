@@ -619,7 +619,7 @@ sub _eval_keyword_dependentSchemas {
   foreach my $property (sort keys %{$schema->{dependentSchemas}}) {
     next if not exists $data->{$property}
       or $self->_eval($data, $schema->{dependentSchemas}{$property},
-        +{ %$state, schema_path => $state->{schema_path}.'/dependentSchemas/'.$property });
+        +{ %$state, schema_path => jsonp($state->{schema_path}, 'dependentSchemas', $property) });
 
     $valid = 0;
     last if $state->{short_circuit};
@@ -761,8 +761,8 @@ sub _eval_keyword_properties {
     next if not exists $data->{$property};
     $valid = 0 if not $self->_eval($data->{$property}, $schema->{properties}{$property},
         +{ %$state,
-          data_path => $state->{data_path}.'/'.$property,
-          schema_path => $state->{schema_path}.'/properties/'.$property,
+          data_path => jsonp($state->{data_path}, $property),
+          schema_path => jsonp($state->{schema_path}, 'properties', $property),
         });
     last if not $valid and $state->{short_circuit};
   }
@@ -785,15 +785,15 @@ sub _eval_keyword_patternProperties {
     }
     catch {
       abort({ %$state,
-        schema_path_rest => $state->{schema_path}.'/patternProperties/'.$property_pattern },
+        schema_path_rest => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) },
       $@);
     };
     foreach my $property (sort @matched_properties) {
       $valid = 0
         if not $self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
           +{ %$state,
-            data_path => $state->{data_path}.'/'.$property,
-            schema_path => $state->{schema_path}.'/patternProperties/'.$property_pattern,
+            data_path => jsonp($state->{data_path}, $property),
+            schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern),
           });
       last if not $valid and $state->{short_circuit};
     }
@@ -815,13 +815,13 @@ sub _eval_keyword_additionalProperties {
       and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
 
     if ($self->_is_type('boolean', $schema->{additionalProperties})) {
-      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$property },
+      $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property) },
         'additional property not permitted') if not $schema->{additionalProperties};
     }
     else {
       $valid = 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties},
         +{ %$state,
-          data_path => $state->{data_path}.'/'.$property,
+          data_path => jsonp($state->{data_path}, $property),
           schema_path => $state->{schema_path}.'/additionalProperties',
         });
     }
@@ -847,7 +847,7 @@ sub _eval_keyword_propertyNames {
   foreach my $property (sort keys %$data) {
     $valid = 0 if not $self->_eval($property, $schema->{propertyNames},
       +{ %$state,
-        data_path => $state->{data_path}.'/'.$property,
+        data_path => jsonp($state->{data_path}, $property),
         schema_path => $state->{schema_path}.'/propertyNames',
       });
     last if not $valid and $state->{short_circuit};
@@ -940,7 +940,7 @@ sub _is_equal {
     return 0 if keys %$x != keys %$y;
     return 0 if not $self->_is_equal([ sort keys %$x ], [ sort keys %$y ]);
     foreach my $property (keys %$x) {
-      $state->{path} = $path.'/'.$property;
+      $state->{path} = jsonp($path, $property);
       return 0 if not $self->_is_equal($x->{$property}, $y->{$property}, $state);
     }
     return 1;
@@ -1070,6 +1070,12 @@ has _json_decoder => (
   lazy => 1,
   default => sub { JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1) },
 );
+
+# shorthand for creating and appending json pointers
+use namespace::clean 'jsonp';
+sub jsonp {
+  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, @_);
+}
 
 # shorthand for creating error objects
 use namespace::clean 'E';

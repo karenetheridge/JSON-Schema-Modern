@@ -1017,4 +1017,64 @@ subtest 'bad regex in schema' => sub {
   );
 };
 
+subtest 'JSON pointer escaping' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      { '{}' => { 'my~tilde/slash-property' => 1 } },
+      {
+        '$defs' => {
+          mydef => {
+            properties => {
+              '{}' => {
+                patternProperties => {
+                  '~' => false,
+                  '/' => false,
+                  '[~/]' => false,
+                },
+              },
+            },
+          },
+        },
+        '$ref' => '#/$defs/mydef',
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/{}/my~0tilde~1slash-property',
+          keywordLocation => '/$ref/properties/{}/patternProperties/~1',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~1',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '/{}/my~0tilde~1slash-property',
+          keywordLocation => '/$ref/properties/{}/patternProperties/[~0~1]',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/%5B~0~1%5D',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '/{}/my~0tilde~1slash-property',
+          keywordLocation => '/$ref/properties/{}/patternProperties/~0',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '/{}',
+          keywordLocation => '/$ref/properties/{}/patternProperties',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/properties',
+          absoluteKeywordLocation => '#/$defs/mydef/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'JSON pointers are properly escaped; URIs doubly so',
+  );
+};
+
 done_testing;
