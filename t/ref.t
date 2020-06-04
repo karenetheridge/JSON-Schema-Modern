@@ -134,7 +134,7 @@ subtest '$id with an empty fragment' => sub {
   );
 };
 
-subtest '$recursiveRef with no use of $recursiveAnchor' => sub {
+subtest '$recursiveRef without nesting' => sub {
   cmp_deeply(
     $js->evaluate(
       { foo => { bar => 'hello', baz => 1 } },
@@ -221,6 +221,40 @@ subtest '$recursiveRef with no use of $recursiveAnchor' => sub {
       ],
     },
     '$recursiveRef without nested $recursiveAnchor behaves like $ref',
+  );
+};
+
+subtest '$recursiveRef without $recursiveAnchor' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      { foo => { bar => 1 } },
+      {
+        properties => { foo => { '$recursiveRef' => '#' } },
+        additionalProperties => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/foo/bar',
+          keywordLocation => '/properties/foo/$recursiveRef/additionalProperties',
+          absoluteKeywordLocation => '#/additionalProperties',
+          error => 'additional property not permitted',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/$recursiveRef/additionalProperties',
+          absoluteKeywordLocation => '#/additionalProperties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
   );
 };
 
