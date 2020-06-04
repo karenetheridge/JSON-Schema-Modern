@@ -420,8 +420,4 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   );
 };
 
-# TODO: $recursiveRef with a fragment - resolve against $recursiveAnchor uri
-# TODO: $recursiveRef with a path portion - resolve against $recursiveAnchor uri
-# TODO: error case where $recursiveRef is not '#' and $recursiveAnchor uri has a fragment
-
 done_testing;
