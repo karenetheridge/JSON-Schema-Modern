@@ -258,6 +258,51 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
   );
 };
 
+subtest '$recursiveAnchor is not at a schema resource root' => sub {
+  my $schema = {
+    '$defs' => {
+      myobject => {
+        '$recursiveAnchor' => true,
+        anyOf => [
+          { type => 'integer' },
+          {
+            type => 'object',
+            additionalProperties => { '$recursiveRef' => '#' },
+          },
+        ],
+      },
+    },
+    anyOf => [
+      { type => 'integer' },
+      { '$ref' => '#/$defs/myobject' },
+    ],
+  };
+
+  cmp_deeply(
+    $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf/1/$ref/$recursiveAnchor',
+          absoluteKeywordLocation => '#/$defs/myobject/$recursiveAnchor',
+          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+        },
+      ],
+    },
+  );
+
+  $schema->{'$defs'}{myobject}{'$id'} = 'myobject.json';
+
+  cmp_deeply(
+    $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
+    {
+      valid => bool(1),
+    },
+  );
+};
+
 subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   my $schema = {
     '$defs' => {

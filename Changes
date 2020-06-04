@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - fix some edge cases with usage of $recursiveAnchor, $recursiveRef
 
 0.004     2020-06-02 19:14:32Z
           - add support for $recursiveAnchor and $recursiveRef

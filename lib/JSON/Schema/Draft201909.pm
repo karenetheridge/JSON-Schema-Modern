@@ -214,7 +214,7 @@ sub _eval_keyword_recursiveAnchor {
   # record the canonical location of the current position, to be used against future resolution
   # of a $recursiveRef uri -- as if it was the current location when we encounter a $ref.
   my $uri = $state->{canonical_schema_uri} ? $state->{canonical_schema_uri}->clone : Mojo::URL->new;
-  $uri->fragment(($uri->fragment//'').$state->{schema_path});
+  abort($state, '"$recursiveAnchor" keyword used without "$id"') if $uri->fragment;
 
   $state->{recursive_anchor_uri} = $uri;
   return 1;
