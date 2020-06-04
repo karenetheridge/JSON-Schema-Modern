@@ -336,6 +336,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
     {
       valid => bool(1),
     },
+    '$recursiveRef with a single $recursiveAnchor in scope',
   );
 
   cmp_deeply(
@@ -391,6 +392,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
         },
       ],
     },
+    'validation requires the override that is not in scope',
   );
 
   cmp_deeply(
@@ -401,6 +403,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
     {
       valid => bool(1),
     },
+    '$recursiveRef with both $recursiveAnchors in scope',
   );
 
   cmp_deeply(
@@ -413,6 +416,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
     {
       valid => bool(1),
     },
+    'validation makes use of the override that is now in scope',
   );
 };
 
