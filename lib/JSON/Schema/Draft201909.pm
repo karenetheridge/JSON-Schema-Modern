@@ -82,14 +82,15 @@ sub evaluate {
       $document->_resource_pairs
   );
 
+  my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
+
   my $state = {
-    base_uri => Mojo::URL->new,                   # TODO: will be set by a global attribute
     short_circuit => $self->short_circuit,
     depth => 0,
     data_path => '',
-    traversed_schema_path => '',  # the accumulated path up to the last $ref traversal
-    canonical_schema_uri => undef,# the canonical path of the last traversed $ref (Mojo::URL)
-    schema_path => '',            # the rest of the path, since the last traversed $ref
+    traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
+    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
+    schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
   };
 
@@ -177,14 +178,13 @@ sub _eval_keyword_id {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = Mojo::URL->new($schema->{'$id'})->base($state->{base_uri})->to_abs;
+  my $uri = Mojo::URL->new($schema->{'$id'})->base($state->{canonical_schema_uri})->to_abs;
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length $uri->fragment;
 
   $uri->fragment(undef);
-  $state->{base_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  $state->{canonical_schema_uri} = $uri->clone;
+  $state->{canonical_schema_uri} = $uri;
   $state->{schema_path} = '';
 
   return 1;
@@ -196,7 +196,7 @@ sub _eval_keyword_anchor {
   assert_keyword_type($state, $schema, 'string');
 
   if ($schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
-    $self->_remove_resource($state->{base_uri}->clone->fragment($schema->{'$anchor'}));
+    $self->_remove_resource($state->{canonical_schema_uri}->clone->fragment($schema->{'$anchor'}));
     abort($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'});
   }
 
@@ -254,7 +254,7 @@ sub _eval_keyword_ref {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{base_uri})->to_abs;
+  my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{canonical_schema_uri})->to_abs;
   return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
 }
 
@@ -1087,7 +1087,7 @@ sub E {
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$schema_path_rest,
-    !$state->{canonical_schema_uri} ? () : ( absolute_keyword_location => do {
+    !"$state->{canonical_schema_uri}" ? () : ( absolute_keyword_location => do {
       my $uri = $state->{canonical_schema_uri}->clone;
       $uri->fragment(($uri->fragment//'').$schema_path_rest) if $schema_path_rest;
       $uri;
