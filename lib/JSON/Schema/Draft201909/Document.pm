@@ -13,6 +13,7 @@ use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use List::Util 1.29 'pairs';
+use Safe::Isa;
 use Moo;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
@@ -31,6 +32,7 @@ has canonical_uri => (
   isa => InstanceOf['Mojo::URL'], # always fragmentless
   lazy => 1,
   default => sub { Mojo::URL->new },
+  coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
 );
 
 has resource_index => (

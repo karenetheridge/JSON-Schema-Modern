@@ -29,6 +29,26 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
 my $js = JSON::Schema::Draft201909->new;
 my $js_short_circuit = JSON::Schema::Draft201909->new(short_circuit => 1);
 
+my $add_resource = sub {
+  my ($uri, $data) = @_;
+  $js->add_schema($uri => $data);
+  $js_short_circuit->add_schema($uri => $data);
+};
+
+# TODO: moving into TJSA 1.000
+my $base = Mojo::URL->new('http://localhost:1234');
+$accepter->additional_resources->visit(
+  sub {
+    my ($path) = @_;
+    return if not $path->is_file or $path !~ /\.json$/;
+    my $data = $accepter->_json_decoder->decode($path->slurp_raw);
+    my $file = $path->relative($accepter->additional_resources);
+    my $uri = Mojo::URL->new($file)->base($base)->to_abs;
+    $add_resource->($uri => $data);
+  },
+  { recurse => 1 },
+);
+
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
 $encoder->indent_length(2) if $encoder->can('indent_length');
 
@@ -55,7 +75,6 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        'refRemote.json',             # adding or loading external file
         'unevaluatedItems.json',
         'unevaluatedProperties.json',
         'optional/bignum.json',
@@ -85,6 +104,9 @@ $accepter->acceptance(
       ] },
     { file => 'ref.json', group_description => [
         'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
+      ] },
+    { file => 'refRemote.json', group_description => [      # TODO: waiting for test suite PR 360
+        'base URI change - change folder', 'base URI change - change folder in subschema',
       ] },
 
     $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
@@ -123,6 +145,7 @@ $accepter->acceptance(
 # 2020-05-22  0.997  Looks like you failed 163 tests of 994.
 # 2020-06-01  0.997  Looks like you failed 159 tests of 994.
 # 2020-06-08  0.999  Looks like you failed 176 tests of 1055.
+# 2020-06-09  0.999  Looks like you failed 165 tests of 1055.
 
 
 END {

@@ -46,6 +46,34 @@ has max_traversal_depth => (
   default => 50,
 );
 
+sub add_schema {
+  my $self = shift;
+
+  my $uri = $_[0]->$_isa('Mojo::URL') ? shift : !ref $_[0] ? Mojo::URL->new(shift) : Mojo::URL->new;
+  croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
+
+  if (not @_) {
+    my ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+    return if not defined $schema or not defined wantarray;
+    return $self->_get_resource($canonical_uri->clone->fragment(undef))->{document};
+  }
+
+  my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
+    : JSON::Schema::Draft201909::Document->new(schema => shift, $uri ? (canonical_uri => $uri) : ());
+
+  $self->_add_resources(
+    map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
+      $document->_resource_pairs
+  ) if not (grep $_->{document} == $document, $self->_resource_values);
+
+  if ("$uri" and not $self->_get_resource($uri)) {
+    $document->_add_resources($uri, { path => '', canonical_uri => $document->canonical_uri });
+    $self->_add_resources($uri => { path => '', canonical_uri => $document->canonical_uri, document => $document });
+  }
+
+  return $document;
+}
+
 sub evaluate_json_string {
   my ($self, $json_data, $schema) = @_;
   my $data;
@@ -92,15 +120,7 @@ sub evaluate {
       ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($schema_reference);
     }
     else {
-      my $document = $schema_reference->$_isa('JSON::Schema::Draft201909::Document')
-        ? $schema_reference
-        : JSON::Schema::Draft201909::Document->new(schema => $schema_reference);
-
-      $self->_add_resources(
-        map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
-          $document->_resource_pairs
-      ) if not (grep $_->{document} == $document, $self->_resource_values);
-
+      my $document = $self->add_schema($schema_reference);
       ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
     }
 
@@ -1222,6 +1242,20 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
+
+=head2 add_schema
+
+  $js->add_schema($uri => $schema);
+  $js->add_schema($uri => $document);
+  $js->add_schema($schema);
+  $js->add_schema($document);
+
+Introduces the (unblessed, nested Perl data structure) or L<JSON::Schema::Draft201909::Document>
+object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
+provided (and if not, C<''> will be used if no other identifier can be found within).
+
+You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
+before calling L</evaluate>, other than the standard metaschemas which are pre-loaded.
 
 =head1 LIMITATIONS
 

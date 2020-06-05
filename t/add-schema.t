@@ -6,6 +6,8 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
+use Test::Fatal;
+use Test::Deep::UnorderedPairs;
 use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
@@ -166,5 +168,188 @@ subtest 'evaluate a uri' => sub {
 
 # TODO: test ->evaluate(..., $non_canonical_uri) -- resource index should contain both the
 # non-canonical id and the $id from within the schema resource.
+
+subtest 'add a uri resource' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  cmp_deeply(
+    $js->add_schema(METASCHEMA),
+    all(
+      isa('JSON::Schema::Draft201909::Document'),
+      listmethods(
+        resource_index => [
+          METASCHEMA() => {
+            path => '',
+            canonical_uri => str(METASCHEMA),
+          },
+        ],
+        canonical_uri => [ str(METASCHEMA) ],
+      ),
+    ),
+    'added the metaschema by uri',
+  );
+
+  is(
+    $js->add_schema('http://httpbin.org/status/404'),
+    undef,
+    'attempt to add a resource that does not exist',
+  );
+};
+
+subtest 'add a schema associated with a uri' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  like(
+    exception { $js->add_schema('https://foo.com#/x/y/z', {}) },
+    qr/^cannot add a schema with a uri with a fragment/,
+    'cannot use a uri with a fragment',
+  );
+
+  cmp_deeply(
+    my $document = $js->add_schema(
+      'https://foo.com',
+      { '$id' => 'https://bar.com', allOf => [ false, true ] },
+    ),
+    all(
+      isa('JSON::Schema::Draft201909::Document'),
+      listmethods(
+        resource_index => unordered_pairs(
+          'https://foo.com' => {
+            path => '',
+            canonical_uri => str('https://bar.com'),
+          },
+          'https://bar.com' => {
+            path => '',
+            canonical_uri => str('https://bar.com'),
+          },
+        ),
+        canonical_uri => [ str('https://bar.com') ],
+      ),
+    ),
+    'added the schema data with an associated uri',
+  );
+
+  cmp_deeply(
+    my $result = $js->evaluate(1, 'https://bar.com#/allOf/0')->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0',
+          absoluteKeywordLocation => 'https://bar.com#/allOf/0',
+          error => 'subschema is false',
+        },
+      ],
+    },
+    'can now evaluate using a uri to a subschema of a resource we loaded earlier',
+  );
+
+  cmp_deeply(
+    $js->evaluate(1, 'https://foo.com')->TO_JSON,
+    {
+      valid => bool(0),
+      errors => my $errors = [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0',
+          absoluteKeywordLocation => 'https://bar.com#/allOf/0',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          absoluteKeywordLocation => 'https://bar.com#/allOf',
+          error => 'subschema 0 is not valid',
+        },
+      ],
+    },
+    'can also evaluate using a non-canonical uri',
+  );
+
+  cmp_deeply(
+    $js->add_schema('https://bloop.com', $document),
+    shallow($document),
+    'can add the same document and associate it with another schema',
+  );
+
+  cmp_deeply(
+    { $js->_resource_index },
+    {
+      map +( $_ => {
+        path => '',
+        canonical_uri => str('https://bar.com'),
+        document => shallow($document),
+      } ), qw(https://foo.com https://bar.com https://bloop.com)
+    },
+    'now the document is available as all three uris',
+  );
+};
+
+subtest 'add a document without associating it with a uri' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  cmp_deeply(
+    $js->add_schema(
+      my $document = JSON::Schema::Draft201909::Document->new(
+        schema => { '$id' => 'https://bar.com', allOf => [ false, true ] },
+      )),
+    all(
+      isa('JSON::Schema::Draft201909::Document'),
+      listmethods(
+        resource_index => [
+          'https://bar.com' => {
+            path => '',
+            canonical_uri => str('https://bar.com'),
+          },
+        ],
+        canonical_uri => [ str('https://bar.com') ],
+      ),
+    ),
+    'added the document without an associated uri',
+  );
+
+  cmp_deeply(
+    { $js->_resource_index },
+    {
+      'https://bar.com' => {
+        path => '', canonical_uri => str('https://bar.com'), document => shallow($document),
+      },
+    },
+    'document only added under its canonical uri',
+  );
+};
+
+subtest 'add a schema without a uri' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  cmp_deeply(
+    my $document = $js->add_schema(
+      { '$id' => 'https://bar.com', allOf => [ false, true ] },
+    ),
+    all(
+      isa('JSON::Schema::Draft201909::Document'),
+      listmethods(
+        resource_index => [
+          'https://bar.com' => {
+            path => '',
+            canonical_uri => str('https://bar.com'),
+          },
+        ],
+        canonical_uri => [ str('https://bar.com') ],
+      ),
+    ),
+    'added the schema data without an associated uri',
+  );
+
+  cmp_deeply(
+    { $js->_resource_index },
+    {
+      'https://bar.com' => {
+        path => '', canonical_uri => str('https://bar.com'), document => shallow($document),
+      },
+    },
+    'document only added under its canonical uri',
+  );
+};
 
 done_testing;
