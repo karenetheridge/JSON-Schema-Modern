@@ -47,7 +47,6 @@ subtest 'load cached metaschema' => sub {
 };
 
 subtest 'resource collision with cached metaschema' => sub {
-  print STDERR "######\n";
   my $js = JSON::Schema::Draft201909->new;
   like(
     exception {
