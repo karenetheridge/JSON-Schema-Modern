@@ -91,6 +91,7 @@ subtest 'object document' => sub {
 
   cmp_deeply(
     JSON::Schema::Draft201909::Document->new(
+      defined $_ ? ( canonical_uri => $_ ) : (),
       schema => { '$id' => 'https://bar.com' },
     ),
     listmethods(
@@ -104,7 +105,8 @@ subtest 'object document' => sub {
       canonical_uri => [ str('https://bar.com') ], # note canonical_uri has been overwritten
     ),
     'object schema with no canonical_uri, and absolute root $id',
-  );
+  )
+  foreach (undef, '', Mojo::URL->new);
 
   cmp_deeply(
     JSON::Schema::Draft201909::Document->new(
