@@ -70,18 +70,7 @@ sub evaluate_json_string {
 }
 
 sub evaluate {
-  my ($self, $data, $schema) = @_;
-
-  # TODO: move to $self->add_schema($schema)
-  my $document = JSON::Schema::Draft201909::Document->new(
-    # TODO canonical_uri => $self->base_uri,
-    schema => $schema,
-  );
-
-  $self->_add_resources(
-    map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
-      $document->_resource_pairs
-  );
+  my ($self, $data, $schema_reference) = @_;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
@@ -97,6 +86,29 @@ sub evaluate {
 
   my $result;
   try {
+    my ($schema, $canonical_uri);
+
+    if (not ref $schema_reference or $schema_reference->$_isa('Mojo::URL')) {
+      ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($schema_reference);
+    }
+    else {
+      my $document = $schema_reference->$_isa('JSON::Schema::Draft201909::Document')
+        ? $schema_reference
+        : JSON::Schema::Draft201909::Document->new(schema => $schema_reference);
+
+      $self->_add_resources(
+        map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
+          $document->_resource_pairs
+      ) if not (grep $_->{document} == $document, $self->_resource_values);
+
+      ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
+    }
+
+    abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
+
+    $state->{canonical_schema_uri} = $canonical_uri->clone->fragment(undef);
+    $state->{schema_path} = $canonical_uri->fragment // '';
+
     $result = $self->_eval($data, $schema, $state);
   }
   catch {
@@ -223,22 +235,7 @@ sub _eval_keyword_recursiveAnchor {
 sub _fetch_and_eval_ref_uri {
   my ($self, $data, $schema, $state, $uri) = @_;
 
-  my $fragment = $uri->fragment // '';
-  my ($subschema, $canonical_uri);
-  if (not length($fragment) or $fragment =~ m{^/}) {
-    my $base = $uri->clone->fragment(undef);
-    if (my $resource = $self->_get_or_load_resource($base)) {
-      $subschema = $resource->{document}->get($resource->{path}.$fragment);
-      $canonical_uri = $uri;
-    }
-  }
-  else {
-    if (my $resource = $self->_get_resource($uri)) {
-      $subschema = $resource->{document}->get($resource->{path});
-      $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI
-    }
-  }
-
+  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
   abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
 
   return $self->_eval($data, $subschema,
@@ -986,6 +983,7 @@ has _resource_index => (
     _resource_index => 'elements',
     _resource_keys => 'keys',
     _add_resources_unsafe => 'set',
+    _resource_values => 'values',
   },
   lazy => 1,
   default => sub { {} },
@@ -1061,6 +1059,32 @@ sub _get_or_load_resource {
 
   return;
 };
+
+# returns a schema (which may not be at a document root), and the canonical uri for that schema.
+# creates a Document and adds it to the resource index, if not already present.
+sub _fetch_schema_from_uri {
+  my ($self, $uri) = @_;
+
+  $uri = Mojo::URL->new($uri) if not ref $uri;
+  my $fragment = $uri->fragment // '';
+
+  my ($subschema, $canonical_uri);
+  if (not length($fragment) or $fragment =~ m{^/}) {
+    my $base = $uri->clone->fragment(undef);
+    if (my $resource = $self->_get_or_load_resource($base)) {
+      $subschema = $resource->{document}->get($resource->{path}.$fragment);
+      $canonical_uri = $uri;
+    }
+  }
+  else {
+    if (my $resource = $self->_get_resource($uri)) {
+      $subschema = $resource->{document}->get($resource->{path});
+      $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI
+    }
+  }
+
+  return defined $subschema && $canonical_uri ? ($subschema, $canonical_uri) : ();
+}
 
 has _json_decoder => (
   is => 'ro',
@@ -1170,8 +1194,13 @@ Evaluates the provided instance data against the known schema document.
 The data is in the form of a JSON-encoded string (in accordance with
 L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
-The schema is in the form of a Perl data structure, representing a JSON Schema
-that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
+L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
+
+=for :list
+* a Perl data structure, such as what is returned from a JSON decode operation,
+* a L<JSON::Schema::Draft201909::Document> object,
+* or a URI string indicating the location where such a schema is located.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -1184,8 +1213,13 @@ Evaluates the provided instance data against the known schema document.
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
 allows (null, boolean, string, number, object, array).
 
-The schema is in the form of a Perl data structure, representing a JSON Schema
-that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
+L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
+
+=for :list
+* a Perl data structure, such as what is returned from a JSON decode operation,
+* a L<JSON::Schema::Draft201909::Document> object,
+* or a URI string indicating the location where such a schema is located.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 

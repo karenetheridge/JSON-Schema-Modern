@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - add support for evaluation against a uri
 
 0.005     2020-06-09 01:54:05Z
           - fix some edge cases with usage of $recursiveAnchor, $recursiveRef

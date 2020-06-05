@@ -32,14 +32,14 @@ foreach my $test (@tests) {
 }
 
 cmp_deeply(
-  $js->evaluate('hello', 'foo')->TO_JSON,
+  $js->evaluate('hello', [])->TO_JSON,
   {
     valid => bool(0),
     errors => [
       {
         instanceLocation => '',
         keywordLocation => '',
-        error => 'EXCEPTION: unrecognized schema type "string"',
+        error => 'EXCEPTION: unrecognized schema type "array"',
       },
     ],
   },

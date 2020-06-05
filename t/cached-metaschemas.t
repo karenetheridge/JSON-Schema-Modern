@@ -6,7 +6,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use Test::Fatal;
 use JSON::Schema::Draft201909;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 
@@ -48,11 +47,18 @@ subtest 'load cached metaschema' => sub {
 
 subtest 'resource collision with cached metaschema' => sub {
   my $js = JSON::Schema::Draft201909->new;
-  like(
-    exception {
-      $js->evaluate(1, { '$id' => 'https://json-schema.org/draft/2019-09/schema' });
+  cmp_deeply(
+    $js->evaluate(1, { '$id' => 'https://json-schema.org/draft/2019-09/schema' })->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => re(qr{^EXCEPTION: \Quri "https://json-schema.org/draft/2019-09/schema" conflicts with an existing meta-schema resource\E}),
+        },
+      ],
     },
-    qr{^\Quri "https://json-schema.org/draft/2019-09/schema" conflicts with an existing meta-schema resource\E},
     'cannot introduce another schema whose id collides with a cached schema, even if it isn\'t loaded yet',
   );
 };
