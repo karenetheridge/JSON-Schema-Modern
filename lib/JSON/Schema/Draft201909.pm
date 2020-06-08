@@ -46,6 +46,12 @@ has max_traversal_depth => (
   default => 50,
 );
 
+has validate_formats => (
+  is => 'ro',
+  isa => Bool,
+  default => 0,
+);
+
 sub add_schema {
   my $self = shift;
 
@@ -168,7 +174,7 @@ sub _eval {
   my $result = 1;
 
   foreach my $keyword (
-    # CORE KEYWORDS
+    # CORE VOCABULARY
     qw($schema $id $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
     # VALIDATOR KEYWORDS
     qw(type enum const
@@ -180,6 +186,8 @@ sub _eval {
     qw(allOf anyOf oneOf not if dependentSchemas
       items unevaluatedItems contains
       properties patternProperties additionalProperties unevaluatedProperties propertyNames),
+    # FORMAT VOCABULARY
+    qw(format),
     # DISCONTINUED KEYWORDS
     qw(definitions dependencies),
   ) {
@@ -870,6 +878,81 @@ sub _eval_keyword_propertyNames {
 
   return 1 if $valid;
   return E($state, 'not all property names are valid');
+}
+
+# TODO allow passing format_validations to constructor.
+# these should be shunted to 'format_validation_overrides'
+# and then the default sub can overlay them on top of the defaults.
+has format_validations => (
+  is => 'bare',
+  isa => HashRef[Dict[
+      type => Enum[qw(null object array boolean string number integer)],
+      sub => CodeRef,
+    ]],
+  handles_via => 'Hash',
+  handles => {
+    _get_format_validation => 'get',
+    _has_format_validation => 'exists',
+  },
+  lazy => 1,
+  default => sub {
+    # conch formats:
+    # date-time
+    # email
+    # ipv4
+    # ipv6
+    # json-pointer
+    # uri
+
+    +{
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+      # 'date-time' => sub { 0 },
+      # date => sub { 0 },
+      # time => sub { 0 },
+      # duration => sub { 0 },
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.2
+      # email => sub { 0 },
+      # 'idn-email' => sub { 0 },
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.3
+      # hostname => sub { 0 },
+      # 'idn-hostname'=> sub { 0 },
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.4
+      # ipv4 => sub { 0 },
+      # ipv6 => sub { 0 },
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.5
+      # uri => sub { 0 },
+      # 'uri-reference' => sub { 0 },
+      # iri => sub { 0 },
+      # 'iri-reference' => sub { 0 },
+      uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$/ },
+
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.6
+      # 'uri-template' => sub { 0 },
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.7
+      # 'json-pointer' => sub { 0 },
+      # 'relative-json-pointer' => sub { 0 },
+      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.8
+      # regex => sub { 0 },
+    }
+  },
+);
+
+# TODO: lots of things to consider in
+# https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.2
+
+sub _eval_keyword_format {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  my $valid = 1;
+  if ($self->validate_formats and my $format_sub = $self->_get_format_validation($schema->{format})) {
+    $valid = $self->_get_format_validation($schema->{format})->($data);
+    return E($state, '... some error here') if not $valid;
+  }
+
+  # TODO: create annotation
+  return $valid;
 }
 
 sub _eval_keyword_definitions {
