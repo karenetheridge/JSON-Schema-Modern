@@ -78,7 +78,7 @@ sub BUILD {
 
   my $original_uri = $self->canonical_uri->clone;
   my $schema = $self->data;
-  my %identifiers = _traverse_for_identifiers($schema, $original_uri);
+  my %identifiers = _traverse_for_identifiers($schema, '', $original_uri->clone);
 
   if (is_plain_hashref($self->schema) and my $id = $self->get('/$id')) {
     $self->_set_canonical_uri(Mojo::URL->new($id)) if $id ne $self->canonical_uri;
@@ -93,12 +93,12 @@ sub BUILD {
 }
 
 sub _traverse_for_identifiers {
-  my ($data, $canonical_uri) = @_;
-  my $uri_fragment = $canonical_uri->fragment // '';
+  my ($data, $path, $canonical_uri) = @_;
   my %identifiers;
   if (is_plain_arrayref($data)) {
     return map
-      __SUB__->($data->[$_], $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
+      __SUB__->($data->[$_], $path.'/'.$_,
+        $canonical_uri->clone->fragment($canonical_uri->fragment.'/'.$_)),
       0 .. $#{$data};
   }
   elsif (is_plain_hashref($data)) {
@@ -107,19 +107,22 @@ sub _traverse_for_identifiers {
       # this might not be a real $id... wait for it to be encountered at runtime before dying
       if (not length $canonical_uri->fragment) {
         $canonical_uri->fragment(undef);
-        $identifiers{$canonical_uri} = { path => $uri_fragment, canonical_uri => $canonical_uri };
+        $identifiers{$canonical_uri} = { path => $path, canonical_uri => $canonical_uri->clone };
       };
     }
     if (exists $data->{'$anchor'} and not is_ref($data->{'$anchor'})) {
       # we cannot change the canonical uri, or we won't be able to properly identify
       # paths within this resource
       my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
-      $identifiers{$uri} = { path => $uri_fragment, canonical_uri => $canonical_uri };
+      $identifiers{$uri} = { path => $path, canonical_uri => $canonical_uri->clone };
     }
 
     return
       %identifiers,
-      map __SUB__->($data->{$_}, $canonical_uri->clone->fragment($uri_fragment.'/'.$_)), keys %$data;
+      map
+        __SUB__->($data->{$_}, $path.'/'.$_,
+          $canonical_uri->clone->fragment(($canonical_uri->fragment//'').'/'.$_)),
+        keys %$data;
   }
 
   return ();

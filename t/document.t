@@ -255,4 +255,44 @@ subtest '$id with a non-empty fragment' => sub {
   );
 };
 
+subtest '$anchor and $id below an $id that is not at the document root' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909::Document->new(
+      canonical_uri => Mojo::URL->new('https://foo.com'),
+      schema => {
+        allOf => [
+          {
+            '$id' => 'https://bar.com',
+            '$anchor' => 'my_anchor',
+            not => {
+              '$anchor' => 'my_not',
+              not => { '$id' => 'inner_id' },
+            },
+          },
+        ],
+      },
+    ),
+    listmethods(
+      resource_index => unordered_pairs(
+        'https://foo.com' => {
+          path => '', canonical_uri => str('https://foo.com'),
+        },
+        'https://bar.com' => {
+          path => '/allOf/0', canonical_uri => str('https://bar.com'),
+        },
+        'https://bar.com#my_anchor' => {
+          path => '/allOf/0', canonical_uri => str('https://bar.com'),
+        },
+        'https://bar.com#my_not' => {
+          path => '/allOf/0/not', canonical_uri => str('https://bar.com#/not'),
+        },
+        'https://bar.com/inner_id' => {
+          path => '/allOf/0/not/not', canonical_uri => str('https://bar.com/inner_id'),
+        },
+      ),
+    ),
+    'canonical_uri uses the path from the innermost $id, not document root $id',
+  );
+};
+
 done_testing;
