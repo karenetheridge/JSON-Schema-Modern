@@ -37,7 +37,7 @@ has resource_index => (
   is => 'bare',
   isa => HashRef[Dict[
       canonical_uri => InstanceOf['Mojo::URL'], # always fragmentless
-      path => Str,  # always a json pointer
+      path => Str,  # always a json pointer, relative to the document root
     ]],
   handles_via => 'Hash',
   handles => {
@@ -97,7 +97,7 @@ sub _traverse_for_identifiers {
   my %identifiers;
   if (is_plain_arrayref($data)) {
     return map
-      __SUB__->($data->[$_], $path.'/'.$_,
+      __SUB__->($data->[$_], jsonp($path, $_),
         $canonical_uri->clone->fragment($canonical_uri->fragment.'/'.$_)),
       0 .. $#{$data};
   }
@@ -119,12 +119,18 @@ sub _traverse_for_identifiers {
     return
       %identifiers,
       map
-        __SUB__->($data->{$_}, $path.'/'.$_,
-          $canonical_uri->clone->fragment(($canonical_uri->fragment//'').'/'.$_)),
+        __SUB__->($data->{$_}, jsonp($path, $_),
+          $canonical_uri->clone->fragment(jsonp($canonical_uri->fragment, $_))),
         keys %$data;
   }
 
   return ();
+}
+
+# shorthand for creating and appending json pointers
+use namespace::clean 'jsonp';
+sub jsonp {
+  return join('/', (shift // ''), map s/~/~0/gr =~ s!/!~1!gr, @_);
 }
 
 1;

@@ -322,4 +322,73 @@ subtest '$anchor and $id below an $id that is not at the document root' => sub {
   );
 };
 
+subtest 'JSON pointer and URI escaping' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909::Document->new(
+      schema => {
+        '$defs' => {
+          foo => {
+            patternProperties => {
+              '~' => {
+                '$id' => 'http://localhost:4242/~username',
+                properties => {
+                  '~/' => {
+                    '$anchor' => 'tilde',
+                  },
+                },
+              },
+              '/' => {
+                '$id' => 'http://localhost:4242/my_slash',
+                properties => {
+                  '~/' => {
+                    '$anchor' => 'slash',
+                  },
+                },
+              },
+              '[~/]' => {
+                '$id' => 'http://localhost:4242/~username/my_slash',
+                properties => {
+                  '~/' => {
+                    '$anchor' => 'tildeslash',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ),
+    listmethods(
+      resource_index => unordered_pairs(
+        '' => { path => '', canonical_uri => str('') },
+        'http://localhost:4242/~username' => {
+          path => '/$defs/foo/patternProperties/~0',
+          canonical_uri => str('http://localhost:4242/~username'),
+        },
+        'http://localhost:4242/my_slash' => {
+          path => '/$defs/foo/patternProperties/~1',
+          canonical_uri => str('http://localhost:4242/my_slash'),
+        },
+        'http://localhost:4242/~username/my_slash' => {
+          path => '/$defs/foo/patternProperties/[~0~1]',
+          canonical_uri => str('http://localhost:4242/~username/my_slash'),
+        },
+        'http://localhost:4242/~username#tilde' => {
+          path => '/$defs/foo/patternProperties/~0/properties/~0~1',
+          canonical_uri => str('http://localhost:4242/~username#/properties/~0~1'),
+        },
+        'http://localhost:4242/my_slash#slash' => {
+          path => '/$defs/foo/patternProperties/~1/properties/~0~1',
+          canonical_uri => str('http://localhost:4242/my_slash#/properties/~0~1'),
+        },
+        'http://localhost:4242/~username/my_slash#tildeslash' => {
+          path => '/$defs/foo/patternProperties/[~0~1]/properties/~0~1',
+          canonical_uri => str('http://localhost:4242/~username/my_slash#/properties/~0~1'),
+        },
+      ),
+    ),
+    'properly escaped special characters in JSON pointers and URIs',
+  );
+};
+
 done_testing;

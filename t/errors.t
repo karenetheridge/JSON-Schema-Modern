@@ -1027,9 +1027,9 @@ subtest 'JSON pointer escaping' => sub {
             properties => {
               '{}' => {
                 patternProperties => {
-                  '~' => false,
-                  '/' => false,
-                  '[~/]' => false,
+                  '~' => { minimum => 5 },
+                  '/' => { minimum => 6 },
+                  '[~/]' => { minimum => 7 },
                 },
               },
             },
@@ -1043,21 +1043,21 @@ subtest 'JSON pointer escaping' => sub {
       errors => [
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
-          keywordLocation => '/$ref/properties/{}/patternProperties/~1',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~1',
-          error => 'subschema is false',
+          keywordLocation => '/$ref/properties/{}/patternProperties/~1/minimum',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~1/minimum',
+          error => 'value is smaller than 6',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
-          keywordLocation => '/$ref/properties/{}/patternProperties/[~0~1]',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/%5B~0~1%5D',
-          error => 'subschema is false',
+          keywordLocation => '/$ref/properties/{}/patternProperties/[~0~1]/minimum',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/%5B~0~1%5D/minimum',
+          error => 'value is smaller than 7',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
-          keywordLocation => '/$ref/properties/{}/patternProperties/~0',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0',
-          error => 'subschema is false',
+          keywordLocation => '/$ref/properties/{}/patternProperties/~0/minimum',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0/minimum',
+          error => 'value is smaller than 5',
         },
         {
           instanceLocation => '/{}',
