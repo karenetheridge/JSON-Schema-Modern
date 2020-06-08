@@ -241,17 +241,24 @@ subtest '$id with a non-empty fragment' => sub {
         '$defs' => {
           foo => {
             '$id' => 'http://localhost:4242/my_foo#hello',
-            type => 'string',
+            properties => {
+              bar => {
+                '$id' => 'my_bar',
+                '$anchor' => 'my_anchor',
+              },
+            },
           },
         },
       },
     ),
     listmethods(
-      resource_index => [
+      resource_index => unordered_pairs(
         '' => { path => '', canonical_uri => str('') },
-      ],
+        'my_bar' => { path => '/$defs/foo/properties/bar', canonical_uri => str('my_bar') },
+        'my_bar#my_anchor' => { path => '/$defs/foo/properties/bar', canonical_uri => str('my_bar') },
+      ),
     ),
-    'did not index the $id with a non-empty fragment -- either it is not in a subschema or the schema is buggy',
+    'did not index the $id with a non-empty fragment, nor use it as the base for other identifiers',
   );
 };
 

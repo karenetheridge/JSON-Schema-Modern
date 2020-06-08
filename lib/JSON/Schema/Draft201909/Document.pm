@@ -103,12 +103,12 @@ sub _traverse_for_identifiers {
   }
   elsif (is_plain_hashref($data)) {
     if (exists $data->{'$id'} and not is_ref($data->{'$id'})) {
-      $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
-      # this might not be a real $id... wait for it to be encountered at runtime before dying
-      if (not length $canonical_uri->fragment) {
+      my $uri = Mojo::URL->new($data->{'$id'});
+      if (not length $uri->fragment) {
+        $canonical_uri = $uri->base($canonical_uri)->to_abs;
         $canonical_uri->fragment(undef);
         $identifiers{$canonical_uri} = { path => $path, canonical_uri => $canonical_uri->clone };
-      };
+      }
     }
     if (exists $data->{'$anchor'} and not is_ref($data->{'$anchor'})) {
       # we cannot change the canonical uri, or we won't be able to properly identify
