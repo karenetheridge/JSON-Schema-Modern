@@ -12,6 +12,7 @@ use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
 use List::Util 1.33 qw(any pairs);
+use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
 use Safe::Isa;
@@ -304,14 +305,14 @@ sub _eval_keyword_defs {
 sub _eval_keyword_type {
   my ($self, $data, $schema, $state) = @_;
 
-  foreach my $type (ref $schema->{type} eq 'ARRAY' ? @{$schema->{type}} : $schema->{type}) {
+  foreach my $type (is_plain_arrayref($schema->{type}) ? @{$schema->{type}} : $schema->{type}) {
     abort($state, 'unrecognized type "%s"', $type)
       if not any { $type eq $_ } qw(null boolean object array string number integer);
     return 1 if $self->_is_type($type, $data);
   }
 
   return E($state, 'wrong type (expected %s)',
-    ref $schema->{type} eq 'ARRAY' ? ('one of '.join(', ', @{$schema->{type}})) : $schema->{type});
+    is_plain_arrayref($schema->{type}) ? ('one of '.join(', ', @{$schema->{type}})) : $schema->{type});
 }
 
 sub _eval_keyword_enum {
@@ -632,7 +633,7 @@ sub _eval_keyword_items {
 
   return 1 if not $self->_is_type('array', $data);
 
-  if (ref $schema->{items} ne 'ARRAY') {
+  if (not is_plain_arrayref($schema->{items})) {
     my $valid = 1;
     foreach my $idx (0 .. $#{$data}) {
       next if $self->_eval($data->[$idx], $schema->{items},
@@ -875,14 +876,14 @@ sub _is_type {
     return is_bool($value);
   }
   if ($type eq 'object') {
-    return ref $value eq 'HASH';
+    return is_plain_hashref($value);
   }
   if ($type eq 'array') {
-    return ref $value eq 'ARRAY';
+    return is_plain_arrayref($value);
   }
 
   if ($type eq 'string' or $type eq 'number' or $type eq 'integer') {
-    return 0 if not defined $value or ref $value;
+    return 0 if not defined $value or is_ref($value);
     my $flags = B::svref_2object(\$value)->FLAGS;
 
     if ($type eq 'string') {
@@ -908,11 +909,11 @@ sub _get_type {
   my ($self, $value) = @_;
 
   return 'null' if not defined $value;
-  return 'object' if ref $value eq 'HASH';
-  return 'array' if ref $value eq 'ARRAY';
+  return 'object' if is_plain_hashref($value);
+  return 'array' if is_plain_arrayref($value);
   return 'boolean' if is_bool($value);
 
-  if (not ref $value) {
+  if (not is_ref($value)) {
     my $flags = B::svref_2object(\$value)->FLAGS;
     return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
     return 'number' if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));

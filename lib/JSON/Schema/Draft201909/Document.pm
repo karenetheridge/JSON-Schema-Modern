@@ -11,6 +11,7 @@ use feature 'current_sub';
 use Mojo::URL;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
+use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use List::Util 1.29 'pairs';
 use Moo;
 use MooX::TypeTiny;
@@ -79,7 +80,7 @@ sub BUILD {
   my $schema = $self->data;
   my %identifiers = _traverse_for_identifiers($schema, $original_uri);
 
-  if (ref $self->schema eq 'HASH' and my $id = $self->get('/$id')) {
+  if (is_plain_hashref($self->schema) and my $id = $self->get('/$id')) {
     $self->_set_canonical_uri(Mojo::URL->new($id)) if $id ne $self->canonical_uri;
   }
 
@@ -95,13 +96,13 @@ sub _traverse_for_identifiers {
   my ($data, $canonical_uri) = @_;
   my $uri_fragment = $canonical_uri->fragment // '';
   my %identifiers;
-  if (ref $data eq 'ARRAY') {
+  if (is_plain_arrayref($data)) {
     return map
       __SUB__->($data->[$_], $canonical_uri->clone->fragment($uri_fragment.'/'.$_)),
       0 .. $#{$data};
   }
-  elsif (ref $data eq 'HASH') {
-    if (exists $data->{'$id'} and not ref($data->{'$id'})) {
+  elsif (is_plain_hashref($data)) {
+    if (exists $data->{'$id'} and not is_ref($data->{'$id'})) {
       $canonical_uri = Mojo::URL->new($data->{'$id'})->base($canonical_uri)->to_abs;
       # this might not be a real $id... wait for it to be encountered at runtime before dying
       if (not length $canonical_uri->fragment) {
@@ -109,7 +110,7 @@ sub _traverse_for_identifiers {
         $identifiers{$canonical_uri} = { path => $uri_fragment, canonical_uri => $canonical_uri };
       };
     }
-    if (exists $data->{'$anchor'} and not ref($data->{'$anchor'})) {
+    if (exists $data->{'$anchor'} and not is_ref($data->{'$anchor'})) {
       # we cannot change the canonical uri, or we won't be able to properly identify
       # paths within this resource
       my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
