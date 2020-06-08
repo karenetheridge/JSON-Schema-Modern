@@ -17,7 +17,7 @@ BEGIN {
 }
 
 use Test::Warnings 0.027 ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 0.994;
+use Test::JSON::Schema::Acceptance 0.999;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
 
@@ -60,6 +60,7 @@ $accepter->acceptance(
         'unevaluatedProperties.json',
         'optional/bignum.json',
         'optional/content.json',
+        'optional/ecmascript-regex.json', # possibly TODO, pending outcome of json-schema-org/JSON-Schema-Test-Suite#380
         qw(
           optional/format/date-time.json
           optional/format/date.json
@@ -121,6 +122,7 @@ $accepter->acceptance(
 # 2020-05-19  0.997  Looks like you failed 171 tests of 994.
 # 2020-05-22  0.997  Looks like you failed 163 tests of 994.
 # 2020-06-01  0.997  Looks like you failed 159 tests of 994.
+# 2020-06-08  0.999  Looks like you failed 176 tests of 1055.
 
 
 END {
