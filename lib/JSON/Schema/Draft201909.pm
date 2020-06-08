@@ -197,7 +197,6 @@ sub _eval_keyword_anchor {
   assert_keyword_type($state, $schema, 'string');
 
   if ($schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
-    $self->_remove_resource($state->{canonical_schema_uri}->clone->fragment($schema->{'$anchor'}));
     abort($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'});
   }
 

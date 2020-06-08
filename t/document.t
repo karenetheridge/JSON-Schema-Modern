@@ -262,6 +262,26 @@ subtest '$id with a non-empty fragment' => sub {
   );
 };
 
+subtest '$anchor not conforming to syntax' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909::Document->new(
+      schema => {
+        '$defs' => {
+          foo => {
+            '$anchor' => 'my_#bad_anchor',
+          },
+        },
+      },
+    ),
+    listmethods(
+      resource_index => [
+        '' => { path => '', canonical_uri => str('') },
+      ],
+    ),
+    'did not index an $anchor with invalid characters',
+  );
+};
+
 subtest '$anchor and $id below an $id that is not at the document root' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909::Document->new(

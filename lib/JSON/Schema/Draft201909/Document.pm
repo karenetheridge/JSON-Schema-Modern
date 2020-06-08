@@ -110,9 +110,8 @@ sub _traverse_for_identifiers {
         $identifiers{$canonical_uri} = { path => $path, canonical_uri => $canonical_uri->clone };
       }
     }
-    if (exists $data->{'$anchor'} and not is_ref($data->{'$anchor'})) {
-      # we cannot change the canonical uri, or we won't be able to properly identify
-      # paths within this resource
+    if (exists $data->{'$anchor'} and not is_ref($data->{'$anchor'})
+        and $data->{'$anchor'} =~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
       my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
       $identifiers{$uri} = { path => $path, canonical_uri => $canonical_uri->clone };
     }

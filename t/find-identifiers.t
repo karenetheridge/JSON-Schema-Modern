@@ -252,8 +252,6 @@ subtest 'invalid $id and $anchor' => sub {
     'schema is evaluatable if bad definitions are not traversed',
   );
 
-  ok($js->_get_resource('foo.json#my$foo'), '$anchor resource has not been verified yet');
-
   cmp_deeply(
     $js->evaluate(
       'check anchor',
@@ -273,8 +271,6 @@ subtest 'invalid $id and $anchor' => sub {
     'evaluation gives an error if bad $anchor is traversed',
   );
 
-  ok(!$js->_get_resource('foo.json#my$foo'), '$anchor resource found to be bad, and removed');
-
   cmp_deeply(
     $js->evaluate(
       'check id',
@@ -293,9 +289,6 @@ subtest 'invalid $id and $anchor' => sub {
     },
     'evaluation gives an error if bad $id is traversed',
   );
-
-  # TODO: bad $anchor should still be absent, because when we have ::Document objects we won't
-  # re-parse a document for $id and $anchors for each evaluation (in theory?)
 };
 
 subtest 'nested $ids' => sub {
