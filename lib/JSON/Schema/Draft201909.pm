@@ -8,11 +8,12 @@ package JSON::Schema::Draft201909;
 our $VERSION = '0.006';
 
 no if "$]" >= 5.031009, feature => 'indirect';
+use feature 'fc';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
 use List::Util 1.33 qw(any pairs);
-use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
+use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
 use Safe::Isa;
@@ -21,7 +22,7 @@ use File::ShareDir 'dist_dir';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict);
+use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef);
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
 use JSON::Schema::Draft201909::Document;
@@ -45,6 +46,37 @@ has max_traversal_depth => (
   isa => Int,
   default => 50,
 );
+
+has validate_formats => (
+  is => 'ro',
+  isa => Bool,
+  default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
+);
+
+sub BUILD {
+  my ($self, $args) = @_;
+
+  if (exists $args->{format_validations}) {
+    croak 'format_validations must be a hashref'
+      if not is_plain_hashref($args->{format_validations});
+
+    foreach my $format (keys %{$args->{format_validations}}) {
+      if (my $existing = $self->_get_format_validation($format)) {
+        croak 'overrides to existing format_validations must be coderefs'
+          if not is_plain_coderef($args->{format_validations}{$format});
+        $self->_set_format_validation($format,
+          +{ type => $existing->{type}, sub => $args->{format_validations}{$format} });
+      }
+      else {
+        my $type = Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef];
+        croak $type->get_message($args->{format_validations}{$format})
+          if not $type->check($args->{format_validations}{$format});
+
+        $self->_set_format_validation($format => $args->{format_validations}{$format});
+      }
+    }
+  }
+}
 
 sub add_schema {
   my $self = shift;
@@ -180,6 +212,8 @@ sub _eval {
     qw(allOf anyOf oneOf not if dependentSchemas
       items unevaluatedItems contains
       properties patternProperties additionalProperties unevaluatedProperties propertyNames),
+    # FORMAT VOCABULARY
+    qw(format),
     # DISCONTINUED KEYWORDS
     qw(definitions dependencies),
   ) {
@@ -872,6 +906,110 @@ sub _eval_keyword_propertyNames {
   return E($state, 'not all property names are valid');
 }
 
+has _format_validations => (
+  is => 'bare',
+  isa => HashRef[Dict[
+      type => Enum[qw(null object array boolean string number integer)],
+      sub => CodeRef,
+    ]],
+  handles_via => 'Hash',
+  handles => {
+    _get_format_validation => 'get',
+    _set_format_validation => 'set',
+  },
+  lazy => 1,
+  default => sub {
+    my $is_datetime = sub {
+      eval { require Time::Moment; 1 } or return 1;
+      eval { Time::Moment->from_string($_[0]) } ? 1 : 0,
+    };
+    my $is_email = sub {
+      eval { require Email::Address::XS; 1 } or return 1;
+      Email::Address::XS->parse($_[0])->is_valid;
+    };
+    my $is_hostname = sub {
+      eval { require Data::Validate::Domain; 1 } or return 1;
+      Data::Validate::Domain::is_domain($_[0]);
+    };
+    my $idn_decode = sub {
+      eval { require Net::IDN::Encode; 1 } or return $_[0];
+      try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch { return $_[0]; }
+    };
+    my $is_ipv4 = sub {
+      my @o = split(/\./, $_[0], 5);
+      @o == 4 && (grep /^[0-9]{1,3}$/, @o) == 4 && (grep $_ < 256, @o) == 4;
+    };
+    # https://tools.ietf.org/html/rfc3339#appendix-A with some additions for the 2000 version
+    my $duration_re = do {
+      my $num = qr{[0-9]+(?:[.,][0-9]+)?};
+      my $second = qr{${num}S};
+      my $minute = qr{${num}M};
+      my $hour = qr{${num}H};
+      my $time = qr{T(?=[0-9])(?:$hour)?(?:$minute)?(?:$second)?};
+      my $day = qr{${num}D};
+      my $month = qr{${num}M};
+      my $year = qr{${num}Y};
+      my $week = qr{${num}W};
+      my $date = qr{(?=[0-9])(?:$year)?(?:$month)?(?:$day)?};
+      qr{^P(?:(?=.)(?:$date)?(?:$time)?|$week)$};
+    };
+
+    +{
+      'date-time' => { type => 'string', sub => $is_datetime },
+      date => { type => 'string', sub => sub { $is_datetime->($_[0].'T00:00:00Z') } },
+      time => { type => 'string', sub => sub { $is_datetime->('2000-01-01T'.$_[0]) } },
+      duration => { type => 'string', sub => sub {
+        $_[0] =~ $duration_re && $_[0] !~ m{[.,][0-9]+[A-Z].};
+      } },
+      email => { type => 'string', sub => sub { $is_email->($_[0]) && $_[0] !~ /[^[:ascii:]]/ } },
+      'idn-email' => { type => 'string', sub => $is_email },
+      hostname => { type => 'string', sub => $is_hostname },
+      'idn-hostname' => { type => 'string', sub => sub { $is_hostname->($idn_decode->($_[0])) } },
+      ipv4 => { type => 'string', sub => $is_ipv4 },
+      ipv6 => { type => 'string', sub => sub {
+        ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/
+          || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,4}:?((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
+              && $is_ipv4->($1))
+          && (()= ($_[0] =~ /::/g)) < 2;
+      } },
+      uri => { type => 'string', sub => sub {
+        my $uri = Mojo::URL->new($_[0]);
+        fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs && $_[0] !~ /[^[:ascii:]]/;
+      } },
+      'uri-reference' => { type => 'string', sub => sub {
+        fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
+      } },
+      iri => { type => 'string', sub => sub { Mojo::URL->new($_[0])->is_abs } },
+      'iri-reference' => { type => 'string', sub => sub { 1 } },
+      uuid => { type => 'string', sub => sub {
+        $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}$/;
+      } },
+      'uri-template' => { type => 'string', sub => sub { 1 } },
+      'json-pointer' => { type => 'string', sub => sub {
+        (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])};
+      } },
+      'relative-json-pointer' => { type => 'string', sub => sub {
+        $_[0] =~ m{^[0-9]+(?:#$|$|/)} && $_[0] !~ m{~(?![01])};
+      } },
+      regex => { type => 'string', sub => sub { eval { qr/$_[0]/; 1 } ? 1 : 0 } },
+    }
+  },
+);
+
+sub _eval_keyword_format {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  if ($self->validate_formats and my $spec = $self->_get_format_validation($schema->{format})) {
+    return E($state, 'not a %s', $schema->{format})
+      if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
+  }
+
+  # TODO: create annotation
+  return 1;
+}
+
 sub _eval_keyword_definitions {
   carp 'no-longer-supported "definitions" keyword present: this should be rewritten as "$defs"';
   return 1;
@@ -1203,7 +1341,23 @@ The maximum number of levels deep a schema traversal may go, before evaluation i
 protect against accidental infinite recursion, such as from two subschemas that each reference each
 other. Defaults to 50.
 
+=head2 validate_formats
+
+When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
+to false.
+
+=head2 format_validations
+
+An optional hashref that allows overriding the validation method for formats, or adding new ones.
+Existing formats must be specified in the form of C<< { $format_name => $format_sub } >>, where
+the format sub is a coderef that takes one argument and returns a boolean result. New formats must
+be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
+where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
+number, or integer) the instance value must be for the format validation to be considered.
+
 =head1 METHODS
+
+=for Pod::Coverage BUILD
 
 =head2 evaluate_json_string
 
@@ -1272,6 +1426,40 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
+=head2 FORMAT VALIDATION
+
+By default, formats are treated only as annotations, not assertions. When L</validate_format> is
+true, strings are also checked against the format as specified in the schema. At present the
+following formats are supported (use of any other formats than these will evaluate as true):
+
+=for :list
+* C<date-time>
+* C<date>
+* C<time>
+* C<duration>
+* C<email>
+* C<idn-email>
+* C<hostname>
+* C<idn-hostname>
+* C<ipv4>
+* C<ipv6>
+* C<uri>
+* C<uri-reference>
+* C<iri>
+* C<uuid>
+* C<json-pointer>
+* C<relative-json-pointer>
+* C<regex>
+
+A few optional prerequisites are needed for some of these (if the prerequisite is missing,
+validation will always succeed):
+
+=for :list
+* C<date-time>, C<date>, and C<time> require L<Time::Moment>
+* C<email> and C<idn-email> require L<Email::Address::XS>
+* C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
+* C<idn-hostname> requires L<Net::IDN::Encode>
+
 =head2 SPECIFICATION COMPLIANCE
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
@@ -1279,7 +1467,6 @@ Until version 1.000 is released, this implementation is not fully specification-
 To date, missing components (some of which are optional, but still quite useful) include:
 
 =for :list
-* support for the C<format> keyword as an assertion
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
@@ -1291,7 +1478,8 @@ To date, missing components (some of which are optional, but still quite useful)
 
 =head1 SECURITY CONSIDERATIONS
 
-The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema.
+The C<pattern> and C<patternProperties> keywords, and the C<regex> format validator,
+evaluate regular expressions from the schema.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
 potentially pathological constructs that may pose a security risk, either via denial of service
 or by allowing exposure to the internals of your application. B<DO NOT RUN SCHEMAS FROM UNTRUSTED

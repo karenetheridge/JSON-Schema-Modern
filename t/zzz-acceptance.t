@@ -26,8 +26,10 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
   include_optional => 1,
   verbose => 1,
 );
-my $js = JSON::Schema::Draft201909->new;
-my $js_short_circuit = JSON::Schema::Draft201909->new(short_circuit => 1);
+
+my %options = (validate_formats => 1);
+my $js = JSON::Schema::Draft201909->new(%options);
+my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
 
 my $add_resource = sub {
   my ($uri, $data) = @_;
@@ -80,26 +82,22 @@ $accepter->acceptance(
         'optional/bignum.json',
         'optional/content.json',
         'optional/ecmascript-regex.json',                   # TODO: see issue #27
+        # not yet implemented
+        qw(
+          optional/format/iri-reference.json
+          optional/format/uri-template.json
+        ),
+        # these all depend on optional prereqs
+        $ENV{AUTOMATED_TESTING} ? (
         qw(
           optional/format/date-time.json
           optional/format/date.json
-          optional/format/duration.json
+          optional/format/time.json
           optional/format/email.json
           optional/format/hostname.json
-          optional/format/idn-email.json
           optional/format/idn-hostname.json
-          optional/format/ipv4.json
-          optional/format/ipv6.json
-          optional/format/iri-reference.json
-          optional/format/iri.json
-          optional/format/json-pointer.json
-          optional/format/regex.json
-          optional/format/relative-json-pointer.json
-          optional/format/time.json
-          optional/format/uri-reference.json
-          optional/format/uri-template.json
-          optional/format/uri.json
-        ),
+          optional/format/idn-email.json
+        ) ) : (),
       ] },
     { file => 'ref.json', group_description => [
         'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
@@ -107,7 +105,19 @@ $accepter->acceptance(
     { file => 'refRemote.json', group_description => [      # TODO: waiting for test suite PR 360
         'base URI change - change folder', 'base URI change - change folder in subschema',
       ] },
-
+    # various edge cases that are difficult to accomodate
+    { file => 'optional/format/date-time.json', group_description => 'validation of date-time strings',
+      test_description => 'case-insensitive T and Z' },
+    { file => 'optional/format/date.json', group_description => 'validation of date strings',
+      test_description => 'only RFC3339 not all of ISO 8601 are valid' },
+    { file => 'optional/format/iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
+      test_description => 'an invalid IRI based on IPv6' },
+    { file => 'optional/format/idn-hostname.json',
+      group_description => 'validation of internationalized host names',
+      test_description => [
+        'contains illegal char U+302E Hangul single dot tone mark', # IDN decoder likes this
+        'valid Chinese Punycode',                     # Data::Validate::Domain doesn't like this
+      ] },
     $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
       { file => 'const.json',
         group_description => 'float and integers are equal up to 64-bit representation limits',
@@ -145,6 +155,7 @@ $accepter->acceptance(
 # 2020-06-01  0.997  Looks like you failed 159 tests of 994.
 # 2020-06-08  0.999  Looks like you failed 176 tests of 1055.
 # 2020-06-09  0.999  Looks like you failed 165 tests of 1055.
+# 2020-06-10  0.999  Looks like you failed 104 tests of 1055.
 
 
 END {
