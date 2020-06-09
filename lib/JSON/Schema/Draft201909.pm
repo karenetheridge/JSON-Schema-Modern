@@ -1375,6 +1375,16 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
+=head2 FORMAT VALIDATION
+
+By default, formats are treated only as annotations, not assertions. When L</validate_format> is
+true, strings are also checked against the format as specified in the schema. At present the
+following formats are supported (use of any formats will evaluate as if the format is correct):
+
+=for :list
+* email
+* uuid
+
 =head2 SPECIFICATION COMPLIANCE
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
