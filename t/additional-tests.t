@@ -13,8 +13,9 @@ my $accepter = Test::JSON::Schema::Acceptance->new(test_dir => 't/additional-tes
 
 plan skip_all => 'no tests in this directory to test' if not @{$accepter->_test_data};
 
-my $js = JSON::Schema::Draft201909->new;
-my $js_short_circuit = JSON::Schema::Draft201909->new(short_circuit => 1);
+my %options = (validate_formats => 1);
+my $js = JSON::Schema::Draft201909->new(%options);
+my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
 $encoder->indent_length(2) if $encoder->can('indent_length');
 
