@@ -18,6 +18,7 @@ use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
 use File::ShareDir 'dist_dir';
+use Module::Runtime 'use_module';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
@@ -925,7 +926,7 @@ has _format_validations => (
       date => { type => 'string', sub => sub { 1 } },
       time => { type => 'string', sub => sub { 1 } },
       duration => { type => 'string', sub => sub { 1 } },
-      email => { type => 'string', sub => sub { 1 } },
+      email => { type => 'string', sub => sub { use_module('Email::Valid')->address($_[0]) } },
       'idn-email' => { type => 'string', sub => sub { 1 } },
       hostname => { type => 'string', sub => sub { 1 } },
       'idn-hostname'=> { type => 'string', sub => sub { 1 } },
