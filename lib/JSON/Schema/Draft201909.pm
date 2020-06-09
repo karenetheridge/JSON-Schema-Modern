@@ -214,7 +214,7 @@ sub _eval_keyword_recursiveAnchor {
   # record the canonical location of the current position, to be used against future resolution
   # of a $recursiveRef uri -- as if it was the current location when we encounter a $ref.
   my $uri = $state->{canonical_schema_uri} ? $state->{canonical_schema_uri}->clone : Mojo::URL->new;
-  abort($state, '"$recursiveAnchor" keyword used without "$id"') if $uri->fragment;
+  abort($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
 
   $state->{recursive_anchor_uri} = $uri;
   return 1;
@@ -267,7 +267,7 @@ sub _eval_keyword_recursiveRef {
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->base($base)->to_abs;
 
   abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
-    if $schema->{'$recursiveRef'} ne '#' and $base->fragment;
+    if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;
 
   return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
 }
