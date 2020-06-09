@@ -60,7 +60,7 @@ $accepter->acceptance(
         'unevaluatedProperties.json',
         'optional/bignum.json',
         'optional/content.json',
-        'optional/ecmascript-regex.json', # possibly TODO, pending outcome of json-schema-org/JSON-Schema-Test-Suite#380
+        'optional/ecmascript-regex.json',                   # TODO: see issue #27
         qw(
           optional/format/date-time.json
           optional/format/date.json
