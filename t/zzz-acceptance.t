@@ -84,7 +84,6 @@ $accepter->acceptance(
           optional/format/date-time.json
           optional/format/date.json
           optional/format/duration.json
-          optional/format/ecmascript-regex.json
           optional/format/email.json
           optional/format/hostname.json
           optional/format/idn-email.json
