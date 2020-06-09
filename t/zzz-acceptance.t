@@ -26,9 +26,8 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
   include_optional => 1,
   verbose => 1,
 );
-my %options = (validate_formats => 1);
-my $js = JSON::Schema::Draft201909->new(%options);
-my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
+my $js = JSON::Schema::Draft201909->new;
+my $js_short_circuit = JSON::Schema::Draft201909->new(short_circuit => 1);
 
 my $add_resource = sub {
   my ($uri, $data) = @_;
