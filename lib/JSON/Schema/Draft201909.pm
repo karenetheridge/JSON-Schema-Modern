@@ -12,7 +12,7 @@ use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
 use List::Util 1.33 qw(any pairs);
-use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
+use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
 use Safe::Isa;
@@ -51,6 +51,31 @@ has validate_formats => (
   isa => Bool,
   default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
 );
+
+sub BUILD {
+  my ($self, $args) = @_;
+
+  if (exists $args->{format_validations}) {
+    croak 'format_validations must be a hashref'
+      if not is_plain_hashref($args->{format_validations});
+
+    foreach my $format (keys %{$args->{format_validations}}) {
+      if (my $existing = $self->_get_format_validation($format)) {
+        croak 'overrides to existing format_validations must be coderefs'
+          if not is_plain_coderef($args->{format_validations}{$format});
+        $self->_set_format_validation($format,
+          +{ type => $existing->{type}, sub => $args->{format_validations}{$format} });
+      }
+      else {
+        my $type = Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef];
+        croak $type->get_message($args->{format_validations}{$format})
+          if not $type->check($args->{format_validations}{$format});
+
+        $self->_set_format_validation($format => $args->{format_validations}{$format});
+      }
+    }
+  }
+}
 
 sub add_schema {
   my $self = shift;
@@ -890,6 +915,7 @@ has _format_validations => (
   handles => {
     _get_format_validation => 'get',
     _has_format_validation => 'exists',
+    _set_format_validation => 'set',
   },
   lazy => 1,
   default => sub {
