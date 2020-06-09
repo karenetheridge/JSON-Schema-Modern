@@ -1296,6 +1296,15 @@ other. Defaults to 50.
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults to false.
 
+=head2 format_validations
+
+An optional hashref that allows overriding the validation method for formats, or adding new ones.
+Existing formats must be specified in the form of C<< { $format_name => $format_sub } >>, where
+the format sub is a coderef that takes one argument and returns a boolean result. New formats must
+be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
+where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
+number, or integer) the instance value must be for the format validation to be considered.
+
 =head1 METHODS
 
 =head2 evaluate_json_string
