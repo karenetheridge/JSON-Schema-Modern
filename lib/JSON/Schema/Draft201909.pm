@@ -943,7 +943,7 @@ has _format_validations => (
       'uri-template' => { type => 'string', sub => sub { 1 } },
       'json-pointer' => { type => 'string', sub => sub { 1 } },
       'relative-json-pointer' => { type => 'string', sub => sub { 1 } },
-      regex => { type => 'string', sub => sub { 1 } },
+      regex => { type => 'string', sub => sub { eval { qr/$_[0]/; 1 } ? 1 : 0 } },
     }
   },
 );

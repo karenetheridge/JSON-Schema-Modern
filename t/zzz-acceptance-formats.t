@@ -72,7 +72,6 @@ $accepter->acceptance(
           iri-reference.json
           iri.json
           json-pointer.json
-          regex.json
           relative-json-pointer.json
           time.json
           uri-reference.json

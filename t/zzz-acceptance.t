@@ -93,7 +93,6 @@ $accepter->acceptance(
           optional/format/iri-reference.json
           optional/format/iri.json
           optional/format/json-pointer.json
-          optional/format/regex.json
           optional/format/relative-json-pointer.json
           optional/format/time.json
           optional/format/uri-reference.json
