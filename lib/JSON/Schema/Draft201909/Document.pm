@@ -28,7 +28,7 @@ has schema => (
 
 has canonical_uri => (
   is => 'rwp',
-  isa => InstanceOf['Mojo::URL'],
+  isa => InstanceOf['Mojo::URL'], # always fragmentless
   lazy => 1,
   default => sub { Mojo::URL->new },
 );
@@ -36,7 +36,7 @@ has canonical_uri => (
 has resource_index => (
   is => 'bare',
   isa => HashRef[Dict[
-      canonical_uri => InstanceOf['Mojo::URL'], # always fragmentless
+      canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,  # always a json pointer, relative to the document root
     ]],
   handles_via => 'Hash',
