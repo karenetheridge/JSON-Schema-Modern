@@ -21,7 +21,7 @@ use File::ShareDir 'dist_dir';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict);
+use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef);
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
 use JSON::Schema::Draft201909::Document;
@@ -49,7 +49,7 @@ has max_traversal_depth => (
 has validate_formats => (
   is => 'ro',
   isa => Bool,
-  default => 0,
+  default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
 );
 
 sub add_schema {
@@ -880,10 +880,7 @@ sub _eval_keyword_propertyNames {
   return E($state, 'not all property names are valid');
 }
 
-# TODO allow passing format_validations to constructor.
-# these should be shunted to 'format_validation_overrides'
-# and then the default sub can overlay them on top of the defaults.
-has format_validations => (
+has _format_validations => (
   is => 'bare',
   isa => HashRef[Dict[
       type => Enum[qw(null object array boolean string number integer)],
@@ -896,63 +893,46 @@ has format_validations => (
   },
   lazy => 1,
   default => sub {
-    # conch formats:
-    # date-time
-    # email
-    # ipv4
-    # ipv6
-    # json-pointer
-    # uri
-
+    # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3
     +{
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
-      # 'date-time' => sub { 0 },
-      # date => sub { 0 },
-      # time => sub { 0 },
-      # duration => sub { 0 },
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.2
-      # email => sub { 0 },
-      # 'idn-email' => sub { 0 },
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.3
-      # hostname => sub { 0 },
-      # 'idn-hostname'=> sub { 0 },
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.4
-      # ipv4 => sub { 0 },
-      # ipv6 => sub { 0 },
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.5
-      # uri => sub { 0 },
-      # 'uri-reference' => sub { 0 },
-      # iri => sub { 0 },
-      # 'iri-reference' => sub { 0 },
-      uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$/ },
-
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.6
-      # 'uri-template' => sub { 0 },
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.7
-      # 'json-pointer' => sub { 0 },
-      # 'relative-json-pointer' => sub { 0 },
-      # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.8
-      # regex => sub { 0 },
+      'date-time' => { type => 'string', sub => sub { 1 } },
+      date => { type => 'string', sub => sub { 1 } },
+      time => { type => 'string', sub => sub { 1 } },
+      duration => { type => 'string', sub => sub { 1 } },
+      email => { type => 'string', sub => sub { 1 } },
+      'idn-email' => { type => 'string', sub => sub { 1 } },
+      hostname => { type => 'string', sub => sub { 1 } },
+      'idn-hostname'=> { type => 'string', sub => sub { 1 } },
+      ipv4 => { type => 'string', sub => sub { 1 } },
+      ipv6 => { type => 'string', sub => sub { 1 } },
+      uri => { type => 'string', sub => sub { 1 } },
+      'uri-reference' => { type => 'string', sub => sub { 1 } },
+      iri => { type => 'string', sub => sub { 1 } },
+      'iri-reference' => { type => 'string', sub => sub { 1 } },
+      uuid => {
+        type => 'string',
+        sub => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}$/ },
+      },
+      'uri-template' => { type => 'string', sub => sub { 1 } },
+      'json-pointer' => { type => 'string', sub => sub { 1 } },
+      'relative-json-pointer' => { type => 'string', sub => sub { 1 } },
+      regex => { type => 'string', sub => sub { 1 } },
     }
   },
 );
-
-# TODO: lots of things to consider in
-# https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.2
 
 sub _eval_keyword_format {
   my ($self, $data, $schema, $state) = @_;
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $valid = 1;
-  if ($self->validate_formats and my $format_sub = $self->_get_format_validation($schema->{format})) {
-    $valid = $self->_get_format_validation($schema->{format})->($data);
-    return E($state, '... some error here') if not $valid;
+  if ($self->validate_formats and my $spec = $self->_get_format_validation($schema->{format})) {
+    return E($state, 'not a %s', $schema->{format})
+      if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
   }
 
   # TODO: create annotation
-  return $valid;
+  return 1;
 }
 
 sub _eval_keyword_definitions {
@@ -1285,6 +1265,10 @@ Defaults to true when C<output_format> is C<flag>, and false otherwise.
 The maximum number of levels deep a schema traversal may go, before evaluation is halted. This is to
 protect against accidental infinite recursion, such as from two subschemas that each reference each
 other. Defaults to 50.
+
+=head2 validate_formats
+
+When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults to false.
 
 =head1 METHODS
 
