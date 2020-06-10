@@ -69,7 +69,6 @@ $accepter->acceptance(
           idn-hostname.json
           iri-reference.json
           iri.json
-          json-pointer.json
           relative-json-pointer.json
           time.json
           uri-reference.json
