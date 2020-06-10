@@ -90,7 +90,6 @@ $accepter->acceptance(
           optional/format/idn-hostname.json
           optional/format/iri-reference.json
           optional/format/iri.json
-          optional/format/relative-json-pointer.json
           optional/format/time.json
           optional/format/uri-reference.json
           optional/format/uri-template.json

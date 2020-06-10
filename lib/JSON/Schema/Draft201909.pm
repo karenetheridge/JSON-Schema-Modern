@@ -947,7 +947,8 @@ has _format_validations => (
       'uri-template' => { type => 'string', sub => sub { 1 } },
       'json-pointer' => { type => 'string',
         sub => sub { (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])} } },
-      'relative-json-pointer' => { type => 'string', sub => sub { 1 } },
+      'relative-json-pointer' => { type => 'string',
+        sub => sub { $_[0] =~ m{^[0-9]+(?:#$|$|/)} && $_[0] !~ m{~(?![01])} } },
       regex => { type => 'string', sub => sub { eval { qr/$_[0]/; 1 } ? 1 : 0 } },
     }
   },
