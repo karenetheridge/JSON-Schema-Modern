@@ -931,7 +931,7 @@ has _format_validations => (
       hostname => { type => 'string', sub => sub { 1 } },
       'idn-hostname'=> { type => 'string', sub => sub { 1 } },
       ipv4 => { type => 'string', sub => sub { 1 } },
-      ipv6 => { type => 'string', sub => sub { 1 } },
+      ipv6 => { type => 'string', sub => sub { $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/ && ($_[0] =~ /::/g) < 2 } },
       uri => { type => 'string', sub => sub { 1 } },
       'uri-reference' => { type => 'string', sub => sub { 1 } },
       iri => { type => 'string', sub => sub { 1 } },
