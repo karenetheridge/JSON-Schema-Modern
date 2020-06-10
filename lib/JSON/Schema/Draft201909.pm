@@ -927,16 +927,13 @@ has _format_validations => (
     };
     my $is_hostname = sub {
       eval { require Data::Validate::Domain; 1 } or return 1;
-print STDERR "### hostname passed value '$_[0]'\n";
       Data::Validate::Domain::is_domain($_[0], { domain_disable_tld_validation => 1 });
       #Data::Validate::Domain::is_domain($_[0]);
     };
     my $idn_decode = sub {
       eval { require Net::IDN::Encode; 1 } or return $_[0];
-print STDERR "### idn_decode passed value '$_[0]'\n";
       try { return Net::IDN::Encode::domain_to_ascii($_[0]) }
       catch {
-    print STDERR "### idn_decode died\n";
         return $_[0]; }
     };
     my $is_ipv4 = sub {
