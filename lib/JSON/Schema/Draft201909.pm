@@ -939,6 +939,10 @@ print STDERR "### idn_decode passed value '$_[0]'\n";
     print STDERR "### idn_decode died\n";
         return $_[0]; }
     };
+    my $is_ipv4 = sub {
+        my @o = split(/\./, $_[0], 5);
+        @o == 4 && grep /^[0-9]{1,3}$/, @o == 4 && (grep $_ < 256, @o) == 4;
+    };
 
     # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3
     +{
@@ -959,12 +963,14 @@ print STDERR "### idn_decode passed value '$_[0]'\n";
         Data::Validate::Domain::is_domain($_[0]);
       } },
       'idn-hostname'=> { type => 'string', sub => sub { $is_hostname->($idn_decode->($_[0])) } },
-
-      ipv4 => { type => 'string', sub => sub {
-        my @o = split(/\./, $_[0], 5);
-        @o == 4 && grep /^[0-9]{1,3}$/, @o == 4 && (grep $_ < 256, @o) == 4;
+      ipv4 => { type => 'string', sub => $is_ipv4 },
+      ipv6 => { type => 'string', sub => sub {
+        ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/
+          ||
+         $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,4}:?((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
+          && $is_ipv4->($1))
+        && (()= ($_[0] =~ /::/g)) < 2
       } },
-      ipv6 => { type => 'string', sub => sub { $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/ && ($_[0] =~ /::/g) < 2 } },
       uri => { type => 'string', sub => sub {
           my $uri = Mojo::URL->new($_[0]);
           fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs && $_[0] !~ /[^[:ascii:]]/;
