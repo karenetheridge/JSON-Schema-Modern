@@ -71,6 +71,12 @@ $accepter->acceptance(
       ] },
     { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
       test_description => 'an invalid IRI based on IPv6' },
+    { file => 'idn-hostname.json',
+      group_description => 'validation of internationalized host names',
+      test_description => [
+        'contains illegal char U+302E Hangul single dot tone mark', # IDN decoder likes this
+        'valid Chinese Punycode',                     # Data::Validate::Domain doesn't like this
+      ] },
   ] ),
 );
 
