@@ -1416,7 +1416,7 @@ For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 By default, formats are treated only as annotations, not assertions. When L</validate_format> is
 true, strings are also checked against the format as specified in the schema. At present the
-following formats are supported (use of any formats will evaluate as if the format is correct):
+following formats are supported (use of any other formats than these will evaluate as true):
 
 =for :list
 * C<date-time>
