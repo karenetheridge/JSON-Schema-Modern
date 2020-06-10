@@ -1416,23 +1416,23 @@ true, strings are also checked against the format as specified in the schema. At
 following formats are supported (use of any formats will evaluate as if the format is correct):
 
 =for :list
-* date-time
-* date
-* time
-* duration
-* email
-* idn-email
-* hostname
-* idn-hostname
-* ipv4
-* ipv6
-* uri
-* uri-reference
-* iri
-* uuid
-* json-pointer
-* relative-json-pointer
-* regex
+* C<date-time>
+* C<date>
+* C<time>
+* C<duration>
+* C<email>
+* C<idn-email>
+* C<hostname>
+* C<idn-hostname>
+* C<ipv4>
+* C<ipv6>
+* C<uri>
+* C<uri-reference>
+* C<iri>
+* C<uuid>
+* C<json-pointer>
+* C<relative-json-pointer>
+* C<regex>
 
 =head2 SPECIFICATION COMPLIANCE
 
