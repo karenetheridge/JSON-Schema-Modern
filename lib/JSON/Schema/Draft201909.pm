@@ -930,7 +930,11 @@ has _format_validations => (
       'idn-email' => { type => 'string', sub => sub { 1 } },
       hostname => { type => 'string', sub => sub { 1 } },
       'idn-hostname'=> { type => 'string', sub => sub { 1 } },
-      ipv4 => { type => 'string', sub => sub { 1 } },
+
+      ipv4 => { type => 'string', sub => sub {
+        my @o = split(/\./, $_[0], 5);
+        @o == 4 && grep /^[0-9]{1,3}$/, @o == 4 && (grep $_ < 256, @o) == 4;
+      } },
       ipv6 => { type => 'string', sub => sub { $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/ && ($_[0] =~ /::/g) < 2 } },
       uri => { type => 'string', sub => sub { 1 } },
       'uri-reference' => { type => 'string', sub => sub { 1 } },
