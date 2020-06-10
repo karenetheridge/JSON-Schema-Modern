@@ -1329,7 +1329,8 @@ other. Defaults to 50.
 
 =head2 validate_formats
 
-When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults to false.
+When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
+to false.
 
 =head2 format_validations
 
