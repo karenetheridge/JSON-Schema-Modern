@@ -939,13 +939,27 @@ has _format_validations => (
       my @o = split(/\./, $_[0], 5);
       @o == 4 && (grep /^[0-9]{1,3}$/, @o) == 4 && (grep $_ < 256, @o) == 4;
     };
+    # https://tools.ietf.org/html/rfc3339#appendix-A with some additions for the 2000 version
+    my $duration_re = do {
+      my $num = qr{[0-9]+(?:[.,][0-9]+)?};
+      my $second = qr{${num}S};
+      my $minute = qr{${num}M};
+      my $hour = qr{${num}H};
+      my $time = qr{T(?=[0-9])(?:$hour)?(?:$minute)?(?:$second)?};
+      my $day = qr{${num}D};
+      my $month = qr{${num}M};
+      my $year = qr{${num}Y};
+      my $week = qr{${num}W};
+      my $date = qr{(?=[0-9])(?:$year)?(?:$month)?(?:$day)?};
+      qr{^P(?:(?=.)(?:$date)?(?:$time)?|$week)$};
+    };
 
     +{
       'date-time' => { type => 'string', sub => $is_datetime },
       date => { type => 'string', sub => sub { $is_datetime->($_[0].'T00:00:00Z') } },
       time => { type => 'string', sub => sub { $is_datetime->('2000-01-01T'.$_[0]) } },
       duration => { type => 'string', sub => sub {
-        $_[0] =~ /^P(?:(?:[0-9]+Y)?(?:[0-9]+D)?(?:[0-9]+M)?(?:T(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?|[0-9]+W)$/;
+        $_[0] =~ $duration_re && $_[0] !~ m{[.,][0-9]+[A-Z].};
       } },
       email => { type => 'string', sub => sub { $is_email->($_[0]) && $_[0] !~ /[^[:ascii:]]/ } },
       'idn-email' => { type => 'string', sub => $is_email },
