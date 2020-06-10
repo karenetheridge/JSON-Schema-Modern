@@ -59,7 +59,6 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        eval { require Email::Valid; 1 } ? () : 'email.json',
         qw(
           date-time.json
           date.json
