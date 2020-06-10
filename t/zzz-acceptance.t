@@ -89,11 +89,8 @@ $accepter->acceptance(
           optional/format/idn-email.json
           optional/format/idn-hostname.json
           optional/format/iri-reference.json
-          optional/format/iri.json
           optional/format/time.json
-          optional/format/uri-reference.json
           optional/format/uri-template.json
-          optional/format/uri.json
         ),
       ] },
     { file => 'ref.json', group_description => [

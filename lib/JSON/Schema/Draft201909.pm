@@ -8,6 +8,7 @@ package JSON::Schema::Draft201909;
 our $VERSION = '0.006';
 
 no if "$]" >= 5.031009, feature => 'indirect';
+use feature 'fc';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
@@ -936,9 +937,14 @@ has _format_validations => (
         @o == 4 && grep /^[0-9]{1,3}$/, @o == 4 && (grep $_ < 256, @o) == 4;
       } },
       ipv6 => { type => 'string', sub => sub { $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/ && ($_[0] =~ /::/g) < 2 } },
-      uri => { type => 'string', sub => sub { 1 } },
-      'uri-reference' => { type => 'string', sub => sub { 1 } },
-      iri => { type => 'string', sub => sub { 1 } },
+      uri => { type => 'string', sub => sub {
+          my $uri = Mojo::URL->new($_[0]);
+          fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs && $_[0] !~ /[^[:ascii:]]/;
+        } },
+      'uri-reference' => { type => 'string', sub => sub {
+          fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
+        } },
+      iri => { type => 'string', sub => sub { Mojo::URL->new($_[0])->is_abs } },
       'iri-reference' => { type => 'string', sub => sub { 1 } },
       uuid => {
         type => 'string',

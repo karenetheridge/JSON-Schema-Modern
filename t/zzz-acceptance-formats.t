@@ -68,11 +68,8 @@ $accepter->acceptance(
           idn-email.json
           idn-hostname.json
           iri-reference.json
-          iri.json
           time.json
-          uri-reference.json
           uri-template.json
-          uri.json
         ),
       ] },
   ] ),
