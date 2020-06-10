@@ -86,7 +86,6 @@ $accepter->acceptance(
           optional/format/duration.json
           optional/format/email.json
           optional/format/idn-email.json
-          optional/format/idn-hostname.json
           optional/format/iri-reference.json
           optional/format/time.json
           optional/format/uri-template.json
