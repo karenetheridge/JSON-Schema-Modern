@@ -942,8 +942,13 @@ print STDERR "### idn_decode passed value '$_[0]'\n";
       date => { type => 'string', sub => sub { 1 } },
       time => { type => 'string', sub => sub { 1 } },
       duration => { type => 'string', sub => sub { 1 } },
-      email => { type => 'string', sub => sub { use_module('Email::Valid')->address($_[0]) } },
-      'idn-email' => { type => 'string', sub => sub { 1 } },
+      email => { type => 'string', sub => sub {
+        eval { require Email::Address::XS; 1 } or return 1;
+        Email::Address::XS->parse($_[0])->is_valid && $_[0] !~ /[^[:ascii:]]/ } },
+      'idn-email' => { type => 'string', sub => sub {
+        eval { require Email::Address::XS; 1 } or return 1;
+        Email::Address::XS->parse($_[0])->is_valid
+      } },
       hostname => { type => 'string', sub => sub {
         eval { require Data::Validate::Domain; 1 } or return 1;
         Data::Validate::Domain::is_domain($_[0]);
