@@ -155,6 +155,7 @@ $accepter->acceptance(
 # 2020-06-01  0.997  Looks like you failed 159 tests of 994.
 # 2020-06-08  0.999  Looks like you failed 176 tests of 1055.
 # 2020-06-09  0.999  Looks like you failed 165 tests of 1055.
+# 2020-06-10  0.999  Looks like you failed 104 tests of 1055.
 
 
 END {
