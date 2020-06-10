@@ -64,7 +64,6 @@ $accepter->acceptance(
           date-time.json
           date.json
           duration.json
-          hostname.json
           idn-email.json
           idn-hostname.json
           iri-reference.json

@@ -929,7 +929,10 @@ has _format_validations => (
       duration => { type => 'string', sub => sub { 1 } },
       email => { type => 'string', sub => sub { use_module('Email::Valid')->address($_[0]) } },
       'idn-email' => { type => 'string', sub => sub { 1 } },
-      hostname => { type => 'string', sub => sub { 1 } },
+      hostname => { type => 'string', sub => sub {
+        eval { require Data::Validate::Domain; 1 } or return 1;
+        Data::Validate::Domain::is_domain($_[0]);
+      } },
       'idn-hostname'=> { type => 'string', sub => sub { 1 } },
 
       ipv4 => { type => 'string', sub => sub {
