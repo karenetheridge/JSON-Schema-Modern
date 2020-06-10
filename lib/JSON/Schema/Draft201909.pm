@@ -1343,6 +1343,8 @@ number, or integer) the instance value must be for the format validation to be c
 
 =head1 METHODS
 
+=for Pod::Coverage BUILD
+
 =head2 evaluate_json_string
 
   $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
