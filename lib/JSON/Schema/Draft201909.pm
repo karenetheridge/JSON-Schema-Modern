@@ -1313,6 +1313,5 @@ SOURCES.>
 * L<https://json-schema.org/>
 * L<RFC8259|https://tools.ietf.org/html/rfc8259>
 * L<Test::JSON::Schema::Acceptance>
-* L<JSON::Validator>
 
 =cut
