@@ -69,6 +69,8 @@ $accepter->acceptance(
           uri-template.json
         ),
       ] },
+    { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
+      test_description => 'an invalid IRI based on IPv6' },
   ] ),
 );
 

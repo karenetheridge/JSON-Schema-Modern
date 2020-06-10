@@ -102,6 +102,8 @@ $accepter->acceptance(
         group_description => 'float and integers are equal up to 64-bit representation limits',
         test_description => 'float is valid' }
       : (),
+    { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
+      test_description => 'an invalid IRI based on IPv6' },
   ] ),
 );
 
