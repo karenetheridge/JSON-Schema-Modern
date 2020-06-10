@@ -945,7 +945,8 @@ print STDERR "### idn_decode passed value '$_[0]'\n";
       'date-time' => { type => 'string', sub => $is_datetime },
       date => { type => 'string', sub => sub { $is_datetime->($_[0].'T00:00:00Z') } },
       time => { type => 'string', sub => sub { $is_datetime->('2000-01-01T'.$_[0]) } },
-      duration => { type => 'string', sub => sub { 1 } },
+      duration => { type => 'string', sub => sub {
+        $_[0] =~ /^P(?:(?:[0-9]+Y)?(?:[0-9]+D)?(?:[0-9]+M)?(?:T(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?|[0-9]+W)$/ } },
       email => { type => 'string', sub => sub {
         eval { require Email::Address::XS; 1 } or return 1;
         Email::Address::XS->parse($_[0])->is_valid && $_[0] !~ /[^[:ascii:]]/ } },

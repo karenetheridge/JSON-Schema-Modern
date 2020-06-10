@@ -60,7 +60,6 @@ $accepter->acceptance(
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
         qw(
-          duration.json
           iri-reference.json
           uri-template.json
         ),
