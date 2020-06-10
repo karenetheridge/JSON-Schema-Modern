@@ -19,7 +19,6 @@ use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
 use File::ShareDir 'dist_dir';
-use Module::Runtime 'use_module';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
@@ -201,7 +200,7 @@ sub _eval {
   my $result = 1;
 
   foreach my $keyword (
-    # CORE VOCABULARY
+    # CORE KEYWORDS
     qw($schema $id $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
     # VALIDATOR KEYWORDS
     qw(type enum const
@@ -916,76 +915,68 @@ has _format_validations => (
   handles_via => 'Hash',
   handles => {
     _get_format_validation => 'get',
-    _has_format_validation => 'exists',
     _set_format_validation => 'set',
   },
   lazy => 1,
   default => sub {
     my $is_datetime = sub {
-        eval { require Time::Moment; 1 } or return 1;
-        eval { Time::Moment->from_string($_[0]) } ? 1 : 0,
+      eval { require Time::Moment; 1 } or return 1;
+      eval { Time::Moment->from_string($_[0]) } ? 1 : 0,
+    };
+    my $is_email = sub {
+      eval { require Email::Address::XS; 1 } or return 1;
+      Email::Address::XS->parse($_[0])->is_valid;
     };
     my $is_hostname = sub {
       eval { require Data::Validate::Domain; 1 } or return 1;
-      Data::Validate::Domain::is_domain($_[0], { domain_disable_tld_validation => 1 });
-      #Data::Validate::Domain::is_domain($_[0]);
+      Data::Validate::Domain::is_domain($_[0]);
     };
     my $idn_decode = sub {
       eval { require Net::IDN::Encode; 1 } or return $_[0];
-      try { return Net::IDN::Encode::domain_to_ascii($_[0]) }
-      catch {
-        return $_[0]; }
+      try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch { return $_[0]; }
     };
     my $is_ipv4 = sub {
-        my @o = split(/\./, $_[0], 5);
-        @o == 4 && grep /^[0-9]{1,3}$/, @o == 4 && (grep $_ < 256, @o) == 4;
+      my @o = split(/\./, $_[0], 5);
+      @o == 4 && grep /^[0-9]{1,3}$/, @o == 4 && (grep $_ < 256, @o) == 4;
     };
 
-    # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3
     +{
       'date-time' => { type => 'string', sub => $is_datetime },
       date => { type => 'string', sub => sub { $is_datetime->($_[0].'T00:00:00Z') } },
       time => { type => 'string', sub => sub { $is_datetime->('2000-01-01T'.$_[0]) } },
       duration => { type => 'string', sub => sub {
-        $_[0] =~ /^P(?:(?:[0-9]+Y)?(?:[0-9]+D)?(?:[0-9]+M)?(?:T(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?|[0-9]+W)$/ } },
-      email => { type => 'string', sub => sub {
-        eval { require Email::Address::XS; 1 } or return 1;
-        Email::Address::XS->parse($_[0])->is_valid && $_[0] !~ /[^[:ascii:]]/ } },
-      'idn-email' => { type => 'string', sub => sub {
-        eval { require Email::Address::XS; 1 } or return 1;
-        Email::Address::XS->parse($_[0])->is_valid
+        $_[0] =~ /^P(?:(?:[0-9]+Y)?(?:[0-9]+D)?(?:[0-9]+M)?(?:T(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?|[0-9]+W)$/;
       } },
-      hostname => { type => 'string', sub => sub {
-        eval { require Data::Validate::Domain; 1 } or return 1;
-        Data::Validate::Domain::is_domain($_[0]);
-      } },
-      'idn-hostname'=> { type => 'string', sub => sub { $is_hostname->($idn_decode->($_[0])) } },
+      email => { type => 'string', sub => sub { $is_email->($_[0]) && $_[0] !~ /[^[:ascii:]]/ } },
+      'idn-email' => { type => 'string', sub => $is_email },
+      hostname => { type => 'string', sub => $is_hostname },
+      'idn-hostname' => { type => 'string', sub => sub { $is_hostname->($idn_decode->($_[0])) } },
       ipv4 => { type => 'string', sub => $is_ipv4 },
       ipv6 => { type => 'string', sub => sub {
         ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/
-          ||
-         $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,4}:?((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
-          && $is_ipv4->($1))
-        && (()= ($_[0] =~ /::/g)) < 2
+          || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,4}:?((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
+             && $is_ipv4->($1))
+          && (()= ($_[0] =~ /::/g)) < 2;
       } },
       uri => { type => 'string', sub => sub {
-          my $uri = Mojo::URL->new($_[0]);
-          fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs && $_[0] !~ /[^[:ascii:]]/;
-        } },
+        my $uri = Mojo::URL->new($_[0]);
+        fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs && $_[0] !~ /[^[:ascii:]]/;
+      } },
       'uri-reference' => { type => 'string', sub => sub {
-          fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
-        } },
+        fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
+      } },
       iri => { type => 'string', sub => sub { Mojo::URL->new($_[0])->is_abs } },
       'iri-reference' => { type => 'string', sub => sub { 1 } },
-      uuid => {
-        type => 'string',
-        sub => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}$/ },
-      },
+      uuid => { type => 'string', sub => sub {
+        $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}$/;
+      } },
       'uri-template' => { type => 'string', sub => sub { 1 } },
-      'json-pointer' => { type => 'string',
-        sub => sub { (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])} } },
-      'relative-json-pointer' => { type => 'string',
-        sub => sub { $_[0] =~ m{^[0-9]+(?:#$|$|/)} && $_[0] !~ m{~(?![01])} } },
+      'json-pointer' => { type => 'string', sub => sub {
+        (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])};
+      } },
+      'relative-json-pointer' => { type => 'string', sub => sub {
+        $_[0] =~ m{^[0-9]+(?:#$|$|/)} && $_[0] !~ m{~(?![01])};
+      } },
       regex => { type => 'string', sub => sub { eval { qr/$_[0]/; 1 } ? 1 : 0 } },
     }
   },
@@ -1425,8 +1416,23 @@ true, strings are also checked against the format as specified in the schema. At
 following formats are supported (use of any formats will evaluate as if the format is correct):
 
 =for :list
+* date-time
+* date
+* time
+* duration
 * email
+* idn-email
+* hostname
+* idn-hostname
+* ipv4
+* ipv6
+* uri
+* uri-reference
+* iri
 * uuid
+* json-pointer
+* relative-json-pointer
+* regex
 
 =head2 SPECIFICATION COMPLIANCE
 
