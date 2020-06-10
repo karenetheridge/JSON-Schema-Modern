@@ -80,13 +80,27 @@ $accepter->acceptance(
         'optional/bignum.json',
         'optional/content.json',
         'optional/ecmascript-regex.json',                   # TODO: see issue #27
+        # format validation is disabled for this test run
         qw(
           optional/format/date-time.json
           optional/format/date.json
           optional/format/duration.json
+          optional/format/ecmascript-regex.json
+          optional/format/email.json
+          optional/format/hostname.json
+          optional/format/idn-email.json
+          optional/format/idn-hostname.json
+          optional/format/ipv4.json
+          optional/format/ipv6.json
           optional/format/iri-reference.json
+          optional/format/iri.json
+          optional/format/json-pointer.json
+          optional/format/regex.json
+          optional/format/relative-json-pointer.json
           optional/format/time.json
+          optional/format/uri-reference.json
           optional/format/uri-template.json
+          optional/format/uri.json
         ),
       ] },
     { file => 'ref.json', group_description => [
@@ -101,14 +115,6 @@ $accepter->acceptance(
         group_description => 'float and integers are equal up to 64-bit representation limits',
         test_description => 'float is valid' }
       : (),
-    { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
-      test_description => 'an invalid IRI based on IPv6' },
-    { file => 'idn-hostname.json',
-      group_description => 'validation of internationalized host names',
-      test_description => [
-        'contains illegal char U+302E Hangul single dot tone mark', # IDN decoder likes this
-        'valid Chinese Punycode',                     # Data::Validate::Domain doesn't like this
-      ] },
   ] ),
 );
 
