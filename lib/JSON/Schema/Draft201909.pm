@@ -921,6 +921,10 @@ has _format_validations => (
   },
   lazy => 1,
   default => sub {
+    my $is_datetime = sub {
+        eval { require Time::Moment; 1 } or return 1;
+        eval { Time::Moment->from_string($_[0]) } ? 1 : 0,
+    };
     my $is_hostname = sub {
       eval { require Data::Validate::Domain; 1 } or return 1;
 print STDERR "### hostname passed value '$_[0]'\n";
@@ -938,9 +942,9 @@ print STDERR "### idn_decode passed value '$_[0]'\n";
 
     # https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3
     +{
-      'date-time' => { type => 'string', sub => sub { 1 } },
-      date => { type => 'string', sub => sub { 1 } },
-      time => { type => 'string', sub => sub { 1 } },
+      'date-time' => { type => 'string', sub => $is_datetime },
+      date => { type => 'string', sub => sub { $is_datetime->($_[0].'T00:00:00Z') } },
+      time => { type => 'string', sub => sub { $is_datetime->('2000-01-01T'.$_[0]) } },
       duration => { type => 'string', sub => sub { 1 } },
       email => { type => 'string', sub => sub {
         eval { require Email::Address::XS; 1 } or return 1;
