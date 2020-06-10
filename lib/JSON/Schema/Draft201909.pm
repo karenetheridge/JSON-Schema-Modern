@@ -1276,28 +1276,17 @@ For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
-The minimum extensible JSON Schema implementation requirements involve:
+To date, missing components (some of which are optional, but still quite useful) include:
 
 =for :list
-* identifying, organizing, and linking schemas (with keywords such as C<$ref>, C<$id>, C<$schema>,
-  C<$anchor>, C<$defs>)
-* providing an interface to evaluate assertions
-* providing an interface to collect annotations
-* applying subschemas to instances and combining assertion results and annotation data accordingly.
-* support for all vocabularies required by the Draft 2019-09 metaschema,
-  L<https://json-schema.org/draft/2019-09/schema>
-
-To date, missing components include most of these. More specifically, features to be added include:
-
-=for :list
-* loading multiple schema documents, and registration of a schema against a canonical base URI
-* collection of annotations
-  (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>)
-* multiple output formats
-  (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
+* multiple output formats
+  (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
+* annotation collection (including the "meta-data" and "content" vocabularies)
+* examination of the C<$schema> keyword for deviation from the standard metaschema, including
+  changes to vocabulary behaviour
 
 =head1 SECURITY CONSIDERATIONS
 
