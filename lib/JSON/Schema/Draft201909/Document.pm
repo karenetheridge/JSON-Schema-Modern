@@ -11,7 +11,7 @@ use feature 'current_sub';
 use Mojo::URL;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
-use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
+use Ref::Util 0.100 qw(is_plain_arrayref is_plain_hashref);
 use List::Util 1.29 'pairs';
 use Safe::Isa;
 use Moo;
@@ -104,7 +104,7 @@ sub _traverse_for_identifiers {
       0 .. $#{$data};
   }
   elsif (is_plain_hashref($data)) {
-    if (exists $data->{'$id'} and not is_ref($data->{'$id'})) {
+    if (exists $data->{'$id'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$id'})) {
       my $uri = Mojo::URL->new($data->{'$id'});
       if (not length $uri->fragment) {
         $canonical_uri = $uri->base($canonical_uri)->to_abs;
@@ -112,7 +112,7 @@ sub _traverse_for_identifiers {
         $identifiers{$canonical_uri} = { path => $path, canonical_uri => $canonical_uri->clone };
       }
     }
-    if (exists $data->{'$anchor'} and not is_ref($data->{'$anchor'})
+    if (exists $data->{'$anchor'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$anchor'})
         and $data->{'$anchor'} =~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
       my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
       $identifiers{$uri} = { path => $path, canonical_uri => $canonical_uri->clone };

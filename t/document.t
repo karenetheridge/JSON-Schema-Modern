@@ -8,7 +8,7 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::Deep::UnorderedPairs;
 use Test::Fatal;
-use JSON::Schema::Draft201909::Document;
+use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
 
