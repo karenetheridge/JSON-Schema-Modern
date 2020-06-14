@@ -68,19 +68,21 @@ L<JSON::Schema::Draft201909>.
 
 =head2 instance_location
 
-The path in the instance where the error occurred.
+The path in the instance where the error occurred; encoded as per the JSON Pointer specification
+(L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
 
 =head2 keyword_location
 
-The schema path taken during evaluation to arrive at the error.
+The schema path taken during evaluation to arrive at the error; encoded as per the JSON Pointer
+specification (L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
 
 =head2 absolute_keyword_location
 
-The path in the schema where the error occurred (may be different from keyword_location, if a
-C<$ref> was followed).  Note that this is not actually an absolute (fragmentless) URI in most cases,
-as the indicated error will occur at a path below the position where the most recent identifier had
-been declared in the schema. Further, if the schema never declared an absolute base URI, this URI
-won't contain a scheme either.
+The canonical URI or URI reference of the location in the schema where the error occurred; not
+defined, if there is no base URI for the schema and no C<$ref> was followed. Note that this is not
+actually an absolute (fragmentless) URI in most cases, as the indicated error will occur at a path
+below the position where the most recent identifier had been declared in the schema. Further, if the
+schema never declared an absolute base URI, this URI won't contain a scheme either.
 
 =head2 error
 
