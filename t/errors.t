@@ -1077,4 +1077,74 @@ subtest 'JSON pointer escaping' => sub {
   );
 };
 
+subtest 'invalid $schema' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        allOf => [
+          true,
+          { '$schema' => 'https://json-schema.org/draft/2019-09/schema' },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/$schema',
+          error => 'EXCEPTION: $schema can only appear at the schema resource root',
+        },
+      ],
+    },
+    '$schema can only appear at the root of a schema, when there is no canonical URI',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'https://bloop.com',
+        allOf => [
+          true,
+          { '$schema' => 'https://json-schema.org/draft/2019-09/schema' },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/$schema',
+          absoluteKeywordLocation => 'https://bloop.com#/allOf/1/$schema',
+          error => 'EXCEPTION: $schema can only appear at the schema resource root',
+        },
+      ],
+    },
+    '$schema can only appear where the canonical URI has no fragment, when there is a canonical URI',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'https://bloop.com',
+        allOf => [
+          true,
+          {
+            '$id' => 'https://newid.com',
+            '$schema' => 'https://json-schema.org/draft/2019-09/schema',
+          },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    '$schema can appear adjacent to any $id',
+  );
+};
+
 done_testing;

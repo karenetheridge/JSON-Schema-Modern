@@ -201,7 +201,7 @@ sub _eval {
 
   foreach my $keyword (
     # CORE KEYWORDS
-    qw($schema $id $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
+    qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
     # VALIDATOR KEYWORDS
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
@@ -230,16 +230,6 @@ sub _eval {
   return $result;
 }
 
-sub _eval_keyword_schema {
-  my ($self, $data, $schema, $state) = @_;
-
-  assert_keyword_type($state, $schema, 'string');
-  abort($state, 'custom $schema references are not yet supported')
-    if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
-
-  return 1;
-}
-
 sub _eval_keyword_id {
   my ($self, $data, $schema, $state) = @_;
 
@@ -253,6 +243,20 @@ sub _eval_keyword_id {
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{canonical_schema_uri} = $uri;
   $state->{schema_path} = '';
+
+  return 1;
+}
+
+sub _eval_keyword_schema {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  abort($state, '$schema can only appear at the schema resource root')
+    if length($state->{schema_path});
+
+  abort($state, 'custom $schema references are not yet supported')
+    if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 
   return 1;
 }
