@@ -79,8 +79,6 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        'unevaluatedItems.json',                    # TODO: see issue #19
-        'unevaluatedProperties.json',               # ""
         'optional/bignum.json',                     # TODO: see issue #10
         'optional/content.json',                    # per spec, should not be validated by default
         'optional/ecmascript-regex.json',           # TODO: see issue #27
@@ -96,9 +94,6 @@ $accepter->acceptance(
           optional/format/idn-hostname.json
           optional/format/idn-email.json
         ) ) : (),
-      ] },
-    { file => 'ref.json', group_description => [
-        'ref creates new scope when adjacent to keywords',  # unevaluatedProperties (issue #19)
       ] },
     { file => 'refRemote.json', group_description => [      # TODO: waiting for test suite PR 360
         'base URI change - change folder', 'base URI change - change folder in subschema',
@@ -154,6 +149,7 @@ $accepter->acceptance(
 # 2020-06-08  0.999  Looks like you failed 176 tests of 1055.
 # 2020-06-09  0.999  Looks like you failed 165 tests of 1055.
 # 2020-06-10  0.999  Looks like you failed 104 tests of 1055.
+# 2020-07-07  0.999  Looks like you failed 31 tests of 1055.
 
 
 END {

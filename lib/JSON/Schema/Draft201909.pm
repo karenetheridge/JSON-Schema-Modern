@@ -12,7 +12,7 @@ use feature 'fc';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
-use List::Util 1.55 qw(any pairs first uniqint);
+use List::Util 1.55 qw(any pairs first uniqint max);
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
@@ -839,7 +839,46 @@ sub _eval_keyword_items {
 sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedItems" keyword present, but annotation collection is not supported');
+  abort($state, '"unevaluatedItems" keyword present, but annotation collection is dsabled')
+    if not $self->collect_annotations;
+
+  abort($state, '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
+    if $self->short_circuit;
+
+  my @annotations = local_annotations($state);
+  my @items_annotations = grep $_->keyword eq 'items', @annotations;
+  my @additionalItems_annotations = grep $_->keyword eq 'additionalItems', @annotations;
+  my @unevaluatedItems_annotations = grep $_->keyword eq 'unevaluatedItems', @annotations;
+
+  # items, additionalItems or unevaluatedItems already produced a 'true' annotation at this location
+  return 1
+    if any { $self->_is_type('boolean', $_->annotation) && $_->annotation }
+      @items_annotations, @additionalItems_annotations, @unevaluatedItems_annotations;
+
+  # otherwise, _eval at every instance item greater than the max of all numeric 'items' annotations
+  my $last_index = max(-1, grep $self->_is_type('integer', $_), map $_->annotation, @items_annotations);
+  return 1 if $last_index == $#{$data};
+
+  my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
+  foreach my $idx ($last_index+1 .. $#{$data}) {
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data->[$idx], $schema->{unevaluatedItems},
+        +{ %$state, annotations => \@annotations,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/unevaluatedItems' })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
+
+    $valid = 0;
+    last if $state->{short_circuit};
+  }
+
+  return E($state, 'subschema is not valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return A($state, true);
 }
 
 sub _eval_keyword_contains {
@@ -1018,7 +1057,54 @@ sub _eval_keyword_additionalProperties {
 sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is not supported');
+  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is dsabled')
+    if not $self->collect_annotations;
+
+  abort($state, '"unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable')
+    if $self->short_circuit;
+
+  return 1 if not $self->_is_type('object', $data);
+
+  my @evaluated_properties = map {
+    my $keyword = $_->keyword;
+    (grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties))
+      ? @{$_->annotation} : ();
+  } local_annotations($state);
+
+  my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my (@valid_properties, @new_annotations);
+  foreach my $property (sort keys %$data) {
+    next if any { $_ eq $property } @evaluated_properties;
+
+    if ($self->_is_type('boolean', $schema->{unevaluatedProperties})) {
+      if ($schema->{unevaluatedProperties}) {
+        push @valid_properties, $property;
+        next;
+      }
+
+      $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property) },
+        'additional property not permitted');
+    }
+    else {
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->{$property}, $schema->{unevaluatedProperties},
+          +{ %$state, annotations => \@annotations,
+            data_path => jsonp($state->{data_path}, $property),
+            schema_path => $state->{schema_path}.'/unevaluatedProperties' })) {
+        push @valid_properties, $property;
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
+      $valid = 0;
+    }
+    last if $state->{short_circuit};
+  }
+
+  return E($state, 'not all properties are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
 sub _eval_keyword_propertyNames {
@@ -1463,6 +1549,13 @@ has _json_decoder => (
 use namespace::clean 'jsonp';
 sub jsonp {
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, @_);
+}
+
+# get all annotations produced for the current instance data location
+use namespace::clean 'local_annotations';
+sub local_annotations {
+  my $state = shift;
+  grep $_->instance_location eq $state->{data_path}, @{$state->{annotations}};
 }
 
 # shorthand for creating error objects
