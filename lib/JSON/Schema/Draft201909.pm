@@ -1172,8 +1172,7 @@ sub _eval_keyword_format {
       if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
   }
 
-  # TODO: create annotation
-  return 1;
+  return A($state, $schema->{format});
 }
 
 sub _eval_keyword_definitions {
