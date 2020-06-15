@@ -28,7 +28,8 @@ $accepter->acceptance(
     note $encoder->encode($result);
 
     die 'results inconsistent between short_circuit = false and true'
-      if $result xor $result_short;
+      if ($result xor $result_short)
+        and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
     $result;
   },

@@ -184,6 +184,28 @@ subtest 'not' => sub {
     },
     'passing not: state is correct after evaluating',
   );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        not => {
+          not => {
+            '$comment' => 'this subschema must still produce annotations internally, even though the "not" will ultimately discard them',
+            anyOf => [
+              true,
+              { properties => { foo => true } },
+            ],
+            unevaluatedProperties => false,
+          },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    'annotations are still collected inside a "not", otherwuse the unevaluatedProperties would have returned false',
+  );
 };
 
 # recursively call ->TO_JSON on everything
