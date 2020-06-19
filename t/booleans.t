@@ -39,7 +39,7 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '',
-        error => 'EXCEPTION: unrecognized schema type "array"',
+        error => 'EXCEPTION: invalid schema type: array',
       },
     ],
   },

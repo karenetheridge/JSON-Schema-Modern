@@ -712,7 +712,7 @@ subtest 'exceptions' => sub {
         {
           instanceLocation => '/x',
           keywordLocation => '/allOf/0/properties/x',
-          error => 'EXCEPTION: unrecognized schema type "number"',
+          error => 'EXCEPTION: invalid schema type: number',
         },
       ],
     },

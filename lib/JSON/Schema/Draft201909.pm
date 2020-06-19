@@ -195,7 +195,7 @@ sub _eval {
   my $schema_type = $self->_get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
 
-  abort($state, 'unrecognized schema type "%s"', $schema_type) if $schema_type ne 'object';
+  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $result = 1;
 
