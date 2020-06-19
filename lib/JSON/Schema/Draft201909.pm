@@ -1071,11 +1071,11 @@ sub _get_type {
   return 'array' if is_plain_arrayref($value);
   return 'boolean' if is_bool($value);
 
-  if (not is_ref($value)) {
-    my $flags = B::svref_2object(\$value)->FLAGS;
-    return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
-    return 'number' if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
-  }
+  croak sprintf('unsupported reference type %s', ref $value) if is_ref($value);
+
+  my $flags = B::svref_2object(\$value)->FLAGS;
+  return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
+  return 'number' if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
 
   croak sprintf('ambiguous type for %s', $self->_json_decoder->encode($value));
 }

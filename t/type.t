@@ -111,4 +111,22 @@ like(
   'ambiguous type results in exception',
 );
 
+subtest '_get_type for references' => sub {
+  like(
+    exception { $line = __LINE__; $js->_get_type($_->[0]) },
+    qr/unsupported reference type $_->[1]/,
+    $_->[1].' reference type results in exception',
+  ) foreach (
+    [ \1, 'SCALAR' ],
+    [ \\2, 'REF' ],
+    [ sub { 1 }, 'CODE' ],
+    [ \*stdout, 'GLOB' ],
+    [ \substr('a', '1'), 'LVALUE' ],
+    [ \v1.2.3, 'VSTRING' ],
+    [ qr/foo/, 'Regexp' ],
+    [ *STDIN{IO}, 'IO::File' ],
+    [ bless({}, 'Foo'), 'Foo' ],
+  );
+};
+
 done_testing;
