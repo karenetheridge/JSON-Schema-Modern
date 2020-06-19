@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -49,7 +49,23 @@ The maximum number of levels deep a schema traversal may go, before evaluation i
 protect against accidental infinite recursion, such as from two subschemas that each reference each
 other. Defaults to 50.
 
+=head2 validate_formats
+
+When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
+to false.
+
+=head2 format_validations
+
+An optional hashref that allows overriding the validation method for formats, or adding new ones.
+Existing formats must be specified in the form of C<< { $format_name => $format_sub } >>, where
+the format sub is a coderef that takes one argument and returns a boolean result. New formats must
+be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
+where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
+number, or integer) the instance value must be for the format validation to be considered.
+
 =head1 METHODS
+
+=for Pod::Coverage BUILD
 
 =head2 evaluate_json_string
 
@@ -60,8 +76,24 @@ Evaluates the provided instance data against the known schema document.
 The data is in the form of a JSON-encoded string (in accordance with
 L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
-The schema is in the form of a Perl data structure, representing a JSON Schema
-that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
+L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
+
+=over 4
+
+=item *
+
+a Perl data structure, such as what is returned from a JSON decode operation,
+
+=item *
+
+a L<JSON::Schema::Draft201909::Document> object,
+
+=item *
+
+or a URI string indicating the location where such a schema is located.
+
+=back
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -74,10 +106,40 @@ Evaluates the provided instance data against the known schema document.
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
 allows (null, boolean, string, number, object, array).
 
-The schema is in the form of a Perl data structure, representing a JSON Schema
-that respects the Draft 2019-09 meta-schema at L<https://json-schema.org/draft/2019-09/schema>.
+The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
+L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
+
+=over 4
+
+=item *
+
+a Perl data structure, such as what is returned from a JSON decode operation,
+
+=item *
+
+a L<JSON::Schema::Draft201909::Document> object,
+
+=item *
+
+or a URI string indicating the location where such a schema is located.
+
+=back
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
+
+=head2 add_schema
+
+  $js->add_schema($uri => $schema);
+  $js->add_schema($uri => $document);
+  $js->add_schema($schema);
+  $js->add_schema($document);
+
+Introduces the (unblessed, nested Perl data structure) or L<JSON::Schema::Draft201909::Document>
+object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
+provided (and if not, C<''> will be used if no other identifier can be found within).
+
+You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
+before calling L</evaluate>, other than the standard metaschemas which are pre-loaded.
 
 =head1 LIMITATIONS
 
@@ -94,51 +156,114 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
+=head2 FORMAT VALIDATION
+
+By default, formats are treated only as annotations, not assertions. When L</validate_format> is
+true, strings are also checked against the format as specified in the schema. At present the
+following formats are supported (use of any other formats than these will evaluate as true):
+
+=over 4
+
+=item *
+
+C<date-time>
+
+=item *
+
+C<date>
+
+=item *
+
+C<time>
+
+=item *
+
+C<duration>
+
+=item *
+
+C<email>
+
+=item *
+
+C<idn-email>
+
+=item *
+
+C<hostname>
+
+=item *
+
+C<idn-hostname>
+
+=item *
+
+C<ipv4>
+
+=item *
+
+C<ipv6>
+
+=item *
+
+C<uri>
+
+=item *
+
+C<uri-reference>
+
+=item *
+
+C<iri>
+
+=item *
+
+C<uuid>
+
+=item *
+
+C<json-pointer>
+
+=item *
+
+C<relative-json-pointer>
+
+=item *
+
+C<regex>
+
+=back
+
+A few optional prerequisites are needed for some of these (if the prerequisite is missing,
+validation will always succeed):
+
+=over 4
+
+=item *
+
+C<date-time>, C<date>, and C<time> require L<Time::Moment>
+
+=item *
+
+C<email> and C<idn-email> require L<Email::Address::XS>
+
+=item *
+
+C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
+
+=item *
+
+C<idn-hostname> requires L<Net::IDN::Encode>
+
+=back
+
 =head2 SPECIFICATION COMPLIANCE
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
-The minimum extensible JSON Schema implementation requirements involve:
+To date, missing components (some of which are optional, but still quite useful) include:
 
 =over 4
-
-=item *
-
-identifying, organizing, and linking schemas (with keywords such as C<$ref>, C<$id>, C<$schema>, C<$anchor>, C<$defs>)
-
-=item *
-
-providing an interface to evaluate assertions
-
-=item *
-
-providing an interface to collect annotations
-
-=item *
-
-applying subschemas to instances and combining assertion results and annotation data accordingly.
-
-=item *
-
-support for all vocabularies required by the Draft 2019-09 metaschema, L<https://json-schema.org/draft/2019-09/schema>
-
-=back
-
-To date, missing components include most of these. More specifically, features to be added include:
-
-=over 4
-
-=item *
-
-loading multiple schema documents, and registration of a schema against a canonical base URI
-
-=item *
-
-collection of annotations (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7>)
-
-=item *
-
-multiple output formats (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
 
 =item *
 
@@ -152,11 +277,24 @@ loading schema documents from the network
 
 loading schema documents from a local web application (e.g. L<Mojolicious>)
 
+=item *
+
+multiple output formats (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
+
+=item *
+
+annotation collection (including the "format", "meta-data" and "content" vocabularies)
+
+=item *
+
+examination of the C<$schema> keyword for deviation from the standard metaschema, including changes to vocabulary behaviour
+
 =back
 
 =head1 SECURITY CONSIDERATIONS
 
-The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema.
+The C<pattern> and C<patternProperties> keywords, and the C<regex> format validator,
+evaluate regular expressions from the schema.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
 potentially pathological constructs that may pose a security risk, either via denial of service
 or by allowing exposure to the internals of your application. B<DO NOT RUN SCHEMAS FROM UNTRUSTED
@@ -177,10 +315,6 @@ L<RFC8259|https://tools.ietf.org/html/rfc8259>
 =item *
 
 L<Test::JSON::Schema::Acceptance>
-
-=item *
-
-L<JSON::Validator>
 
 =back
 
