@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
+{{$NEXT}}
+
 0.006     2020-06-19 20:54:40Z
           - add support for evaluation against a uri
           - add "add_schema" interface for using additional schema documents
