@@ -928,7 +928,7 @@ has _format_validations => (
       eval { Time::Moment->from_string($_[0]) } ? 1 : 0,
     };
     my $is_email = sub {
-      eval { require Email::Address::XS; 1 } or return 1;
+      eval { require Email::Address::XS; Email::Address::XS->VERSION(1.01); 1 } or return 1;
       Email::Address::XS->parse($_[0])->is_valid;
     };
     my $is_hostname = sub {

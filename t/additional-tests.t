@@ -33,6 +33,8 @@ $accepter->acceptance(
     $result;
   },
   @ARGV ? (tests => { file => \@ARGV }) : (),
+  # optional prereqs
+  eval { require Email::Address::XS; 1 } ? () : (todo_tests => 'format-idn-email.json'),
 );
 
 done_testing;
