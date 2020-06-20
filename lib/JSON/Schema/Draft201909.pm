@@ -838,7 +838,7 @@ sub _eval_keyword_patternProperties {
     }
     catch {
       abort({ %$state,
-        schema_path_rest => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) },
+        _schema_path_rest => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) },
       $@);
     };
     foreach my $property (sort @matched_properties) {
@@ -1267,15 +1267,15 @@ sub E {
   my ($state, $error_string, @args) = @_;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $schema_path_rest = $state->{schema_path_rest}
+  my $schema_path = delete $state->{_schema_path_rest}
     // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
 
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{data_path},
-    keyword_location => $state->{traversed_schema_path}.$schema_path_rest,
+    keyword_location => $state->{traversed_schema_path}.$schema_path,
     !"$state->{canonical_schema_uri}" ? () : ( absolute_keyword_location => do {
       my $uri = $state->{canonical_schema_uri}->clone;
-      $uri->fragment(($uri->fragment//'').$schema_path_rest) if $schema_path_rest;
+      $uri->fragment(($uri->fragment//'').$schema_path) if $schema_path;
       $uri;
     } ),
     error => @args ? sprintf($error_string, @args) : $error_string,
