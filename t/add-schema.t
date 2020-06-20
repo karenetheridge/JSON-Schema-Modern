@@ -12,6 +12,8 @@ use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
 
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
+
 use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
 
 subtest 'evaluate a document' => sub {
