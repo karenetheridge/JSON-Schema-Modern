@@ -140,7 +140,7 @@ subtest 'evaluate a uri' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/properties/$schema/type',
+          keywordLocation => '/type',
           absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/meta/core#/properties/$schema/type',
           error => 'wrong type (expected string)',
         },
@@ -237,7 +237,7 @@ subtest 'add a schema associated with a uri' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/allOf/0',
+          keywordLocation => '',
           absoluteKeywordLocation => 'https://bar.com#/allOf/0',
           error => 'subschema is false',
         },
@@ -351,6 +351,150 @@ subtest 'add a schema without a uri' => sub {
       },
     },
     'document only added under its canonical uri',
+  );
+};
+
+subtest '$ref to non-canonical uri' => sub {
+  my $schema = {
+    '$id' => 'http://localhost:4242/my_document', # the canonical_uri
+    properties => {
+      alpha => false,
+      beta => {
+        '$id' => 'beta',
+        properties => {
+          gamma => {
+            minimum => 2,
+          },
+        },
+      },
+      delta => {
+        '$ref' => 'http://otherhost:4242/another_uri#/properties/alpha',
+      },
+    },
+  };
+
+  my $js = JSON::Schema::Draft201909->new;
+  $js->add_schema('http://otherhost:4242/another_uri', $schema);
+
+  cmp_deeply(
+    $js->evaluate({ alpha => 1 }, 'http://otherhost:4242/another_uri')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/alpha',
+          keywordLocation => '/properties/alpha',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties/alpha',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'errors use the canonical uri, not the uri used to evaluate against',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ gamma => 1 }, 'http://otherhost:4242/beta')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => 'EXCEPTION: unable to find resource http://otherhost:4242/beta',
+        },
+      ],
+    },
+    'non-canonical uri is not used to resolve inner $id keywords',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ gamma => 1 }, 'http://localhost:4242/beta')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/gamma',
+          keywordLocation => '/properties/gamma/minimum',
+          absoluteKeywordLocation => 'http://localhost:4242/beta#/properties/gamma/minimum',
+          error => 'value is smaller than 2',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'http://localhost:4242/beta#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'the canonical uri is updated when use the canonical uri, not the uri used to evaluate against',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ delta => 1 }, 'http://otherhost:4242/another_uri')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/delta',
+          keywordLocation => '/properties/delta/$ref',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties/alpha',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'canonical_uri is not always what was in the $ref, even when no local $id is present',
+  );
+
+  cmp_deeply(
+    $js->evaluate(1, 'http://otherhost:4242/another_uri#/properties/alpha')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties/alpha',
+          error => 'subschema is false',
+        },
+      ],
+    },
+    'canonical_uri fragment also needs to be adjusted',
+  );
+
+  delete $schema->{properties}{beta}{'$id'};
+
+  cmp_deeply(
+    $js->evaluate({ gamma => 1 }, 'http://otherhost:4242/another_uri#/properties/beta')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/gamma',
+          keywordLocation => '/properties/gamma/minimum',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties/beta/properties/gamma/minimum',
+          error => 'value is smaller than 2',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties/beta/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'canonical_uri starts out containing a fragment and can be appended to during traversal',
   );
 };
 

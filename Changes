@@ -2,6 +2,8 @@ Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
           - raise some inadequate prereq declarations
+          - fix incorrect canonical uri when evaluating a (sub)schema using a
+            non-canonical uri
 
 0.006     2020-06-19 20:54:40Z
           - add support for evaluation against a uri

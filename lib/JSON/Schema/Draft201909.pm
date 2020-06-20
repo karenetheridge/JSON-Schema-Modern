@@ -158,8 +158,7 @@ sub evaluate {
 
     abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
 
-    $state->{canonical_schema_uri} = $canonical_uri->clone->fragment(undef);
-    $state->{schema_path} = $canonical_uri->fragment // '';
+    $state->{canonical_schema_uri} = $canonical_uri->clone->fragment($canonical_uri->fragment);
 
     $result = $self->_eval($data, $schema, $state);
   }
@@ -299,7 +298,7 @@ sub _fetch_and_eval_ref_uri {
   return $self->_eval($data, $subschema,
     +{ %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},
-      canonical_schema_uri => $canonical_uri, # note: not canonical yet until $id is processed
+      canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
       schema_path => '',
     });
 }
@@ -1235,7 +1234,7 @@ sub _fetch_schema_from_uri {
     my $base = $uri->clone->fragment(undef);
     if (my $resource = $self->_get_or_load_resource($base)) {
       $subschema = $resource->{document}->get($resource->{path}.$fragment);
-      $canonical_uri = $uri;
+      $canonical_uri = $resource->{canonical_uri}->clone->fragment($uri->fragment);
     }
   }
   else {
