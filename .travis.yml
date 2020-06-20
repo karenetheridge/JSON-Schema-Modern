@@ -5,6 +5,7 @@ addons:
       - aspell-en
 language: perl
 perl:
+  - "5.32"
   - "5.30"
   - "5.28"
   - "5.26"
