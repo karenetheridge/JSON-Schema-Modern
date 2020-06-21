@@ -77,18 +77,14 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        'unevaluatedItems.json',
-        'unevaluatedProperties.json',
-        'optional/bignum.json',
-        'optional/content.json',
-        'optional/ecmascript-regex.json',                   # TODO: see issue #27
-        # not yet implemented
-        qw(
-          optional/format/iri-reference.json
-          optional/format/uri-template.json
-        ),
-        # these all depend on optional prereqs
-        $ENV{AUTOMATED_TESTING} ? (
+        'unevaluatedItems.json',                    # TODO: see issue #19
+        'unevaluatedProperties.json',               # ""
+        'optional/bignum.json',                     # TODO: see issue #10
+        'optional/content.json',                    # per spec, should not be validated by default
+        'optional/ecmascript-regex.json',           # TODO: see issue #27
+        'optional/format/iri-reference.json',       # not yet implemented
+        'optional/format/uri-template.json',        # not yet implemented
+        $ENV{AUTOMATED_TESTING} ? (                 # these all depend on optional prereqs
         qw(
           optional/format/date-time.json
           optional/format/date.json
@@ -100,7 +96,7 @@ $accepter->acceptance(
         ) ) : (),
       ] },
     { file => 'ref.json', group_description => [
-        'ref creates new scope when adjacent to keywords',  # unevaluatedProperties
+        'ref creates new scope when adjacent to keywords',  # unevaluatedProperties (issue #19)
       ] },
     { file => 'refRemote.json', group_description => [      # TODO: waiting for test suite PR 360
         'base URI change - change folder', 'base URI change - change folder in subschema',
