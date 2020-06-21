@@ -348,7 +348,6 @@ sub _eval_keyword_comment {
 sub _eval_keyword_defs {
   my ($self, $data, $schema, $state) = @_;
 
-  my $type = $self->_get_type($schema->{'$defs'});
   assert_keyword_type($state, $schema, 'object');
 
   # we do nothing directly with this keyword, including not collecting its value for annotations.
