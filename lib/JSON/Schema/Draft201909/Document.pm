@@ -79,7 +79,7 @@ sub BUILD {
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
 
   my $original_uri = $self->canonical_uri->clone;
-  my $schema = $self->data;
+  my $schema = $self->schema;
   my %identifiers = _traverse_for_identifiers($schema, '', $original_uri->clone);
 
   if (is_plain_hashref($self->schema) and my $id = $self->get('/$id')) {
