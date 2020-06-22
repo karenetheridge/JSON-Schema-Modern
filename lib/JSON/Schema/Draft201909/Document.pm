@@ -60,7 +60,7 @@ before _add_resources => sub {
     my ($key, $value) = @$pair;
     if (my $existing = $self->_get_resource($key)) {
       croak 'a schema resource is already indexed with uri "'.$key.'"'
-        if $existing->{path} != $value->{path}
+        if $existing->{path} ne $value->{path}
           or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
 
