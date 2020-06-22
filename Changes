@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.008     2020-06-22 04:24:06Z
           - fix bad syntax used in a test
 
 0.007     2020-06-21 21:20:33Z
