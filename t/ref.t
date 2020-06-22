@@ -6,6 +6,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use Test::Fatal;
 use Test::Deep;
+use Storable 'dclone';
 use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
@@ -293,6 +294,7 @@ subtest '$recursiveAnchor is not at a schema resource root' => sub {
     },
   );
 
+  $schema = dclone($schema);
   $schema->{'$defs'}{myobject}{'$id'} = 'myobject.json';
 
   cmp_deeply(

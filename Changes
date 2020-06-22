@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - no longer allowing adding another schema document with a duplicate
+            uri but different schema content (some collision checks were too
+            lax).
 
 0.008     2020-06-22 04:24:06Z
           - fix bad syntax used in a test

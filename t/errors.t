@@ -1130,7 +1130,7 @@ subtest 'invalid $schema' => sub {
     $js->evaluate(
       1,
       {
-        '$id' => 'https://bloop.com',
+        '$id' => 'https://bloop2.com',
         allOf => [
           true,
           {

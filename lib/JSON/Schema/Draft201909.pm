@@ -12,7 +12,7 @@ use feature 'fc';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
-use List::Util 1.33 qw(any pairs);
+use List::Util 1.55 qw(any pairs first uniqint);
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
@@ -93,12 +93,20 @@ sub add_schema {
   my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
     : JSON::Schema::Draft201909::Document->new(schema => shift, $uri ? (canonical_uri => $uri) : ());
 
-  $self->_add_resources(
-    map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
-      $document->_resource_pairs
-  ) if not (grep $_->{document} == $document, $self->_resource_values);
+  if (not grep $_->{document} == $document, $self->_resource_values) {
+    my $schema_content = $self->_json_decoder->encode($document->schema);
+    if (my $existing_doc = first { $self->_json_decoder->encode($_->schema) eq $schema_content }
+        uniqint map $_->{document}, $self->_resource_values) {
+      # we already have this schema content in another document object.
+      $document = $existing_doc;
+    }
+    else {
+      $self->_add_resources(map +($_->[0] => +{ %{$_->[1]}, document => $document }),
+        $document->_resource_pairs);
+    }
+  }
 
-  if ("$uri" and not $self->_get_resource($uri)) {
+  if ("$uri") {
     $document->_add_resources($uri, { path => '', canonical_uri => $document->canonical_uri });
     $self->_add_resources($uri => { path => '', canonical_uri => $document->canonical_uri, document => $document });
   }
@@ -1149,21 +1157,26 @@ has _resource_index => (
   default => sub { {} },
 );
 
-before _add_resources => sub {
-  my $self = shift;
+
+around _add_resources => sub {
+  my ($orig, $self) = (shift, shift);
+
+  my @resources;
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
     my ($key, $value) = @$pair;
     if (my $existing = $self->_get_resource($key)) {
-      # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of
-      # schemas that lack all identifiers altogether; we drop *all* resources from that document
-      $self->_remove_resource(
-          grep $self->_get_resource($_)->{document} == $existing->{document}, $self->_resource_keys)
-        if $key eq '';
-
-      croak 'uri "'.$key.'" conflicts with an existing schema resource'
-        if ($key ne '' and $existing->{canonical_uri} ne '')
-          and $existing->{path} ne $value->{path}
-            or $existing->{canonical_uri} ne $value->{canonical_uri};
+      if ($key eq '') {
+        # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
+        # lack all identifiers altogether; we drop *all* resources from that document
+        $self->_remove_resource(
+          grep $self->_get_resource($_)->{document} == $existing->{document}, $self->_resource_keys);
+      }
+      else {
+        next if $existing->{path} eq $value->{path}
+          and $existing->{canonical_uri} eq $value->{canonical_uri}
+          and $existing->{document} == $value->{document};
+        croak 'uri "'.$key.'" conflicts with an existing schema resource';
+      }
     }
     elsif ($self->CACHED_METASCHEMAS->{$key}) {
       croak 'uri "'.$key.'" conflicts with an existing meta-schema resource';
@@ -1175,7 +1188,11 @@ before _add_resources => sub {
 
     croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
       if ($fragment // '') =~ m{^[^/]};
+
+    push @resources, $key => $value;
   }
+
+  $self->$orig(@resources) if @resources;
 };
 
 use constant CACHED_METASCHEMAS => {
@@ -1205,6 +1222,7 @@ sub _get_or_load_resource {
     my $schema = $self->_json_decoder->decode($file->slurp_raw);
     my $document = JSON::Schema::Draft201909::Document->new(schema => $schema);
 
+    # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
       map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
         $document->_resource_pairs
@@ -1250,7 +1268,7 @@ has _json_decoder => (
   is => 'ro',
   isa => HasMethods[qw(encode decode)],
   lazy => 1,
-  default => sub { JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1) },
+  default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1) },
 );
 
 # shorthand for creating and appending json pointers
