@@ -168,9 +168,6 @@ subtest 'evaluate a uri' => sub {
   );
 };
 
-# TODO: test ->evaluate(..., $non_canonical_uri) -- resource index should contain both the
-# non-canonical id and the $id from within the schema resource.
-
 subtest 'add a uri resource' => sub {
   my $js = JSON::Schema::Draft201909->new;
   cmp_deeply(
