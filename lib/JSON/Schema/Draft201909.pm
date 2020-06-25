@@ -242,7 +242,8 @@ sub _eval_keyword_id {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = Mojo::URL->new($schema->{'$id'})->base($state->{canonical_schema_uri})->to_abs;
+  my $uri = Mojo::URL->new($schema->{'$id'});
+  $uri = $uri->base($state->{canonical_schema_uri})->to_abs if not $uri->is_abs;
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length $uri->fragment;
 
@@ -316,7 +317,8 @@ sub _eval_keyword_ref {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = Mojo::URL->new($schema->{'$ref'})->base($state->{canonical_schema_uri})->to_abs;
+  my $uri = Mojo::URL->new($schema->{'$ref'});
+  $uri = $uri->base($state->{canonical_schema_uri})->to_abs if not $uri->is_abs;
   return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
 }
 
@@ -326,7 +328,8 @@ sub _eval_keyword_recursiveRef {
   assert_keyword_type($state, $schema, 'string');
 
   my $base = $state->{recursive_anchor_uri} // Mojo::URL->new;
-  my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->base($base)->to_abs;
+  my $uri = Mojo::URL->new($schema->{'$recursiveRef'});
+  $uri = $uri->base($base)->to_abs if not $uri->is_abs;
 
   abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
     if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;

@@ -107,7 +107,7 @@ sub _traverse_for_identifiers {
     if (exists $data->{'$id'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$id'})) {
       my $uri = Mojo::URL->new($data->{'$id'});
       if (not length $uri->fragment) {
-        $canonical_uri = $uri->base($canonical_uri)->to_abs;
+        $canonical_uri = $uri->is_abs ? $uri : $uri->base($canonical_uri)->to_abs;
         $canonical_uri->fragment(undef);
         $identifiers{$canonical_uri} = { path => $path, canonical_uri => $canonical_uri->clone };
       }
