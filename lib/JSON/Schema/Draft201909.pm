@@ -721,8 +721,7 @@ sub _eval_keyword_items {
       +{ %$state,
         data_path => $state->{data_path}.'/'.$idx,
         schema_path => $state->{schema_path}.'/items/'.$idx,
-      },
-    );
+      });
     $valid = 0;
     last if $state->{short_circuit} and not exists $schema->{additionalItems};
   }
@@ -764,8 +763,7 @@ sub _eval_keyword_contains {
           errors => \@errors,
           data_path => $state->{data_path}.'/'.$idx,
           schema_path => $state->{schema_path}.'/contains',
-        })
-    ) {
+        })) {
       ++$num_valid;
       last if $state->{short_circuit}
         and (not exists $schema->{maxContains} or $num_valid > $schema->{maxContains})
@@ -1224,7 +1222,7 @@ sub _get_or_load_resource {
 
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
-      map +( $_->[0] => +{ %{$_->[1]}, document => $document } ),
+      map +($_->[0] => +{ %{$_->[1]}, document => $document }),
         $document->_resource_pairs
     );
 
