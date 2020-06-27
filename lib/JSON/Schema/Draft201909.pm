@@ -248,20 +248,24 @@ sub _eval {
   my $result = 1;
 
   foreach my $keyword (
-    # CORE KEYWORDS
+    # CORE VOCABULARY
     qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
-    # VALIDATOR KEYWORDS
+    # VALIDATION VOCABULARY
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
       maxLength minLength pattern
       maxItems minItems uniqueItems
       maxProperties minProperties required dependentRequired),
-    # APPLICATOR KEYWORDS
+    # APPLICATOR VOCABULARY
     qw(allOf anyOf oneOf not if dependentSchemas
       items unevaluatedItems contains
       properties patternProperties additionalProperties unevaluatedProperties propertyNames),
     # FORMAT VOCABULARY
     qw(format),
+    # CONTENT VOCABULARY
+    qw(contentEncoding contentMediaType contentSchema),
+    # META-DATA VOCABULARY
+    qw(title description default deprecated readOnly writeOnly examples),
     # DISCONTINUED KEYWORDS
     qw(definitions dependencies),
   ) {
@@ -1173,6 +1177,67 @@ sub _eval_keyword_format {
   }
 
   return A($state, $schema->{format});
+}
+
+sub _eval_keyword_contentEncoding {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not $self->_is_type('string', $data);
+  assert_keyword_type($state, $schema, 'string');
+  return A($state, $schema->{$state->{keyword}});
+}
+
+sub _eval_keyword_contentMediaType {
+  goto \&_eval_keyword_contentEncoding;
+}
+
+sub _eval_keyword_contentSchema {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not exists $schema->{contentMediaType};
+  return 1 if not $self->_is_type('string', $data);
+
+  abort($state, 'contentSchema value is not an object or boolean')
+    if not any { $self->_is_type($_, $schema->{contentSchema}) } qw(object boolean);
+  return A($state, dclone($schema->{contentSchema}));
+}
+
+sub _eval_keyword_title {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+  return A($state, $schema->{$state->{keyword}});
+}
+
+sub _eval_keyword_description {
+  goto \&_eval_keyword_title;
+}
+
+sub _eval_keyword_default {
+  my ($self, $data, $schema, $state) = @_;
+  return A($state, is_ref($schema->{default}) ? dclone($schema->{default}) : $schema->{default});
+}
+
+sub _eval_keyword_deprecated {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'boolean');
+  return A($state, $schema->{$state->{keyword}});
+}
+
+sub _eval_keyword_readOnly {
+  goto \&_eval_keyword_deprecated;
+}
+
+sub _eval_keyword_writeOnly {
+  goto \&_eval_keyword_deprecated;
+}
+
+sub _eval_keyword_examples {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'array');
+  return A($state, is_ref($schema->{examples}) ? dclone($schema->{examples}) : $schema->{examples});
 }
 
 sub _eval_keyword_definitions {
