@@ -652,23 +652,18 @@ sub _eval_keyword_if {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not exists $schema->{then} and not exists $schema->{else};
-  if ($self->_eval($data, $schema->{if},
+  my $keyword = $self->_eval($data, $schema->{if},
       +{ %$state,
         schema_path => $state->{schema_path}.'/if',
         short_circuit => 1, # for now, until annotations are collected
         errors => [],
-      })) {
-    return 1 if not exists $schema->{then};
-    return 1 if $self->_eval($data, $schema->{then},
-      +{ %$state, schema_path => $state->{schema_path}.'/then' });
-    return E({ %$state, keyword => 'then' }, 'subschema is not valid');
-  }
-  else {
-    return 1 if not exists $schema->{else};
-    return 1 if $self->_eval($data, $schema->{else},
-      +{ %$state, schema_path => $state->{schema_path}.'/else' });
-    return E({ %$state, keyword => 'else' }, 'subschema is not valid');
-  }
+      })
+    ? 'then' : 'else';
+
+  return 1 if not exists $schema->{$keyword};
+  return 1 if $self->_eval($data, $schema->{$keyword},
+    +{ %$state, schema_path => $state->{schema_path}.'/'.$keyword });
+  return E({ %$state, keyword => $keyword }, 'subschema is not valid');
 }
 
 sub _eval_keyword_dependentSchemas {
