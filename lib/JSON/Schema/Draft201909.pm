@@ -1351,8 +1351,8 @@ L<JSON::Schema::Draft201909::Result/output_format>.
 
 =head2 short_circuit
 
-When true, evaluation will immediately return upon encountering the first validation failure, rather
-than continuing to find all errors.
+When true, evaluation will return early in any execution path as soon as the outcome can be
+determined, rather than continuing to find all possible errors.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
