@@ -85,6 +85,7 @@ sub add_schema {
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
 
   if (not @_) {
+    # TODO: resolve $uri against $self->base_uri
     my ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
     return if not defined $schema or not defined wantarray;
     return $self->_get_resource($canonical_uri->clone->fragment(undef))->{document};
@@ -157,6 +158,7 @@ sub evaluate {
     my ($schema, $canonical_uri);
 
     if (not ref $schema_reference or $schema_reference->$_isa('Mojo::URL')) {
+      # TODO: resolve $uri against base_uri
       ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($schema_reference);
     }
     else {
@@ -327,7 +329,7 @@ sub _eval_keyword_recursiveRef {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $base = $state->{recursive_anchor_uri} // Mojo::URL->new;
+  my $base = $state->{recursive_anchor_uri} // $state->{canonical_schema_uri};
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'});
   $uri = $uri->base($base)->to_abs if not $uri->is_abs;
 

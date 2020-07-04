@@ -422,4 +422,86 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   );
 };
 
+subtest '$recursiveRef without $recursiveAnchor' => sub {
+  my $schema = {
+    '$id' => 'strings_only',
+    '$defs' => {
+      allow_ints => {
+        '$id' => 'allow_ints',
+        anyOf => [
+          { type => 'integer' },
+          { type => 'object', additionalProperties => { '$ref' => '#' } },
+        ],
+      },
+    },
+    anyOf => [
+      { type => 'string' },
+      { type => 'object', additionalProperties => { '$ref' => '#' } },
+    ],
+  };
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => my $errors = [
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf/0/type',
+          absoluteKeywordLocation => 'strings_only#/anyOf/0/type',
+          error => 'wrong type (expected string)',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/anyOf/1/additionalProperties/$ref/anyOf/0/type',
+          absoluteKeywordLocation => 'strings_only#/anyOf/0/type',
+          error => 'wrong type (expected string)',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/anyOf/1/additionalProperties/$ref/anyOf/1/type',
+          absoluteKeywordLocation => 'strings_only#/anyOf/1/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/anyOf/1/additionalProperties/$ref/anyOf',
+          absoluteKeywordLocation => 'strings_only#/anyOf',
+          error => 'no subschemas are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf/1/additionalProperties',
+          absoluteKeywordLocation => 'strings_only#/anyOf/1/additionalProperties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf',
+          absoluteKeywordLocation => 'strings_only#/anyOf',
+          error => 'no subschemas are valid',
+        },
+      ],
+    },
+    '$ref - one level recursion',
+  );
+
+  $js->{_resource_index} = {};
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      $js->_json_decoder->decode($js->_json_decoder->encode($schema) =~ s/\$ref/\$recursiveRef/gr),
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => $js->_json_decoder->decode($js->_json_decoder->encode($errors) =~ s/\$ref/\$recursiveRef/gr),
+    },
+    '$recursiveRef with no $recursiveAnchor in scope has the same outcome',
+  );
+};
+
 done_testing;
