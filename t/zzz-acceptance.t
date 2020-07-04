@@ -22,7 +22,7 @@ use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'sh
 use JSON::Schema::Draft201909;
 
 my $accepter = Test::JSON::Schema::Acceptance->new(
-  specification => 'draft2019-09',
+  $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (specification => 'draft2019-09'),
   include_optional => 1,
   verbose => 1,
 );
