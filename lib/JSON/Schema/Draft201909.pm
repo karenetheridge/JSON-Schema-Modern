@@ -300,20 +300,6 @@ sub _eval_keyword_recursiveAnchor {
   return 1;
 }
 
-sub _fetch_and_eval_ref_uri {
-  my ($self, $data, $schema, $state, $uri) = @_;
-
-  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
-  abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
-
-  return $self->_eval($data, $subschema,
-    +{ %$state,
-      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},
-      canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
-      schema_path => '',
-    });
-}
-
 sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
@@ -321,7 +307,15 @@ sub _eval_keyword_ref {
 
   my $uri = Mojo::URL->new($schema->{'$ref'});
   $uri = $uri->base($state->{canonical_schema_uri})->to_abs if not $uri->is_abs;
-  return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
+  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+  abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
+
+  return $self->_eval($data, $subschema,
+    +{ %$state,
+      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
+      canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
+      schema_path => '',
+    });
 }
 
 sub _eval_keyword_recursiveRef {
@@ -329,14 +323,30 @@ sub _eval_keyword_recursiveRef {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $base = $state->{recursive_anchor_uri} // $state->{canonical_schema_uri};
-  my $uri = Mojo::URL->new($schema->{'$recursiveRef'});
-  $uri = $uri->base($base)->to_abs if not $uri->is_abs;
+  my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'});
+  $target_uri = $target_uri->base($state->{canonical_schema_uri})->to_abs if not $target_uri->is_abs;
+  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($target_uri);
+  abort($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
 
-  abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
-    if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;
+  if ($self->_is_type('boolean', $subschema->{'$recursiveAnchor'})
+      and $subschema->{'$recursiveAnchor'}) {
+    my $uri = Mojo::URL->new($schema->{'$recursiveRef'});
+    my $base = $state->{recursive_anchor_uri} // $state->{canonical_schema_uri};
+    $uri = $uri->base($base)->to_abs if not $uri->is_abs;
 
-  return $self->_fetch_and_eval_ref_uri($data, $schema, $state, $uri);
+    abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
+      if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;
+
+    ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+    abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
+  }
+
+  return $self->_eval($data, $subschema,
+    +{ %$state,
+      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
+      canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
+      schema_path => '',
+    });
 }
 
 sub _eval_keyword_vocabulary {

@@ -4,7 +4,8 @@ Revision history for JSON-Schema-Draft201909
           - no longer allowing adding another schema document with a duplicate
             uri but different schema content (some collision checks were too
             lax).
-          - fix behaviour of $recursiveRef without an $recursiveAnchor
+          - fix behaviour of $recursiveRef without an $recursiveAnchor in the
+            initial target scope
 
 0.008     2020-06-22 04:24:06Z
           - fix bad syntax used in a test
