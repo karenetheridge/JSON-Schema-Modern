@@ -1441,7 +1441,7 @@ before calling L</evaluate>, other than the standard metaschemas which are pre-l
 
 =head1 LIMITATIONS
 
-=head2 TYPES
+=head2 Types
 
 Perl is a more loosely-typed language than JSON. This module delves into a value's internal
 representation in an attempt to derive the true "intended" type of the value. However, if a value is
@@ -1454,7 +1454,7 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
-=head2 FORMAT VALIDATION
+=head2 Format Validation
 
 By default, formats are treated only as annotations, not assertions. When L</validate_format> is
 true, strings are also checked against the format as specified in the schema. At present the
@@ -1488,7 +1488,7 @@ validation will always succeed):
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
 * C<idn-hostname> requires L<Net::IDN::Encode>
 
-=head2 SPECIFICATION COMPLIANCE
+=head2 Specification Compliance
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
