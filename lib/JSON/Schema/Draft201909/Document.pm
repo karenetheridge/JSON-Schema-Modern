@@ -185,10 +185,12 @@ externally (you should use the public accessors in L<JSON::Schema::Draft201909> 
 
 =head2 contains
 
+Check if L</"schema"> contains a value that can be identified with the given JSON Pointer.
 See L<Mojo::JSON::Pointer/contains>.
 
 =head2 get
 
+Extract value from L</"schema"> identified by the given JSON Pointer.
 See L<Mojo::JSON::Pointer/get>.
 
 =cut
