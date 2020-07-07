@@ -162,8 +162,6 @@ This class represents one JSON Schema document, to be used by L<JSON::Schema::Dr
 
 =head2 schema
 
-=head2 data
-
 The actual raw data representing the schema.
 
 =head2 canonical_uri
