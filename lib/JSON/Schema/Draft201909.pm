@@ -1433,12 +1433,13 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
   $js->add_schema($schema);
   $js->add_schema($document);
 
-Introduces the (unblessed, nested Perl data structure) or L<JSON::Schema::Draft201909::Document>
+Introduces the (unblessed, nested) Perl data structure or L<JSON::Schema::Draft201909::Document>
 object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
 provided (and if not, C<''> will be used if no other identifier can be found within).
 
 You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
-before calling L</evaluate>, other than the standard metaschemas which are pre-loaded.
+before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
+as needed.
 
 =head1 LIMITATIONS
 
@@ -1511,7 +1512,7 @@ The C<pattern> and C<patternProperties> keywords, and the C<regex> format valida
 evaluate regular expressions from the schema.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
 potentially pathological constructs that may pose a security risk, either via denial of service
-or by allowing exposure to the internals of your application. B<DO NOT RUN SCHEMAS FROM UNTRUSTED
+or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM UNTRUSTED
 SOURCES.>
 
 =head1 SEE ALSO

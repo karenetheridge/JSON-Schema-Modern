@@ -80,9 +80,9 @@ specification (L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
 
 The canonical URI or URI reference of the location in the schema where the error occurred; not
 defined, if there is no base URI for the schema and no C<$ref> was followed. Note that this is not
-actually an absolute (fragmentless) URI in most cases, as the indicated error will occur at a path
+a fragmentless URI in most cases, as the indicated error will occur at a path
 below the position where the most recent identifier had been declared in the schema. Further, if the
-schema never declared an absolute base URI, this URI won't contain a scheme either.
+schema never declared an absolute base URI (containing a scheme), this URI won't be absolute either.
 
 =head2 error
 
