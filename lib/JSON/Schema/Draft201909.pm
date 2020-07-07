@@ -1377,7 +1377,8 @@ to false.
 =head2 format_validations
 
 An optional hashref that allows overriding the validation method for formats, or adding new ones.
-Existing formats must be specified in the form of C<< { $format_name => $format_sub } >>, where
+Overrides to existing formats (see L</Format Validation>)
+must be specified in the form of C<< { $format_name => $format_sub } >>, where
 the format sub is a coderef that takes one argument and returns a boolean result. New formats must
 be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
 where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
