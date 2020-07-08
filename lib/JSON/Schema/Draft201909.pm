@@ -1140,12 +1140,11 @@ sub _eval_keyword_format {
   assert_keyword_type($state, $schema, 'string');
 
   if ($self->validate_formats and my $spec = $self->_get_format_validation($schema->{format})) {
-    return E($state, 'not a %s', $schema->{format})
-      if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
+    return 1 if not $self->_is_type($spec->{type}, $data);
+    return E($state, 'not a %s', $schema->{format}) if not $spec->{sub}->($data);
   }
 
-  # TODO: create annotation
-  return 1;
+  return A($state, $schema->{format});
 }
 
 sub _eval_keyword_definitions {
