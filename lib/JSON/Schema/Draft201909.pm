@@ -418,7 +418,7 @@ sub _eval_keyword_multipleOf {
 
   my $quotient = $data / $schema->{multipleOf};
   return 1 if int($quotient) == $quotient;
-  return E($state, 'value is not a multiple of %d', $schema->{multipleOf});
+  return E($state, 'value is not a multiple of %g', $schema->{multipleOf});
 }
 
 sub _eval_keyword_maximum {
@@ -428,7 +428,7 @@ sub _eval_keyword_maximum {
   assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data <= $schema->{maximum};
-  return E($state, 'value is larger than %d', $schema->{maximum});
+  return E($state, 'value is larger than %g', $schema->{maximum});
 }
 
 sub _eval_keyword_exclusiveMaximum {
@@ -438,7 +438,7 @@ sub _eval_keyword_exclusiveMaximum {
   assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data < $schema->{exclusiveMaximum};
-  return E($state, 'value is equal to or larger than %d', $schema->{exclusiveMaximum});
+  return E($state, 'value is equal to or larger than %g', $schema->{exclusiveMaximum});
 }
 
 sub _eval_keyword_minimum {
@@ -448,7 +448,7 @@ sub _eval_keyword_minimum {
   assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data >= $schema->{minimum};
-  return E($state, 'value is smaller than %d', $schema->{minimum});
+  return E($state, 'value is smaller than %g', $schema->{minimum});
 }
 
 sub _eval_keyword_exclusiveMinimum {
@@ -458,7 +458,7 @@ sub _eval_keyword_exclusiveMinimum {
   assert_keyword_type($state, $schema, 'number');
 
   return 1 if $data > $schema->{exclusiveMinimum};
-  return E($state, 'value is equal to or smaller than %d', $schema->{exclusiveMinimum});
+  return E($state, 'value is equal to or smaller than %g', $schema->{exclusiveMinimum});
 }
 
 sub _eval_keyword_maxLength {
