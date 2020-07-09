@@ -192,6 +192,29 @@ subtest 'add a uri resource' => sub {
     undef,
     'attempt to add a resource that does not exist',
   );
+
+  cmp_deeply(
+    scalar $js->get(METASCHEMA),
+    $js->_get_resource(METASCHEMA)->{document}->schema,
+    '->get in scalar context on a URI to the head of a document',
+  );
+  cmp_deeply(
+    [ $js->get(METASCHEMA) ],
+    [ $js->_get_resource(METASCHEMA)->{document}->schema,
+      all(isa('Mojo::URL'), str(METASCHEMA)) ],
+    '->get in list context on a URI to the head of a document',
+  );
+
+  cmp_deeply(
+    scalar $js->get(METASCHEMA.'#/properties/definitions/type'),
+    my $foo = 'object', # $document->schema->{properties}{definitions}{type}
+    '->get in scalar context on a URI to inside of a document',
+  );
+  cmp_deeply(
+    [ $js->get(METASCHEMA.'#/properties/definitions/type') ],
+    [ 'object', all(isa('Mojo::URL'), str(METASCHEMA.'#/properties/definitions/type')) ],
+    '->get in list context on a URI to inside of a document',
+  );
 };
 
 subtest 'add a schema associated with a uri' => sub {
@@ -501,6 +524,12 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     schema => {
       '$id' => 'https://foo.com',
       maximum => 1,
+      '$defs' => {
+        foo => {
+          '$anchor' => 'fooanchor',
+          allOf => [ true ],
+        },
+      },
     });
   $js->add_schema($document);
 
@@ -510,6 +539,11 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
       'https://foo.com' => {
         path => '',
         canonical_uri => str('https://foo.com'),
+        document => shallow($document),
+      },
+      'https://foo.com#fooanchor' => {
+        path => '/$defs/foo',
+        canonical_uri => str('https://foo.com#/$defs/foo'),
         document => shallow($document),
       },
     },
@@ -523,6 +557,11 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     my $main_resource_index = {
       'https://foo.com' => {
         path => '', canonical_uri => str('https://foo.com'), document => shallow($document) },
+      'https://foo.com#fooanchor' => {
+        path => '/$defs/foo',
+        canonical_uri => str('https://foo.com#/$defs/foo'),
+        document => shallow($document),
+      },
       'https://uri2.com' => {
         path => '', canonical_uri => str('https://foo.com'), document => shallow($document) },
     },
@@ -533,6 +572,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     { $document->resource_index },
     my $doc_resource_index = {
       'https://foo.com' => { path => '', canonical_uri => str('https://foo.com') },
+      'https://foo.com#fooanchor' => { path => '/$defs/foo', canonical_uri => str('https://foo.com#/$defs/foo') },
       'https://uri2.com' => { path => '', canonical_uri => str('https://foo.com') },
     },
     'secondary uri added to the document also',
@@ -579,6 +619,29 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
       %$main_resource_index,
     },
     'new uri was added against the original document (no new document created)',
+  );
+
+  cmp_deeply(
+    scalar $js->get('https://foo.com#fooanchor'),
+    $js->_get_resource('https://foo.com#fooanchor')->{document}->schema->{'$defs'}{foo},
+    '->get in scalar context on a secondary URI with a plain-name fragment',
+  );
+  cmp_deeply(
+    [ $js->get('https://foo.com#fooanchor') ],
+    [ $js->_get_resource('https://uri2.com')->{document}->schema->{'$defs'}{foo},
+      all(isa('Mojo::URL'), str('https://foo.com#/$defs/foo')) ],
+    '->get in list context on a URI with a plain-name fragment includes the canonical uri',
+  );
+
+  is(
+    scalar $js->get('https://foo.com#i_do_not_exist'),
+    undef,
+    '->get in scalar context for a nonexistent resource returns undef',
+  );
+  cmp_deeply(
+    [ $js->get('https://foo.com#i_do_not_exist') ],
+    [],
+    '->get in list context for a nonexistent resource returns empty list',
   );
 };
 

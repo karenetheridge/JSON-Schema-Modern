@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - new "get" method for fetching the schema found at a URI
 
 0.009     2020-07-07 19:54:44Z
           - no longer allowing adding another schema document with a duplicate

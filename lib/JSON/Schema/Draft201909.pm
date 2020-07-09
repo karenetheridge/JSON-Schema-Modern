@@ -190,6 +190,13 @@ sub evaluate {
   );
 }
 
+sub get {
+  my ($self, $uri) = @_;
+
+  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+  return !defined $subschema ? () : wantarray ? ($subschema, $canonical_uri) : $subschema;
+}
+
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
 sub _eval {
@@ -1440,6 +1447,15 @@ provided (and if not, C<''> will be used if no other identifier can be found wit
 You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
+
+=head2 get
+
+  my $schema = $js->get($uri);
+  my ($schema, $canonical_uri) = $js->get($uri);
+
+Fetches the Perl data structure representing the JSON Schema at the indicated URI. When called in
+list context, the canonical URI of that location is also returned, as a L<Mojo::URL>. Returns
+C<undef> if the schema with that URI has not been loaded (or cached).
 
 =head1 LIMITATIONS
 
