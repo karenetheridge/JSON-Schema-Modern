@@ -995,9 +995,18 @@ has _format_validations => (
       ipv4 => { type => 'string', sub => $is_ipv4 },
       ipv6 => { type => 'string', sub => sub {
         ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/
-          || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,4}:?((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
+          || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){1,6}((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
               && $is_ipv4->($1))
-          && (()= ($_[0] =~ /::/g)) < 2;
+          && $_[0] !~ /:::/
+          && $_[0] !~ /^:[^:]/
+          && $_[0] !~ /[^:]:$/
+          && do {
+            my $double_colons = ()= ($_[0] =~ /::/g);
+            my $colon_components = grep length, split(/:+/, $_[0], -1);
+            $double_colons < 2 && ($double_colons > 0
+              || ($colon_components == 8 && !defined $1)
+              || ($colon_components == 7 && defined $1))
+          };
       } },
       uri => { type => 'string', sub => sub {
         my $uri = Mojo::URL->new($_[0]);
