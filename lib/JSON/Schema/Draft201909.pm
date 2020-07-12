@@ -134,7 +134,7 @@ sub add_schema {
 }
 
 sub evaluate_json_string {
-  my ($self, $json_data, $schema) = @_;
+  my ($self, $json_data, $schema, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
 
   my $data;
@@ -156,18 +156,18 @@ sub evaluate_json_string {
     );
   }
 
-  return $self->evaluate($data, $schema);
+  return $self->evaluate($data, $schema, $config_override);
 }
 
 sub evaluate {
-  my ($self, $data, $schema_reference) = @_;
+  my ($self, $data, $schema_reference, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
   my $state = {
-    short_circuit => $self->short_circuit,
-    collect_annotations => $self->collect_annotations,
+    short_circuit => $config_override->{short_circuit} // $self->short_circuit,
+    collect_annotations => $config_override->{collect_annotations} // $self->collect_annotations,
     depth => 0,
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
@@ -211,7 +211,7 @@ sub evaluate {
     output_format => $self->output_format,
     result => $result,
     $result
-      ? ($self->collect_annotations ? (annotations => $state->{annotations}) : ())
+      ? ($state->{collect_annotations} ? (annotations => $state->{annotations}) : ())
       : (errors => $state->{errors}),
   );
 }
@@ -1732,6 +1732,7 @@ Defaults to false.
 =head2 evaluate_json_string
 
   $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
+  $result = $js->evaluate_json_string($data_as_json_string, $schema_data, { collect_annotations => 1});
 
 Evaluates the provided instance data against the known schema document.
 
@@ -1746,11 +1747,15 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * a L<JSON::Schema::Draft201909::Document> object,
 * or a URI string indicating the location where such a schema is located.
 
+Optionally, a hashref can be passed as a third parameter which allows changing the values of the
+L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
 
   $result = $js->evaluate($instance_data, $schema_data);
+  $result = $js->evaluate($instance_data, $schema_data, { short_circuit => 0 });
 
 Evaluates the provided instance data against the known schema document.
 
@@ -1764,6 +1769,9 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * a Perl data structure, such as what is returned from a JSON decode operation,
 * a L<JSON::Schema::Draft201909::Document> object,
 * or a URI string indicating the location where such a schema is located.
+
+Optionally, a hashref can be passed as a third parameter which allows changing the values of the
+L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 

@@ -23,7 +23,7 @@ my $initial_state = {
 };
 
 subtest 'allOf' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit => 0);
   my $state = {
     %$initial_state,
     keyword => 'allOf',
@@ -78,6 +78,31 @@ subtest 'allOf' => sub {
       ],
     },
     'passing allOf: state is correct after evaluating',
+  );
+
+  cmp_deeply(
+    $js->evaluate(1, $pass_schema, { collect_annotations => 0 })->TO_JSON,
+    { valid => bool(1) },
+    'annotation collection can be turned off in evaluate()',
+  );
+
+  ok($js->collect_annotations, '...but the value is still true on the object');
+
+  $js = JSON::Schema::Draft201909->new;
+  ok(!$js->collect_annotations, 'collect_annotations defaults to false');
+  cmp_deeply(
+    $js->evaluate(1, $pass_schema, { collect_annotations => 1 })->TO_JSON,
+    {
+      valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/title',
+          annotation => 'allOf title',
+        },
+      ],
+    },
+    'annotation collection can be turned on in evaluate() also',
   );
 };
 
