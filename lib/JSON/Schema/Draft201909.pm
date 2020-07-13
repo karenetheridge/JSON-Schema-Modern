@@ -12,7 +12,7 @@ use feature 'fc';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
-use List::Util 1.55 qw(any pairs first uniqint max);
+use List::Util 1.55 qw(any pairs first uniqint uniqstr max);
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
@@ -1008,7 +1008,7 @@ sub _eval_keyword_patternProperties {
 
   return E($state, 'not all properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
-  return @valid_properties ? A($state, \@valid_properties) : 1;
+  return @valid_properties ? A($state, [ uniqstr @valid_properties ]) : 1;
 }
 
 sub _eval_keyword_additionalProperties {
