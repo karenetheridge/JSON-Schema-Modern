@@ -446,9 +446,8 @@ sub _eval_keyword_multipleOf {
   my $quotient = $data / $schema->{multipleOf};
   return 1 if int($quotient) == $quotient;
 
-  return 0 if $self->_is_type('integer', $schema->{multipleOf});
   # this works because NV stringification defaults to rounding to 15 digits - see sv_dump()
-  return 1 if "$quotient" !~ /\./;
+  return 1 if not $self->_is_type('integer', $schema->{multipleOf}) and "$quotient" !~ /\./;
 
   return E($state, 'value is not a multiple of %g', $schema->{multipleOf});
 }
