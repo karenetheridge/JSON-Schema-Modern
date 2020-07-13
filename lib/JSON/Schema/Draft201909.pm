@@ -515,7 +515,7 @@ sub _eval_keyword_maxItems {
   abort($state, 'maxItems value is not a non-negative integer') if $schema->{maxItems} < 0;
 
   return 1 if @$data <= $schema->{maxItems};
-  return E($state, 'more than %d items', $schema->{maxItems});
+  return E($state, 'more than %d item%s', $schema->{maxItems}, $schema->{maxItems} > 1 ? 's' : '');
 }
 
 sub _eval_keyword_minItems {
@@ -526,7 +526,7 @@ sub _eval_keyword_minItems {
   abort($state, 'minItems value is not a non-negative integer') if $schema->{minItems} < 0;
 
   return 1 if @$data >= $schema->{minItems};
-  return E($state, 'fewer than %d items', $schema->{minItems});
+  return E($state, 'fewer than %d item%s', $schema->{minItems}, $schema->{minItems} > 1 ? 's' : '');
 }
 
 sub _eval_keyword_uniqueItems {
@@ -549,7 +549,8 @@ sub _eval_keyword_maxProperties {
     if $schema->{maxProperties} < 0;
 
   return 1 if keys %$data <= $schema->{maxProperties};
-  return E($state, 'more than %d properties', $schema->{maxProperties});
+  return E($state, 'more than %d propert%s', $schema->{maxProperties},
+    $schema->{maxProperties} > 1 ? 'ies' : 'y');
 }
 
 sub _eval_keyword_minProperties {
@@ -561,7 +562,8 @@ sub _eval_keyword_minProperties {
     if $schema->{minProperties} < 0;
 
   return 1 if keys %$data >= $schema->{minProperties};
-  return E($state, 'fewer than %d properties', $schema->{minProperties});
+  return E($state, 'fewer than %d propert%s', $schema->{minProperties},
+    $schema->{minProperties} > 1 ? 'ies' : 'y');
 }
 
 sub _eval_keyword_required {
@@ -574,7 +576,7 @@ sub _eval_keyword_required {
 
   my @missing = grep !exists $data->{$_}, @{$schema->{required}};
   return 1 if not @missing;
-  return E($state, 'missing propert'.(@missing > 1 ? 'ies' : 'y').': '.join(', ', @missing));
+  return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
 }
 
 sub _eval_keyword_dependentRequired {
@@ -594,7 +596,7 @@ sub _eval_keyword_dependentRequired {
     keys %{$schema->{dependentRequired}};
 
   return 1 if not @missing;
-  return E($state, 'missing propert'.(@missing > 1 ? 'ies' : 'y').': '.join(', ', sort @missing));
+  return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', sort @missing));
 }
 
 sub _eval_keyword_allOf {
@@ -614,7 +616,7 @@ sub _eval_keyword_allOf {
 
   return 1 if @invalid == 0;
   my $pl = @invalid > 1;
-  return E($state, 'subschema'.($pl?'s ':' ').join(', ', @invalid).($pl?' are':' is').' not valid');
+  return E($state, 'subschema%s %s %s not valid', $pl?'s':'', join(', ', @invalid), $pl?'are':'is');
 }
 
 sub _eval_keyword_anyOf {
@@ -1038,7 +1040,7 @@ sub _eval_keyword_format {
   assert_keyword_type($state, $schema, 'string');
 
   if ($self->validate_formats and my $spec = $self->_get_format_validation($schema->{format})) {
-    return E($state, 'not a %s', $schema->{format})
+    return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
       if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
   }
 
