@@ -81,6 +81,7 @@ sub BUILD {
 
 sub add_schema {
   my $self = shift;
+  die 'insufficient arguments' if @_ < 1;
 
   my $uri = $_[0]->$_isa('Mojo::URL') ? shift : !ref $_[0] ? Mojo::URL->new(shift) : Mojo::URL->new;
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
@@ -118,6 +119,8 @@ sub add_schema {
 
 sub evaluate_json_string {
   my ($self, $json_data, $schema) = @_;
+  die 'insufficient arguments' if @_ < 3;
+
   my $data;
   try {
     $data = $self->_json_decoder->decode($json_data)
@@ -141,6 +144,7 @@ sub evaluate_json_string {
 
 sub evaluate {
   my ($self, $data, $schema_reference) = @_;
+  die 'insufficient arguments' if @_ < 3;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
@@ -193,6 +197,7 @@ sub evaluate {
 
 sub get {
   my ($self, $uri) = @_;
+  die 'insufficient arguments' if @_ < 2;
 
   my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
   $subschema = dclone($subschema) if is_ref($subschema);
