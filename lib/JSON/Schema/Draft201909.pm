@@ -1515,7 +1515,7 @@ validation will always succeed):
 
 =for :list
 * C<date-time>, C<date>, and C<time> require L<Time::Moment>
-* C<email> and C<idn-email> require L<Email::Address::XS>
+* C<email> and C<idn-email> require L<Email::Address::XS> version 1.01
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
 * C<idn-hostname> requires L<Net::IDN::Encode>
 
