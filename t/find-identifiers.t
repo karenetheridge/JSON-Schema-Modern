@@ -2,6 +2,7 @@ use strict;
 use warnings;
 no if "$]" >= 5.031009, feature => 'indirect';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
+use feature 'current_sub';
 
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
@@ -55,6 +56,21 @@ subtest '$id sets canonical uri' => sub {
   my $doc1 = $js->{_resource_index}{''}{document};
   my $doc2 = $js->{_resource_index}{'http://localhost:4242/my_foo'}{document};
   ok($doc1 == $doc2, 'the same document object is indexed under both URIs');
+
+  sub _find_all_values {
+      my $data = shift;
+      if (ref $data eq 'ARRAY') {
+          return map __SUB__->($_), @$data;
+      }
+      elsif (ref $data eq 'HASH') {
+          return map __SUB__->($_), values %$data;
+      }
+      return $data;
+  }
+
+  my @blessed_values = grep ref($_), _find_all_values($doc1->schema);
+  ok(!@blessed_values, 'the schema contains no blessed leaf nodes')
+    or diag 'found blessed values: ', explain [ map ref, @blessed_values ];
 };
 
 subtest 'anchors' => sub {
