@@ -83,7 +83,9 @@ sub add_schema {
   my $self = shift;
   die 'insufficient arguments' if @_ < 1;
 
-  my $uri = $_[0]->$_isa('Mojo::URL') ? shift : !ref $_[0] ? Mojo::URL->new(shift) : Mojo::URL->new;
+  my $uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
+    : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
+
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
 
   if (not @_) {
@@ -162,7 +164,7 @@ sub evaluate {
   try {
     my ($schema, $canonical_uri);
 
-    if (not ref $schema_reference or $schema_reference->$_isa('Mojo::URL')) {
+    if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
       # TODO: resolve $uri against base_uri
       ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($schema_reference);
     }
@@ -1276,7 +1278,7 @@ sub _get_or_load_resource {
 sub _fetch_schema_from_uri {
   my ($self, $uri) = @_;
 
-  $uri = Mojo::URL->new($uri) if not ref $uri;
+  $uri = Mojo::URL->new($uri) if not is_ref($uri);
   my $fragment = $uri->fragment // '';
 
   my ($subschema, $canonical_uri);
