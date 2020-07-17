@@ -54,6 +54,13 @@ has resource_index => (
   default => sub { {} },
 );
 
+# for internal use only
+has serialized_schema => (
+  is => 'rw',
+  isa => Str,
+  init_arg => undef,
+);
+
 before _add_resources => sub {
   my $self = shift;
   foreach my $pair (pairs @_) {

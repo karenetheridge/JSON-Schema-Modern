@@ -99,9 +99,14 @@ sub add_schema {
     : JSON::Schema::Draft201909::Document->new(schema => shift, $uri ? (canonical_uri => $uri) : ());
 
   if (not grep $_->{document} == $document, $self->_resource_values) {
-    my $schema_content = $self->_json_decoder->encode($document->schema);
-    if (my $existing_doc = first { $self->_json_decoder->encode($_->schema) eq $schema_content }
-        uniqint map $_->{document}, $self->_resource_values) {
+    my $schema_content = $document->serialized_schema
+      // $document->serialized_schema($self->_json_decoder->encode($document->schema));
+
+    if (my $existing_doc = first {
+          my $existing_content = $_->serialized_schema
+            // $_->serialized_schema($self->_json_decoder->encode($_->schema));
+          $existing_content eq $schema_content
+        } uniqint map $_->{document}, $self->_resource_values) {
       # we already have this schema content in another document object.
       $document = $existing_doc;
     }
