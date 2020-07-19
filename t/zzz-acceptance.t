@@ -168,3 +168,77 @@ DIAG
 }
 
 done_testing;
+__END__
+
+# Results using Test::JSON::Schema::Acceptance 0.999
+# with commit 817b724b7a64d7c18a8232aa32b5f1cc1d6dd153 (2.0.0-215-g817b724)
+# from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+#
+# filename                                    pass  fail
+# ------------------------------------------------------
+# additionalItems.json                          11     0
+# additionalProperties.json                     15     0
+# allOf.json                                    30     0
+# anchor.json                                    6     0
+# anyOf.json                                    18     0
+# boolean_schema.json                           18     0
+# const.json                                    38     0
+# contains.json                                 18     0
+# default.json                                   4     0
+# defs.json                                      2     0
+# dependentRequired.json                        20     0
+# dependentSchemas.json                         13     0
+# enum.json                                     31     0
+# exclusiveMaximum.json                          4     0
+# exclusiveMinimum.json                          4     0
+# format.json                                  102     0
+# id.json                                       13     0
+# if-then-else.json                             22     0
+# items.json                                    26     0
+# maxContains.json                              10     0
+# maxItems.json                                  4     0
+# maxLength.json                                 5     0
+# maxProperties.json                             8     0
+# maximum.json                                   8     0
+# minContains.json                              23     0
+# minItems.json                                  4     0
+# minLength.json                                 5     0
+# minProperties.json                             6     0
+# minimum.json                                  11     0
+# multipleOf.json                                8     0
+# not.json                                      12     0
+# oneOf.json                                    27     0
+# pattern.json                                   9     0
+# patternProperties.json                        21     0
+# properties.json                               20     0
+# propertyNames.json                            10     0
+# ref.json                                      29     1
+# refRemote.json                                11     4
+# required.json                                  9     0
+# type.json                                     80     0
+# unevaluatedItems.json                          0    33
+# unevaluatedProperties.json                     0    39
+# uniqueItems.json                              62     0
+# optional/bignum.json                           4     5
+# optional/content.json                          6     4
+# optional/ecmascript-regex.json                13    10
+# optional/non-bmp-regex.json                   12     0
+# optional/refOfUnknownKeyword.json              4     0
+# optional/format/date-time.json                 8     1
+# optional/format/date.json                      2     1
+# optional/format/duration.json                  2     0
+# optional/format/email.json                     2     0
+# optional/format/hostname.json                 12     0
+# optional/format/idn-email.json                 2     0
+# optional/format/idn-hostname.json             12     2
+# optional/format/ipv4.json                      5     0
+# optional/format/ipv6.json                      4     0
+# optional/format/iri-reference.json             5     2
+# optional/format/iri.json                       8     1
+# optional/format/json-pointer.json             32     0
+# optional/format/regex.json                     2     0
+# optional/format/relative-json-pointer.json     6     0
+# optional/format/time.json                      3     0
+# optional/format/uri-reference.json             7     0
+# optional/format/uri-template.json              3     1
+# optional/format/uri.json                      19     0
