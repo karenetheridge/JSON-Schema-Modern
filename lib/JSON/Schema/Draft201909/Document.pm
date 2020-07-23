@@ -4,7 +4,7 @@ package JSON::Schema::Draft201909::Document;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: One JSON Schema document
 
-our $VERSION = '0.010';
+our $VERSION = '0.011';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use feature 'current_sub';
