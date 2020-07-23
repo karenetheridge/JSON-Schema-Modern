@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.009
+version 0.010
 
 =head1 SYNOPSIS
 
@@ -57,7 +57,8 @@ to false.
 =head2 format_validations
 
 An optional hashref that allows overriding the validation method for formats, or adding new ones.
-Existing formats must be specified in the form of C<< { $format_name => $format_sub } >>, where
+Overrides to existing formats (see L</Format Validation>)
+must be specified in the form of C<< { $format_name => $format_sub } >>, where
 the format sub is a coderef that takes one argument and returns a boolean result. New formats must
 be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
 where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
@@ -134,16 +135,26 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
   $js->add_schema($schema);
   $js->add_schema($document);
 
-Introduces the (unblessed, nested Perl data structure) or L<JSON::Schema::Draft201909::Document>
+Introduces the (unblessed, nested) Perl data structure or L<JSON::Schema::Draft201909::Document>
 object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
 provided (and if not, C<''> will be used if no other identifier can be found within).
 
 You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
-before calling L</evaluate>, other than the standard metaschemas which are pre-loaded.
+before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
+as needed.
+
+=head2 get
+
+  my $schema = $js->get($uri);
+  my ($schema, $canonical_uri) = $js->get($uri);
+
+Fetches the Perl data structure representing the JSON Schema at the indicated URI. When called in
+list context, the canonical URI of that location is also returned, as a L<Mojo::URL>. Returns
+C<undef> if the schema with that URI has not been loaded (or cached).
 
 =head1 LIMITATIONS
 
-=head2 TYPES
+=head2 Types
 
 Perl is a more loosely-typed language than JSON. This module delves into a value's internal
 representation in an attempt to derive the true "intended" type of the value. However, if a value is
@@ -156,7 +167,7 @@ option.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
-=head2 FORMAT VALIDATION
+=head2 Format Validation
 
 By default, formats are treated only as annotations, not assertions. When L</validate_format> is
 true, strings are also checked against the format as specified in the schema. At present the
@@ -245,7 +256,7 @@ C<date-time>, C<date>, and C<time> require L<Time::Moment>
 
 =item *
 
-C<email> and C<idn-email> require L<Email::Address::XS>
+C<email> and C<idn-email> require L<Email::Address::XS> version 1.01
 
 =item *
 
@@ -257,7 +268,7 @@ C<idn-hostname> requires L<Net::IDN::Encode>
 
 =back
 
-=head2 SPECIFICATION COMPLIANCE
+=head2 Specification Compliance
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
@@ -297,7 +308,7 @@ The C<pattern> and C<patternProperties> keywords, and the C<regex> format valida
 evaluate regular expressions from the schema.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
 potentially pathological constructs that may pose a security risk, either via denial of service
-or by allowing exposure to the internals of your application. B<DO NOT RUN SCHEMAS FROM UNTRUSTED
+or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM UNTRUSTED
 SOURCES.>
 
 =head1 SEE ALSO
@@ -310,7 +321,11 @@ L<https://json-schema.org/>
 
 =item *
 
-L<RFC8259|https://tools.ietf.org/html/rfc8259>
+L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://tools.ietf.org/html/rfc8259>
+
+=item *
+
+L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://tools.ietf.org/html/rfc3986>
 
 =item *
 

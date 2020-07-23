@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.010     2020-07-23 16:50:18Z
           - fixed error generation for validator keywords with numeric
             arguments (e.g. minimum, multipleOf)
           - new "get" method for fetching the schema found at a URI
