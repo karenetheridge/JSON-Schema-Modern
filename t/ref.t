@@ -256,6 +256,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
         },
       ],
     },
+    '$recursiveRef without $recursiveAnchor behaves like $ref',
   );
 };
 
@@ -292,6 +293,7 @@ subtest '$recursiveAnchor is not at a schema resource root' => sub {
         },
       ],
     },
+    '$recursiveAnchor can only appear at a schema resource root',
   );
 
   $schema = dclone($schema);
@@ -302,6 +304,7 @@ subtest '$recursiveAnchor is not at a schema resource root' => sub {
     {
       valid => bool(1),
     },
+    'schema now valid when an $id is added',
   );
 };
 
