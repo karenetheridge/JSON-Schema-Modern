@@ -1283,14 +1283,15 @@ sub _fetch_schema_from_uri {
   my ($self, $uri) = @_;
 
   $uri = Mojo::URL->new($uri) if not is_ref($uri);
-  my $fragment = $uri->fragment // '';
+  my $fragment = $uri->fragment;
 
   my ($subschema, $canonical_uri);
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
     if (my $resource = $self->_get_or_load_resource($base)) {
-      $subschema = $resource->{document}->get($resource->{path}.$fragment);
-      $canonical_uri = $resource->{canonical_uri}->clone->fragment($uri->fragment);
+      $subschema = $resource->{document}->get($resource->{path}.($fragment//''));
+      undef $fragment if not length $fragment;
+      $canonical_uri = $resource->{canonical_uri}->clone->fragment($fragment);
     }
   }
   else {
@@ -1300,7 +1301,7 @@ sub _fetch_schema_from_uri {
     }
   }
 
-  return defined $subschema && $canonical_uri ? ($subschema, $canonical_uri) : ();
+  return defined $subschema ? ($subschema, $canonical_uri) : ();
 }
 
 has _json_decoder => (
@@ -1325,14 +1326,16 @@ sub E {
   my $schema_path = delete $state->{_schema_path_rest}
     // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
 
+  my $uri = $state->{canonical_schema_uri}->clone;
+  $uri->fragment(($uri->fragment//'').$schema_path);
+  $uri->fragment(undef) if not length($uri->fragment);
+  undef $uri if $uri eq '' and $state->{traversed_schema_path}.$schema_path eq ''
+    or $uri eq '#'.$state->{traversed_schema_path}.$schema_path;
+
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$schema_path,
-    !"$state->{canonical_schema_uri}" ? () : ( absolute_keyword_location => do {
-      my $uri = $state->{canonical_schema_uri}->clone;
-      $uri->fragment(($uri->fragment//'').$schema_path) if $schema_path;
-      $uri;
-    } ),
+    defined $uri ? ( absolute_keyword_location => $uri ) : (),
     error => @args ? sprintf($error_string, @args) : $error_string,
   );
 

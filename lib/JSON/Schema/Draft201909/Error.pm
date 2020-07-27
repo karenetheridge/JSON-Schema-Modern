@@ -33,7 +33,7 @@ sub TO_JSON {
   return +{
     instanceLocation => $self->instance_location,
     keywordLocation => $self->keyword_location,
-    !$self->absolute_keyword_location ? ()
+    !defined($self->absolute_keyword_location) ? ()
       : ( absoluteKeywordLocation => $self->absolute_keyword_location ),
     error => $self->error,  # TODO: allow localization
   };

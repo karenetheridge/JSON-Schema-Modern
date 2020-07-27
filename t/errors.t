@@ -1147,4 +1147,56 @@ subtest 'invalid $schema' => sub {
   );
 };
 
+subtest 'absoluteKeywordLocation' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909->new(max_traversal_depth => 1)->evaluate(
+      [ [ 1 ] ],
+      { items => { '$ref' => '#' } },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/0',
+          keywordLocation => '/items/$ref',
+          absoluteKeywordLocation => '',
+          error => 'EXCEPTION: maximum traversal depth exceeded',
+        },
+      ],
+    },
+    'absoluteKeywordLocation is included when different from instanceLocation, even when empty',
+  );
+
+  cmp_deeply(
+    $js->evaluate(1, { '$ref' => '#does_not_exist' })->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref',
+          error => 'EXCEPTION: unable to find resource #does_not_exist',
+        },
+      ],
+    },
+    'absoluteKeywordLocation is not included when the path equals keywordLocation, even if a $ref is present',
+  );
+
+  $js->add_schema(false);
+  cmp_deeply(
+    $js->evaluate(1, '#')->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => 'subschema is false',
+        },
+      ],
+    },
+    'absoluteKeywordLocation is never "#"',
+  );
+};
+
 done_testing;
