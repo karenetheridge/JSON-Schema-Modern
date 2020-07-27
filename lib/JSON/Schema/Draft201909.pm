@@ -92,7 +92,7 @@ sub add_schema {
     # TODO: resolve $uri against $self->base_uri
     my ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
     return if not defined $schema or not defined wantarray;
-    return $self->_get_resource($canonical_uri->clone->fragment(undef))->{document};
+    return $self->_get_resource($canonical_uri->fragment(undef))->{document};
   }
 
   my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
@@ -180,8 +180,7 @@ sub evaluate {
 
     abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
 
-    $state->{canonical_schema_uri} = $canonical_uri->clone->fragment($canonical_uri->fragment);
-
+    $state->{canonical_schema_uri} = $canonical_uri;
     $result = $self->_eval($data, $schema, $state);
   }
   catch {
