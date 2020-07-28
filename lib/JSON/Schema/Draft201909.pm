@@ -163,6 +163,7 @@ sub evaluate {
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
+    seen => {},
   };
 
   my $result;
@@ -220,6 +221,9 @@ sub _eval {
 
   abort($state, 'maximum traversal depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
+
+  abort($state, 'infinite loop detected (same location evaluated twice)')
+    if $state->{seen}{$state->{data_path}}{$state->{canonical_schema_uri}.$state->{schema_path}}++;
 
   my $schema_type = $self->_get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
@@ -1401,7 +1405,7 @@ Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
 The maximum number of levels deep a schema traversal may go, before evaluation is halted. This is to
 protect against accidental infinite recursion, such as from two subschemas that each reference each
-other. Defaults to 50.
+other, or badly-written schemas that could be optimized. Defaults to 50.
 
 =head2 validate_formats
 
