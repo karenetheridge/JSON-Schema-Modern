@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - now using unicode semantics for pattern matching
 
 0.011     2020-08-04 22:16:46Z
           - better normalization of uris in errors

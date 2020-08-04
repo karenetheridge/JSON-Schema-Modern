@@ -9,6 +9,7 @@ our $VERSION = '0.012';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use feature 'fc';
+use feature 'unicode_strings';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
