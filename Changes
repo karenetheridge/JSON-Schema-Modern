@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
+{{$NEXT}}
+
 0.011     2020-08-04 22:16:46Z
           - better normalization of uris in errors
           - now detecting infinite loops separately from deep traversal
