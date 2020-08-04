@@ -6,6 +6,7 @@ package JSON::Schema::Draft201909::Result;
 
 our $VERSION = '0.012';
 
+use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 use Moo;
 use MooX::TypeTiny;

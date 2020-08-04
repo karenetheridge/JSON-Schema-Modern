@@ -6,8 +6,8 @@ package JSON::Schema::Draft201909::Document;
 
 our $VERSION = '0.012';
 
+use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
-use feature 'current_sub';
 use Mojo::URL;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';

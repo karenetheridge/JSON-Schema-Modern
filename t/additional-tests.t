@@ -1,6 +1,7 @@
 # vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
 use strict;
 use warnings;
+use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
