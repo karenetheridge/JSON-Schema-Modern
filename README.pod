@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 
@@ -39,7 +39,9 @@ L<JSON::Schema::Draft201909::Result/output_format>.
 =head2 short_circuit
 
 When true, evaluation will return early in any execution path as soon as the outcome can be
-determined, rather than continuing to find all possible errors.
+determined, rather than continuing to find all errors or annotations. Be aware that this can result
+in invalid results in the presence of keywords that depend on annotations, namely
+C<unevaluatedItems> and C<unevaluatedProperties>.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
@@ -47,7 +49,7 @@ Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
 The maximum number of levels deep a schema traversal may go, before evaluation is halted. This is to
 protect against accidental infinite recursion, such as from two subschemas that each reference each
-other. Defaults to 50.
+other, or badly-written schemas that could be optimized. Defaults to 50.
 
 =head2 validate_formats
 
@@ -64,6 +66,12 @@ be specified in the form of C<< { $format_name => { type => $type, sub => $forma
 where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
 number, or integer) the instance value must be for the format validation to be considered.
 
+=head2 collect_annotations
+
+When true, annotations are collected from keywords that produce them, when validation succeeds.
+These annotations are available in the returned result (see L<JSON::Schema::Draft201909::Result>).
+Defaults to false.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILD
@@ -71,6 +79,7 @@ number, or integer) the instance value must be for the format validation to be c
 =head2 evaluate_json_string
 
   $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
+  $result = $js->evaluate_json_string($data_as_json_string, $schema_data, { collect_annotations => 1});
 
 Evaluates the provided instance data against the known schema document.
 
@@ -96,11 +105,15 @@ or a URI string indicating the location where such a schema is located.
 
 =back
 
+Optionally, a hashref can be passed as a third parameter which allows changing the values of the
+L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
 
   $result = $js->evaluate($instance_data, $schema_data);
+  $result = $js->evaluate($instance_data, $schema_data, { short_circuit => 0 });
 
 Evaluates the provided instance data against the known schema document.
 
@@ -125,6 +138,9 @@ a L<JSON::Schema::Draft201909::Document> object,
 or a URI string indicating the location where such a schema is located.
 
 =back
+
+Optionally, a hashref can be passed as a third parameter which allows changing the values of the
+L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -291,10 +307,6 @@ loading schema documents from a local web application (e.g. L<Mojolicious>)
 =item *
 
 multiple output formats (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
-
-=item *
-
-annotation collection (including the "format", "meta-data" and "content" vocabularies)
 
 =item *
 
