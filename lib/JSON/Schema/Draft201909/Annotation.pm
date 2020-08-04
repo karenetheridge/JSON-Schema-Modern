@@ -1,21 +1,21 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Error;
+package JSON::Schema::Draft201909::Annotation;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Contains a single error from a JSON Schema evaluation
+# ABSTRACT: Contains a single annotation from a JSON Schema evaluation
 
-our $VERSION = '0.011';
+our $VERSION = '0.001';
 
 no if "$]" >= 5.031009, feature => 'indirect';
 use Moo;
 use MooX::TypeTiny;
-use Types::Standard qw(Str Undef);
+use Types::Standard 'Str';
 use namespace::clean;
 
 has [qw(
+  keyword
   instance_location
   keyword_location
-  error
 )] => (
   is => 'ro',
   isa => Str,
@@ -28,9 +28,9 @@ has absolute_keyword_location => (
   coerce => sub { "$_[0]" },
 );
 
-has keyword => (
+# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7.1
+has annotation => (
   is => 'ro',
-  isa => Str|Undef,
   required => 1,
 );
 
@@ -41,7 +41,7 @@ sub TO_JSON {
     keywordLocation => $self->keyword_location,
     !defined($self->absolute_keyword_location) ? ()
       : ( absoluteKeywordLocation => $self->absolute_keyword_location ),
-    error => $self->error,  # TODO: allow localization
+    annotation => $self->annotation,
   };
 }
 
@@ -58,45 +58,45 @@ __END__
   use JSON::Schema::Draft201909;
   my $js = JSON::Schema::Draft201909->new;
   my $result = $js->evaluate($data, $schema);
-  my @errors = $result->errors;
+  my @annotations = $result->annotations;
 
-  my $message = $errors[0]->error;
-  my $instance_location = $errors[0]->instance_location;
+  my $value = $annotations[0]->annotation;
+  my $instance_location = $annotations[0]->instance_location;
 
-  my $errors_encoded = encode_json(\@errors);
+  my $annotations_encoded = encode_json(\@annotations);
 
 =head1 DESCRIPTION
 
-An instance of this class holds one error from evaluating a JSON Schema with
+An instance of this class holds one annotation from evaluating a JSON Schema with
 L<JSON::Schema::Draft201909>.
 
 =head1 ATTRIBUTES
 
 =head2 keyword
 
-The keyword that produced the error; might be C<undef>.
+The keyword that produced the annotation.
 
 =head2 instance_location
 
-The path in the instance where the error occurred; encoded as per the JSON Pointer specification
-(L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
+The path in the instance where the annotation was produced; encoded as per the JSON Pointer
+specification (L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
 
 =head2 keyword_location
 
-The schema path taken during evaluation to arrive at the error; encoded as per the JSON Pointer
+The schema path taken during evaluation to arrive at the annotation; encoded as per the JSON Pointer
 specification (L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
 
 =head2 absolute_keyword_location
 
 The canonical URI or URI reference of the location in the schema where the error occurred; not
 defined, if there is no base URI for the schema and no C<$ref> was followed. Note that this is not
-a fragmentless URI in most cases, as the indicated error will occur at a path
+actually fragmentless URI in most cases, as the indicated error will occur at a path
 below the position where the most recent identifier had been declared in the schema. Further, if the
 schema never declared an absolute base URI (containing a scheme), this URI won't be absolute either.
 
-=head2 error
+=head2 annotation
 
-The actual error string.
+The actual annotation value (which may or may not be a string).
 
 =head1 METHODS
 

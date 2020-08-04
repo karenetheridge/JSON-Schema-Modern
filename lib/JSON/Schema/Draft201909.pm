@@ -12,7 +12,7 @@ use feature 'fc';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
-use List::Util 1.55 qw(any pairs first uniqint);
+use List::Util 1.55 qw(any pairs first uniqint uniqstr max);
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
 use Mojo::JSON::Pointer;
 use Mojo::URL;
@@ -25,9 +25,12 @@ use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef);
 use JSON::Schema::Draft201909::Error;
+use JSON::Schema::Draft201909::Annotation;
 use JSON::Schema::Draft201909::Result;
 use JSON::Schema::Draft201909::Document;
 use namespace::clean;
+
+use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 has output_format => (
   is => 'ro',
@@ -39,7 +42,7 @@ has short_circuit => (
   is => 'ro',
   isa => Bool,
   lazy => 1,
-  default => sub { $_[0]->output_format eq 'flag' },
+  default => sub { $_[0]->output_format eq 'flag' && !$_[0]->collect_annotations },
 );
 
 has max_traversal_depth => (
@@ -52,6 +55,12 @@ has validate_formats => (
   is => 'ro',
   isa => Bool,
   default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
+);
+
+has collect_annotations => (
+  is => 'ro',
+  isa => Bool,
+  default => 0,
 );
 
 sub BUILD {
@@ -125,7 +134,7 @@ sub add_schema {
 }
 
 sub evaluate_json_string {
-  my ($self, $json_data, $schema) = @_;
+  my ($self, $json_data, $schema, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
 
   my $data;
@@ -138,6 +147,7 @@ sub evaluate_json_string {
       result => 0,
       errors => [
         JSON::Schema::Draft201909::Error->new(
+          keyword => undef,
           instance_location => '',
           keyword_location => '',
           error => $@,
@@ -146,23 +156,25 @@ sub evaluate_json_string {
     );
   }
 
-  return $self->evaluate($data, $schema);
+  return $self->evaluate($data, $schema, $config_override);
 }
 
 sub evaluate {
-  my ($self, $data, $schema_reference) = @_;
+  my ($self, $data, $schema_reference, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
   my $state = {
-    short_circuit => $self->short_circuit,
+    short_circuit => $config_override->{short_circuit} // $self->short_circuit,
+    collect_annotations => $config_override->{collect_annotations} // $self->collect_annotations,
     depth => 0,
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
+    annotations => [],
     seen => {},
   };
 
@@ -198,7 +210,9 @@ sub evaluate {
   return JSON::Schema::Draft201909::Result->new(
     output_format => $self->output_format,
     result => $result,
-    errors => $state->{errors},
+    $result
+      ? ($state->{collect_annotations} ? (annotations => $state->{annotations}) : ())
+      : (errors => $state->{errors}),
   );
 }
 
@@ -217,6 +231,7 @@ sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
   $state = { %$state };     # changes to $state should only affect subschemas, not parents
+  my @parent_annotations = @{$state->{annotations}};
   delete $state->{keyword};
 
   abort($state, 'maximum traversal depth exceeded')
@@ -233,20 +248,24 @@ sub _eval {
   my $result = 1;
 
   foreach my $keyword (
-    # CORE KEYWORDS
+    # CORE VOCABULARY
     qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
-    # VALIDATOR KEYWORDS
+    # VALIDATION VOCABULARY
     qw(type enum const
       multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
       maxLength minLength pattern
       maxItems minItems uniqueItems
       maxProperties minProperties required dependentRequired),
-    # APPLICATOR KEYWORDS
+    # APPLICATOR VOCABULARY
     qw(allOf anyOf oneOf not if dependentSchemas
       items unevaluatedItems contains
       properties patternProperties additionalProperties unevaluatedProperties propertyNames),
     # FORMAT VOCABULARY
     qw(format),
+    # CONTENT VOCABULARY
+    qw(contentEncoding contentMediaType contentSchema),
+    # META-DATA VOCABULARY
+    qw(title description default deprecated readOnly writeOnly examples),
     # DISCONTINUED KEYWORDS
     qw(definitions dependencies),
   ) {
@@ -257,9 +276,10 @@ sub _eval {
     abort($state, 'unsupported keyword "%s"', $keyword) if not $self->can($method);
     $result = 0 if not $self->$method($data, $schema, $state);
 
-    return 0 if not $result and $state->{short_circuit};
+    last if not $result and $state->{short_circuit};
   }
 
+  @{$state->{annotations}} = @parent_annotations if not $result;
   return $result;
 }
 
@@ -621,15 +641,25 @@ sub _eval_keyword_allOf {
   abort($state, '"allOf" array is empty') if not @{$schema->{allOf}};
 
   my @invalid;
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
   foreach my $idx (0 .. $#{$schema->{allOf}}) {
-    next if $self->_eval($data, $schema->{allOf}[$idx],
-      +{ %$state, schema_path => $state->{schema_path}.'/allOf/'.$idx });
-
-    push @invalid, $idx;
-    last if $state->{short_circuit};
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data, $schema->{allOf}[$idx], +{ %$state,
+        schema_path => $state->{schema_path}.'/allOf/'.$idx, annotations => \@annotations })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+    }
+    else {
+      push @invalid, $idx;
+      last if $state->{short_circuit};
+    }
   }
 
-  return 1 if @invalid == 0;
+  if (not @invalid) {
+    push @{$state->{annotations}}, @new_annotations;
+    return 1;
+  }
+
   my $pl = @invalid > 1;
   return E($state, 'subschema%s %s %s not valid', $pl?'s':'', join(', ', @invalid), $pl?'are':'is');
 }
@@ -661,14 +691,22 @@ sub _eval_keyword_oneOf {
   abort($state, '"oneOf" array is empty') if not @{$schema->{oneOf}};
 
   my (@valid, @errors);
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
   foreach my $idx (0 .. $#{$schema->{oneOf}}) {
-    push @valid, $idx if $self->_eval($data, $schema->{oneOf}[$idx],
-      +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/oneOf/'.$idx });
+    my @annotations = @orig_annotations;
+    next if not $self->_eval($data, $schema->{oneOf}[$idx],
+      +{ %$state, errors => \@errors, annotations => \@annotations,
+        schema_path => $state->{schema_path}.'/oneOf/'.$idx });
+    push @valid, $idx;
+    push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
     last if @valid > 1 and $state->{short_circuit};
   }
 
-  return 1 if @valid == 1;
-
+  if (@valid == 1) {
+    push @{$state->{annotations}}, @new_annotations;
+    return 1;
+  }
   if (not @valid) {
     push @{$state->{errors}}, @errors;
     return E($state, 'no subschemas are valid');
@@ -680,8 +718,11 @@ sub _eval_keyword_oneOf {
 
 sub _eval_keyword_not {
   my ($self, $data, $schema, $state) = @_;
+
   return 1 if not $self->_eval($data, $schema->{not},
-    +{ %$state, schema_path => $state->{schema_path}.'/not', short_circuit => 1, errors => [] });
+    +{ %$state, schema_path => $state->{schema_path}.'/not',
+      short_circuit => (!$state->{short_circuit} || $state->{collect_annotations} ? 0 : 1),
+      errors => [], annotations => [ @{$state->{annotations}} ] });
 
   return E($state, 'subschema is valid');
 }
@@ -689,11 +730,12 @@ sub _eval_keyword_not {
 sub _eval_keyword_if {
   my ($self, $data, $schema, $state) = @_;
 
-  return 1 if not exists $schema->{then} and not exists $schema->{else};
+  return 1 if not exists $schema->{then} and not exists $schema->{else}
+    and not $state->{collect_annotations};
   my $keyword = $self->_eval($data, $schema->{if},
-      +{ %$state,
+     +{ %$state,
         schema_path => $state->{schema_path}.'/if',
-        short_circuit => 1, # for now, until annotations are collected
+        short_circuit => (!$state->{short_circuit} || $state->{collect_annotations} ? 0 : 1),
         errors => [],
       })
     ? 'then' : 'else';
@@ -711,17 +753,26 @@ sub _eval_keyword_dependentSchemas {
   assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
   foreach my $property (sort keys %{$schema->{dependentSchemas}}) {
-    next if not exists $data->{$property}
-      or $self->_eval($data, $schema->{dependentSchemas}{$property},
-        +{ %$state, schema_path => jsonp($state->{schema_path}, 'dependentSchemas', $property) });
+    next if not exists $data->{$property};
+
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data, $schema->{dependentSchemas}{$property},
+        +{ %$state, annotations => \@annotations,
+          schema_path => jsonp($state->{schema_path}, 'dependentSchemas', $property) })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
 
     $valid = 0;
     last if $state->{short_circuit};
   }
 
-  return 1 if $valid;
-  return E($state, 'not all subschemas are valid');
+  return E($state, 'not all subschemas are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return 1;
 }
 
 sub _eval_keyword_items {
@@ -729,20 +780,28 @@ sub _eval_keyword_items {
 
   return 1 if not $self->_is_type('array', $data);
 
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
+
   if (not is_plain_arrayref($schema->{items})) {
     my $valid = 1;
     foreach my $idx (0 .. $#{$data}) {
-      next if $self->_eval($data->[$idx], $schema->{items},
-        +{ %$state,
-          data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/items',
-        });
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->[$idx], $schema->{items},
+          +{ %$state, annotations => \@annotations,
+            data_path => $state->{data_path}.'/'.$idx,
+            schema_path => $state->{schema_path}.'/items' })) {
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
       $valid = 0;
       last if $state->{short_circuit};
     }
 
-    return 1 if $valid;
-    return E($state, 'subschema is not valid against all items');
+    return E($state, 'subschema is not valid against all items') if not $valid;
+    push @{$state->{annotations}}, @new_annotations;
+    return A($state, true);
   }
 
   abort($state, '"items" array is empty') if not @{$schema->{items}};
@@ -753,37 +812,92 @@ sub _eval_keyword_items {
     last if $idx > $#{$schema->{items}};
 
     $last_index = $idx;
-    next if $self->_eval($data->[$idx], $schema->{items}[$idx],
-      +{ %$state,
-        data_path => $state->{data_path}.'/'.$idx,
-        schema_path => $state->{schema_path}.'/items/'.$idx,
-      });
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data->[$idx], $schema->{items}[$idx],
+        +{ %$state, annotations => \@annotations,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/items/'.$idx })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
+
     $valid = 0;
     last if $state->{short_circuit} and not exists $schema->{additionalItems};
   }
 
-  E($state, 'a subschema is not valid') if not $valid;
-  return $valid if not $valid or not exists $schema->{additionalItems} or $last_index == $#{$data};
+  if ($valid) {
+    push @{$state->{annotations}}, @new_annotations;
+    A($state, $last_index);
+  }
+  else {
+    E($state, 'a subschema is not valid');
+  }
+
+  return $valid if not exists $schema->{additionalItems} or $last_index == $#{$data};
+  $state->{keyword} = 'additionalItems';
+  @orig_annotations = @{$state->{annotations}};
 
   foreach my $idx ($last_index+1 .. $#{$data}) {
-    next if $self->_eval($data->[$idx], $schema->{additionalItems},
-      +{ %$state,
-        data_path => $state->{data_path}.'/'.$idx,
-        schema_path => $state->{schema_path}.'/additionalitems',
-      });
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data->[$idx], $schema->{additionalItems},
+        +{ %$state, data_path => $state->{data_path}.'/'.$idx,
+        schema_path => $state->{schema_path}.'/additionalitems', annotations => \@annotations })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
 
     $valid = 0;
     last if $state->{short_circuit};
   }
 
-  return 1 if $valid;
-  return E({ %$state, keyword => 'additionalItems' }, 'subschema is not valid');
+  return E($state, 'subschema is not valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return A($state, true);
 }
 
 sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedItems" keyword present, but annotation collection is not supported');
+  abort($state, '"unevaluatedItems" keyword present, but annotation collection is disabled')
+    if not $state->{collect_annotations};
+
+  abort($state, '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
+    if $state->{short_circuit};
+
+  my @annotations = local_annotations($state);
+  my @items_annotations = grep $_->keyword eq 'items', @annotations;
+  my @additionalItems_annotations = grep $_->keyword eq 'additionalItems', @annotations;
+  my @unevaluatedItems_annotations = grep $_->keyword eq 'unevaluatedItems', @annotations;
+
+  # items, additionalItems or unevaluatedItems already produced a 'true' annotation at this location
+  return 1
+    if any { $self->_is_type('boolean', $_->annotation) && $_->annotation }
+      @items_annotations, @additionalItems_annotations, @unevaluatedItems_annotations;
+
+  # otherwise, _eval at every instance item greater than the max of all numeric 'items' annotations
+  my $last_index = max(-1, grep $self->_is_type('integer', $_), map $_->annotation, @items_annotations);
+  return 1 if $last_index == $#{$data};
+
+  my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
+  foreach my $idx ($last_index+1 .. $#{$data}) {
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data->[$idx], $schema->{unevaluatedItems},
+        +{ %$state, annotations => \@annotations,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/unevaluatedItems' })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
+
+    $valid = 0;
+    last if $state->{short_circuit};
+  }
+
+  return E($state, 'subschema is not valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return A($state, true);
 }
 
 sub _eval_keyword_contains {
@@ -792,20 +906,23 @@ sub _eval_keyword_contains {
   return 1 if not $self->_is_type('array', $data);
 
   my $num_valid = 0;
-  my @errors;
+  my @orig_annotations = @{$state->{annotations}};
+  my (@errors, @new_annotations);
   foreach my $idx (0 .. $#{$data}) {
+    my @annotations = @orig_annotations;
     if ($self->_eval($data->[$idx], $schema->{contains},
-        +{ %$state,
-          errors => \@errors,
+        +{ %$state, errors => \@errors, annotations => \@annotations,
           data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/contains',
-        })) {
+          schema_path => $state->{schema_path}.'/contains' })) {
       ++$num_valid;
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
       last if $state->{short_circuit}
         and (not exists $schema->{maxContains} or $num_valid > $schema->{maxContains})
         and ($num_valid >= ($schema->{minContains} // 1));
     }
   }
+
+  push @{$state->{annotations}}, @new_annotations if $num_valid;
 
   if (exists $schema->{minContains}) {
     local $state->{keyword} = 'minContains';
@@ -850,18 +967,27 @@ sub _eval_keyword_properties {
   assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my (@valid_properties, @new_annotations);
   foreach my $property (sort keys %{$schema->{properties}}) {
     next if not exists $data->{$property};
-    $valid = 0 if not $self->_eval($data->{$property}, $schema->{properties}{$property},
-        +{ %$state,
+    my @annotations = @orig_annotations;
+    if ($self->_eval($data->{$property}, $schema->{properties}{$property},
+        +{ %$state, annotations => \@annotations,
           data_path => jsonp($state->{data_path}, $property),
-          schema_path => jsonp($state->{schema_path}, 'properties', $property),
-        });
-    last if not $valid and $state->{short_circuit};
+          schema_path => jsonp($state->{schema_path}, 'properties', $property) })) {
+      push @valid_properties, $property;
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
+
+    $valid = 0;
+    last if $state->{short_circuit};
   }
 
-  return 1 if $valid;
-  return E($state, 'not all properties are valid');
+  return E($state, 'not all properties are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
 sub _eval_keyword_patternProperties {
@@ -871,6 +997,8 @@ sub _eval_keyword_patternProperties {
   assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my (@valid_properties, @new_annotations);
   foreach my $property_pattern (sort keys %{$schema->{patternProperties}}) {
     my @matched_properties;
     try {
@@ -882,18 +1010,24 @@ sub _eval_keyword_patternProperties {
       $@);
     };
     foreach my $property (sort @matched_properties) {
-      $valid = 0
-        if not $self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
-          +{ %$state,
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
+          +{ %$state, annotations => \@annotations,
             data_path => jsonp($state->{data_path}, $property),
-            schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern),
-          });
-      last if not $valid and $state->{short_circuit};
+            schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) })) {
+        push @valid_properties, $property;
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
+      $valid = 0;
+      last if $state->{short_circuit};
     }
   }
 
-  return 1 if $valid;
-  return E($state, 'not all properties are valid');
+  return E($state, 'not all properties are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return @valid_properties ? A($state, [ uniqstr @valid_properties ]) : 1;
 }
 
 sub _eval_keyword_additionalProperties {
@@ -902,33 +1036,94 @@ sub _eval_keyword_additionalProperties {
   return 1 if not $self->_is_type('object', $data);
 
   my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my (@valid_properties, @new_annotations);
   foreach my $property (sort keys %$data) {
     next if exists $schema->{properties} and exists $schema->{properties}{$property};
     next if exists $schema->{patternProperties}
       and any { $property =~ /$_/ } keys %{$schema->{patternProperties}};
 
     if ($self->_is_type('boolean', $schema->{additionalProperties})) {
+      if ($schema->{additionalProperties}) {
+        push @valid_properties, $property;
+        next;
+      }
+
       $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property) },
-        'additional property not permitted') if not $schema->{additionalProperties};
+        'additional property not permitted');
     }
     else {
-      $valid = 0 if not $self->_eval($data->{$property}, $schema->{additionalProperties},
-        +{ %$state,
-          data_path => jsonp($state->{data_path}, $property),
-          schema_path => $state->{schema_path}.'/additionalProperties',
-        });
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->{$property}, $schema->{additionalProperties},
+          +{ %$state, annotations => \@annotations,
+            data_path => jsonp($state->{data_path}, $property),
+            schema_path => $state->{schema_path}.'/additionalProperties' })) {
+        push @valid_properties, $property;
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
+      $valid = 0;
     }
-    last if not $valid and $state->{short_circuit};
+    last if $state->{short_circuit};
   }
 
-  return 1 if $valid;
-  return E($state, 'not all properties are valid');
+  return E($state, 'not all properties are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
 sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is not supported');
+  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is disabled')
+    if not $state->{collect_annotations};
+
+  abort($state, '"unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable')
+    if $state->{short_circuit};
+
+  return 1 if not $self->_is_type('object', $data);
+
+  my @evaluated_properties = map {
+    my $keyword = $_->keyword;
+    (grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties))
+      ? @{$_->annotation} : ();
+  } local_annotations($state);
+
+  my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my (@valid_properties, @new_annotations);
+  foreach my $property (sort keys %$data) {
+    next if any { $_ eq $property } @evaluated_properties;
+
+    if ($self->_is_type('boolean', $schema->{unevaluatedProperties})) {
+      if ($schema->{unevaluatedProperties}) {
+        push @valid_properties, $property;
+        next;
+      }
+
+      $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property) },
+        'additional property not permitted');
+    }
+    else {
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->{$property}, $schema->{unevaluatedProperties},
+          +{ %$state, annotations => \@annotations,
+            data_path => jsonp($state->{data_path}, $property),
+            schema_path => $state->{schema_path}.'/unevaluatedProperties' })) {
+        push @valid_properties, $property;
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
+      $valid = 0;
+    }
+    last if $state->{short_circuit};
+  }
+
+  return E($state, 'not all properties are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
 sub _eval_keyword_propertyNames {
@@ -937,17 +1132,25 @@ sub _eval_keyword_propertyNames {
   return 1 if not $self->_is_type('object', $data);
 
   my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
   foreach my $property (sort keys %$data) {
-    $valid = 0 if not $self->_eval($property, $schema->{propertyNames},
-      +{ %$state,
-        data_path => jsonp($state->{data_path}, $property),
-        schema_path => $state->{schema_path}.'/propertyNames',
-      });
-    last if not $valid and $state->{short_circuit};
+    my @annotations = @orig_annotations;
+    if ($self->_eval($property, $schema->{propertyNames},
+        +{ %$state, annotations => \@annotations,
+          data_path => jsonp($state->{data_path}, $property),
+          schema_path => $state->{schema_path}.'/propertyNames' })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
+    }
+
+    $valid = 0;
+    last if $state->{short_circuit};
   }
 
-  return 1 if $valid;
-  return E($state, 'not all property names are valid');
+  return E($state, 'not all property names are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return 1;
 }
 
 has _format_validations => (
@@ -1059,8 +1262,68 @@ sub _eval_keyword_format {
       if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
   }
 
-  # TODO: create annotation
-  return 1;
+  return A($state, $schema->{format});
+}
+
+sub _eval_keyword_contentEncoding {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not $self->_is_type('string', $data);
+  assert_keyword_type($state, $schema, 'string');
+  return A($state, $schema->{$state->{keyword}});
+}
+
+sub _eval_keyword_contentMediaType {
+  goto \&_eval_keyword_contentEncoding;
+}
+
+sub _eval_keyword_contentSchema {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not exists $schema->{contentMediaType};
+  return 1 if not $self->_is_type('string', $data);
+
+  abort($state, 'contentSchema value is not an object or boolean')
+    if not any { $self->_is_type($_, $schema->{contentSchema}) } qw(object boolean);
+  return A($state, dclone($schema->{contentSchema}));
+}
+
+sub _eval_keyword_title {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+  return A($state, $schema->{$state->{keyword}});
+}
+
+sub _eval_keyword_description {
+  goto \&_eval_keyword_title;
+}
+
+sub _eval_keyword_default {
+  my ($self, $data, $schema, $state) = @_;
+  return A($state, is_ref($schema->{default}) ? dclone($schema->{default}) : $schema->{default});
+}
+
+sub _eval_keyword_deprecated {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'boolean');
+  return A($state, $schema->{$state->{keyword}});
+}
+
+sub _eval_keyword_readOnly {
+  goto \&_eval_keyword_deprecated;
+}
+
+sub _eval_keyword_writeOnly {
+  goto \&_eval_keyword_deprecated;
+}
+
+sub _eval_keyword_examples {
+  my ($self, $data, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'array');
+  return A($state, is_ref($schema->{examples}) ? dclone($schema->{examples}) : $schema->{examples});
 }
 
 sub _eval_keyword_definitions {
@@ -1321,6 +1584,13 @@ sub jsonp {
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, @_);
 }
 
+# get all annotations produced for the current instance data location
+use namespace::clean 'local_annotations';
+sub local_annotations {
+  my $state = shift;
+  grep $_->instance_location eq $state->{data_path}, @{$state->{annotations}};
+}
+
 # shorthand for creating error objects
 use namespace::clean 'E';
 sub E {
@@ -1337,6 +1607,7 @@ sub E {
     or $uri eq '#'.$state->{traversed_schema_path}.$schema_path;
 
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
+    keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$schema_path,
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
@@ -1344,6 +1615,30 @@ sub E {
   );
 
   return 0;
+}
+
+# shorthand for creating annotations
+use namespace::clean 'A';
+sub A {
+  my ($state, $annotation) = @_;
+  return 1 if not $state->{collect_annotations};
+
+  my $schema_path = $state->{schema_path_rest}
+    // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
+
+  push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
+    keyword => $state->{keyword},
+    instance_location => $state->{data_path},
+    keyword_location => $state->{traversed_schema_path}.$schema_path,
+    !"$state->{canonical_schema_uri}" ? () : ( absolute_keyword_location => do {
+      my $uri = $state->{canonical_schema_uri}->clone;
+      $uri->fragment(($uri->fragment//'').$schema_path) if $schema_path;
+      $uri;
+    } ),
+    annotation => $annotation,
+  );
+
+  return 1;
 }
 
 # creates an error object, but also aborts evaluation immediately
@@ -1397,7 +1692,9 @@ L<JSON::Schema::Draft201909::Result/output_format>.
 =head2 short_circuit
 
 When true, evaluation will return early in any execution path as soon as the outcome can be
-determined, rather than continuing to find all possible errors.
+determined, rather than continuing to find all errors or annotations. Be aware that this can result
+in invalid results in the presence of keywords that depend on annotations, namely
+C<unevaluatedItems> and C<unevaluatedProperties>.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
@@ -1422,6 +1719,12 @@ be specified in the form of C<< { $format_name => { type => $type, sub => $forma
 where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
 number, or integer) the instance value must be for the format validation to be considered.
 
+=head2 collect_annotations
+
+When true, annotations are collected from keywords that produce them, when validation succeeds.
+These annotations are available in the returned result (see L<JSON::Schema::Draft201909::Result>).
+Defaults to false.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILD
@@ -1429,6 +1732,7 @@ number, or integer) the instance value must be for the format validation to be c
 =head2 evaluate_json_string
 
   $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
+  $result = $js->evaluate_json_string($data_as_json_string, $schema_data, { collect_annotations => 1});
 
 Evaluates the provided instance data against the known schema document.
 
@@ -1443,11 +1747,15 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * a L<JSON::Schema::Draft201909::Document> object,
 * or a URI string indicating the location where such a schema is located.
 
+Optionally, a hashref can be passed as a third parameter which allows changing the values of the
+L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
 
   $result = $js->evaluate($instance_data, $schema_data);
+  $result = $js->evaluate($instance_data, $schema_data, { short_circuit => 0 });
 
 Evaluates the provided instance data against the known schema document.
 
@@ -1461,6 +1769,9 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * a Perl data structure, such as what is returned from a JSON decode operation,
 * a L<JSON::Schema::Draft201909::Document> object,
 * or a URI string indicating the location where such a schema is located.
+
+Optionally, a hashref can be passed as a third parameter which allows changing the values of the
+L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -1549,7 +1860,6 @@ To date, missing components (some of which are optional, but still quite useful)
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
 * multiple output formats
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
-* annotation collection (including the "format", "meta-data" and "content" vocabularies)
 * examination of the C<$schema> keyword for deviation from the standard metaschema, including
   changes to vocabulary behaviour
 

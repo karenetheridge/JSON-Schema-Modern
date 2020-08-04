@@ -10,25 +10,39 @@ use Test::Fatal;
 use JSON::Schema::Draft201909;
 
 subtest 'no validation' => sub {
-  my $js = JSON::Schema::Draft201909->new(validate_formats => 0);
+  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 0);
   cmp_deeply(
     $js->evaluate('abc', { format => 'uuid' })->TO_JSON,
     {
       valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          annotation => 'uuid',
+        },
+      ],
     },
-    'validate_format=0 disables format assertion behaviour',
+    'validate_format=0 disables format assertion behaviour; annotation is still produced',
   );
 };
 
 subtest 'simple validation' => sub {
-  my $js = JSON::Schema::Draft201909->new(validate_formats => 1);
+  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1);
 
   cmp_deeply(
     $js->evaluate(123, { format => 'uuid' })->TO_JSON,
     {
       valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          annotation => 'uuid',
+        },
+      ],
     },
-    'non-string values are valid',
+    'non-string values are valid, and produce an annotation',
   );
 
   cmp_deeply(
@@ -38,6 +52,13 @@ subtest 'simple validation' => sub {
     )->TO_JSON,
     {
       valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          annotation => 'uuid',
+        },
+      ],
     },
     'simple success',
   );
@@ -59,13 +80,20 @@ subtest 'simple validation' => sub {
 };
 
 subtest 'unknown format attribute' => sub {
-  my $js = JSON::Schema::Draft201909->new(validate_formats => 1);
+  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1);
   cmp_deeply(
     $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
     {
       valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          annotation => 'whargarbl',
+        },
+      ],
     },
-    'unrecognized format attributes do not cause validation failure',
+    'unrecognized format attributes do not cause validation failure; annotation is still produced',
   );
 };
 
@@ -93,6 +121,7 @@ subtest 'override a format sub' => sub {
   );
 
   my $js = JSON::Schema::Draft201909->new(
+    collect_annotations => 1,
     validate_formats => 1,
     format_validations => +{
       uuid => sub { $_[0] =~ /^[A-Z]+$/ },

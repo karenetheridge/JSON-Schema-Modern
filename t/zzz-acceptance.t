@@ -27,7 +27,7 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
   verbose => 1,
 );
 
-my %options = (validate_formats => 1);
+my %options = (validate_formats => 1, collect_annotations => 1);
 my $js = JSON::Schema::Draft201909->new(%options);
 my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
 
@@ -64,7 +64,8 @@ $accepter->acceptance(
     note $encoder->encode($result_short) if $result xor $result_short;
 
     die 'results inconsistent between short_circuit = false and true'
-      if $result xor $result_short;
+      if ($result xor $result_short)
+        and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
     # if any errors contain an exception, propage at that upwards as an exception so we can be sure
     # to count that as a failure.
@@ -78,8 +79,6 @@ $accepter->acceptance(
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
-        'unevaluatedItems.json',                    # TODO: see issue #19
-        'unevaluatedProperties.json',               # ""
         'optional/bignum.json',                     # TODO: see issue #10
         'optional/content.json',                    # per spec, should not be validated by default
         'optional/ecmascript-regex.json',           # TODO: see issue #27
@@ -95,9 +94,6 @@ $accepter->acceptance(
           optional/format/idn-hostname.json
           optional/format/idn-email.json
         ) ) : (),
-      ] },
-    { file => 'ref.json', group_description => [
-        'ref creates new scope when adjacent to keywords',  # unevaluatedProperties (issue #19)
       ] },
     { file => 'refRemote.json', group_description => [      # TODO: waiting for test suite PR 360
         'base URI change - change folder', 'base URI change - change folder in subschema',
@@ -153,6 +149,7 @@ $accepter->acceptance(
 # 2020-06-08  0.999  Looks like you failed 176 tests of 1055.
 # 2020-06-09  0.999  Looks like you failed 165 tests of 1055.
 # 2020-06-10  0.999  Looks like you failed 104 tests of 1055.
+# 2020-07-07  0.999  Looks like you failed 31 tests of 1055.
 
 
 END {
@@ -212,12 +209,12 @@ __END__
 # patternProperties.json                        21     0
 # properties.json                               20     0
 # propertyNames.json                            10     0
-# ref.json                                      29     1
+# ref.json                                      30     0
 # refRemote.json                                11     4
 # required.json                                  9     0
 # type.json                                     80     0
-# unevaluatedItems.json                          0    33
-# unevaluatedProperties.json                     0    39
+# unevaluatedItems.json                         33     0
+# unevaluatedProperties.json                    39     0
 # uniqueItems.json                              62     0
 # optional/bignum.json                           4     5
 # optional/content.json                          6     4
