@@ -18,7 +18,7 @@ BEGIN {
 }
 
 use Test::Warnings 0.027 ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 0.999;
+use Test::JSON::Schema::Acceptance 1.000;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
 
@@ -33,24 +33,10 @@ my $js = JSON::Schema::Draft201909->new(%options);
 my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
 
 my $add_resource = sub {
-  my ($uri, $data) = @_;
-  $js->add_schema($uri => $data);
-  $js_short_circuit->add_schema($uri => $data);
+  my ($uri, $schema) = @_;
+  $js->add_schema($uri => $schema);
+  $js_short_circuit->add_schema($uri => $schema);
 };
-
-# TODO: moving into TJSA 1.000
-my $base = Mojo::URL->new('http://localhost:1234');
-$accepter->additional_resources->visit(
-  sub {
-    my ($path) = @_;
-    return if not $path->is_file or $path !~ /\.json$/;
-    my $data = $accepter->_json_decoder->decode($path->slurp_raw);
-    my $file = $path->relative($accepter->additional_resources);
-    my $uri = Mojo::URL->new($file)->base($base)->to_abs;
-    $add_resource->($uri => $data);
-  },
-  { recurse => 1 },
-);
 
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
 $encoder->indent_length(2) if $encoder->can('indent_length');
@@ -77,6 +63,7 @@ $accepter->acceptance(
 
     $result;
   },
+  add_resource => $add_resource,
   @ARGV ? (tests => { file => \@ARGV }) : (),
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
