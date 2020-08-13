@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.012     2020-08-13 20:23:21Z
           - now using unicode semantics for pattern matching
 
 0.011     2020-08-04 22:16:46Z
