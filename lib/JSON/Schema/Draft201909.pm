@@ -1791,6 +1791,9 @@ You B<MUST> call C<add_schema> for any external resources that a schema may refe
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
 
+Returns the L<JSON::Schema::Draft201909::Document> that contains the added schema, or C<undef>
+if the resource could not be found.
+
 =head2 get
 
   my $schema = $js->get($uri);
