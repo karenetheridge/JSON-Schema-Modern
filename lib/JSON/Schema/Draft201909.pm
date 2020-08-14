@@ -21,6 +21,7 @@ use Path::Tiny;
 use Storable 'dclone';
 use File::ShareDir 'dist_dir';
 use Moo;
+use strictures 2;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef);

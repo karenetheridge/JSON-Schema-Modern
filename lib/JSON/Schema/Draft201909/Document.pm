@@ -15,6 +15,7 @@ use Ref::Util 0.100 qw(is_plain_arrayref is_plain_hashref);
 use List::Util 1.29 'pairs';
 use Safe::Isa;
 use Moo;
+use strictures 2;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
 use Types::Standard qw(InstanceOf HashRef Str Dict HasMethods);

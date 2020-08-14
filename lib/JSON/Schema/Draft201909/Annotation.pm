@@ -9,6 +9,7 @@ our $VERSION = '0.013';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 use Moo;
+use strictures 2;
 use MooX::TypeTiny;
 use Types::Standard 'Str';
 use namespace::clean;
