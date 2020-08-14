@@ -83,9 +83,6 @@ $accepter->acceptance(
           optional/format/idn-email.json
         ) ) : (),
       ] },
-    # TODO: see JSON-Schema-Test-Suite #424
-    { file => 'refRemote.json', group_description => 'base URI change - change folder' },
-
     # various edge cases that are difficult to accomodate
     { file => 'optional/format/date-time.json', group_description => 'validation of date-time strings',
       test_description => 'case-insensitive T and Z' },
@@ -138,6 +135,7 @@ $accepter->acceptance(
 # 2020-06-10  0.999  Looks like you failed 104 tests of 1055.
 # 2020-07-07  0.999  Looks like you failed 31 tests of 1055.
 # 2020-08-13  1.000  Looks like you failed 44 tests of 1210.
+# 2020-08-14  1.000  Looks like you failed 42 tests of 1210.
 
 
 END {
@@ -198,7 +196,7 @@ __END__
 # properties.json                               20     0
 # propertyNames.json                            10     0
 # ref.json                                      32     0
-# refRemote.json                                13     2
+# refRemote.json                                15     0
 # required.json                                  9     0
 # type.json                                     80     0
 # unevaluatedItems.json                         33     0

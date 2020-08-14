@@ -100,9 +100,9 @@ sub add_schema {
 
   if (not @_) {
     # TODO: resolve $uri against $self->base_uri
-    my ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+    my ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
     return if not defined $schema or not defined wantarray;
-    return $self->_get_resource($canonical_uri->fragment(undef))->{document};
+    return $document;
   }
 
   my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
@@ -173,6 +173,8 @@ sub evaluate {
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
+    document => 'SEE BELOW',            # the ::Document object containing this schema
+    document_path => 'SEE BELOW',       # the *initial* path within the document of this schema
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
     annotations => [],
@@ -181,20 +183,22 @@ sub evaluate {
 
   my $result;
   try {
-    my ($schema, $canonical_uri);
+    my ($schema, $canonical_uri, $document, $document_path);
 
     if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
       # TODO: resolve $uri against base_uri
-      ($schema, $canonical_uri) = $self->_fetch_schema_from_uri($schema_reference);
+      ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($schema_reference);
     }
     else {
-      my $document = $self->add_schema($schema_reference);
+      $document = $self->add_schema($schema_reference);
       ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
+      $document_path = '';
     }
 
     abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
 
-    $state->{canonical_schema_uri} = $canonical_uri;
+    @$state{qw(canonical_schema_uri document document_path)} = ($canonical_uri, $document, $document_path);
+
     $result = $self->_eval($data, $schema, $state);
   }
   catch {
@@ -289,17 +293,20 @@ sub _eval_keyword_id {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = Mojo::URL->new($schema->{'$id'});
-  $uri = $uri->base($state->{canonical_schema_uri})->to_abs if not $uri->is_abs;
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
-    if length $uri->fragment;
+    if length Mojo::URL->new($schema->{'$id'})->fragment;
 
-  $uri->fragment(undef);
-  $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  $state->{canonical_schema_uri} = $uri;
-  $state->{schema_path} = '';
+  if (my $resource = first { $_->[1]{path} eq $state->{document_path}.$state->{schema_path} }
+      $state->{document}->_resource_pairs) {
+    $state->{canonical_schema_uri} = $resource->[1]{canonical_uri}->clone;
+    $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
+    $state->{document_path} = $state->{document_path}.$state->{schema_path};
+    $state->{schema_path} = '';
+    return 1;
+  }
 
-  return 1;
+  # this should never happen, if the pre-evaluation traversal was performed correctly
+  abort($state, 'failed to resolve $id to canonical uri');
 }
 
 sub _eval_keyword_schema {
@@ -352,13 +359,15 @@ sub _eval_keyword_ref {
 
   my $uri = Mojo::URL->new($schema->{'$ref'});
   $uri = $uri->base($state->{canonical_schema_uri})->to_abs if not $uri->is_abs;
-  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+  my ($subschema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
   abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
 
   return $self->_eval($data, $subschema,
     +{ %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
       canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
+      document => $document,
+      document_path => $document_path,
       schema_path => '',
     });
 }
@@ -370,7 +379,7 @@ sub _eval_keyword_recursiveRef {
 
   my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'});
   $target_uri = $target_uri->base($state->{canonical_schema_uri})->to_abs if not $target_uri->is_abs;
-  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($target_uri);
+  my ($subschema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($target_uri);
   abort($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
 
   if ($self->_is_type('boolean', $subschema->{'$recursiveAnchor'})
@@ -382,7 +391,7 @@ sub _eval_keyword_recursiveRef {
     abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
       if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;
 
-    ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
+    ($subschema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
     abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
   }
 
@@ -390,6 +399,8 @@ sub _eval_keyword_recursiveRef {
     +{ %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
       canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
+      document => $document,
+      document_path => $document_path,
       schema_path => '',
     });
 }
@@ -1543,7 +1554,9 @@ sub _get_or_load_resource {
   return;
 };
 
-# returns a schema (which may not be at a document root), and the canonical uri for that schema.
+# returns a schema (which may not be at a document root), the canonical uri for that schema,
+# the JSON::Schema::Draft201909::Document object that holds that schema, and the path relative
+# to the document root for this schema.
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_schema_from_uri {
   my ($self, $uri) = @_;
@@ -1551,23 +1564,25 @@ sub _fetch_schema_from_uri {
   $uri = Mojo::URL->new($uri) if not is_ref($uri);
   my $fragment = $uri->fragment;
 
-  my ($subschema, $canonical_uri);
+  my ($subschema, $canonical_uri, $document, $document_path);
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
     if (my $resource = $self->_get_or_load_resource($base)) {
-      $subschema = $resource->{document}->get($resource->{path}.($fragment//''));
+      $subschema = $resource->{document}->get($document_path = $resource->{path}.($fragment//''));
       undef $fragment if not length $fragment;
       $canonical_uri = $resource->{canonical_uri}->clone->fragment($fragment);
+      $document = $resource->{document};
     }
   }
   else {
     if (my $resource = $self->_get_resource($uri)) {
-      $subschema = $resource->{document}->get($resource->{path});
+      $subschema = $resource->{document}->get($document_path = $resource->{path});
       $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI
+      $document = $resource->{document};
     }
   }
 
-  return defined $subschema ? ($subschema, $canonical_uri) : ();
+  return defined $subschema ? ($subschema, $canonical_uri, $document, $document_path) : ();
 }
 
 has _json_decoder => (

@@ -315,7 +315,7 @@ subtest 'nested $ids' => sub {
   my $js = JSON::Schema::Draft201909->new(short_circuit => 0);
   my $schema = {
     '$id' => '/foo/bar/baz.json',
-    '$ref' => '/foo/bar/baz.json#/properties/alpha',  # not the canonical URI for this location
+    '$ref' => '/foo/bar/baz.json#/properties/alpha',  # not the canonical URI for that location
     properties => {
       alpha => my $alpha = {
         '$id' => 'alpha.json',
@@ -526,6 +526,45 @@ subtest 'resource collisions' => sub {
       ],
     },
     'detected collision between two document subschema uris',
+  );
+};
+
+subtest 'relative uri in $id' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909->new->evaluate(
+      1,
+      {
+        '$id' => 'foo/bar/baz.json',
+        type => 'object',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/type',
+          absoluteKeywordLocation => 'foo/bar/baz.json#/type',
+          error => 'wrong type (expected object)',
+        },
+      ],
+    },
+    'root schema location is correctly identified',
+  );
+
+  cmp_deeply(
+    JSON::Schema::Draft201909->new->evaluate(
+      [ 1, [ 2, 3 ] ],
+      {
+        '$id' => 'foo/bar/baz.json',
+        type => [ 'integer', 'array' ],
+        items => { '$ref' => '#' },
+      },
+    )->TO_JSON,
+    {
+      valid => true,
+    },
+    'properly able to traverse a recursive schema using a relative $id',
   );
 };
 
