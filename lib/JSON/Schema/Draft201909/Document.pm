@@ -56,7 +56,7 @@ has resource_index => (
 );
 
 # for internal use only
-has serialized_schema => (
+has _serialized_schema => (
   is => 'rw',
   isa => Str,
   init_arg => undef,
