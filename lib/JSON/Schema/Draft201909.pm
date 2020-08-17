@@ -1198,6 +1198,7 @@ has _format_validations => (
       @o == 4 && (grep /^[0-9]{1,3}$/, @o) == 4 && (grep $_ < 256, @o) == 4;
     };
     # https://tools.ietf.org/html/rfc3339#appendix-A with some additions for the 2000 version
+    # as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
     my $duration_re = do {
       my $num = qr{[0-9]+(?:[.,][0-9]+)?};
       my $second = qr{${num}S};
