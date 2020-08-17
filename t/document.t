@@ -450,6 +450,20 @@ subtest 'resource collisions' => sub {
       'ignored "duplicate" uris embedded in non-schemas',
     );
   }
+
+  cmp_deeply(
+    JSON::Schema::Draft201909::Document->new(
+      canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
+      schema => {
+        '$id' => 'https://bar.com',
+        '$anchor' => 'hello',
+      },
+    )->{canonical_uri_index},
+    {
+      '' => str('https://bar.com'),
+    },
+    'the correct canonical uri is indexed in the inverted index',
+  );
 };
 
 done_testing;

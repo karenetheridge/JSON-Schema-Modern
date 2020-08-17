@@ -55,6 +55,19 @@ has resource_index => (
   default => sub { {} },
 );
 
+has canonical_uri_index => (
+  is => 'bare',
+  isa => HashRef[InstanceOf['Mojo::URL']],
+  handles_via => 'Hash',
+  handles => {
+    _add_canonical_uri => 'set',
+    _path_to_canonical_uri => 'get',
+  },
+  init_arg => undef,
+  lazy => 1,
+  default => sub { {} },
+);
+
 # for internal use only
 has _serialized_schema => (
   is => 'rw',
@@ -78,6 +91,7 @@ around _add_resources => sub {
       if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
 
     $self->$orig($key, $value);
+    $self->_add_canonical_uri($value->{path}, $value->{canonical_uri});
   }
 };
 
@@ -184,12 +198,17 @@ can be considered the canonical URI for the document as a whole.
 
 =head2 resource_index
 
-An index of URIs to subschemas (json path to reach the location, and the canonical uri of that
+An index of URIs to subschemas (json path to reach the location, and the canonical URI of that
 location) for all identifiable subschemas found in the document. An entry for URI C<''> is added
 only when no other suitable identifier can be found for the root schema.
 
 This attribute should only be used by L<JSON::Schema::Draft201909> and not intended for use
 externally (you should use the public accessors in L<JSON::Schema::Draft201909> instead).
+
+=head2 canonical_uri_index
+
+An index of json paths (from the document root) to canonical URIs. This is the inversion of
+L</resource_index> and is constructed as that is built up.
 
 =head1 METHODS
 
