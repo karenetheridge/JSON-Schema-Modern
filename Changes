@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - detect more cases of resource identifier collisions
 
 0.012     2020-08-13 20:23:21Z
           - now using unicode semantics for pattern matching

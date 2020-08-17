@@ -62,18 +62,22 @@ has _serialized_schema => (
   init_arg => undef,
 );
 
-before _add_resources => sub {
+around _add_resources => sub {
+  my $orig = shift;
   my $self = shift;
   foreach my $pair (pairs @_) {
     my ($key, $value) = @$pair;
     if (my $existing = $self->_get_resource($key)) {
-      croak 'a schema resource is already indexed with uri "'.$key.'"'
+      croak 'uri "'.$key.'" conflicts with an existing schema resource'
         if $existing->{path} ne $value->{path}
           or $existing->{canonical_uri} ne $value->{canonical_uri};
     }
 
-    croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
+    # this will never happen, if we parsed $id correctly
+    croak sprintf('a resource canonical uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
       if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
+
+    $self->$orig($key, $value);
   }
 };
 
@@ -88,23 +92,23 @@ sub BUILD {
 
   my $original_uri = $self->canonical_uri->clone;
   my $schema = $self->schema;
-  my %identifiers = _traverse_for_identifiers($schema, '', $original_uri->clone);
+  my @identifiers = _traverse_for_identifiers($schema, '', $original_uri->clone);
 
   if (is_plain_hashref($self->schema) and my $id = $self->get('/$id')) {
     $self->_set_canonical_uri(Mojo::URL->new($id)) if $id ne $self->canonical_uri;
   }
 
   # make sure the root schema is always indexed against *something*.
-  $identifiers{$original_uri} = { path => '', canonical_uri => $self->canonical_uri }
+  $self->_add_resources($original_uri => { path => '', canonical_uri => $self->canonical_uri })
     if (not "$original_uri" and $original_uri eq $self->canonical_uri)
-      or ("$original_uri" and not exists $identifiers{$original_uri});
+      or "$original_uri";
 
-  $self->_add_resources(%identifiers);
+  $self->_add_resources(@identifiers);
 }
 
 sub _traverse_for_identifiers {
   my ($data, $path, $canonical_uri) = @_;
-  my %identifiers;
+  my @identifiers;
   if (is_plain_arrayref($data)) {
     return map
       __SUB__->($data->[$_], jsonp($path, $_),
@@ -117,17 +121,17 @@ sub _traverse_for_identifiers {
       if (not length $uri->fragment) {
         $canonical_uri = $uri->is_abs ? $uri : $uri->base($canonical_uri)->to_abs;
         $canonical_uri->fragment(undef);
-        $identifiers{$canonical_uri} = { path => $path, canonical_uri => $canonical_uri->clone };
+        push @identifiers, $canonical_uri => { path => $path, canonical_uri => $canonical_uri->clone };
       }
     }
     if (exists $data->{'$anchor'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$anchor'})
         and $data->{'$anchor'} =~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
       my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
-      $identifiers{$uri} = { path => $path, canonical_uri => $canonical_uri->clone };
+      push @identifiers, $uri => { path => $path, canonical_uri => $canonical_uri->clone };
     }
 
     return
-      %identifiers,
+      @identifiers,
       map
         __SUB__->($data->{$_}, jsonp($path, $_),
           $canonical_uri->clone->fragment(jsonp($canonical_uri->fragment, $_))),

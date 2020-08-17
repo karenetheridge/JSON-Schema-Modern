@@ -488,4 +488,45 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
   );
 };
 
+subtest 'resource collisions' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  $js->add_schema({ '$id' => 'https://foo.com/x/y/z' });
+
+  cmp_deeply(
+    $js->evaluate(1, { '$id' => 'https://foo.com', anyOf => [ { '$id' => '/x/y/z' } ] })->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => re(qr{^EXCEPTION: uri "https://foo.com/x/y/z" conflicts with an existing schema resource}),
+        }
+      ],
+    },
+    'detected collision between a document\'s initial uri and a document\'s subschema\'s uri',
+  );
+
+  $js = JSON::Schema::Draft201909->new;
+  $js->add_schema({
+    '$id' => 'https://foo.com',
+    anyOf => [ { '$id' => '/x/y/z' } ],
+  });
+
+  cmp_deeply(
+    $js->evaluate(1, { allOf => [ { '$id' => 'https://foo.com/x/y/z' } ] })->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => re(qr{^EXCEPTION: uri "https://foo.com/x/y/z" conflicts with an existing schema resource}),
+        }
+      ],
+    },
+    'detected collision between two document subschema uris',
+  );
+};
+
 done_testing;

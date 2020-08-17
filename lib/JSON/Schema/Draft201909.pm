@@ -1496,10 +1496,8 @@ around _add_resources => sub {
     croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
       if ($fragment // '') =~ m{^[^/]};
 
-    push @resources, $key => $value;
+    $self->$orig($key, $value);
   }
-
-  $self->$orig(@resources) if @resources;
 };
 
 use constant CACHED_METASCHEMAS => {
