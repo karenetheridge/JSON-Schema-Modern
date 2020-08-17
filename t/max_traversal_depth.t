@@ -60,4 +60,20 @@ cmp_deeply(
   'evaluation is halted when an instance location is evaluated against the same schema location a second time',
 );
 
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        '$defs' => { mydef => { '$id' => '/properties/foo' } },
+        properties => {
+          foo => {
+            '$ref' => '/properties/foo',
+          },
+        },
+      },
+    )->TO_JSON,
+    { valid => bool(1) },
+    'the seen counter does not confuse URI paths and fragments: /properties/foo vs #/properties/foo',
+  );
+
 done_testing;
