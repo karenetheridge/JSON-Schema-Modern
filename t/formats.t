@@ -81,6 +81,9 @@ subtest 'simple validation' => sub {
 };
 
 subtest 'unknown format attribute' => sub {
+  # see https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.3
+  # "An implementation MUST NOT fail validation or cease processing due to an unknown format
+  # attribute."
   my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1);
   cmp_deeply(
     $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
