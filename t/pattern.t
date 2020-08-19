@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
+no if "$]" >= 5.033001, feature => 'multidimensional';
 use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 

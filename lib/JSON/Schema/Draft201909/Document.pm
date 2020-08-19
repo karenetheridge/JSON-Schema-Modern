@@ -8,6 +8,7 @@ our $VERSION = '0.013';
 
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
+no if "$]" >= 5.033001, feature => 'multidimensional';
 use Mojo::URL;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
