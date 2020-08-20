@@ -1836,7 +1836,7 @@ For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 By default, formats are treated only as annotations, not assertions. When L</validate_format> is
 true, strings are also checked against the format as specified in the schema. At present the
-following formats are supported (use of any other formats than these will evaluate as true):
+following formats are supported (use of any other formats than these will always evaluate as true):
 
 =for :list
 * C<date-time>
@@ -1862,7 +1862,7 @@ validation will always succeed):
 
 =for :list
 * C<date-time>, C<date>, and C<time> require L<Time::Moment>
-* C<email> and C<idn-email> require L<Email::Address::XS> version 1.01
+* C<email> and C<idn-email> require L<Email::Address::XS> version 1.01 (or higher)
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
 * C<idn-hostname> requires L<Net::IDN::Encode>
 
@@ -1876,7 +1876,7 @@ To date, missing components (some of which are optional, but still quite useful)
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
-* multiple output formats
+* additional output formats beyond C<flag> and C<basic>
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
 * examination of the C<$schema> keyword for deviation from the standard metaschema, including
   changes to vocabulary behaviour
