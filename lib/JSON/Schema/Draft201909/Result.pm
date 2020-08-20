@@ -44,7 +44,7 @@ has $_.'s' => (
 ) foreach qw(error annotation);
 
 has output_format => (
-  is => 'ro',
+  is => 'rw',
   isa => Enum[qw(flag basic detailed verbose)],
   default => 'basic',
 );
