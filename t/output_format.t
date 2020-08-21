@@ -12,18 +12,29 @@ use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new(short_circuit => 0);
+my $js = JSON::Schema::Draft201909->new(short_circuit => 0, collect_annotations => 1);
 is($js->output_format, 'basic', 'output_format defaults to basic');
 
 my $result = $js->evaluate(
-  { alpha => 1, beta => 1 },
+  { alpha => 1, beta => 1, gamma => [ 0, 1 ], foo => 1, zulu => 2 },
   {
-    required => [ 'foo' ],
+    required => [ 'bar' ],
+    allOf => [ { type => 'number' } ],
+    anyOf => [ { type => 'number' }, { if => true, then => { type => 'array' }, else => false } ],
+    if => false, then => false, else => { type => 'number' },
+    not => true,
     properties => {
       alpha => false,
       beta => { multipleOf => 2 },
+      gamma => {
+        items => [ false ], # this is silly. no reason to special-case do this.
+        additionalItems => false,
+        unevaluatedItems => false,
+      },
     },
-    not => true,
+    patternProperties => { 'o' => false },
+    additionalProperties => false,
+    unevaluatedProperties => false,
   },
 );
 
@@ -37,7 +48,37 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/required',
-        error => 'missing property: foo',
+        error => 'missing property: bar',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/0/type',
+        error => 'wrong type (expected number)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf',
+        error => 'subschema 0 is not valid',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf/0/type',
+        error => 'wrong type (expected number)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf/1/then/type',
+        error => 'wrong type (expected array)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf/1/then',
+        error => 'subschema is not valid',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf',
+        error => 'no subschemas are valid',
       },
       {
         instanceLocation => '',
@@ -45,9 +86,19 @@ cmp_deeply(
         error => 'subschema is valid',
       },
       {
+        instanceLocation => '',
+        keywordLocation => '/else/type',
+        error => 'wrong type (expected number)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/else',
+        error => 'subschema is not valid',
+      },
+      {
         instanceLocation => '/alpha',
         keywordLocation => '/properties/alpha',
-        error => 'subschema is false',
+        error => 'property not permitted',
       },
       {
         instanceLocation => '/beta',
@@ -55,9 +106,69 @@ cmp_deeply(
         error => 'value is not a multiple of 2',
       },
       {
+        instanceLocation => '/gamma/0',
+        keywordLocation => '/properties/gamma/items/0',
+        error => 'subschema is false',
+      },
+      {
+        instanceLocation => '/gamma',
+        keywordLocation => '/properties/gamma/items',
+        error => 'subschema is not valid against all items',
+      },
+      {
+        instanceLocation => '/gamma/1',
+        keywordLocation => '/properties/gamma/additionalItems',
+        error => 'additional item not permitted',
+      },
+      {
+        instanceLocation => '/gamma',
+        keywordLocation => '/properties/gamma/additionalItems',
+        error => 'subschema is not valid against all additional items',
+      },
+      (map +{
+        instanceLocation => '/gamma/'.$_,
+        keywordLocation => '/properties/gamma/unevaluatedItems',
+        error => 'additional item not permitted',
+      }, (0..1)),
+      {
+        instanceLocation => '/gamma',
+        keywordLocation => '/properties/gamma/unevaluatedItems',
+        error => 'subschema is not valid against all additional items',
+      },
+      {
         instanceLocation => '',
         keywordLocation => '/properties',
         error => 'not all properties are valid',
+      },
+      {
+        instanceLocation => '/foo',
+        keywordLocation => '/patternProperties/o',
+        error => 'property not permitted',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/patternProperties',
+        error => 'not all properties are valid',
+      },
+      {
+        instanceLocation => '/zulu',
+        keywordLocation => '/additionalProperties',
+        error => 'additional property not permitted',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/additionalProperties',
+        error => 'not all additional properties are valid',
+      },
+      (map +{
+        instanceLocation => '/'.$_,
+        keywordLocation => '/unevaluatedProperties',
+        error => 'additional property not permitted',
+      }, qw(alpha beta foo gamma zulu)),
+      {
+        instanceLocation => '',
+        keywordLocation => '/unevaluatedProperties',
+        error => 'not all additional properties are valid',
       },
     ],
   },

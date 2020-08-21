@@ -933,12 +933,12 @@ subtest 'sorted property names' => sub {
         {
           instanceLocation => '/bar',
           keywordLocation => '/properties/bar',
-          error => 'subschema is false',
+          error => 'property not permitted',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/properties/foo',
-          error => 'subschema is false',
+          error => 'property not permitted',
         },
         {
           instanceLocation => '',

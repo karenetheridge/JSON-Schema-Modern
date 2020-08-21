@@ -822,8 +822,8 @@ sub _eval_keyword_items {
   my $valid = 1;
   foreach my $idx (0 .. $#{$data}) {
     last if $idx > $#{$schema->{items}};
-
     $last_index = $idx;
+
     my @annotations = @orig_annotations;
     if ($self->_eval($data->[$idx], $schema->{items}[$idx],
         +{ %$state, annotations => \@annotations,
@@ -850,15 +850,22 @@ sub _eval_keyword_items {
   @orig_annotations = @{$state->{annotations}};
 
   foreach my $idx ($last_index+1 .. $#{$data}) {
-    my @annotations = @orig_annotations;
-    if ($self->_eval($data->[$idx], $schema->{additionalItems},
-        +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-        schema_path => $state->{schema_path}.'/additionalitems', annotations => \@annotations })) {
-      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
-      next;
+    if ($self->_is_type('boolean', $schema->{additionalItems})) {
+      next if $schema->{additionalItems};
+      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx },
+          'additional item not permitted');
     }
+    else {
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->[$idx], $schema->{additionalItems},
+          +{ %$state, data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/additionalitems', annotations => \@annotations })) {
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
 
-    $valid = 0;
+      $valid = 0;
+    }
     last if $state->{short_circuit};
   }
 
@@ -894,16 +901,23 @@ sub _eval_keyword_unevaluatedItems {
   my @orig_annotations = @{$state->{annotations}};
   my @new_annotations;
   foreach my $idx ($last_index+1 .. $#{$data}) {
-    my @annotations = @orig_annotations;
-    if ($self->_eval($data->[$idx], $schema->{unevaluatedItems},
-        +{ %$state, annotations => \@annotations,
-          data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/unevaluatedItems' })) {
-      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
-      next;
+    if ($self->_is_type('boolean', $schema->{unevaluatedItems})) {
+      next if $schema->{unevaluatedItems};
+      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx },
+          'additional item not permitted')
     }
+    else {
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->[$idx], $schema->{unevaluatedItems},
+          +{ %$state, annotations => \@annotations,
+            data_path => $state->{data_path}.'/'.$idx,
+            schema_path => $state->{schema_path}.'/unevaluatedItems' })) {
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
 
-    $valid = 0;
+      $valid = 0;
+    }
     last if $state->{short_circuit};
   }
 
@@ -983,17 +997,30 @@ sub _eval_keyword_properties {
   my (@valid_properties, @new_annotations);
   foreach my $property (sort keys %{$schema->{properties}}) {
     next if not exists $data->{$property};
-    my @annotations = @orig_annotations;
-    if ($self->_eval($data->{$property}, $schema->{properties}{$property},
-        +{ %$state, annotations => \@annotations,
-          data_path => jsonp($state->{data_path}, $property),
-          schema_path => jsonp($state->{schema_path}, 'properties', $property) })) {
-      push @valid_properties, $property;
-      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
-      next;
-    }
 
-    $valid = 0;
+    if ($self->_is_type('boolean', $schema->{properties}{$property})) {
+      if ($schema->{properties}{$property}) {
+        push @valid_properties, $property;
+        next;
+      }
+
+      $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
+          _schema_path_rest => jsonp($state->{schema_path}, 'properties', $property) },
+        'property not permitted');
+    }
+    else {
+      my @annotations = @orig_annotations;
+      if ($self->_eval($data->{$property}, $schema->{properties}{$property},
+          +{ %$state, annotations => \@annotations,
+            data_path => jsonp($state->{data_path}, $property),
+            schema_path => jsonp($state->{schema_path}, 'properties', $property) })) {
+        push @valid_properties, $property;
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
+      $valid = 0;
+    }
     last if $state->{short_circuit};
   }
 
@@ -1022,17 +1049,29 @@ sub _eval_keyword_patternProperties {
       $@);
     };
     foreach my $property (sort @matched_properties) {
-      my @annotations = @orig_annotations;
-      if ($self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
-          +{ %$state, annotations => \@annotations,
-            data_path => jsonp($state->{data_path}, $property),
-            schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) })) {
-        push @valid_properties, $property;
-        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
-        next;
-      }
+      if ($self->_is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
+        if ($schema->{patternProperties}{$property_pattern}) {
+          push @valid_properties, $property;
+          next;
+        }
 
-      $valid = 0;
+        $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
+            _schema_path_rest => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) },
+          'property not permitted');
+      }
+      else {
+        my @annotations = @orig_annotations;
+        if ($self->_eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
+            +{ %$state, annotations => \@annotations,
+              data_path => jsonp($state->{data_path}, $property),
+              schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) })) {
+          push @valid_properties, $property;
+          push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+          next;
+        }
+
+        $valid = 0;
+      }
       last if $state->{short_circuit};
     }
   }

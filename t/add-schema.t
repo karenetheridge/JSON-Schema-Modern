@@ -409,7 +409,7 @@ subtest '$ref to non-canonical uri' => sub {
           instanceLocation => '/alpha',
           keywordLocation => '/properties/alpha',
           absoluteKeywordLocation => 'http://localhost:4242/my_document#/properties/alpha',
-          error => 'subschema is false',
+          error => 'property not permitted',
         },
         {
           instanceLocation => '',
