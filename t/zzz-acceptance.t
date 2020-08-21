@@ -48,14 +48,14 @@ $accepter->acceptance(
     my $result = $js->evaluate($instance_data, $schema);
     my $result_short = $js_short_circuit->evaluate($instance_data, $schema);
 
-    note $encoder->encode($result);
-    note $encoder->encode($result_short) if $result xor $result_short;
+    note 'result: ', $encoder->encode($result);
+    note 'short-circuited result: ', $encoder->encode($result_short) if $result xor $result_short;
 
     die 'results inconsistent between short_circuit = false and true'
       if ($result xor $result_short)
         and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
-    # if any errors contain an exception, propage at that upwards as an exception so we can be sure
+    # if any errors contain an exception, propagate that upwards as an exception so we can be sure
     # to count that as a failure.
     # (This might change if tests are added that are expected to produce exceptions.)
     if (my ($e) = grep $_->error =~ /^EXCEPTION/, $result->errors) {
