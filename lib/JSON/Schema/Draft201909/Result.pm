@@ -43,9 +43,11 @@ has $_.'s' => (
   },
 ) foreach qw(error annotation);
 
+use constant OUTPUT_FORMATS => [qw(flag basic detailed verbose terse)];
+
 has output_format => (
   is => 'rw',
-  isa => Enum[qw(flag basic detailed verbose)],
+  isa => Enum(OUTPUT_FORMATS),
   default => 'basic',
 );
 
@@ -65,6 +67,28 @@ sub format {
       $self->result
         ? ($self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, $self->errors ]),
+    };
+  }
+  if ($style eq 'terse') {
+    return +{
+      valid => $self->result,
+      $self->result
+        ? ($self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
+        : (errors => [ map $_->TO_JSON,
+            grep {
+              my ($keyword, $error) = ($_->keyword, $_->error);
+              not $keyword
+                or (
+                  not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas items propertyNames)
+                  and ($keyword ne 'oneOf' or $error ne 'no subschemas are valid')
+                  and (not grep $keyword eq $_, qw(additionalItems unevaluatedItems)
+                    or $error eq 'additional item not permitted')
+                  and (not grep $keyword eq $_, qw(properties patternProperties)
+                    or $error eq 'property not permitted')
+                  and (not grep $keyword eq $_, qw(additionalProperties unevaluatedProperties)
+                    or $error eq 'additional property not permitted'))
+            }
+            $self->errors ]),
     };
   }
 
@@ -120,11 +144,11 @@ Returns an array of L<JSON::Schema::Draft201909::Error> objects.
 
 =head2 output_format
 
-One of: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<basic>.
+One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD
+=for Pod::Coverage BUILD OUTPUT_FORMATS
 
 =head2 format
 

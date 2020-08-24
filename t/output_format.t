@@ -35,6 +35,7 @@ my $result = $js->evaluate(
     patternProperties => { 'o' => false },
     additionalProperties => false,
     unevaluatedProperties => false,
+    propertyNames => { pattern => '[ao]' },
   },
 );
 
@@ -170,6 +171,16 @@ cmp_deeply(
         keywordLocation => '/unevaluatedProperties',
         error => 'not all additional properties are valid',
       },
+      {
+        instanceLocation => '/zulu',
+        keywordLocation => '/propertyNames/pattern',
+        error => 'pattern does not match',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/propertyNames',
+        error => 'not all property names are valid',
+      },
     ],
   },
   'basic format includes all errors linearly',
@@ -182,6 +193,104 @@ cmp_deeply(
     valid => bool(0),
   },
   'flag format only includes the valid property',
+);
+
+$result->output_format('terse');
+cmp_deeply(
+  $result->TO_JSON,
+  {
+    valid => bool(0),
+    errors => [
+      {
+        instanceLocation => '',
+        keywordLocation => '/required',
+        error => 'missing property: bar',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/0/type',
+        error => 'wrong type (expected number)',
+      },
+      # "summary" error from /allOf is omitted
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf/0/type',
+        error => 'wrong type (expected number)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf/1/then/type',
+        error => 'wrong type (expected array)',
+      },
+      # "summary" error from /anyOf/1/then is omitted
+      # "summary" error from /anyOf is omitted
+      {
+        instanceLocation => '',
+        keywordLocation => '/not',
+        error => 'subschema is valid',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/else/type',
+        error => 'wrong type (expected number)',
+      },
+      # "summary" error from /else is omitted
+      {
+        instanceLocation => '/alpha',
+        keywordLocation => '/properties/alpha',
+        error => 'property not permitted',
+      },
+      {
+        instanceLocation => '/beta',
+        keywordLocation => '/properties/beta/multipleOf',
+        error => 'value is not a multiple of 2',
+      },
+      {
+        instanceLocation => '/gamma/0',
+        keywordLocation => '/properties/gamma/items/0',
+        error => 'subschema is false',
+      },
+      # "summary" error from /properties/gamma/items is omitted
+      {
+        instanceLocation => '/gamma/1',
+        keywordLocation => '/properties/gamma/additionalItems',
+        error => 'additional item not permitted',
+      },
+      # "summary" error from /properties/gamma/additionalItems is omitted
+      (map +{
+        instanceLocation => '/gamma/'.$_,
+        keywordLocation => '/properties/gamma/unevaluatedItems',
+        error => 'additional item not permitted',
+      }, (0..1)),
+      # "summary" error from /properties/gamma/unevaluatedItems is omitted
+      # "summary" error from /properties is omitted
+      {
+        instanceLocation => '/foo',
+        keywordLocation => '/patternProperties/o',
+        error => 'property not permitted',
+      },
+      # "summary" error from /patternProperties is omitted
+      {
+        instanceLocation => '/zulu',
+        keywordLocation => '/additionalProperties',
+        error => 'additional property not permitted',
+      },
+      # "summary" error from /additionalProperties is omitted
+      (map +{
+        instanceLocation => '/'.$_,
+        keywordLocation => '/unevaluatedProperties',
+        error => 'additional property not permitted',
+      }, qw(alpha beta foo gamma zulu)),
+      # "summary" error from /unevaluatedProperties is omitted
+      {
+        instanceLocation => '/zulu',
+        keywordLocation => '/propertyNames/pattern',
+        error => 'pattern does not match',
+      },
+      # "summary" error from /propertyNames is omitted
+    ],
+  },
+  'terse format omits errors from redundant applicator keywords',
 );
 
 done_testing;

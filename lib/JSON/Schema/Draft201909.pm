@@ -36,7 +36,7 @@ use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 has output_format => (
   is => 'ro',
-  isa => Enum[qw(flag basic detailed verbose)],
+  isa => Enum(JSON::Schema::Draft201909::Result->OUTPUT_FORMATS),
   default => 'basic',
 );
 
@@ -1740,7 +1740,7 @@ version of the specification.
 
 =head2 output_format
 
-One of: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<basic>. Passed to
+One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>. Passed to
 L<JSON::Schema::Draft201909::Result/output_format>.
 
 =head2 short_circuit
@@ -1915,7 +1915,7 @@ To date, missing components (some of which are optional, but still quite useful)
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
-* additional output formats beyond C<flag> and C<basic>
+* additional output formats beyond C<flag>, C<basic> and C<terse>
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
 * examination of the C<$schema> keyword for deviation from the standard metaschema, including
   changes to vocabulary behaviour
