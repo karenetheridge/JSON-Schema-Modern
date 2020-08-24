@@ -958,7 +958,7 @@ subtest 'sorted property names' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/additionalProperties',
-          error => 'not all properties are valid',
+          error => 'not all additional properties are valid',
         },
       ],
     },

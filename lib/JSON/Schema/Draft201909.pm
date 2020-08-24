@@ -842,7 +842,7 @@ sub _eval_keyword_items {
     A($state, $last_index);
   }
   else {
-    E($state, 'a subschema is not valid');
+    E($state, 'subschema is not valid against all items');
   }
 
   return $valid if not exists $schema->{additionalItems} or $last_index == $#{$data};
@@ -862,7 +862,7 @@ sub _eval_keyword_items {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'subschema is not valid') if not $valid;
+  return E($state, 'subschema is not valid against all additional items') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
   return A($state, true);
 }
@@ -907,7 +907,7 @@ sub _eval_keyword_unevaluatedItems {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'subschema is not valid') if not $valid;
+  return E($state, 'subschema is not valid against all additional items') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
   return A($state, true);
 }
@@ -1080,7 +1080,7 @@ sub _eval_keyword_additionalProperties {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all properties are valid') if not $valid;
+  return E($state, 'not all additional properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }
@@ -1133,7 +1133,7 @@ sub _eval_keyword_unevaluatedProperties {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all properties are valid') if not $valid;
+  return E($state, 'not all additional properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }

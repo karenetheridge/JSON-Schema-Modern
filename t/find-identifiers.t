@@ -360,7 +360,7 @@ subtest 'nested $ids' => sub {
           instanceLocation => '',
           keywordLocation => '/$ref/additionalProperties',
           absoluteKeywordLocation => '/foo/bar/alpha.json#/additionalProperties',
-          error => 'not all properties are valid',
+          error => 'not all additional properties are valid',
         },
         {
           instanceLocation => '/alpha/beta/gamma',
