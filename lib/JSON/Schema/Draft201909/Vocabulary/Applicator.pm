@@ -11,7 +11,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 use List::Util 1.45 qw(any uniqstr max);
 use Ref::Util 0.100 'is_plain_arrayref';
 use Syntax::Keyword::Try 0.11;
-use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort assert_keyword_type true);
+use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort true);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -21,16 +21,15 @@ with 'JSON::Schema::Draft201909::Vocabulary';
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 
 sub keywords {
-  qw(allOf anyOf oneOf not if dependentSchemas
-    items unevaluatedItems contains
+  qw(allOf anyOf oneOf not if then else dependentSchemas
+    items additionalItems unevaluatedItems contains
     properties patternProperties additionalProperties unevaluatedProperties propertyNames);
 }
 
+sub _traverse_keyword_allOf { shift->traverse_array_schemas(@_) }
+
 sub _eval_keyword_allOf {
   my ($self, $data, $schema, $state) = @_;
-
-  assert_keyword_type($state, $schema, 'array');
-  abort($state, '"allOf" array is empty') if not @{$schema->{allOf}};
 
   my @invalid;
   my @orig_annotations = @{$state->{annotations}};
@@ -56,11 +55,10 @@ sub _eval_keyword_allOf {
   return E($state, 'subschema%s %s %s not valid', $pl?'s':'', join(', ', @invalid), $pl?'are':'is');
 }
 
+sub _traverse_keyword_anyOf { shift->traverse_array_schemas(@_) }
+
 sub _eval_keyword_anyOf {
   my ($self, $data, $schema, $state) = @_;
-
-  assert_keyword_type($state, $schema, 'array');
-  abort($state, '"anyOf" array is empty') if not @{$schema->{anyOf}};
 
   my $valid = 0;
   my @errors;
@@ -76,11 +74,10 @@ sub _eval_keyword_anyOf {
   return E($state, 'no subschemas are valid');
 }
 
+sub _traverse_keyword_oneOf { shift->traverse_array_schemas(@_) }
+
 sub _eval_keyword_oneOf {
   my ($self, $data, $schema, $state) = @_;
-
-  assert_keyword_type($state, $schema, 'array');
-  abort($state, '"oneOf" array is empty') if not @{$schema->{oneOf}};
 
   my (@valid, @errors);
   my @orig_annotations = @{$state->{annotations}};
@@ -108,6 +105,8 @@ sub _eval_keyword_oneOf {
   }
 }
 
+sub _traverse_keyword_not { shift->traverse_schema(@_) }
+
 sub _eval_keyword_not {
   my ($self, $data, $schema, $state) = @_;
 
@@ -118,6 +117,10 @@ sub _eval_keyword_not {
 
   return E($state, 'subschema is valid');
 }
+
+sub _traverse_keyword_if { shift->traverse_schema(@_) }
+sub _traverse_keyword_then { shift->traverse_schema(@_) }
+sub _traverse_keyword_else { shift->traverse_schema(@_) }
 
 sub _eval_keyword_if {
   my ($self, $data, $schema, $state) = @_;
@@ -138,11 +141,12 @@ sub _eval_keyword_if {
   return E({ %$state, keyword => $keyword }, 'subschema is not valid');
 }
 
+sub _traverse_keyword_dependentSchemas { shift->traverse_object_schemas(@_) }
+
 sub _eval_keyword_dependentSchemas {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('object', $data);
-  assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   my @orig_annotations = @{$state->{annotations}};
@@ -166,6 +170,16 @@ sub _eval_keyword_dependentSchemas {
   push @{$state->{annotations}}, @new_annotations;
   return 1;
 }
+
+sub _traverse_keyword_items {
+  my ($self, $schema, $state) = @_;
+
+  # Note: the metaschema says "items" has minItems:1 but the written spec omits this.
+  my $method = is_plain_arrayref($schema->{items}) ? 'traverse_array_schemas' : 'traverse_schema';
+  $self->$method($schema, $state);
+}
+
+sub _traverse_keyword_additionalItems { shift->traverse_schema(@_) }
 
 sub _eval_keyword_items {
   my ($self, $data, $schema, $state) = @_;
@@ -199,8 +213,6 @@ sub _eval_keyword_items {
     push @{$state->{annotations}}, @new_annotations;
     return A($state, true);
   }
-
-  abort($state, '"items" array is empty') if not @{$schema->{items}};
 
   my $last_index = -1;
   my $valid = 1;
@@ -263,6 +275,8 @@ sub _eval_keyword_items {
   return A($state, true);
 }
 
+sub _traverse_keyword_unevaluatedItems { shift->traverse_schema(@_) }
+
 sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
@@ -317,6 +331,8 @@ sub _eval_keyword_unevaluatedItems {
   return A($state, true);
 }
 
+sub _traverse_keyword_contains { shift->traverse_schema(@_) }
+
 sub _eval_keyword_contains {
   my ($self, $data, $schema, $state) = @_;
 
@@ -341,12 +357,6 @@ sub _eval_keyword_contains {
 
   push @{$state->{annotations}}, @new_annotations if $num_valid;
 
-  if (exists $schema->{minContains}) {
-    local $state->{keyword} = 'minContains';
-    assert_keyword_type($state, $schema, 'integer');
-    abort($state, 'minContains value is not a non-negative integer') if $schema->{minContains} < 0;
-  }
-
   my $valid = 1;
   # note: no items contained is only valid when minContains=0
   if (not $num_valid and ($schema->{minContains} // 1) > 0) {
@@ -358,8 +368,6 @@ sub _eval_keyword_contains {
 
   if (exists $schema->{maxContains}) {
     local $state->{keyword} = 'maxContains';
-    assert_keyword_type($state, $schema, 'integer');
-    abort($state, 'maxContains value is not a non-negative integer') if $schema->{maxContains} < 0;
 
     if ($num_valid > $schema->{maxContains}) {
       $valid = 0;
@@ -377,11 +385,12 @@ sub _eval_keyword_contains {
   return $valid;
 }
 
+sub _traverse_keyword_properties { shift->traverse_object_schemas(@_) }
+
 sub _eval_keyword_properties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('object', $data);
-  assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   my @orig_annotations = @{$state->{annotations}};
@@ -419,11 +428,12 @@ sub _eval_keyword_properties {
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
+sub _traverse_keyword_patternProperties { shift->traverse_object_schemas(@_) }
+
 sub _eval_keyword_patternProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('object', $data);
-  assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   my @orig_annotations = @{$state->{annotations}};
@@ -468,6 +478,8 @@ sub _eval_keyword_patternProperties {
   return @valid_properties ? A($state, [ uniqstr @valid_properties ]) : 1;
 }
 
+sub _traverse_keyword_additionalProperties { shift->traverse_schema(@_) }
+
 sub _eval_keyword_additionalProperties {
   my ($self, $data, $schema, $state) = @_;
 
@@ -510,6 +522,8 @@ sub _eval_keyword_additionalProperties {
   push @{$state->{annotations}}, @new_annotations;
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }
+
+sub _traverse_keyword_unevaluatedProperties { shift->traverse_schema(@_) }
 
 sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
@@ -563,6 +577,8 @@ sub _eval_keyword_unevaluatedProperties {
   push @{$state->{annotations}}, @new_annotations;
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }
+
+sub _traverse_keyword_propertyNames { shift->traverse_schema(@_) }
 
 sub _eval_keyword_propertyNames {
   my ($self, $data, $schema, $state) = @_;

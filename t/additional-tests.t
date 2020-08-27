@@ -42,7 +42,6 @@ $accepter->acceptance(
   # optional prereqs
   todo_tests => [
     eval { require Email::Address::XS; 1 } ? () : { file => 'format-idn-email.json' },
-    { file => 'faux-buggy-schemas.json' },
   ],
 );
 

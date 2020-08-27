@@ -25,34 +25,49 @@ sub keywords {
     multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
     maxLength minLength pattern
     maxItems minItems uniqueItems
+    minContains maxContains
     maxProperties minProperties required dependentRequired);
+}
+
+sub _traverse_keyword_type {
+  my ($self, $schema, $state) = @_;
+
+  if (is_plain_arrayref($schema->{type})) {
+    foreach my $type (@{$schema->{type}}) {
+      abort($state, 'unrecognized type "%s"', $type)
+        if not any { $type eq $_ } qw(null boolean object array string number integer);
+    }
+    abort($state, '"type" values are not unique') if not is_elements_unique($schema->{type});
+  }
+  else {
+    abort($state, 'unrecognized type "%s"', $schema->{type})
+      if not any { $schema->{type} eq $_ } qw(null boolean object array string number integer);
+  }
 }
 
 sub _eval_keyword_type {
   my ($self, $data, $schema, $state) = @_;
 
   if (is_plain_arrayref($schema->{type})) {
-    abort($state, '"type" values are not unique') if not is_elements_unique($schema->{type});
     foreach my $type (@{$schema->{type}}) {
-      abort($state, 'unrecognized type "%s"', $type)
-        if not any { $type eq $_ } qw(null boolean object array string number integer);
       return 1 if is_type($type, $data);
     }
     return E($state, 'wrong type (expected one of %s)', join(', ', @{$schema->{type}}));
   }
   else {
-    abort($state, 'unrecognized type "%s"', $schema->{type})
-      if not any { $schema->{type} eq $_ } qw(null boolean object array string number integer);
     return 1 if is_type($schema->{type}, $data);
     return E($state, 'wrong type (expected %s)', $schema->{type});
   }
 }
 
-sub _eval_keyword_enum {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _traverse_keyword_enum {
+  my ($self, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'array');
   abort($state, '"enum" values are not unique') if not is_elements_unique($schema->{enum});
+}
+
+sub _eval_keyword_enum {
+  my ($self, $data, $schema, $state) = @_;
 
   my @s; my $idx = 0;
   return 1 if any { is_equal($data, $_, $s[$idx++] = {}) } @{$schema->{enum}};
@@ -70,85 +85,91 @@ sub _eval_keyword_const {
     .($s->{path} ? ' (differences start at "'.$s->{path}.'")' : ''));
 }
 
+sub _traverse_keyword_multipleOf {
+  my ($self, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'number');
+  abort($state, 'multipleOf value is not a positive number') if $schema->{multipleOf} <= 0;
+}
+
 sub _eval_keyword_multipleOf {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('number', $data);
-  assert_keyword_type($state, $schema, 'number');
-  abort($state, 'multipleOf value is not a positive number') if $schema->{multipleOf} <= 0;
 
   my $quotient = $data / $schema->{multipleOf};
   return 1 if int($quotient) == $quotient and $quotient !~ /^-?Inf$/i;
   return E($state, 'value is not a multiple of %g', $schema->{multipleOf});
 }
 
+sub _traverse_keyword_maximum { goto \&_assert_number }
+
 sub _eval_keyword_maximum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('number', $data);
-  assert_keyword_type($state, $schema, 'number');
-
   return 1 if $data <= $schema->{maximum};
   return E($state, 'value is larger than %g', $schema->{maximum});
 }
+
+sub _traverse_keyword_exclusiveMaximum { goto \&_assert_number }
 
 sub _eval_keyword_exclusiveMaximum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('number', $data);
-  assert_keyword_type($state, $schema, 'number');
-
   return 1 if $data < $schema->{exclusiveMaximum};
   return E($state, 'value is equal to or larger than %g', $schema->{exclusiveMaximum});
 }
+
+sub _traverse_keyword_minimum { goto \&_assert_number }
 
 sub _eval_keyword_minimum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('number', $data);
-  assert_keyword_type($state, $schema, 'number');
-
   return 1 if $data >= $schema->{minimum};
   return E($state, 'value is smaller than %g', $schema->{minimum});
 }
+
+sub _traverse_keyword_exclusiveMinimum { goto \&_assert_number }
 
 sub _eval_keyword_exclusiveMinimum {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('number', $data);
-  assert_keyword_type($state, $schema, 'number');
-
   return 1 if $data > $schema->{exclusiveMinimum};
   return E($state, 'value is equal to or smaller than %g', $schema->{exclusiveMinimum});
 }
+
+sub _traverse_keyword_maxLength { goto \&_assert_non_negative_integer }
 
 sub _eval_keyword_maxLength {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('string', $data);
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, 'maxLength value is not a non-negative integer') if $schema->{maxLength} < 0;
-
   return 1 if length($data) <= $schema->{maxLength};
   return E($state, 'length is greater than %d', $schema->{maxLength});
 }
+
+sub _traverse_keyword_minLength { goto \&_assert_non_negative_integer }
 
 sub _eval_keyword_minLength {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('string', $data);
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, 'minLength value is not a non-negative integer') if $schema->{minLength} < 0;
-
   return 1 if length($data) >= $schema->{minLength};
   return E($state, 'length is less than %d', $schema->{minLength});
+}
+
+sub _traverse_keyword_pattern {
+  my ($self, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'string');
 }
 
 sub _eval_keyword_pattern {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('string', $data);
-  assert_keyword_type($state, $schema, 'string');
 
   try {
     return 1 if $data =~ m/$schema->{pattern}/;
@@ -159,85 +180,89 @@ sub _eval_keyword_pattern {
   };
 }
 
+sub _traverse_keyword_maxItems { goto \&_assert_non_negative_integer }
+
 sub _eval_keyword_maxItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('array', $data);
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, 'maxItems value is not a non-negative integer') if $schema->{maxItems} < 0;
 
   return 1 if @$data <= $schema->{maxItems};
   return E($state, 'more than %d item%s', $schema->{maxItems}, $schema->{maxItems} > 1 ? 's' : '');
 }
 
+sub _traverse_keyword_minItems { goto \&_assert_non_negative_integer }
+
 sub _eval_keyword_minItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('array', $data);
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, 'minItems value is not a non-negative integer') if $schema->{minItems} < 0;
-
   return 1 if @$data >= $schema->{minItems};
   return E($state, 'fewer than %d item%s', $schema->{minItems}, $schema->{minItems} > 1 ? 's' : '');
+}
+
+sub _traverse_keyword_uniqueItems {
+  my ($self, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'boolean');
 }
 
 sub _eval_keyword_uniqueItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('array', $data);
-  assert_keyword_type($state, $schema, 'boolean');
-
   return 1 if not $schema->{uniqueItems};
   return 1 if is_elements_unique($data, my $equal_indices = []);
   return E($state, 'items at indices %d and %d are not unique', @$equal_indices);
 }
 
+# Note: no effort is made to check if the 'contains' keyword has been disabled via its vocabulary.
+sub _traverse_keyword_minContains { goto \&_assert_non_negative_integer }
+sub _traverse_keyword_maxContains { goto \&_assert_non_negative_integer }
+
+sub _traverse_keyword_maxProperties { goto \&_assert_non_negative_integer }
+
 sub _eval_keyword_maxProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('object', $data);
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, 'maxProperties value is not a non-negative integer')
-    if $schema->{maxProperties} < 0;
-
   return 1 if keys %$data <= $schema->{maxProperties};
   return E($state, 'more than %d propert%s', $schema->{maxProperties},
     $schema->{maxProperties} > 1 ? 'ies' : 'y');
 }
 
+sub _traverse_keyword_minProperties { goto \&_assert_non_negative_integer }
+
 sub _eval_keyword_minProperties {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('object', $data);
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, 'minProperties value is not a non-negative integer')
-    if $schema->{minProperties} < 0;
-
   return 1 if keys %$data >= $schema->{minProperties};
   return E($state, 'fewer than %d propert%s', $schema->{minProperties},
     $schema->{minProperties} > 1 ? 'ies' : 'y');
+}
+
+sub _traverse_keyword_required {
+  my ($self, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'array');
+  abort($state, '"required" element is not a string')
+    if any { !is_type('string', $_) } @{$schema->{required}};
+  abort($state, '"required" values are not unique') if not is_elements_unique($schema->{required});
 }
 
 sub _eval_keyword_required {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('object', $data);
-  assert_keyword_type($state, $schema, 'array');
-
-  abort($state, '"required" element is not a string')
-    if any { !is_type('string', $_) } @{$schema->{required}};
-
-  abort($state, '"required" values are not unique') if not is_elements_unique($schema->{required});
 
   my @missing = grep !exists $data->{$_}, @{$schema->{required}};
   return 1 if not @missing;
   return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
 }
 
-sub _eval_keyword_dependentRequired {
-  my ($self, $data, $schema, $state) = @_;
+sub _traverse_keyword_dependentRequired {
+  my ($self, $schema, $state) = @_;
 
-  return 1 if not is_type('object', $data);
   assert_keyword_type($state, $schema, 'object');
   abort($state, '"dependentRequired" property is not an array')
     if any { !is_type('array', $schema->{dependentRequired}{$_}) }
@@ -247,6 +272,12 @@ sub _eval_keyword_dependentRequired {
   abort($state, '"dependentRequired" property elements are not unique')
     if any { !is_elements_unique($schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
+}
+
+sub _eval_keyword_dependentRequired {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not is_type('object', $data);
 
   my @missing = grep
     +(exists $data->{$_} && any { !exists $data->{$_} } @{ $schema->{dependentRequired}{$_} }),
@@ -254,6 +285,18 @@ sub _eval_keyword_dependentRequired {
 
   return 1 if not @missing;
   return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', sort @missing));
+}
+
+sub _assert_number {
+  my ($self, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'number');
+}
+
+sub _assert_non_negative_integer {
+  my ($self, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'integer');
+  abort($state, '%s value is not a non-negative integer', $state->{keyword})
+    if $schema->{$state->{keyword}} < 0;
 }
 
 1;

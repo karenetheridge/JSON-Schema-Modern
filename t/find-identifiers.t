@@ -167,7 +167,7 @@ subtest '$anchor at root without $id' => sub {
   cmp_deeply(
     $js->evaluate(
       1,
-      my $schema = {
+      {
         '$anchor' => 'root',
         '$defs' => {
           foo => {
@@ -207,44 +207,79 @@ subtest '$anchor at root without $id' => sub {
   );
 };
 
+subtest '$ids and $anchors in subschemas after $id changes' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'https://foo.com/a/alpha',
+        properties => {
+          b => {
+            '$id' => 'beta',
+            properties => {
+              d => {
+                '$anchor' => 'my_d',
+              },
+            },
+          },
+          f => {
+            '$id' => 'zeta',
+            properties => {
+              h => {
+                '$anchor' => 'my_h',
+              },
+            },
+          },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    '$anchor is legal in a subschema',
+  );
+
+  cmp_deeply(
+    { $js->_resource_index },
+    {
+      'https://foo.com/a/alpha' => {
+        path => '', canonical_uri => str('https://foo.com/a/alpha'), document => ignore,
+      },
+      'https://foo.com/a/beta' => {
+        path => '/properties/b', canonical_uri => str('https://foo.com/a/beta'), document => ignore,
+      },
+      'https://foo.com/a/zeta' => {
+        path => '/properties/f', canonical_uri => str('https://foo.com/a/zeta'), document => ignore,
+      },
+      'https://foo.com/a/beta#my_d' => {
+        path => '/properties/b/properties/d',
+        canonical_uri => str('https://foo.com/a/beta#/properties/d'),
+        document => ignore,
+      },
+      'https://foo.com/a/zeta#my_h' => {
+        path => '/properties/f/properties/h',
+        canonical_uri => str('https://foo.com/a/zeta#/properties/h'),
+        document => ignore,
+      },
+    },
+    'internal resource index is correct',
+  );
+};
+
 subtest 'invalid $id and $anchor' => sub {
   my $js = JSON::Schema::Draft201909->new;
 
   cmp_deeply(
     $js->evaluate(
       1,
-      my $schema = {
+      {
         '$id' => 'foo.json',
         '$defs' => {
           bad_id => {
             '$id' => 'foo.json#/foo/bar',
           },
-          bad_anchor => {
-            '$anchor' => 'my$foo',
-          },
-          const_not_id => {
-            const => {
-              '$id' => 'not_a_real_id',
-            },
-          },
-          const_not_anchor => {
-            const => {
-              '$anchor' => 'not_a_real_anchor',
-            },
-          },
         },
-        allOf => [
-          {
-            if => { const => 'check id' },
-            then => { '$ref' => 'foo.json#/$defs/bad_id' },
-            else => {
-              if => { const => 'check anchor' },
-              then => { '$ref' => '#/$defs/bad_anchor' },
-            },
-          },
-          { '$ref' => '#/$defs/const_not_id' },
-          { '$ref' => '#/$defs/const_not_anchor' },
-        ],
       },
     )->TO_JSON,
     {
@@ -252,63 +287,69 @@ subtest 'invalid $id and $anchor' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/allOf/1/$ref/const',
-          absoluteKeywordLocation => 'foo.json#/$defs/const_not_id/const',
-          error => 'value does not match',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/2/$ref/const',
-          absoluteKeywordLocation => 'foo.json#/$defs/const_not_anchor/const',
-          error => 'value does not match',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf',
-          absoluteKeywordLocation => 'foo.json#/allOf',
-          error => 'subschemas 1, 2 are not valid',
-        },
-      ],
-    },
-    'schema is evaluatable if bad definitions are not traversed',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      'check anchor',
-      $schema,
-    )->TO_JSON,
-    {
-      valid => bool(0),
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/0/else/then/$ref/$anchor',
-          absoluteKeywordLocation => 'foo.json#/$defs/bad_anchor/$anchor',
-          error => 'EXCEPTION: $anchor value "my$foo" does not match required syntax',
-        }
-      ],
-    },
-    'evaluation gives an error if bad $anchor is traversed',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      'check id',
-      $schema,
-    )->TO_JSON,
-    {
-      valid => bool(0),
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/0/then/$ref/$id',
+          keywordLocation => '/$defs/bad_id/$id',
           absoluteKeywordLocation => 'foo.json#/$defs/bad_id/$id',
           error => 'EXCEPTION: $id value "foo.json#/foo/bar" cannot have a non-empty fragment',
-        }
+        },
       ],
     },
-    'evaluation gives an error if bad $id is traversed',
+    'bad $id is detected, even if bad definitions are not traversed',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'foo.json',
+        '$defs' => {
+          bad_anchor => {
+            '$anchor' => 'my$foo',
+          },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$defs/bad_anchor/$anchor',
+          absoluteKeywordLocation => 'foo.json#/$defs/bad_anchor/$anchor',
+          error => 'EXCEPTION: $anchor value "my$foo" does not match required syntax',
+        },
+      ],
+    },
+    'bad $anchor is detected, even if bad definitions are not traversed',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'foo.json',
+        '$defs' => {
+          const_not_id => {
+            const => {
+              '$id' => 'not_a_real_id',
+            },
+          },
+          const_not_anchor => {
+            enum => [
+              '$anchor' => 'not_a_real_anchor',
+            ],
+          },
+        },
+        anyOf => [
+          { '$ref' => '#/$defs/const_not_id' },
+          { '$ref' => '#/$defs/const_not_anchor' },
+          true,
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    '"bad" $ids and $anchors that are not actually keywords are not reported as errors',
   );
 };
 

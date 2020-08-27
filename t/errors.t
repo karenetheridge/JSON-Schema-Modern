@@ -712,7 +712,7 @@ subtest 'exceptions' => sub {
       valid => bool(0),
       errors => [
         {
-          instanceLocation => '/x',
+          instanceLocation => '',
           keywordLocation => '/allOf/0/properties/x',
           error => 'EXCEPTION: invalid schema type: number',
         },
@@ -1277,13 +1277,13 @@ subtest 'invalid $schema' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$ref/$schema',
+          keywordLocation => '/$defs/my_def/$schema',
           absoluteKeywordLocation => 'https://bloop3.com#/$defs/my_def/$schema',
           error => 'EXCEPTION: $schema can only appear at the schema resource root',
         },
       ],
     },
-    '$state->{schema_path} is empty, but this is still not a resource root',
+    'this is still not a resource root, even in a $ref target',
   );
 };
 
