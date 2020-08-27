@@ -161,6 +161,30 @@ sub evaluate_json_string {
   return $self->evaluate($data, $schema, $config_override);
 }
 
+# this is called whenever we need to walk a document for something.
+# for now it is just called when a ::Document object is created, to identify
+# $id and $anchor keywords within.
+sub traverse {
+  my ($self, $schema_reference, $callbacks) = @_;
+  die 'insufficient arguments' if @_ < 4;
+
+  my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
+
+  my $state = {
+    depth => 0,
+    traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
+    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
+    document => 'SEE BELOW',            # the ::Document object containing this schema
+    document_path => 'SEE BELOW',       # the *initial* path within the document of this schema
+    schema_path => '',                  # the rest of the path, since the last traversed $ref
+    errors => [],                       # not used but must be initialized
+  };
+
+  # try-catch...
+  # then call _traverse at the top.
+
+}
+
 sub evaluate {
   my ($self, $data, $schema_reference, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
@@ -233,6 +257,37 @@ sub get {
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
+sub _traverse {
+  my ($self, $schema, $state, $callbacks) = @_;
+
+  delete $state->{keyword};
+  abort($state, 'maximum traversal depth exceeded')
+    if $state->{depth}++ > $self->max_traversal_depth;
+
+  my $schema_type = $self->_get_type($schema);
+  return if $schema_type eq 'boolean';
+
+  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
+
+  foreach my $keyword (
+    # CORE VOCABULARY
+    qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs),
+    # other vocabularies go here too. but they should be split out into separate classes first.
+  ) {
+    next if not exists $schema->{$keyword};
+
+    $state->{keyword} = $keyword;
+    my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
+    abort($state, 'unsupported keyword "%s"', $keyword) if not $self->can($method);
+    $self->$method($schema, $state);
+
+    # XXX now call callback for this keyword if we have one.
+    if (my $sub = $callbacks->{$keyword}) {
+      $sub->($schema, $state);
+    }
+  }
+}
+
 sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
@@ -289,9 +344,31 @@ sub _eval {
   return $result;
 }
 
+sub _traverse_keyword_id {
+  my ($self, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
+    if length Mojo::URL->new($schema->{'$id'})->fragment;
+
+  my $uri = Mojo::URL->new($schema->{'$id'});
+  $state->{canonical_schema_uri} = $uri->is_abs ? $uri
+    : $uri->base($state->{canonical_schema_uri})->to_abs;
+  $state->{canonical_schema_uri}->fragment(undef);
+
+  # do everything that is currently in _eval_keyword_id.
+  # but actually no... because that is looking up the $id in the document,
+  # and we haven't figure it out yet!
+  # so we need to do what _traverse_for_identifiers is doing.
+
+  # no return value.
+}
+
 sub _eval_keyword_id {
   my ($self, $data, $schema, $state) = @_;
 
+  # these checks can be moved to traverse.
   assert_keyword_type($state, $schema, 'string');
 
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
@@ -323,8 +400,19 @@ sub _eval_keyword_schema {
   return 1;
 }
 
+sub _traverse_keyword_anchor {
+  my ($self, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'string');
+
+  abort($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
+    if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/;
+}
+
 sub _eval_keyword_anchor {
   my ($self, $data, $schema, $state) = @_;
+
+  # this sub should be empty - nothing to do at runtime.
 
   assert_keyword_type($state, $schema, 'string');
 
@@ -351,6 +439,9 @@ sub _eval_keyword_recursiveAnchor {
   $state->{recursive_anchor_uri} = $uri;
   return 1;
 }
+
+# _traverse_keyword_ref:
+# do nothing except syntax checking.
 
 sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
