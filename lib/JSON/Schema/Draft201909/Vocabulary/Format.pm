@@ -21,10 +21,13 @@ sub keywords {
   qw(format);
 }
 
+sub _traverse_keyword_format {
+  my ($self, $schema, $state) = @_;
+  assert_keyword_type($state, $schema, 'string');
+}
+
 sub _eval_keyword_format {
   my ($self, $data, $schema, $state) = @_;
-
-  assert_keyword_type($state, $schema, 'string');
 
   if ($state->{validate_formats}
       and my $spec = $self->evaluator->_get_format_validation($schema->{format})) {

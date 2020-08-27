@@ -241,24 +241,31 @@ subtest '$id with a non-empty fragment' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909::Document->new(
       schema => {
+        '$id' => 'http://main.com',
         '$defs' => {
           foo => {
-            '$id' => 'http://localhost:4242/my_foo#hello',
+            '$id' => 'http://secondary.com',
             properties => {
               bar => {
-                '$id' => 'my_bar',
-                '$anchor' => 'my_anchor',
+                '$id' => 'http://localhost:4242/my_foo#hello',
               },
             },
           },
         },
       },
     ),
-    listmethods(
-      resource_index => unordered_pairs(
-        '' => { path => '', canonical_uri => str('') },
-        'my_bar' => { path => '/$defs/foo/properties/bar', canonical_uri => str('my_bar') },
-        'my_bar#my_anchor' => { path => '/$defs/foo/properties/bar', canonical_uri => str('my_bar') },
+    all(
+      methods(canonical_uri => str('http://main.com')),
+      listmethods(
+        resource_index => [],
+        errors => [
+          methods(TO_JSON => {
+            instanceLocation => '',
+            keywordLocation => '/$defs/foo/properties/bar/$id',
+            absoluteKeywordLocation => 'http://secondary.com#/properties/bar/$id',
+            error => 'EXCEPTION: $id value "http://localhost:4242/my_foo#hello" cannot have a non-empty fragment',
+          }),
+        ],
       ),
     ),
     'did not index the $id with a non-empty fragment, nor use it as the base for other identifiers',
@@ -277,8 +284,13 @@ subtest '$anchor not conforming to syntax' => sub {
       },
     ),
     listmethods(
-      resource_index => [
-        '' => { path => '', canonical_uri => str('') },
+      resource_index => [],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/$defs/foo/$anchor',
+          error => 'EXCEPTION: $anchor value "my_#bad_anchor" does not match required syntax',
+        }),
       ],
     ),
     'did not index an $anchor with invalid characters',
@@ -427,30 +439,27 @@ subtest 'resource collisions' => sub {
     'detected collision between two subschema uris in a document',
   );
 
-  TODO: {
-    local $TODO = 'we need a more sophisticated traverser to detect non-schemas';
-    is(
-      exception {
-        JSON::Schema::Draft201909::Document->new(
-          canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
-          schema => {
-            examples => [
+  is(
+    exception {
+      JSON::Schema::Draft201909::Document->new(
+        canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
+        schema => {
+          examples => [
+            { '$id' => '/x/y/z' },
+            { '$id' => 'https://foo.com/x/y/z' },
+          ],
+          default => {
+            allOf => [
               { '$id' => '/x/y/z' },
               { '$id' => 'https://foo.com/x/y/z' },
             ],
-            default => {
-              allOf => [
-                { '$id' => '/x/y/z' },
-                { '$id' => 'https://foo.com/x/y/z' },
-              ],
-            },
           },
-        );
-      },
-      undef,
-      'ignored "duplicate" uris embedded in non-schemas',
-    );
-  }
+        },
+      );
+    },
+    undef,
+    'ignored "duplicate" uris embedded in non-schemas',
+  );
 
   cmp_deeply(
     JSON::Schema::Draft201909::Document->new(

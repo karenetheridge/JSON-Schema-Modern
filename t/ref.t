@@ -288,8 +288,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/anyOf/1/$ref/$recursiveAnchor',
-          absoluteKeywordLocation => '#/$defs/myobject/$recursiveAnchor',
+          keywordLocation => '/$defs/myobject/$recursiveAnchor',
           error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
         },
       ],
@@ -327,13 +326,8 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       valid => bool(0),
       errors => [
         {
-          # TODO: when we have a separate traversal path, this will become:
-          # instanceLocation => '',
-          # keywordLocation => '/$defs/inner/$recursiveAnchor',
-          # error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
-          instanceLocation => '/foo',
-          keywordLocation => '/additionalProperties/$recursiveRef/$recursiveAnchor',
-          absoluteKeywordLocation => '#/$defs/inner/$recursiveAnchor',
+          instanceLocation => '',
+          keywordLocation => '/$defs/inner/$recursiveAnchor',
           error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
         },
       ],
@@ -372,87 +366,76 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   my $schema = {
     '$defs' => {
       allow_ints => {
+        '$id' => 'https://allowints.com',
         '$recursiveAnchor' => true,
         anyOf => [
-          { '$ref' => '#/$defs/base' },   # the base: all leaf nodes must be booleans
-          { type => 'integer' },          # or, integers are okay too
+          { '$recursiveRef' => '#' }, # the base: all leaf nodes must be booleans
+          { type => 'integer' },            # or, integers are okay too
         ],
       },
       base => {
-        '$recursiveAnchor' => true,
         anyOf => [
           { type => 'boolean' },
           {
+            '$id' => 'https://innerbase.com',
+            #'$recursiveAnchor' => true,  # the presence of this keyword changes everything
             type => 'object',
-            additionalProperties => { '$recursiveRef' => '#' }, # allow schema mods here too
+            additionalProperties => { '$recursiveRef' => 'https://base.com' },
           },
         ],
       },
     },
+    '$id' => 'https://base.com',
     '$recursiveAnchor' => true,
-    # here is where I insert a $ref to whatever subschema I want.
+    '$ref' => '#/$defs/base',
   };
 
   cmp_deeply(
-    $js->evaluate(
-      { foo => true },
-      { %$schema, '$ref' => '#/$defs/base' },
-    )->TO_JSON,
-    {
-      valid => bool(1),
-    },
-    '$recursiveRef with a single $recursiveAnchor in scope',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      { foo => 1 },
-      { %$schema, '$ref' => '#/$defs/base' },
-    )->TO_JSON,
+    $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
     {
       valid => bool(0),
       errors => [
-# 0 data: ''       schema: $ref/anyOf/0  - fails, not bool
-#   data: /foo   schema: $ref/anyOf/0/additionalProperties/$recursiveRef
-# 1 data: /foo   schema: $ref/anyOf/0/additionalProperties/$recursiveRef/anyOf/0/type       # - fails, not bool
-# 2 data: /foo/1 schema: $ref/anyOf/1/additionalProperties/$recursiveRef/anyOf/1/type       # - fails, not object.
-# 3                        $ref/anyOf/1/additionalProperties/$recursiveRef/anyOf fails
-# 4                        $ref/anyOf/1/additionalProperties fails
-# 5                        $ref/anyOf fails
+# 0 data: ''     schema: $ref/anyOf/0  - fails, not bool
+#   data: ''     schema: $ref/anyOf/1  - passes, is object
+# 1       /foo   schema  $ref/anyOf/1/additionalProperties/$recursiveRef/$ref/anyOf/0/type - fails, not bool
+# 2 data: /foo   schema: $ref/anyOf/1/additionalProperties/$recursiveRef/$ref/anyOf/1/type - fails, not object.
+# 3                      $ref/anyOf/1/additionalProperties/$recursiveRef/$ref/anyOf fails
+# 4                      $ref/anyOf/1/additionalProperties fails
+# 5                      $ref/anyOf fails
         {
           instanceLocation => '',
           keywordLocation => '/$ref/anyOf/0/type',
-          absoluteKeywordLocation => '#/$defs/base/anyOf/0/type',
+          absoluteKeywordLocation => 'https://base.com#/$defs/base/anyOf/0/type',
           error => 'wrong type (expected boolean)',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/$ref/anyOf/1/additionalProperties/$recursiveRef/$ref/anyOf/0/type',
-          absoluteKeywordLocation => '#/$defs/base/anyOf/0/type',
+          absoluteKeywordLocation => 'https://base.com#/$defs/base/anyOf/0/type',
           error => 'wrong type (expected boolean)',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/$ref/anyOf/1/additionalProperties/$recursiveRef/$ref/anyOf/1/type',
-          absoluteKeywordLocation => '#/$defs/base/anyOf/1/type',
+          absoluteKeywordLocation => 'https://innerbase.com#/type',
           error => 'wrong type (expected object)',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/$ref/anyOf/1/additionalProperties/$recursiveRef/$ref/anyOf',
-          absoluteKeywordLocation => '#/$defs/base/anyOf',
+          absoluteKeywordLocation => 'https://base.com#/$defs/base/anyOf',
           error => 'no subschemas are valid',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/anyOf/1/additionalProperties',
-          absoluteKeywordLocation => '#/$defs/base/anyOf/1/additionalProperties',
+          absoluteKeywordLocation => 'https://innerbase.com#/additionalProperties',
           error => 'not all additional properties are valid',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/anyOf',
-          absoluteKeywordLocation => '#/$defs/base/anyOf',
+          absoluteKeywordLocation => 'https://base.com#/$defs/base/anyOf',
           error => 'no subschemas are valid',
         },
       ],
@@ -460,28 +443,16 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
     'validation requires the override that is not in scope',
   );
 
+  delete $js->{_resource_index};
+
+  $schema->{'$defs'}{base}{anyOf}[1]{'$recursiveAnchor'} = true;
+
   cmp_deeply(
-    $js->evaluate(
-      { foo => true },
-      { %$schema, '$ref' => '#/$defs/allow_ints' },
-    )->TO_JSON,
+    $js->evaluate({ foo => true }, $schema)->TO_JSON,
     {
       valid => bool(1),
     },
     '$recursiveRef with both $recursiveAnchors in scope',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      {
-        foo => 1,
-      },
-      $schema,
-    )->TO_JSON,
-    {
-      valid => bool(1),
-    },
-    'validation makes use of the override that is now in scope',
   );
 };
 
