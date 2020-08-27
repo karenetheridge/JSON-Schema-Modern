@@ -159,6 +159,30 @@ sub evaluate_json_string {
   return $self->evaluate($data, $schema, $config_override);
 }
 
+# this is called whenever we need to walk a document for something.
+# for now it is just called when a ::Document object is created, to identify
+# $id and $anchor keywords within.
+sub traverse {
+  my ($self, $schema_reference, $callbacks) = @_;
+  die 'insufficient arguments' if @_ < 4;
+
+  my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
+
+  my $state = {
+    depth => 0,
+    traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
+    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
+    document => 'SEE BELOW',            # the ::Document object containing this schema
+    document_path => 'SEE BELOW',       # the *initial* path within the document of this schema
+    schema_path => '',                  # the rest of the path, since the last traversed $ref
+    errors => [],                       # not used but must be initialized
+  };
+
+  # try-catch...
+  # then call _traverse at the top.
+
+}
+
 sub evaluate {
   my ($self, $data, $schema_reference, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
@@ -241,6 +265,36 @@ sub get {
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
+sub _traverse {
+  my ($self, $schema, $state, $callbacks) = @_;
+
+  $state = { %$state };     # changes to $state should only affect subschemas, not parents
+  delete $state->{keyword};
+
+  abort($state, 'maximum traversal depth exceeded')
+    if $state->{depth}++ > $self->max_traversal_depth;
+
+  my $schema_type = $self->_get_type($schema);
+  return if $schema_type eq 'boolean';
+
+  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
+
+  foreach my $vocabulary (@{$state->{vocabularies}}) {
+    foreach my $keyword ($vocabulary->keywords) {
+      next if not exists $schema->{$keyword};
+
+      $state->{keyword} = $keyword;
+      my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
+
+      $vocabulary->$method($schema, $state) if $vocabulary->can($method);
+
+      if (my $sub = $callbacks->{$keyword}) {
+        $sub->($schema, $state);
+      }
+    }
+  }
+}
+
 sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
@@ -267,7 +321,8 @@ sub _eval {
 
       $state->{keyword} = $keyword;
       my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
-      $result = 0 if not $vocabulary->$method($data, $schema, $state);
+
+      $result &&= $vocabulary>$method($data, $schema, $state) if $vocabulary->can($method);
 
       last if not $result and $state->{short_circuit};
     }

@@ -76,6 +76,13 @@ has _serialized_schema => (
   init_arg => undef,
 );
 
+has _evaluator => (
+  is => 'ro',
+  isa => InstanceOf['JSON::Schema::Draft201909'],
+  required => 1,
+  weak_ref => 1,
+);
+
 around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
@@ -107,6 +114,7 @@ sub BUILD {
 
   my $original_uri = $self->canonical_uri->clone;
   my $schema = $self->schema;
+
   my @identifiers = _traverse_for_identifiers($schema, '', $original_uri->clone);
 
   if (is_plain_hashref($self->schema) and my $id = $self->get('/$id')) {
@@ -119,6 +127,44 @@ sub BUILD {
       or "$original_uri";
 
   $self->_add_resources(@identifiers);
+}
+
+# XXX TODO
+sub _new_traverse_for_identifiers {
+  my $self = shift;
+
+  # or do we want to provide the original traverse method a sub that will be called
+  # after every hit, so we can recover the identifier out of it?
+
+  # does traverse only happen *once*, or can it be done multiple times?
+
+  # this bit replaces the call to _traverse_for_identifiers in BUILD above:
+
+  my @identifiers;
+  $self->_evaluator->traverse(
+    $self->schema,
+    # callbacks:
+    {
+      '$id' => sub {
+        # note that $self here is the evaluator
+        my ($self, $schema, $state) = @_;
+        push @identifiers,
+          $state->{canonical_schema_uri} => {
+            path => $state->{schema_path}.'/$id',
+            canonical_uri => $$state->{canonical_schema_uri}->clone,
+          };
+      },
+      '$anchor' => sub {
+        # note that $self here is the evaluator
+        my ($self, $schema, $state) = @_;
+        push @identifiers,
+          Mojo::URL->new->base($state->{canonical_schema_uri})->to_abs->fragment($schema->{'$anchor'}) => {
+            path => $state->{schema_path}.'/$anchor',
+            canonical_uri => $state->{canonical_schema_uri}->clone,
+          };
+      },
+    },
+  );
 }
 
 sub _traverse_for_identifiers {
