@@ -67,7 +67,9 @@ $accepter->acceptance(
     # (This might change if tests are added that are expected to produce exceptions.)
     foreach my $r ($result, ($ENV{NO_SHORT_CIRCUIT} ? () : $result_short)) {
       warn 'evaluation generated an exception'
-        if grep $_->{error} =~ /^EXCEPTION/ && $_->{error} !~ /but short_circuit is enabled/,
+        if grep $_->{error} =~ /^EXCEPTION/
+            && $_->{error} !~ /but short_circuit is enabled/
+            && $_->{error} !~ /(max|min)imum value is not a number$/, # optional/bignum.json
           @{$r->TO_JSON->{errors}};
     }
 
@@ -223,8 +225,8 @@ __END__
 # unevaluatedItems.json                         33          0     0
 # unevaluatedProperties.json                    51          0     0
 # uniqueItems.json                              64          0     0
-# optional/bignum.json                           4          5     0
-# optional/content.json                         10          8     0
+# optional/bignum.json                           2          7     0
+# optional/content.json                          6          4     0
 # optional/ecmascript-regex.json                31          9     0
 # optional/float-overflow.json                   0          1     0
 # optional/non-bmp-regex.json                   12          0     0

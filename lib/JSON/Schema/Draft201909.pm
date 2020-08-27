@@ -14,7 +14,7 @@ use JSON::MaybeXS;
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint);
-use Ref::Util 0.100 qw(is_ref is_plain_hashref is_plain_coderef);
+use Ref::Util 0.100 qw(is_ref is_plain_hashref is_plain_coderef is_plain_arrayref);
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
@@ -105,7 +105,13 @@ sub add_schema {
   }
 
   my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
-    : JSON::Schema::Draft201909::Document->new(schema => shift, $uri ? (canonical_uri => $uri) : ());
+    : JSON::Schema::Draft201909::Document->new(
+      schema => shift,
+      $uri ? (canonical_uri => $uri) : (),
+      _evaluator => $self,
+    );
+
+  die [ $document->errors ] if $document->has_errors;
 
   if (not grep $_->{document} == $document, $self->_resource_values) {
     my $schema_content = $document->_serialized_schema
@@ -158,6 +164,50 @@ sub evaluate_json_string {
   return $self->evaluate($data, $schema, $config_override);
 }
 
+# this is called whenever we need to walk a document for something.
+# for now it is just called when a ::Document object is created, to identify
+# $id and $anchor keywords within.
+# Returns the internal $state object accumulated during the traversal.
+sub traverse {
+  my ($self, $schema_reference, $config_override) = @_;
+  die 'insufficient arguments' if @_ < 2;
+
+  my $base_uri = Mojo::URL->new($config_override->{canonical_schema_uri} // '');
+
+  my $state = {
+    depth => 0,
+    data_path => '',                    # this never changes since we don't have an instance yet
+    traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
+    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
+    schema_path => '',                  # the rest of the path, since the last traversed $ref
+    errors => [],
+    # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
+    # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
+    # keyword in the schema and the '$vocabulary' keyword in the metaschema.
+    vocabularies => [
+      (map use_module($_)->new(evaluator => $self),
+        map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
+          qw(Core Validation Applicator Format Content MetaData)),
+      $self,  # for discontinued keywords defined in the base schema
+    ],
+    identifiers => [],
+  };
+
+  try {
+    $self->_traverse($schema_reference, $state);
+  }
+  catch {
+    if ($@->$_isa('JSON::Schema::Draft201909::Error')) {
+      push @{$state->{errors}}, $@;
+    }
+    else {
+      E($state, 'EXCEPTION: '.$@);
+    }
+  }
+
+  return $state;
+}
+
 sub evaluate {
   my ($self, $data, $schema_reference, $config_override) = @_;
   die 'insufficient arguments' if @_ < 3;
@@ -178,9 +228,8 @@ sub evaluate {
     errors => [],
     annotations => [],
     seen => {},
-    # for now, this is hardcoded, but in the future we will wrap this in a dialect that defaults
-    # only to the Core vocabulary and then determine the actual vocabularies from the '$schema'
-    # keyword in the schema and the '$vocabulary' keyword in the metaschema.
+    # for now, this is hardcoded, but in the future the dialect will be determined by the
+    # traverse() pass on the schema and examination of the referenced metaschema.
     vocabularies => [
       (map use_module($_)->new(evaluator => $self),
         map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
@@ -210,7 +259,10 @@ sub evaluate {
     $result = $self->_eval($data, $schema, $state);
   }
   catch {
-    if ($@->$_isa('JSON::Schema::Draft201909::Error')) {
+    if (is_plain_arrayref($@)) {
+      push @{$state->{errors}}, @{$@};
+    }
+    elsif ($@->$_isa('JSON::Schema::Draft201909::Error')) {
       push @{$state->{errors}}, $@;
     }
     else {
@@ -240,6 +292,31 @@ sub get {
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
+sub _traverse {
+  my ($self, $schema, $state) = @_;
+
+  delete $state->{keyword};
+
+  abort($state, 'maximum traversal depth exceeded')
+    if $state->{depth}++ > $self->max_traversal_depth;
+
+  my $schema_type = get_type($schema);
+  return if $schema_type eq 'boolean';
+
+  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
+
+  foreach my $vocabulary (@{$state->{vocabularies}}) {
+    foreach my $keyword ($vocabulary->keywords) {
+      next if not exists $schema->{$keyword};
+
+      $state->{keyword} = $keyword;
+      my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
+
+      $vocabulary->$method($schema, $state) if $vocabulary->can($method);
+    }
+  }
+}
+
 sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
@@ -262,6 +339,7 @@ sub _eval {
   my $schema_type = get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
 
+  # this should never happen, due to checks in traversal
   abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $result = 1;
@@ -272,7 +350,7 @@ sub _eval {
 
       $state->{keyword} = $keyword;
       my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
-      $result = 0 if not $vocabulary->$method($data, $schema, $state);
+      $result = 0 if $vocabulary->can($method) and not $vocabulary->$method($data, $schema, $state);
 
       last if not $result and $state->{short_circuit};
     }
@@ -479,7 +557,8 @@ sub _get_or_load_resource {
   if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
     my $file = path(dist_dir('JSON-Schema-Draft201909'), $local_filename);
     my $schema = $self->_json_decoder->decode($file->slurp_raw);
-    my $document = JSON::Schema::Draft201909::Document->new(schema => $schema);
+    my $document = JSON::Schema::Draft201909::Document->new(schema => $schema, _evaluator => $self);
+    die [ $document->errors ] if $document->has_errors;
 
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
@@ -541,7 +620,7 @@ __END__
 =pod
 
 =for :header
-=for stopwords schema subschema metaschema validator evaluator
+=for stopwords schema subschema metaschema validator evaluator listref
 
 =head1 SYNOPSIS
 
@@ -655,6 +734,15 @@ evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
+=head2 traverse
+
+  $result = $js->traverse($schema_data);
+  $result = $js->traverse($schema_data, { canonical_schema_uri => 'http://foo.com' });
+
+Traverses the provided schema data without evaluating it against any instance data. Returns the
+internal state object accumulated during the traversal, including any identifiers found therein, and
+any errors found during parsing. For internal purposes only.
+
 =head2 add_schema
 
   $js->add_schema($uri => $schema);
@@ -672,6 +760,9 @@ as needed.
 
 Returns the L<JSON::Schema::Draft201909::Document> that contains the added schema, or C<undef>
 if the resource could not be found.
+
+May die with a listref of L<JSON::Schema::Draft201909::Error> object(s), if there were errors in the
+document.
 
 =head2 get
 
