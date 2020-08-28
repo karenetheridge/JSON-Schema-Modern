@@ -32,7 +32,12 @@ our @EXPORT_OK = qw(
   A
   abort
   assert_keyword_type
+  true
+  false
 );
+
+use JSON::PP ();
+use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 sub is_type {
   my ($type, $value) = @_;
@@ -240,6 +245,6 @@ __END__
 This class contains internal utilities to be used by L<JSON::Schema::Draft201909>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
-E A abort assert_keyword_type
+canonical_schema_uri E A abort assert_keyword_type
 
 =cut

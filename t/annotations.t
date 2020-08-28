@@ -8,9 +8,12 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
+use Module::Runtime 'use_module';
 use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
+
+my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit => 0);
 
 my $initial_state = {
   short_circuit => 0,
@@ -19,10 +22,13 @@ my $initial_state = {
   data_path => '',
   schema_path => '',
   traversed_schema_path => '',
+  vocabularies => [
+    (map use_module($_)->new(evaluator => $js),
+      map 'JSON::Schema::Draft201909::Vocabulary::'.$_, qw(Applicator MetaData)),
+  ],
 };
 
 subtest 'allOf' => sub {
-  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit => 0);
   my $state = {
     %$initial_state,
     keyword => 'allOf',
@@ -37,7 +43,10 @@ subtest 'allOf' => sub {
     ],
   };
 
-  ok(!$js->_eval_keyword_allOf(1, $fail_schema, $state), 'evaluation of the allOf keyword fails');
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_allOf(1, $fail_schema, $state),
+    'evaluation of the allOf keyword fails',
+  );
 
   cmp_deeply(
     $state,
@@ -61,7 +70,10 @@ subtest 'allOf' => sub {
     ],
   };
 
-  ok($js->_eval_keyword_allOf(1, $pass_schema, $state), 'evaluation of the allOf keyword succeeds');
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_allOf(1, $pass_schema, $state),
+    'evaluation of the allOf keyword succeeds',
+  );
 
   cmp_deeply(
     $state,
@@ -87,26 +99,27 @@ subtest 'allOf' => sub {
 
   ok($js->collect_annotations, '...but the value is still true on the object');
 
-  $js = JSON::Schema::Draft201909->new;
-  ok(!$js->collect_annotations, 'collect_annotations defaults to false');
-  cmp_deeply(
-    $js->evaluate(1, $pass_schema, { collect_annotations => 1 })->TO_JSON,
-    {
-      valid => bool(1),
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/1/title',
-          annotation => 'allOf title',
-        },
-      ],
-    },
-    'annotation collection can be turned on in evaluate() also',
-  );
+  {
+    my $js = JSON::Schema::Draft201909->new;
+    ok(!$js->collect_annotations, 'collect_annotations defaults to false');
+    cmp_deeply(
+      $js->evaluate(1, $pass_schema, { collect_annotations => 1 })->TO_JSON,
+      {
+        valid => bool(1),
+        annotations => [
+          {
+            instanceLocation => '',
+            keywordLocation => '/allOf/1/title',
+            annotation => 'allOf title',
+          },
+        ],
+      },
+      'annotation collection can be turned on in evaluate() also',
+    );
+  }
 };
 
 subtest 'oneOf' => sub {
-  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit => 0);
   my $state = {
     %$initial_state,
     keyword => 'oneOf',
@@ -122,7 +135,10 @@ subtest 'oneOf' => sub {
     ],
   };
 
-  ok(!$js->_eval_keyword_oneOf(1, $fail_schema, $state), 'evaluation of the oneOf keyword fails');
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_oneOf(1, $fail_schema, $state),
+    'evaluation of the oneOf keyword fails',
+  );
 
   cmp_deeply(
     $state,
@@ -145,7 +161,10 @@ subtest 'oneOf' => sub {
     ],
   };
 
-  ok($js->_eval_keyword_oneOf(1, $pass_schema, $state), 'evaluation of the oneOf keyword succeeds');
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_oneOf(1, $pass_schema, $state),
+    'evaluation of the oneOf keyword succeeds',
+  );
 
   cmp_deeply(
     $state,
@@ -165,7 +184,6 @@ subtest 'oneOf' => sub {
 };
 
 subtest 'not' => sub {
-  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit => 0);
   my $state = {
     %$initial_state,
     keyword => 'not',
@@ -177,7 +195,10 @@ subtest 'not' => sub {
     not => { title => 'not title' },   # passes; creates annotations
   };
 
-  ok(!$js->_eval_keyword_not(1, $fail_schema, $state), 'evaluation of the not keyword fails');
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_not(1, $fail_schema, $state),
+    'evaluation of the not keyword fails',
+  );
 
   cmp_deeply(
     $state,
@@ -196,7 +217,10 @@ subtest 'not' => sub {
     not => { not => { title => 'not title' } },
   };
 
-  ok($js->_eval_keyword_not(1, $pass_schema, $state), 'evaluation of the not keyword succeeds');
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_not(1, $pass_schema, $state),
+    'evaluation of the not keyword succeeds',
+  );
 
   cmp_deeply(
     $state,
