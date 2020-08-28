@@ -20,7 +20,10 @@ use namespace::clean;
 
 use Exporter 'import';
 
-our @EXPORT_OK = qw(is_type get_type is_equal is_elements_unique jsonp local_annotations E A abort assert_keyword_type);
+our @EXPORT_OK = qw(is_type get_type is_equal is_elements_unique jsonp local_annotations E A abort assert_keyword_type true false);
+
+use JSON::PP ();
+use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 sub is_type {
   my ($type, $value) = @_;
