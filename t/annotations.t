@@ -7,9 +7,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use Test::Deep '!blessed';
-use Ref::Util 0.100 qw(is_plain_arrayref is_plain_hashref);
-use Scalar::Util 'blessed';
+use Test::Deep;
 use JSON::Schema::Draft201909;
 use lib 't/lib';
 use Helper;
@@ -42,14 +40,14 @@ subtest 'allOf' => sub {
   ok(!$js->_eval_keyword_allOf(1, $fail_schema, $state), 'evaluation of the allOf keyword fails');
 
   cmp_deeply(
-    unbless($state),
+    $state,
     my $new_state = {
       %$state,
-      canonical_schema_uri => '',
+      canonical_schema_uri => str(''),
       annotations => [ 'a previous annotation' ], # annotation from /allOf/1 is not saved
       errors => [
-        { instanceLocation => '', keywordLocation => '/allOf/0', error => 'subschema is false' },
-        { instanceLocation => '', keywordLocation => '/allOf', error => 'subschema 0 is not valid' },
+        methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf/0', error => 'subschema is false' }),
+        methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf', error => 'subschema 0 is not valid' }),
       ],
     },
     'failing allOf: state is correct after evaluating',
@@ -66,16 +64,16 @@ subtest 'allOf' => sub {
   ok($js->_eval_keyword_allOf(1, $pass_schema, $state), 'evaluation of the allOf keyword succeeds');
 
   cmp_deeply(
-    unbless($state),
+    $state,
     {
       %$new_state,
       annotations => [
         'a previous annotation',
-        {
+        methods(TO_JSON => {
           instanceLocation => '',
           keywordLocation => '/allOf/1/title',
           annotation => 'allOf title',
-        },
+        }),
       ],
     },
     'passing allOf: state is correct after evaluating',
@@ -127,13 +125,13 @@ subtest 'oneOf' => sub {
   ok(!$js->_eval_keyword_oneOf(1, $fail_schema, $state), 'evaluation of the oneOf keyword fails');
 
   cmp_deeply(
-    unbless($state),
+    $state,
     my $new_state = {
       %$state,
-      canonical_schema_uri => '',
+      canonical_schema_uri => str(''),
       annotations => [ 'a previous annotation' ], # annotations from /oneOf/1, /oneOf/2 are not saved
       errors => [
-        { instanceLocation => '', keywordLocation => '/oneOf', error => 'multiple subschemas are valid: 1, 2' },
+        methods(TO_JSON => { instanceLocation => '', keywordLocation => '/oneOf', error => 'multiple subschemas are valid: 1, 2' }),
       ],
     },
     'failing oneOf: state is correct after evaluating',
@@ -150,16 +148,16 @@ subtest 'oneOf' => sub {
   ok($js->_eval_keyword_oneOf(1, $pass_schema, $state), 'evaluation of the oneOf keyword succeeds');
 
   cmp_deeply(
-    unbless($state),
+    $state,
     {
       %$new_state,
       annotations => [
         'a previous annotation',
-        {
+        methods(TO_JSON => {
           instanceLocation => '',
           keywordLocation => '/oneOf/1/title',
           annotation => 'oneOf title',
-        },
+        }),
       ],
     },
     'passing oneOf: state is correct after evaluating',
@@ -182,13 +180,13 @@ subtest 'not' => sub {
   ok(!$js->_eval_keyword_not(1, $fail_schema, $state), 'evaluation of the not keyword fails');
 
   cmp_deeply(
-    unbless($state),
+    $state,
     my $new_state = {
       %$state,
-      canonical_schema_uri => '',
+      canonical_schema_uri => str(''),
       annotations => [ 'a previous annotation' ], # annotation from /not is not saved
       errors => [
-        { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' },
+        methods(TO_JSON => { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' }),
       ],
     },
     'failing not: state is correct after evaluating',
@@ -201,7 +199,7 @@ subtest 'not' => sub {
   ok($js->_eval_keyword_not(1, $pass_schema, $state), 'evaluation of the not keyword succeeds');
 
   cmp_deeply(
-    unbless($state),
+    $state,
     {
       %$new_state,
       annotations => [
@@ -233,23 +231,5 @@ subtest 'not' => sub {
     'annotations are still collected inside a "not", otherwuse the unevaluatedProperties would have returned false',
   );
 };
-
-# recursively call ->TO_JSON on everything
-sub unbless {
-  my $data = shift;
-
-  if (is_plain_arrayref($data)) {
-    return [ map __SUB__->($data->[$_]), 0 .. $#{$data} ];
-  }
-  elsif (is_plain_hashref($data)) {
-    return +{ map +($_ => __SUB__->($data->{$_})), keys %$data };
-  }
-  elsif (blessed $data) {
-    return $data->can('TO_JSON') ? $data->TO_JSON : "$data";
-  }
-  else {
-    return $data;
-  }
-}
 
 done_testing;
