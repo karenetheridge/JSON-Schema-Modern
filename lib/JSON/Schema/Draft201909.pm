@@ -15,7 +15,6 @@ use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(any pairs first uniqint uniqstr max);
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_plain_coderef);
-use Mojo::JSON::Pointer;
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;

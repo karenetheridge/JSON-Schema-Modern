@@ -11,7 +11,6 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use Mojo::URL;
 use Carp 'croak';
-use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_plain_arrayref is_plain_hashref);
 use List::Util 1.29 'pairs';
 use Safe::Isa;
@@ -19,7 +18,7 @@ use Moo;
 use strictures 2;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
-use Types::Standard qw(InstanceOf HashRef Str Dict HasMethods);
+use Types::Standard qw(InstanceOf HashRef Str Dict);
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer';
