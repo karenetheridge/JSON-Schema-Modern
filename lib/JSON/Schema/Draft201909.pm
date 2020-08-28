@@ -170,6 +170,7 @@ sub evaluate {
   my $state = {
     short_circuit => $config_override->{short_circuit} // $self->short_circuit,
     collect_annotations => $config_override->{collect_annotations} // $self->collect_annotations,
+    validate_formats => $config_override->{validate_formats} // $self->validate_formats,
     depth => 0,
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
@@ -1309,7 +1310,7 @@ sub _eval_keyword_format {
 
   assert_keyword_type($state, $schema, 'string');
 
-  if ($self->validate_formats and my $spec = $self->_get_format_validation($schema->{format})) {
+  if ($state->{validate_formats} and my $spec = $self->_get_format_validation($schema->{format})) {
     return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
       if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
   }
@@ -1802,7 +1803,8 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
+evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -1825,7 +1827,8 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
+evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
