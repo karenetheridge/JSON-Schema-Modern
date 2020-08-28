@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - refactor code into separate vocabulary classes, to faciliate
+            future support for custom vocabularies
 
 0.016     2020-11-18 18:18:40Z
           - further fixes to infinite loop detection

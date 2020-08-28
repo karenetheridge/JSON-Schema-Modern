@@ -32,7 +32,12 @@ our @EXPORT_OK = qw(
   A
   abort
   assert_keyword_type
+  true
+  false
 );
+
+use JSON::PP ();
+use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 sub is_type {
   my ($type, $value) = @_;
