@@ -8,11 +8,9 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use JSON::Schema::Draft201909;
+use JSON::Schema::Draft201909::Utilities qw(is_type get_type is_equal);
 use lib 't/lib';
 use Helper;
-
-my $js = JSON::Schema::Draft201909->new;
 
 subtest 'equality, using inflated data' => sub {
   foreach my $test (
@@ -32,14 +30,14 @@ subtest 'equality, using inflated data' => sub {
       { a => { b => 1, c => 2 }, d => { e => 3, f => 5 } }, false, '/d/f' ],
   ) {
     my ($x, $y, $expected, $diff_path) = @$test;
-    my @types = map $js->_get_type($_), $x, $y;
-    my $result = $js->_is_equal($x, $y, my $state = {});
+    my @types = map get_type($_), $x, $y;
+    my $result = is_equal($x, $y, my $state = {});
 
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
 
-    ok($js->_is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
-    ok($js->_is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
+    ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
+    ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
     note '';
   }
@@ -68,13 +66,13 @@ subtest 'equality, using JSON strings' => sub {
     my ($x, $y, $expected, $diff_path) = @$test;
     ($x, $y) = map $decoder->decode($_), $x, $y;
 
-    my @types = map $js->_get_type($_), $x, $y;
-    my $result = $js->_is_equal($x, $y, my $state = {});
+    my @types = map get_type($_), $x, $y;
+    my $result = is_equal($x, $y, my $state = {});
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
 
-    ok($js->_is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
-    ok($js->_is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
+    ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
+    ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
     note '';
   }

@@ -19,6 +19,7 @@ use strictures 2;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
 use Types::Standard qw(InstanceOf HashRef Str Dict);
+use JSON::Schema::Draft201909::Utilities qw(is_type jsonp);
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer';
@@ -130,7 +131,7 @@ sub _traverse_for_identifiers {
       0 .. $#{$data};
   }
   elsif (is_plain_hashref($data)) {
-    if (exists $data->{'$id'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$id'})) {
+    if (exists $data->{'$id'} and is_type('string', $data->{'$id'})) {
       my $uri = Mojo::URL->new($data->{'$id'});
       if (not length $uri->fragment) {
         $canonical_uri = $uri->is_abs ? $uri : $uri->to_abs($canonical_uri);
@@ -138,7 +139,7 @@ sub _traverse_for_identifiers {
         push @identifiers, $canonical_uri => { path => $path, canonical_uri => $canonical_uri->clone };
       }
     }
-    if (exists $data->{'$anchor'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$anchor'})
+    if (exists $data->{'$anchor'} and is_type('string', $data->{'$anchor'})
         and $data->{'$anchor'} =~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
       my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($data->{'$anchor'});
       push @identifiers, $uri => { path => $path, canonical_uri => $canonical_uri->clone };
@@ -148,17 +149,11 @@ sub _traverse_for_identifiers {
       @identifiers,
       map
         __SUB__->($data->{$_}, jsonp($path, $_),
-          $canonical_uri->clone->fragment(jsonp($canonical_uri->fragment, $_))),
+          $canonical_uri->clone->fragment(jsonp($canonical_uri->fragment//'', $_))),
         keys %$data;
   }
 
   return ();
-}
-
-# shorthand for creating and appending json pointers
-use namespace::clean 'jsonp';
-sub jsonp {
-  return join('/', (shift // ''), map s/~/~0/gr =~ s!/!~1!gr, @_);
 }
 
 1;
