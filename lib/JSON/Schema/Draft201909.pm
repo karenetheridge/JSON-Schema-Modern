@@ -348,7 +348,8 @@ sub _eval {
 
 print STDERR "### no $method defined\n"
 if not $vocabulary->can($method)
-  and not grep $keyword eq $_, qw($schema $anchor $vocabulary $comment $defs);
+  and not (grep $keyword eq $_, qw($schema $anchor $vocabulary $comment $defs
+  then else additionalItems));
 
       last if not $result and $state->{short_circuit};
     }

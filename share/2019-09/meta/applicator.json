@@ -23,18 +23,21 @@
         "properties": {
             "type": "object",
             "additionalProperties": { "$recursiveRef": "#" },
-            "default": {}
+            "default": {} // just use the default at # which should be true.
         },
         "patternProperties": {
             "type": "object",
             "additionalProperties": { "$recursiveRef": "#" },
             "propertyNames": { "format": "regex" },
-            "default": {}
+            "default": {} // just use the default at # which should be true.
         },
         "dependentSchemas": {
             "type": "object",
             "additionalProperties": {
                 "$recursiveRef": "#"
+                // no default here?   or maybe # schema should default to true.
+                // this could fold into a schemaObject definition - shared with properties
+                // minProperties: 1, for symmetry with schemaArray?
             }
         },
         "propertyNames": { "$recursiveRef": "#" },
