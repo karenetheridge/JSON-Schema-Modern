@@ -79,8 +79,12 @@ has _serialized_schema => (
 has _evaluator => (
   is => 'ro',
   isa => InstanceOf['JSON::Schema::Draft201909'],
-  required => 1,
   weak_ref => 1,
+  lazy => 1,
+  default => sub {
+    print STDERR "### instantiating a new evaluator in ::Document constructor\n";
+    JSON::Schema::Draft201909->new;
+  },
 );
 
 around _add_resources => sub {
@@ -148,21 +152,24 @@ sub _new_traverse_for_identifiers {
       '$id' => sub {
         # note that $self here is the evaluator
         my ($self, $schema, $state) = @_;
+        # TODO: instead of pushing, just add to resource index directly?
         push @identifiers,
           $state->{canonical_schema_uri} => {
             path => $state->{schema_path}.'/$id',
-            canonical_uri => $$state->{canonical_schema_uri}->clone,
+            canonical_uri => $state->{canonical_schema_uri}->clone,
           };
       },
       '$anchor' => sub {
         # note that $self here is the evaluator
         my ($self, $schema, $state) = @_;
+        # TODO: instead of pushing, just add to resource index directly?
         push @identifiers,
           Mojo::URL->new->base($state->{canonical_schema_uri})->to_abs->fragment($schema->{'$anchor'}) => {
             path => $state->{schema_path}.'/$anchor',
             canonical_uri => $state->{canonical_schema_uri}->clone,
           };
       },
+      # TODO: $schema: copy $state->{vocabularies} in the document resource index
     },
   );
 }

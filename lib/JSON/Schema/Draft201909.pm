@@ -105,7 +105,11 @@ sub add_schema {
   }
 
   my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
-    : JSON::Schema::Draft201909::Document->new(schema => shift, $uri ? (canonical_uri => $uri) : ());
+    : JSON::Schema::Draft201909::Document->new(
+      schema => shift,
+      $uri ? (canonical_uri => $uri) : (),
+      _evaluator => $self,
+    );
 
   if (not grep $_->{document} == $document, $self->_resource_values) {
     my $schema_content = $document->_serialized_schema
@@ -164,7 +168,7 @@ sub evaluate_json_string {
 # $id and $anchor keywords within.
 sub traverse {
   my ($self, $schema_reference, $callbacks) = @_;
-  die 'insufficient arguments' if @_ < 4;
+  die 'insufficient arguments' if @_ < 2;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
@@ -175,12 +179,29 @@ sub traverse {
     document => 'SEE BELOW',            # the ::Document object containing this schema
     document_path => 'SEE BELOW',       # the *initial* path within the document of this schema
     schema_path => '',                  # the rest of the path, since the last traversed $ref
-    errors => [],                       # not used but must be initialized
+    errors => [],
+    # for now, this is hardcoded, but in the future we will start off only with the Core vocabulary
+    # and then determine the actual value(s) from the '$schema' keyword in the schema and the
+    # '$vocabulary' keyword in the metaschema.
+    vocabularies => [
+      (map use_module($_)->new(evaluator => $self),
+        map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
+          qw(Core Validation Applicator Format Content MetaData)),
+      $self,  # for discontinued keywords defined in the base schema
+    ],
+    callbacks => $callbacks // {},
   };
 
-  # try-catch...
-  # then call _traverse at the top.
-
+  try {
+    $self->_traverse($schema_reference, $state);
+  }
+  catch {
+    E($state, 'EXCEPTION: '.$@);
+  }
+use Data::Dumper;
+local $Data::Dumper::Sortkeys = 1;
+local $Data::Dumper::Maxdepth = 3;
+print STDERR "### by end of traversal, state is ", Dumper($state);
 }
 
 sub evaluate {
@@ -266,7 +287,7 @@ sub get {
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
 sub _traverse {
-  my ($self, $schema, $state, $callbacks) = @_;
+  my ($self, $schema, $state) = @_;
 
   $state = { %$state };     # changes to $state should only affect subschemas, not parents
   delete $state->{keyword};
@@ -287,8 +308,9 @@ sub _traverse {
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
 
       $vocabulary->$method($schema, $state) if $vocabulary->can($method);
+print STDERR "### no $method defined\n" if not $vocabulary->can($method);
 
-      if (my $sub = $callbacks->{$keyword}) {
+      if (my $sub = $state->{callbacks}{$keyword}) {
         $sub->($schema, $state);
       }
     }
@@ -322,7 +344,11 @@ sub _eval {
       $state->{keyword} = $keyword;
       my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
 
-      $result &&= $vocabulary>$method($data, $schema, $state) if $vocabulary->can($method);
+      $result = 0 if $vocabulary->can($method) and not $vocabulary->$method($data, $schema, $state);
+
+print STDERR "### no $method defined\n"
+if not $vocabulary->can($method)
+  and not grep $keyword eq $_, qw($schema $anchor $vocabulary $comment $defs);
 
       last if not $result and $state->{short_circuit};
     }
@@ -528,7 +554,7 @@ sub _get_or_load_resource {
   if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
     my $file = path(dist_dir('JSON-Schema-Draft201909'), $local_filename);
     my $schema = $self->_json_decoder->decode($file->slurp_raw);
-    my $document = JSON::Schema::Draft201909::Document->new(schema => $schema);
+    my $document = JSON::Schema::Draft201909::Document->new(schema => $schema, _evaluator => $self);
 
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(

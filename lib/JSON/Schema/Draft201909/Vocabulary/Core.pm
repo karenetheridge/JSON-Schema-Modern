@@ -21,6 +21,10 @@ sub keywords {
   qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs);
 }
 
+# adds the following keys to $state during traversal:
+# - identifiers: an arrayref of tuples:
+#   $uri => { path => $path_to_identifier, canonical_uri => Mojo::URL (absolute when possible) }
+
 sub _traverse_keyword_id {
   my ($self, $schema, $state) = @_;
 
@@ -29,10 +33,15 @@ sub _traverse_keyword_id {
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length Mojo::URL->new($schema->{'$id'})->fragment;
 
-  my $uri = Mojo::URL->new($schema->{'$id'});
+  my $uri = Mojo::URL->new($schema->{'$id'})->fragment(undef);
   $state->{canonical_schema_uri} = $uri->is_abs ? $uri
-    : $uri->base($state->{canonical_schema_uri})->to_abs;
-  $state->{canonical_schema_uri}->fragment(undef);
+    : $uri->to_abs($state->{canonical_schema_uri});
+
+  push @{$state->{identifiers}},
+    $state->{canonical_schema_uri} => {
+      path => $state->{schema_path}.'/$id',
+      canonical_uri => $state->{canonical_schema_uri}->clone,
+    };
 }
 
 sub _eval_keyword_id {
@@ -62,10 +71,11 @@ sub _traverse_keyword_schema {
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 }
 
-# we do nothing with $schema yet at evaluation time. In the future, at thraversal time we will fetch
+# we do nothing with $schema yet at evaluation time. In the future, at traversal time we will fetch
 # the schema at the value of this keyword and examine its $vocabulary keyword to determine which
-# vocabularies shall be in effect when considering this schema. Then at evaluation time we will
-# retrieve the corresponding vocabulary instances and store them in $state.
+# vocabularies shall be in effect when considering this schema, then storing those vocabulary
+# instances in $state.
+# At evaluation time we simply swap out the vocabulary instances in $state.
 
 sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;
@@ -74,6 +84,12 @@ sub _traverse_keyword_anchor {
 
   abort($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
     if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/;
+
+  push @{$state->{identifiers}},
+    Mojo::URL->new->to_abs($state->{canonical_schema_uri})->fragment($schema->{'$anchor'}) => {
+      path => $state->{schema_path}.'/$anchor',
+      canonical_uri => $state->{canonical_schema_uri}->clone,
+    };
 }
 
 # we already indexed the $anchor uri, so there is nothing more to do at evaluation time.
