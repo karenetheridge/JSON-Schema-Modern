@@ -357,8 +357,7 @@ sub _eval_keyword_ref {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = Mojo::URL->new($schema->{'$ref'});
-  $uri = $uri->base($state->{canonical_schema_uri})->to_abs if not $uri->is_abs;
+  my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{canonical_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
   abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
 
@@ -377,20 +376,17 @@ sub _eval_keyword_recursiveRef {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'});
-  $target_uri = $target_uri->base($state->{canonical_schema_uri})->to_abs if not $target_uri->is_abs;
+  my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{canonical_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($target_uri);
   abort($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
 
   if ($self->_is_type('boolean', $subschema->{'$recursiveAnchor'})
       and $subschema->{'$recursiveAnchor'}) {
-    my $uri = Mojo::URL->new($schema->{'$recursiveRef'});
     my $base = $state->{recursive_anchor_uri} // $state->{canonical_schema_uri};
-    $uri = $uri->base($base)->to_abs if not $uri->is_abs;
-
     abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
       if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;
 
+    my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($base);
     ($subschema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
     abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
   }

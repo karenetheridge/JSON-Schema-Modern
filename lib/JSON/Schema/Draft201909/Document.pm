@@ -133,14 +133,14 @@ sub _traverse_for_identifiers {
     if (exists $data->{'$id'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$id'})) {
       my $uri = Mojo::URL->new($data->{'$id'});
       if (not length $uri->fragment) {
-        $canonical_uri = $uri->is_abs ? $uri : $uri->base($canonical_uri)->to_abs;
+        $canonical_uri = $uri->is_abs ? $uri : $uri->to_abs($canonical_uri);
         $canonical_uri->fragment(undef);
         push @identifiers, $canonical_uri => { path => $path, canonical_uri => $canonical_uri->clone };
       }
     }
     if (exists $data->{'$anchor'} and JSON::Schema::Draft201909->_is_type('string', $data->{'$anchor'})
         and $data->{'$anchor'} =~ /^[A-Za-z][A-Za-z0-9_:.-]+$/) {
-      my $uri = Mojo::URL->new->base($canonical_uri)->to_abs->fragment($data->{'$anchor'});
+      my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($data->{'$anchor'});
       push @identifiers, $uri => { path => $path, canonical_uri => $canonical_uri->clone };
     }
 
