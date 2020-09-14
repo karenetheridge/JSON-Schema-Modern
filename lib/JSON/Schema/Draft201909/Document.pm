@@ -134,6 +134,9 @@ sub BUILD {
 }
 
 # XXX TODO
+# ::Document constructor should accept traversal callbacks so we don't need to traverse twice. so does that mean add_schema() should accept them also? maybe not needed.
+#   maybe it makes sense to index all keywords of a specific type, for later retrieval.  or at least index the core keywords?
+
 sub _new_traverse_for_identifiers {
   my $self = shift;
 
