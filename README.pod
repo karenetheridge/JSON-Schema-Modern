@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
@@ -33,7 +33,7 @@ version of the specification.
 
 =head2 output_format
 
-One of: C<flag>, C<basic>, C<detailed>, C<verbose>. Defaults to C<basic>. Passed to
+One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>. Passed to
 L<JSON::Schema::Draft201909::Result/output_format>.
 
 =head2 short_circuit
@@ -106,7 +106,8 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
+evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -140,7 +141,8 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit> and/or L</collect_annotations> setting for just this evaluation call.
+L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
+evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -158,6 +160,9 @@ provided (and if not, C<''> will be used if no other identifier can be found wit
 You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
+
+Returns the L<JSON::Schema::Draft201909::Document> that contains the added schema, or C<undef>
+if the resource could not be found.
 
 =head2 get
 
@@ -187,7 +192,7 @@ For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 By default, formats are treated only as annotations, not assertions. When L</validate_format> is
 true, strings are also checked against the format as specified in the schema. At present the
-following formats are supported (use of any other formats than these will evaluate as true):
+following formats are supported (use of any other formats than these will always evaluate as true):
 
 =over 4
 
@@ -272,7 +277,7 @@ C<date-time>, C<date>, and C<time> require L<Time::Moment>
 
 =item *
 
-C<email> and C<idn-email> require L<Email::Address::XS> version 1.01
+C<email> and C<idn-email> require L<Email::Address::XS> version 1.01 (or higher)
 
 =item *
 
@@ -306,7 +311,7 @@ loading schema documents from a local web application (e.g. L<Mojolicious>)
 
 =item *
 
-multiple output formats (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
+additional output formats beyond C<flag>, C<basic> and C<terse> (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
 
 =item *
 
