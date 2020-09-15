@@ -1676,15 +1676,17 @@ sub A {
   my $schema_path = jsonp($state->{schema_path}, $state->{keyword},
     delete $state->{_schema_path_suffix});
 
+  my $uri = $state->{canonical_schema_uri}->clone;
+  $uri->fragment(($uri->fragment//'').$schema_path);
+  $uri->fragment(undef) if not length($uri->fragment);
+  undef $uri if $uri eq '' and $state->{traversed_schema_path}.$schema_path eq ''
+    or $uri eq '#'.$state->{traversed_schema_path}.$schema_path;
+
   push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $state->{traversed_schema_path}.$schema_path,
-    !"$state->{canonical_schema_uri}" ? () : ( absolute_keyword_location => do {
-      my $uri = $state->{canonical_schema_uri}->clone;
-      $uri->fragment(($uri->fragment//'').$schema_path) if $schema_path;
-      $uri;
-    } ),
+    defined $uri ? ( absolute_keyword_location => $uri ) : (),
     annotation => $annotation,
   );
 
