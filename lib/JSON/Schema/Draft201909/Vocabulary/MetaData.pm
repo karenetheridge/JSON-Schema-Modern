@@ -23,42 +23,45 @@ sub keywords {
   qw(title description default deprecated readOnly writeOnly examples);
 }
 
-sub _eval_keyword_title {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _traverse_keyword_title {
+  my ($self, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'string');
-  return A($state, $schema->{$state->{keyword}});
 }
 
-sub _eval_keyword_description {
-  goto \&_eval_keyword_title;
-}
+sub _eval_keyword_title { goto \&_annotate_self }
 
-sub _eval_keyword_default {
-  my ($self, $data, $schema, $state) = @_;
-  return A($state, is_ref($schema->{default}) ? dclone($schema->{default}) : $schema->{default});
-}
+sub _traverse_keyword_description { goto \&_traverse_keyword_title }
 
-sub _eval_keyword_deprecated {
-  my ($self, $data, $schema, $state) = @_;
+sub _eval_keyword_description { goto \&_annotate_self }
 
+sub _eval_keyword_default { goto \&_annotate_self }
+
+sub _traverse_keyword_deprecated {
+  my ($self, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'boolean');
-  return A($state, $schema->{$state->{keyword}});
 }
 
-sub _eval_keyword_readOnly {
-  goto \&_eval_keyword_deprecated;
-}
+sub _eval_keyword_deprecated { goto \&_annotate_self }
 
-sub _eval_keyword_writeOnly {
-  goto \&_eval_keyword_deprecated;
-}
+sub _traverse_keyword_readOnly { goto \&_traverse_keyword_deprecated }
 
-sub _eval_keyword_examples {
-  my ($self, $data, $schema, $state) = @_;
+sub _eval_keyword_readOnly { goto \&_annotate_self }
 
+sub _traverse_keyword_writeOnly { goto \&_traverse_keyword_deprecated }
+
+sub _eval_keyword_writeOnly { goto \&_annotate_self }
+
+sub _traverse_keyword_examples {
+  my ($self, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'array');
-  return A($state, is_ref($schema->{examples}) ? dclone($schema->{examples}) : $schema->{examples});
+}
+
+sub _eval_keyword_examples { goto \&_annotate_self }
+
+sub _annotate_self {
+  my ($self, $data, $schema, $state) = @_;
+  return A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
+    : $schema->{$state->{keyword}});
 }
 
 1;
