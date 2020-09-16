@@ -445,6 +445,8 @@ sub _eval_keyword_type {
 sub _eval_keyword_enum {
   my ($self, $data, $schema, $state) = @_;
 
+  assert_keyword_type($state, $schema, 'array');
+
   my @s; my $idx = 0;
   return 1 if any { $self->_is_equal($data, $_, $s[$idx++] = {}) } @{$schema->{enum}};
 
