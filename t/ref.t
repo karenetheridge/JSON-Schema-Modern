@@ -262,43 +262,46 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
 };
 
 subtest '$recursiveAnchor is not at a schema resource root' => sub {
-  my $schema = {
-    '$defs' => {
-      myobject => {
-        '$recursiveAnchor' => true,
-        anyOf => [
-          { type => 'integer' },
-          {
-            type => 'object',
-            additionalProperties => { '$recursiveRef' => '#' },
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      my $schema = {
+        '$defs' => {
+          myobject => {
+            '$recursiveAnchor' => true,
+            anyOf => [
+              { type => 'integer', '$comment' => 'inner def' },
+              {
+                type => 'object',
+                additionalProperties => { '$recursiveRef' => '#/$defs/myobject' },
+              },
+            ],
           },
+        },
+        anyOf => [
+          { type => 'integer', '$comment' => 'outer' },
+          { '$ref' => '#/$defs/myobject' },
         ],
       },
-    },
-    anyOf => [
-      { type => 'integer' },
-      { '$ref' => '#/$defs/myobject' },
-    ],
-  };
-
-  cmp_deeply(
-    $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
+    )->TO_JSON,
     {
       valid => bool(0),
       errors => [
         {
-          instanceLocation => '',
-          keywordLocation => '/anyOf/1/$ref/$recursiveAnchor',
-          absoluteKeywordLocation => '#/$defs/myobject/$recursiveAnchor',
-          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+          instanceLocation => '/foo',
+          keywordLocation => '/anyOf/1/$ref/anyOf/1/additionalProperties/$recursiveRef',
+          absoluteKeywordLocation => '#/$defs/myobject/anyOf/1/additionalProperties/$recursiveRef',
+          error => 'EXCEPTION: cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment',
         },
       ],
     },
-    '$recursiveAnchor can only appear at a schema resource root',
+    '$recursiveAnchor can only appear at a schema resource root when $recursiveRef is not #',
   );
 
+  # add an $id, and then adjust the $recursiveRef so it continues to not be '#'
   $schema = dclone($schema);
   $schema->{'$defs'}{myobject}{'$id'} = 'myobject.json';
+  $schema->{'$defs'}{myobject}{anyOf}[1]{additionalProperties}{'$recursiveRef'} = '#/anyOf/0';
 
   cmp_deeply(
     $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
