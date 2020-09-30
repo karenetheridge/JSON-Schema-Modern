@@ -1129,8 +1129,8 @@ subtest 'JSON pointer escaping' => sub {
         },
       ],
     },
-    # all the other _schema_path_rest cases are tested in the earlier test case
-    'use of _schema_path_rest in a fatal error',
+    # all the other _schema_path_suffix cases are tested in the earlier test case
+    'use of _schema_path_suffix in a fatal error',
   );
 };
 

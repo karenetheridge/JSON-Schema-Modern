@@ -1005,8 +1005,7 @@ sub _eval_keyword_properties {
       }
 
       $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
-          _schema_path_rest => jsonp($state->{schema_path}, 'properties', $property) },
-        'property not permitted');
+        _schema_path_suffix => $property }, 'property not permitted');
     }
     else {
       my @annotations = @orig_annotations;
@@ -1044,9 +1043,7 @@ sub _eval_keyword_patternProperties {
       @matched_properties = grep m/$property_pattern/, keys %$data;
     }
     catch {
-      abort({ %$state,
-        _schema_path_rest => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) },
-      $@);
+      abort({ %$state, _schema_path_suffix => $property_pattern }, $@);
     };
     foreach my $property (sort @matched_properties) {
       if ($self->_is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
@@ -1056,8 +1053,7 @@ sub _eval_keyword_patternProperties {
         }
 
         $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
-            _schema_path_rest => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) },
-          'property not permitted');
+          _schema_path_suffix => $property_pattern }, 'property not permitted');
       }
       else {
         my @annotations = @orig_annotations;
@@ -1635,7 +1631,7 @@ has _json_decoder => (
 # shorthand for creating and appending json pointers
 use namespace::clean 'jsonp';
 sub jsonp {
-  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, @_);
+  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, grep defined, @_);
 }
 
 # get all annotations produced for the current instance data location
@@ -1651,8 +1647,8 @@ sub E {
   my ($state, $error_string, @args) = @_;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $schema_path = delete $state->{_schema_path_rest}
-    // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
+  my $schema_path = jsonp($state->{schema_path}, $state->{keyword},
+    delete $state->{_schema_path_suffix});
 
   my $uri = $state->{canonical_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').$schema_path);
@@ -1677,8 +1673,8 @@ sub A {
   my ($state, $annotation) = @_;
   return 1 if not $state->{collect_annotations};
 
-  my $schema_path = $state->{schema_path_rest}
-    // $state->{schema_path}.($state->{keyword} ? '/'.$state->{keyword} : '');
+  my $schema_path = jsonp($state->{schema_path}, $state->{keyword},
+    delete $state->{_schema_path_suffix});
 
   push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
     keyword => $state->{keyword},
