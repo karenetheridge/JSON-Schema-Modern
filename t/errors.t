@@ -1028,10 +1028,14 @@ subtest 'JSON pointer escaping' => sub {
           mydef => {
             properties => {
               '{}' => {
+                properties => {
+                  'my~tilde/slash-property' => false,
+                },
                 patternProperties => {
-                  '~' => { minimum => 5 },
                   '/' => { minimum => 6 },
                   '[~/]' => { minimum => 7 },
+                  '~' => { minimum => 5 },
+                  '~.*/' => false,
                 },
               },
             },
@@ -1045,21 +1049,39 @@ subtest 'JSON pointer escaping' => sub {
       errors => [
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
+          keywordLocation => '/$ref/properties/{}/properties/my~0tilde~1slash-property',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/properties/my~0tilde~1slash-property',
+          error => 'property not permitted',
+        },
+        {
+          instanceLocation => '/{}',
+          keywordLocation => '/$ref/properties/{}/properties',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/patternProperties/~1/minimum',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~1/minimum',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~1/minimum',  # /
           error => 'value is smaller than 6',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/patternProperties/[~0~1]/minimum',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/%5B~0~1%5D/minimum',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/%5B~0~1%5D/minimum',  # [~/]
           error => 'value is smaller than 7',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/patternProperties/~0/minimum',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0/minimum',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0/minimum',  # ~
           error => 'value is smaller than 5',
+        },
+        {
+          instanceLocation => '/{}/my~0tilde~1slash-property',
+          keywordLocation => '/$ref/properties/{}/patternProperties/~0.*~1',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0.*~1', # ~.*/
+          error => 'property not permitted',
         },
         {
           instanceLocation => '/{}',
@@ -1076,6 +1098,39 @@ subtest 'JSON pointer escaping' => sub {
       ],
     },
     'JSON pointers are properly escaped; URIs doubly so',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { '{}' => { 'my~tilde/slash-property' => 1 } },
+      {
+        '$defs' => {
+          mydef => {
+            properties => {
+              '{}' => {
+                patternProperties => {
+                  '(' => { minimum => 2 },  # this is a broken regex
+                },
+              },
+            },
+          },
+        },
+        '$ref' => '#/$defs/mydef',
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/{}',
+          keywordLocation => '/$ref/properties/{}/patternProperties/(',
+          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/(',
+          error => re(qr{^\QEXCEPTION: Unmatched ( in regex; marked by <-- HERE in m/( <-- HERE\E}),
+        },
+      ],
+    },
+    # all the other _schema_path_rest cases are tested in the earlier test case
+    'use of _schema_path_rest in a fatal error',
   );
 };
 
