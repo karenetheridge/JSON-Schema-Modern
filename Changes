@@ -3,6 +3,7 @@ Revision history for JSON-Schema-Draft201909
 {{$NEXT}}
           - ensure "enum" value is an array
           - do not evaluate non-arrays against "unevaluatedItems"
+          - fix detection of bad $recursiveAnchor
 
 0.013     2020-09-15 19:14:53Z
           - detect more cases of resource identifier collisions
