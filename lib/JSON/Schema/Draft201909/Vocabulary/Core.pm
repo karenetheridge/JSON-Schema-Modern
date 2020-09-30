@@ -8,7 +8,7 @@ our $VERSION = '0.013';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
-use JSON::Schema::Draft201909::Utilities qw(is_type abort assert_keyword_type);
+use JSON::Schema::Draft201909::Utilities qw(is_type jsonp abort assert_keyword_type);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -30,16 +30,17 @@ sub _traverse_keyword_id {
 
   assert_keyword_type($state, $schema, 'string');
 
+  my $uri = Mojo::URL->new($schema->{'$id'});
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
-    if length Mojo::URL->new($schema->{'$id'})->fragment;
+    if length $uri->fragment;
 
-  my $uri = Mojo::URL->new($schema->{'$id'})->fragment(undef);
+  $uri->fragment(undef);
   $state->{canonical_schema_uri} = $uri->is_abs ? $uri
     : $uri->to_abs($state->{canonical_schema_uri});
 
   push @{$state->{identifiers}},
     $state->{canonical_schema_uri} => {
-      path => $state->{schema_path}.'/$id',
+      path => $state->{schema_path},
       canonical_uri => $state->{canonical_schema_uri}->clone,
     };
 }
@@ -64,6 +65,8 @@ sub _traverse_keyword_schema {
 
   assert_keyword_type($state, $schema, 'string');
 
+  # FIXME: should be looking at fragment in canonical_state_uri as well.
+  # this should be fixed earlier also, just as we did for $recursiveAnchor.
   abort($state, '$schema can only appear at the schema resource root')
     if length($state->{schema_path});
 
@@ -75,6 +78,8 @@ sub _traverse_keyword_schema {
 # the schema at the value of this keyword and examine its $vocabulary keyword to determine which
 # vocabularies shall be in effect when considering this schema, then storing those vocabulary
 # instances in $state.
+# If no $schema is provided at the top level, we will assume the default set defined by the
+# specification metaschema (all six vocabularies).
 # At evaluation time we simply swap out the vocabulary instances in $state.
 
 sub _traverse_keyword_anchor {
@@ -87,8 +92,9 @@ sub _traverse_keyword_anchor {
 
   push @{$state->{identifiers}},
     Mojo::URL->new->to_abs($state->{canonical_schema_uri})->fragment($schema->{'$anchor'}) => {
-      path => $state->{schema_path}.'/$anchor',
-      canonical_uri => $state->{canonical_schema_uri}->clone,
+      path => $state->{schema_path},
+      canonical_uri => $state->{canonical_schema_uri}->clone
+        ->fragment(length($state->{schema_path}) ? $state->{schema_path} : undef),
     };
 }
 
@@ -98,6 +104,12 @@ sub _traverse_keyword_anchor {
 sub _traverse_keyword_recursiveAnchor {
   my ($self, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'boolean');
+
+  return if not $schema->{'$recursiveAnchor'};
+
+  my $uri = $state->{canonical_schema_uri}->clone;
+  $uri->fragment(($uri->fragment//'').$state->{schema_path});
+  abort($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
 }
 
 sub _eval_keyword_recursiveAnchor {
@@ -107,10 +119,7 @@ sub _eval_keyword_recursiveAnchor {
 
   # record the canonical location of the current position, to be used against future resolution
   # of a $recursiveRef uri -- as if it was the current location when we encounter a $ref.
-  my $uri = $state->{canonical_schema_uri}->clone;
-  $uri->fragment(($uri->fragment//'').$state->{schema_path});
-  abort($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
-
+  my $uri = $state->{canonical_schema_uri}->clone->fragment(undef);
   $state->{recursive_anchor_uri} = $uri;
   return 1;
 }
@@ -149,13 +158,9 @@ sub _eval_keyword_recursiveRef {
   my ($subschema, $canonical_uri, $document, $document_path) = $self->evaluator->_fetch_schema_from_uri($target_uri);
   abort($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
 
-  if (is_type('boolean', $subschema->{'$recursiveAnchor'})
-      and $subschema->{'$recursiveAnchor'}) {
-    my $base = $state->{recursive_anchor_uri} // $state->{canonical_schema_uri};
-    abort($state, 'cannot resolve a $recursiveRef with a non-empty fragment against a $recursiveAnchor location with a canonical URI containing a fragment')
-      if $schema->{'$recursiveRef'} ne '#' and length $base->fragment;
-
-    my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($base);
+  if (is_type('boolean', $subschema->{'$recursiveAnchor'}) and $subschema->{'$recursiveAnchor'}) {
+    my $uri = Mojo::URL->new($schema->{'$recursiveRef'})
+      ->to_abs($state->{recursive_anchor_uri} // $state->{canonical_schema_uri});
     ($subschema, $canonical_uri, $document, $document_path) = $self->evaluator->_fetch_schema_from_uri($uri);
     abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
   }
@@ -188,7 +193,13 @@ sub _traverse_keyword_comment {
 
 sub _traverse_keyword_defs {
   my ($self, $schema, $state) = @_;
+
   assert_keyword_type($state, $schema, 'object');
+
+  foreach my $property (sort keys %{$schema->{'$defs'}}) {
+    $self->evaluator->_traverse($schema->{'$defs'}{$property},
+      +{ %$state, schema_path => jsonp($state->{schema_path}, '$defs', $property) });
+  }
 }
 
 # we do nothing directly with $defs at evaluation time, including not collecting its value for
