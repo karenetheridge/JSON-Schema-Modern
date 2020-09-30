@@ -261,7 +261,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
   );
 };
 
-subtest '$recursiveAnchor is not at a schema resource root' => sub {
+subtest '$recursiveAnchor must be at a schema resource root' => sub {
   my $schema = {
     '$defs' => {
       myobject => {
@@ -306,6 +306,65 @@ subtest '$recursiveAnchor is not at a schema resource root' => sub {
       valid => bool(1),
     },
     'schema now valid when an $id is added',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        '$defs' => {
+          inner => {
+            '$recursiveAnchor' => true,   # this is illegal - canonical uri has a fragment
+            type => [ qw(integer object) ],
+            additionalProperties => { '$recursiveRef' => '#/$defs/inner' },
+          },
+        },
+        type => 'object',
+        additionalProperties => { '$recursiveRef' => '#/$defs/inner' },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          # TODO: when we have a separate traversal path, this will become:
+          # instanceLocation => '',
+          # keywordLocation => '/$defs/inner/$recursiveAnchor',
+          # error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$recursiveRef/$recursiveAnchor',
+          absoluteKeywordLocation => '#/$defs/inner/$recursiveAnchor',
+          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+        },
+      ],
+    },
+    '$recursiveAnchor can only appear at a schema resource root',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        allOf => [
+          {
+            '$recursiveAnchor' => true,
+            type => [ qw(integer object) ],
+            additionalProperties => { '$recursiveRef' => '#/allOf/1' },
+          },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/$recursiveAnchor',
+          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+        },
+      ],
+    },
+    'properly detecting a bad $recursiveAnchor even before passing through a $ref',
   );
 };
 
