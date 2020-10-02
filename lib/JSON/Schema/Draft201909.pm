@@ -244,8 +244,7 @@ sub _eval {
     if $state->{depth}++ > $self->max_traversal_depth;
 
   abort($state, 'infinite loop detected (same location evaluated twice)')
-    if $state->{seen}{$state->{data_path}}{$state->{canonical_schema_uri}->clone
-        ->fragment(($state->{canonical_schema_uri}->fragment//'').$state->{schema_path})}++;
+    if $state->{seen}{$state->{data_path}}{canonical_schema_uri($state)}++;
 
   my $schema_type = $self->_get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
@@ -315,9 +314,7 @@ sub _eval_keyword_schema {
 
   assert_keyword_type($state, $schema, 'string');
 
-  my $uri = $state->{canonical_schema_uri}->clone;
-  $uri->fragment(($uri->fragment//'').$state->{schema_path});
-
+  my $uri = canonical_schema_uri($state);
   abort($state, '$schema can only appear at the schema resource root') if length($uri->fragment);
 
   abort($state, 'custom $schema references are not yet supported')
@@ -348,8 +345,7 @@ sub _eval_keyword_recursiveAnchor {
 
   # record the canonical location of the current position, to be used against future resolution
   # of a $recursiveRef uri -- as if it was the current location when we encounter a $ref.
-  my $uri = $state->{canonical_schema_uri}->clone;
-  $uri->fragment(($uri->fragment//'').$state->{schema_path});
+  my $uri = canonical_schema_uri($state);
 
   abort($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
 
@@ -1646,25 +1642,34 @@ sub local_annotations {
   grep $_->instance_location eq $state->{data_path}, @{$state->{annotations}};
 }
 
+# shorthand for finding the canonical uri of the present schema location
+use namespace::clean 'canonical_schema_uri';
+sub canonical_schema_uri {
+  my ($state, @extra_path) = @_;
+
+  my $uri = $state->{canonical_schema_uri}->clone;
+  $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
+  $uri->fragment(undef) if not length($uri->fragment);
+  $uri;
+}
+
 # shorthand for creating error objects
 use namespace::clean 'E';
 sub E {
   my ($state, $error_string, @args) = @_;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $schema_path = jsonp($state->{schema_path}, $state->{keyword},
-    delete $state->{_schema_path_suffix});
+  my $uri = canonical_schema_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
 
-  my $uri = $state->{canonical_schema_uri}->clone;
-  $uri->fragment(($uri->fragment//'').$schema_path);
-  $uri->fragment(undef) if not length($uri->fragment);
-  undef $uri if $uri eq '' and $state->{traversed_schema_path}.$schema_path eq ''
-    or $uri eq '#'.$state->{traversed_schema_path}.$schema_path;
+  my $keyword_location = $state->{traversed_schema_path}
+    .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
+
+  undef $uri if $uri eq '' and $keyword_location eq '' or $uri eq '#'.$keyword_location;
 
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
-    keyword_location => $state->{traversed_schema_path}.$schema_path,
+    keyword_location => $keyword_location,
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
     error => @args ? sprintf($error_string, @args) : $error_string,
   );
@@ -1678,19 +1683,17 @@ sub A {
   my ($state, $annotation) = @_;
   return 1 if not $state->{collect_annotations};
 
-  my $schema_path = jsonp($state->{schema_path}, $state->{keyword},
-    delete $state->{_schema_path_suffix});
+  my $uri = canonical_schema_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
 
-  my $uri = $state->{canonical_schema_uri}->clone;
-  $uri->fragment(($uri->fragment//'').$schema_path);
-  $uri->fragment(undef) if not length($uri->fragment);
-  undef $uri if $uri eq '' and $state->{traversed_schema_path}.$schema_path eq ''
-    or $uri eq '#'.$state->{traversed_schema_path}.$schema_path;
+  my $keyword_location = $state->{traversed_schema_path}
+    .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
+
+  undef $uri if $uri eq '' and $keyword_location eq '' or $uri eq '#'.$keyword_location;
 
   push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
-    keyword_location => $state->{traversed_schema_path}.$schema_path,
+    keyword_location => $keyword_location,
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
     annotation => $annotation,
   );
