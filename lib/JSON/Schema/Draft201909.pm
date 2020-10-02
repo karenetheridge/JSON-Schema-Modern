@@ -859,7 +859,7 @@ sub _eval_keyword_items {
       my @annotations = @orig_annotations;
       if ($self->_eval($data->[$idx], $schema->{additionalItems},
           +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/additionalitems', annotations => \@annotations })) {
+          schema_path => $state->{schema_path}.'/additionalItems', annotations => \@annotations })) {
         push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
         next;
       }
