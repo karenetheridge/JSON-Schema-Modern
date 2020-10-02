@@ -1202,6 +1202,33 @@ subtest 'invalid $schema' => sub {
     },
     '$schema can appear adjacent to any $id',
   );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'https://bloop3.com',
+        '$defs' => {
+          my_def => {
+            '$schema' => 'https://json-schema.org/draft/2019-09/schema',
+          },
+        },
+        '$ref' => '#/$defs/my_def',
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$schema',
+          absoluteKeywordLocation => 'https://bloop3.com#/$defs/my_def/$schema',
+          error => 'EXCEPTION: $schema can only appear at the schema resource root',
+        },
+      ],
+    },
+    '$state->{schema_path} is empty, but this is still not a resource root',
+  );
 };
 
 subtest 'absoluteKeywordLocation' => sub {

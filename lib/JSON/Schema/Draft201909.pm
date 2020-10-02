@@ -314,8 +314,10 @@ sub _eval_keyword_schema {
 
   assert_keyword_type($state, $schema, 'string');
 
-  abort($state, '$schema can only appear at the schema resource root')
-    if length($state->{schema_path});
+  my $uri = $state->{canonical_schema_uri}->clone;
+  $uri->fragment(($uri->fragment//'').$state->{schema_path});
+
+  abort($state, '$schema can only appear at the schema resource root') if length($uri->fragment);
 
   abort($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
