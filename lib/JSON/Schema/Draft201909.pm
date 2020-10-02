@@ -244,7 +244,8 @@ sub _eval {
     if $state->{depth}++ > $self->max_traversal_depth;
 
   abort($state, 'infinite loop detected (same location evaluated twice)')
-    if $state->{seen}{$state->{data_path}}{$state->{canonical_schema_uri}.(length($state->{schema_path}) ? '#'.$state->{schema_path} : '')}++;
+    if $state->{seen}{$state->{data_path}}{$state->{canonical_schema_uri}->clone
+        ->fragment(($state->{canonical_schema_uri}->fragment//'').$state->{schema_path})}++;
 
   my $schema_type = $self->_get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
