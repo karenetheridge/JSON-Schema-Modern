@@ -240,7 +240,7 @@ sub _eval {
   my @parent_annotations = @{$state->{annotations}};
   delete $state->{keyword};
 
-  abort($state, 'maximum traversal depth exceeded')
+  abort($state, 'maximum evaluation depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
 
   abort($state, 'infinite loop detected (same location evaluated twice)')
