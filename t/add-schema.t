@@ -649,4 +649,53 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
   );
 };
 
+subtest 'external resource with externally-supplied uri; main resource with multiple uris' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  $js->add_schema('http://localhost:1234/integer.json', { type => 'integer' });
+
+  $js->add_schema(
+    'https://secondary.com',
+    my $schema = {
+      '$id' => 'https://main.com',
+      '$ref' => 'http://localhost:1234/integer.json',
+      type => 'object',
+    },
+  );
+
+  cmp_deeply(
+    my $result = $js->evaluate('string', 'https://secondary.com')->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/type',
+          absoluteKeywordLocation => 'http://localhost:1234/integer.json#/type',
+          error => 'wrong type (expected integer)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/type',
+          absoluteKeywordLocation => 'https://main.com#/type',
+          error => 'wrong type (expected object)',
+        },
+      ],
+    },
+    'all uris in result are correct, using secondary uri as the target',
+  );
+
+  cmp_deeply(
+    $js->evaluate('string', 'https://main.com')->TO_JSON,
+    $result,
+    'all uris in result are correct, using main uri as the target',
+  );
+
+  cmp_deeply(
+    $js->evaluate('string', $schema)->TO_JSON,
+    $result,
+    'all uris in result are correct, using the literal schema as the target',
+  );
+};
+
 done_testing;
