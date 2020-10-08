@@ -467,4 +467,23 @@ subtest 'resource collisions' => sub {
   );
 };
 
+subtest 'create document with explicit canonical_uri set to the same as root $id' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909::Document->new(
+      canonical_uri => 'https://foo.com/x/y/z',
+      schema => { '$id' => 'https://foo.com/x/y/z' },
+    ),
+    listmethods(
+      resource_index => [
+        'https://foo.com/x/y/z' => {
+          path => '',
+          canonical_uri => str('https://foo.com/x/y/z'),
+        },
+      ],
+      canonical_uri => [ str('https://foo.com/x/y/z') ],
+    ),
+    'there is one single uri indexed to the document',
+  );
+};
+
 done_testing;
