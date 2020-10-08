@@ -93,13 +93,13 @@ sub add_schema {
   my $self = shift;
   die 'insufficient arguments' if @_ < 1;
 
+  # TODO: resolve $uri against $self->base_uri
   my $uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
     : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
 
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
 
   if (not @_) {
-    # TODO: resolve $uri against $self->base_uri
     my ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
     return if not defined $schema or not defined wantarray;
     return $document;
@@ -191,7 +191,7 @@ sub evaluate {
       ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($schema_reference);
     }
     else {
-      $document = $self->add_schema($schema_reference);
+      $document = $self->add_schema($state->{canonical_schema_uri}, $schema_reference);
       ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
       $document_path = '';
     }
