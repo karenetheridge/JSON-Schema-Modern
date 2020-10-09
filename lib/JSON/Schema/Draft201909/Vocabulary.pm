@@ -36,8 +36,8 @@ sub traverse_schema {
 sub traverse_array_schemas {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'array');
-  abort($state, '"%s" array is empty') if not @{$schema->{$state->{keyword}}};
+  return if not assert_keyword_type($state, $schema, 'array');
+  return E($state, '"%s" array is empty') if not @{$schema->{$state->{keyword}}};
 
   foreach my $idx (0 .. $#{$schema->{$state->{keyword}}}) {
     $self->evaluator->_traverse($schema->{$state->{keyword}}[$idx],
@@ -48,7 +48,7 @@ sub traverse_array_schemas {
 sub traverse_object_schemas {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'object');
+  return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{$state->{keyword}}}) {
     $self->evaluator->_traverse($schema->{$state->{keyword}}{$property},

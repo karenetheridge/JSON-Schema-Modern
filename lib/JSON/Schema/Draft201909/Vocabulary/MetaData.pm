@@ -23,7 +23,7 @@ sub keywords {
 
 sub _traverse_keyword_title {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 }
 
 sub _eval_keyword_title { shift->annotate_self(@_) }
@@ -36,7 +36,7 @@ sub _eval_keyword_default { shift->annotate_self(@_) }
 
 sub _traverse_keyword_deprecated {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'boolean');
+  return if not assert_keyword_type($state, $schema, 'boolean');
 }
 
 sub _eval_keyword_deprecated { shift->annotate_self(@_) }
@@ -51,7 +51,7 @@ sub _eval_keyword_writeOnly { shift->annotate_self(@_) }
 
 sub _traverse_keyword_examples {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'array');
+  return if not assert_keyword_type($state, $schema, 'array');
 }
 
 sub _eval_keyword_examples { shift->annotate_self(@_) }

@@ -226,17 +226,17 @@ sub abort {
   die pop @{$state->{errors}};
 }
 
-# one common usecase of abort()
 sub assert_keyword_type {
   my ($state, $schema, $type) = @_;
-  abort($state, $state->{keyword}.' value is not a%s %s', ($type =~ /^[aeiou]/ ? 'n' : ''), $type)
-    if not is_type($type, $schema->{$state->{keyword}});
+  return 1 if is_type($type, $schema->{$state->{keyword}});
+  E($state, $state->{keyword}.' value is not a%s %s', ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
 }
 
 sub assert_pattern {
   my ($state, $pattern) = @_;
   try { qr/$pattern/; }
-  catch { abort($state, $@); };
+  catch { return E($state, $@); };
+  return 1;
 }
 
 1;

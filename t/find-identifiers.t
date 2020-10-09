@@ -279,29 +279,6 @@ subtest 'invalid $id and $anchor' => sub {
           bad_id => {
             '$id' => 'foo.json#/foo/bar',
           },
-        },
-      },
-    )->TO_JSON,
-    {
-      valid => bool(0),
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/$defs/bad_id/$id',
-          absoluteKeywordLocation => 'foo.json#/$defs/bad_id/$id',
-          error => 'EXCEPTION: $id value "foo.json#/foo/bar" cannot have a non-empty fragment',
-        },
-      ],
-    },
-    'bad $id is detected, even if bad definitions are not traversed',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      1,
-      {
-        '$id' => 'foo.json',
-        '$defs' => {
           bad_anchor => {
             '$anchor' => 'my$foo',
           },
@@ -315,11 +292,17 @@ subtest 'invalid $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/$defs/bad_anchor/$anchor',
           absoluteKeywordLocation => 'foo.json#/$defs/bad_anchor/$anchor',
-          error => 'EXCEPTION: $anchor value "my$foo" does not match required syntax',
+          error => '$anchor value "my$foo" does not match required syntax',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$defs/bad_id/$id',
+          absoluteKeywordLocation => 'foo.json#/$defs/bad_id/$id',
+          error => '$id value "foo.json#/foo/bar" cannot have a non-empty fragment',
         },
       ],
     },
-    'bad $anchor is detected, even if bad definitions are not traversed',
+    'bad $id and $anchor are detected, even if bad definitions are not traversed',
   );
 
   cmp_deeply(

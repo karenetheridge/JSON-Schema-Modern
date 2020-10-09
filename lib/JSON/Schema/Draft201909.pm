@@ -297,13 +297,13 @@ sub _traverse {
 
   delete $state->{keyword};
 
-  abort($state, 'maximum traversal depth exceeded')
+  return E($state, 'maximum traversal depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
 
   my $schema_type = get_type($schema);
   return if $schema_type eq 'boolean';
 
-  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
+  return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   foreach my $vocabulary (@{$state->{vocabularies}}) {
     foreach my $keyword ($vocabulary->keywords) {

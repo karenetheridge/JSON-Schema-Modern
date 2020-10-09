@@ -23,13 +23,13 @@ sub keywords {
 
 sub _traverse_keyword_format {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 }
 
 sub _eval_keyword_format {
   my ($self, $data, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 
   # TODO: instead of checking 'validate_formats', we should be referring to the metaschema's entry
   # for $vocabulary: { <format url>: <bool> }
