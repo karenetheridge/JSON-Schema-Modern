@@ -13,6 +13,7 @@ use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
+use Syntax::Keyword::Try 0.11;
 use strictures 2;
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Annotation;
@@ -32,6 +33,7 @@ our @EXPORT_OK = qw(
   A
   abort
   assert_keyword_type
+  assert_pattern
   true
   false
 );
@@ -231,6 +233,12 @@ sub assert_keyword_type {
     if not is_type($type, $schema->{$state->{keyword}});
 }
 
+sub assert_pattern {
+  my ($state, $pattern) = @_;
+  try { qr/$pattern/; }
+  catch { abort($state, $@); };
+}
+
 1;
 __END__
 
@@ -245,6 +253,6 @@ __END__
 This class contains internal utilities to be used by L<JSON::Schema::Draft201909>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
-canonical_schema_uri E A abort assert_keyword_type
+canonical_schema_uri E A abort assert_keyword_type assert_pattern
 
 =cut

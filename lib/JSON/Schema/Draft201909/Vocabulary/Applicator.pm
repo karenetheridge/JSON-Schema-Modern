@@ -10,8 +10,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use List::Util 1.45 qw(any uniqstr max);
 use Ref::Util 0.100 'is_plain_arrayref';
-use Syntax::Keyword::Try 0.11;
-use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort true);
+use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort assert_keyword_type assert_pattern true);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -428,7 +427,18 @@ sub _eval_keyword_properties {
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
-sub _traverse_keyword_patternProperties { shift->traverse_object_schemas(@_) }
+sub _traverse_keyword_patternProperties {
+  my ($self, $schema, $state) = @_;
+
+  assert_keyword_type($state, $schema, 'object');
+
+  foreach my $property (sort keys %{$schema->{patternProperties}}) {
+    assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
+
+    $self->evaluator->_traverse($schema->{patternProperties}{$property},
+      +{ %$state, schema_path => jsonp($state->{schema_path}, 'patternProperties', $property) });
+  }
+}
 
 sub _eval_keyword_patternProperties {
   my ($self, $data, $schema, $state) = @_;
@@ -439,14 +449,7 @@ sub _eval_keyword_patternProperties {
   my @orig_annotations = @{$state->{annotations}};
   my (@valid_properties, @new_annotations);
   foreach my $property_pattern (sort keys %{$schema->{patternProperties}}) {
-    my @matched_properties;
-    try {
-      @matched_properties = grep m/$property_pattern/, keys %$data;
-    }
-    catch {
-      abort({ %$state, _schema_path_suffix => $property_pattern }, $@);
-    };
-    foreach my $property (sort @matched_properties) {
+    foreach my $property (sort grep m/$property_pattern/, keys %$data) {
       if (is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
         if ($schema->{patternProperties}{$property_pattern}) {
           push @valid_properties, $property;
