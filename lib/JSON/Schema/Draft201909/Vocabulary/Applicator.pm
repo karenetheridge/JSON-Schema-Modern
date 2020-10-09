@@ -430,10 +430,10 @@ sub _eval_keyword_properties {
 sub _traverse_keyword_patternProperties {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'object');
+  return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{patternProperties}}) {
-    assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
+    return if not assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
 
     $self->evaluator->_traverse($schema->{patternProperties}{$property},
       +{ %$state, schema_path => jsonp($state->{schema_path}, 'patternProperties', $property) });

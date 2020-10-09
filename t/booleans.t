@@ -41,7 +41,7 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '',
-        error => 'EXCEPTION: invalid schema type: array',
+        error => 'invalid schema type: array',
       },
     ],
   },
