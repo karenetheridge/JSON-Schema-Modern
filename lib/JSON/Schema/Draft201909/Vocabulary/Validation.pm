@@ -10,8 +10,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
-use Syntax::Keyword::Try 0.11;
-use JSON::Schema::Draft201909::Utilities qw(is_type is_equal is_elements_unique E abort assert_keyword_type);
+use JSON::Schema::Draft201909::Utilities qw(is_type is_equal is_elements_unique E abort assert_keyword_type assert_pattern);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -164,6 +163,7 @@ sub _eval_keyword_minLength {
 sub _traverse_keyword_pattern {
   my ($self, $schema, $state) = @_;
   assert_keyword_type($state, $schema, 'string');
+  assert_pattern($state, $schema->{pattern});
 }
 
 sub _eval_keyword_pattern {
@@ -171,13 +171,8 @@ sub _eval_keyword_pattern {
 
   return 1 if not is_type('string', $data);
 
-  try {
-    return 1 if $data =~ m/$schema->{pattern}/;
-    return E($state, 'pattern does not match');
-  }
-  catch {
-    abort($state, $@);
-  };
+  return 1 if $data =~ m/$schema->{pattern}/;
+  return E($state, 'pattern does not match');
 }
 
 sub _traverse_keyword_maxItems { goto \&_assert_non_negative_integer }
