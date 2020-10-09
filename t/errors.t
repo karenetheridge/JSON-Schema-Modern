@@ -1023,7 +1023,7 @@ subtest 'JSON pointer escaping' => sub {
   cmp_deeply(
     $js->evaluate(
       { '{}' => { 'my~tilde/slash-property' => 1 } },
-      {
+      my $schema = {
         '$defs' => {
           mydef => {
             properties => {
@@ -1046,7 +1046,7 @@ subtest 'JSON pointer escaping' => sub {
     )->TO_JSON,
     {
       valid => bool(0),
-      errors => [
+      errors => my $errors = [
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/properties/my~0tilde~1slash-property',
@@ -1098,6 +1098,24 @@ subtest 'JSON pointer escaping' => sub {
       ],
     },
     'JSON pointers are properly escaped; URIs doubly so',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { '{}' => { 'my~tilde/slash-property' => 1 } },
+      $schema->{'$defs'}{mydef},
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        map +{
+          error => $_->{error},
+          instanceLocation => $_->{instanceLocation},
+          keywordLocation => $_->{keywordLocation} =~ s{^/\$ref}{}r,
+        }, @$errors
+      ],
+    },
+    'absoluteKeywordLocation is omitted when paths are the same, not counting uri encoding',
   );
 
   cmp_deeply(

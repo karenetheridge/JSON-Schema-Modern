@@ -1664,7 +1664,8 @@ sub E {
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
 
-  undef $uri if $uri eq '' and $keyword_location eq '' or $uri eq '#'.$keyword_location;
+  undef $uri if $uri eq '' and $keyword_location eq ''
+    or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
   push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
     keyword => $state->{keyword},
@@ -1688,7 +1689,8 @@ sub A {
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
 
-  undef $uri if $uri eq '' and $keyword_location eq '' or $uri eq '#'.$keyword_location;
+  undef $uri if $uri eq '' and $keyword_location eq ''
+    or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
   push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
     keyword => $state->{keyword},
