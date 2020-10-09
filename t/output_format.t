@@ -295,36 +295,42 @@ cmp_deeply(
 
 
 $js = JSON::Schema::Draft201909->new(short_circuit => 0, collect_annotations => 0);
-foreach my $keyword (qw(unevaluatedItems unevaluatedProperties)) {
-  $result = $js->evaluate(
-    1,
-    { $keyword => false },
-  );
+$result = $js->evaluate(
+  1,
+  {
+    unevaluatedItems => false,
+    unevaluatedProperties => false,
+  },
+);
 
-  cmp_deeply(
-    $result->TO_JSON,
-    {
-      valid => bool(0),
-      errors => my $errors = [
-        {
-          instanceLocation => '',
-          keywordLocation => '/'.$keyword,
-          error => 'EXCEPTION: "'.$keyword.'" keyword present, but annotation collection is disabled',
-        },
-      ],
-    },
-    'basic format includes all errors linearly',
-  );
+cmp_deeply(
+  $result->TO_JSON,
+  {
+    valid => bool(0),
+    errors => my $errors = [
+      {
+        instanceLocation => '',
+        keywordLocation => '/unevaluatedItems',
+        error => '"unevaluatedItems" keyword present, but annotation collection is disabled',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/unevaluatedProperties',
+        error => '"unevaluatedProperties" keyword present, but annotation collection is disabled',
+      },
+    ],
+  },
+  'basic format includes all errors linearly',
+);
 
-  $result->output_format('terse');
-  cmp_deeply(
-    $result->TO_JSON,
-    {
-      valid => bool(0),
-      errors => $errors,
-    },
-    'terse format does not omit these crucial errors',
-  );
-}
+$result->output_format('terse');
+cmp_deeply(
+  $result->TO_JSON,
+  {
+    valid => bool(0),
+    errors => $errors,
+  },
+  'terse format does not omit these crucial errors',
+);
 
 done_testing;

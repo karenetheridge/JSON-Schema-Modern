@@ -714,7 +714,7 @@ subtest 'exceptions' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/properties/x',
-          error => 'EXCEPTION: invalid schema type: number',
+          error => 'invalid schema type: number',
         },
       ],
     },
@@ -737,7 +737,7 @@ subtest 'exceptions' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/type',
-          error => 'EXCEPTION: unrecognized type "whargarbl"',
+          error => 'unrecognized type "whargarbl"',
         },
       ],
     },
@@ -854,7 +854,6 @@ subtest 'unresolvable $ref' => sub {
             '$ref' => 'does-not-exist.json',
           },
         },
-        anyOf => [ false ],
       },
     )->TO_JSON,
     {
@@ -864,7 +863,7 @@ subtest 'unresolvable $ref' => sub {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref',
           absoluteKeywordLocation => 'http://localhost:4242/baz/myint.json#/$ref',
-          error => 'EXCEPTION: unable to find resource http://localhost:4242/baz/does-not-exist.json',
+          error => 'unable to find resource http://localhost:4242/baz/does-not-exist.json',
         },
       ],
     },
@@ -881,7 +880,7 @@ subtest 'unresolvable $ref to plain-name fragment' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$ref',
-          error => 'EXCEPTION: unable to find resource #nowhere',
+          error => 'unable to find resource #nowhere',
         },
       ],
     },
@@ -907,7 +906,7 @@ subtest 'abort due to a schema error' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/oneOf/2/type',
-          error => 'EXCEPTION: unrecognized type "whargarbl"',
+          error => 'unrecognized type "whargarbl"',
         },
       ],
     },
@@ -967,55 +966,52 @@ subtest 'sorted property names' => sub {
 };
 
 subtest 'bad regex in schema' => sub {
-  my $schema = {
-    type => 'object',
-    properties => {
-      my_pattern => {
-        type => 'string',
-        pattern => '(',
+  cmp_deeply(
+    $js->evaluate(
+      {
+        my_pattern => 'foo',
+        my_patternProperties => { foo => 1 },
       },
-      my_patternProperties => {
+      {
         type => 'object',
-        patternProperties => { '(' => true },
-        additionalProperties => false,
+        properties => {
+          my_pattern => {
+            type => 'string',
+            pattern => '(',
+          },
+          my_patternProperties => {
+            type => 'object',
+            patternProperties => { '(' => true },
+            additionalProperties => false,
+          },
+          my_runtime_pattern => {
+            type => 'string',
+            pattern => '\p{IsFoo}', # qr/$pattern/ will not find this error - only m/$pattern/ will
+          },
+        },
       },
-    },
-  };
-
-  cmp_deeply(
-    $js->evaluate(
-      { my_pattern => 'foo' },
-      $schema,
     )->TO_JSON,
     {
       valid => bool(0),
       errors => [
         {
-          instanceLocation => '/my_pattern',
+          instanceLocation => '',
           keywordLocation => '/properties/my_pattern/pattern',
-          error => re(qr/EXCEPTION: Unmatched \( in regex/),
+          error => re(qr/^Unmatched \( in regex/),
         },
-      ],
-    },
-    'bad "pattern" regex is properly noted in error',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      { my_patternProperties => { foo => 1 } },
-      $schema,
-    )->TO_JSON,
-    {
-      valid => bool(0),
-      errors => [
         {
-          instanceLocation => '/my_patternProperties',
+          instanceLocation => '',
           keywordLocation => '/properties/my_patternProperties/patternProperties/(',
-          error => re(qr/EXCEPTION: Unmatched \( in regex/),
+          error => re(qr/^Unmatched \( in regex/),
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties/my_runtime_pattern/pattern',
+          error => re(qr/^Can't find Unicode property definition "IsFoo"/),
         },
       ],
     },
-    'bad "patternProperties" regex is properly noted in error',
+    'bad "pattern" and "patternProperties" regexes are properly noted in error, including errors only found when evaluating the pattern against a string',
   );
 };
 
@@ -1140,10 +1136,9 @@ subtest 'JSON pointer escaping' => sub {
       valid => bool(0),
       errors => [
         {
-          instanceLocation => '/{}',
-          keywordLocation => '/$ref/properties/{}/patternProperties/(',
-          absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/(',
-          error => re(qr{^\QEXCEPTION: Unmatched ( in regex; marked by <-- HERE in m/( <-- HERE\E}),
+          instanceLocation => '',
+          keywordLocation => '/$defs/mydef/properties/{}/patternProperties/(',
+          error => re(qr{^\QUnmatched ( in regex; marked by <-- HERE in m/( <-- HERE\E}),
         },
       ],
     },
@@ -1169,7 +1164,7 @@ subtest 'invalid $schema' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/1/$schema',
-          error => 'EXCEPTION: $schema can only appear at the schema resource root',
+          error => '$schema can only appear at the schema resource root',
         },
       ],
     },
@@ -1194,7 +1189,7 @@ subtest 'invalid $schema' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/1/$schema',
           absoluteKeywordLocation => 'https://bloop.com#/allOf/1/$schema',
-          error => 'EXCEPTION: $schema can only appear at the schema resource root',
+          error => '$schema can only appear at the schema resource root',
         },
       ],
     },
@@ -1241,7 +1236,7 @@ subtest 'invalid $schema' => sub {
           instanceLocation => '',
           keywordLocation => '/$defs/my_def/$schema',
           absoluteKeywordLocation => 'https://bloop3.com#/$defs/my_def/$schema',
-          error => 'EXCEPTION: $schema can only appear at the schema resource root',
+          error => '$schema can only appear at the schema resource root',
         },
       ],
     },
@@ -1277,7 +1272,7 @@ subtest 'absoluteKeywordLocation' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$ref',
-          error => 'EXCEPTION: unable to find resource #does_not_exist',
+          error => 'unable to find resource #does_not_exist',
         },
       ],
     },

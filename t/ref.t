@@ -289,7 +289,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$defs/myobject/$recursiveAnchor',
-          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+          error => '"$recursiveAnchor" keyword used without "$id"',
         },
       ],
     },
@@ -328,7 +328,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$defs/inner/$recursiveAnchor',
-          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+          error => '"$recursiveAnchor" keyword used without "$id"',
         },
       ],
     },
@@ -354,7 +354,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/$recursiveAnchor',
-          error => 'EXCEPTION: "$recursiveAnchor" keyword used without "$id"',
+          error => '"$recursiveAnchor" keyword used without "$id"',
         },
       ],
     },

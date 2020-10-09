@@ -10,8 +10,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
-use Syntax::Keyword::Try 0.11;
-use JSON::Schema::Draft201909::Utilities qw(is_type is_equal is_elements_unique E abort assert_keyword_type);
+use JSON::Schema::Draft201909::Utilities qw(is_type is_equal is_elements_unique E assert_keyword_type assert_pattern);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -33,7 +32,7 @@ sub _traverse_keyword_type {
   my ($self, $schema, $state) = @_;
 
   foreach my $type (is_plain_arrayref($schema->{type}) ? @{$schema->{type}} : $schema->{type}) {
-    abort($state, 'unrecognized type "%s"', $type)
+    return E($state, 'unrecognized type "%s"', $type)
       if not any { $type eq $_ } qw(null boolean object array string number integer);
   }
 }
@@ -51,7 +50,7 @@ sub _eval_keyword_type {
 
 sub _traverse_keyword_enum {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'array');
+  return if not assert_keyword_type($state, $schema, 'array');
 }
 
 sub _eval_keyword_enum {
@@ -75,8 +74,8 @@ sub _eval_keyword_const {
 
 sub _traverse_keyword_multipleOf {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'number');
-  abort($state, 'multipleOf value is not a positive number') if $schema->{multipleOf} <= 0;
+  return if not assert_keyword_type($state, $schema, 'number');
+  return E($state, 'multipleOf value is not a positive number') if $schema->{multipleOf} <= 0;
 }
 
 sub _eval_keyword_multipleOf {
@@ -151,7 +150,8 @@ sub _eval_keyword_minLength {
 
 sub _traverse_keyword_pattern {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
+  assert_pattern($state, $schema->{pattern});
 }
 
 sub _eval_keyword_pattern {
@@ -159,13 +159,8 @@ sub _eval_keyword_pattern {
 
   return 1 if not is_type('string', $data);
 
-  try {
-    return 1 if $data =~ m/$schema->{pattern}/;
-    return E($state, 'pattern does not match');
-  }
-  catch {
-    abort($state, $@);
-  };
+  return 1 if $data =~ m/$schema->{pattern}/;
+  return E($state, 'pattern does not match');
 }
 
 sub _traverse_keyword_maxItems { goto \&_assert_non_negative_integer }
@@ -191,7 +186,7 @@ sub _eval_keyword_minItems {
 
 sub _traverse_keyword_uniqueItems {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'boolean');
+  return if not assert_keyword_type($state, $schema, 'boolean');
 }
 
 sub _eval_keyword_uniqueItems {
@@ -232,8 +227,8 @@ sub _eval_keyword_minProperties {
 sub _traverse_keyword_required {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'array');
-  abort($state, '"required" element is not a string')
+  return if not assert_keyword_type($state, $schema, 'array');
+  return E($state, '"required" element is not a string')
     if any { !is_type('string', $_) } @{$schema->{required}};
   }
 
@@ -250,13 +245,13 @@ sub _eval_keyword_required {
 sub _traverse_keyword_dependentRequired {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'object');
-  abort($state, '"dependentRequired" property is not an array')
+  return if not assert_keyword_type($state, $schema, 'object');
+  return E($state, '"dependentRequired" property is not an array')
     if any { !is_type('array', $schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
-  abort($state, '"dependentRequired" property element is not a string')
+  return E($state, '"dependentRequired" property element is not a string')
     if any { !is_type('string', $_) } map @$_, values %{$schema->{dependentRequired}};
-  abort($state, '"dependentRequired" property elements are not unique')
+  return E($state, '"dependentRequired" property elements are not unique')
     if any { !is_elements_unique($schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
 }
@@ -276,13 +271,13 @@ sub _eval_keyword_dependentRequired {
 
 sub _assert_number {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'number');
+  return if not assert_keyword_type($state, $schema, 'number');
 }
 
 sub _assert_non_negative_integer {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'integer');
-  abort($state, '%s value is not a non-negative integer', $state->{keyword})
+  return if not assert_keyword_type($state, $schema, 'integer');
+  return E($state, '%s value is not a non-negative integer', $state->{keyword})
     if $schema->{$state->{keyword}} < 0;
 }
 

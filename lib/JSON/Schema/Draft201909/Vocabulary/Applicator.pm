@@ -10,8 +10,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use List::Util 1.45 qw(any uniqstr max);
 use Ref::Util 0.100 'is_plain_arrayref';
-use Syntax::Keyword::Try 0.11;
-use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort assert_keyword_type true);
+use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A assert_keyword_type assert_pattern true);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -211,7 +210,7 @@ sub _eval_keyword_items {
     return A($state, true);
   }
 
-  abort($state, '"items" array is empty') if not @{$schema->{items}};
+  return E($state, '"items" array is empty') if not @{$schema->{items}};
 
   my $last_index = -1;
   my $valid = 1;
@@ -274,10 +273,10 @@ sub _traverse_keyword_unevaluatedItems { goto \&_assert_schema }
 sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedItems" keyword present, but annotation collection is disabled')
+  return E($state, '"unevaluatedItems" keyword present, but annotation collection is disabled')
     if not $state->{collect_annotations};
 
-  abort($state, '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
+  return E($state, '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
     if $state->{short_circuit};
 
   return 1 if not is_type('array', $data);
@@ -422,7 +421,18 @@ sub _eval_keyword_properties {
   return @valid_properties ? A($state, \@valid_properties) : 1;
 }
 
-sub _traverse_keyword_patternProperties { goto \&_assert_schema_object }
+sub _traverse_keyword_patternProperties {
+  my ($self, $schema, $state) = @_;
+
+  return if not assert_keyword_type($state, $schema, 'object');
+
+  foreach my $property (sort keys %{$schema->{patternProperties}}) {
+    assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
+
+    $self->evaluator->_traverse($schema->{patternProperties}{$property},
+      +{ %$state, schema_path => jsonp($state->{schema_path}, 'patternProperties', $property) });
+  }
+}
 
 sub _eval_keyword_patternProperties {
   my ($self, $data, $schema, $state) = @_;
@@ -433,14 +443,7 @@ sub _eval_keyword_patternProperties {
   my @orig_annotations = @{$state->{annotations}};
   my (@valid_properties, @new_annotations);
   foreach my $property_pattern (sort keys %{$schema->{patternProperties}}) {
-    my @matched_properties;
-    try {
-      @matched_properties = grep m/$property_pattern/, keys %$data;
-    }
-    catch {
-      abort({ %$state, _schema_path_suffix => $property_pattern }, $@);
-    };
-    foreach my $property (sort @matched_properties) {
+    foreach my $property (sort grep m/$property_pattern/, keys %$data) {
       if (is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
         if ($schema->{patternProperties}{$property_pattern}) {
           push @valid_properties, $property;
@@ -522,10 +525,10 @@ sub _traverse_keyword_unevaluatedProperties { goto \&_assert_schema }
 sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is disabled')
+  return E($state, '"unevaluatedProperties" keyword present, but annotation collection is disabled')
     if not $state->{collect_annotations};
 
-  abort($state, '"unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable')
+  return E($state, '"unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable')
     if $state->{short_circuit};
 
   return 1 if not is_type('object', $data);
@@ -604,8 +607,8 @@ sub _eval_keyword_propertyNames {
 sub _assert_schema_array {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'array');
-  abort($state, '"%s" array is empty') if not @{$schema->{$state->{keyword}}};
+  return if not assert_keyword_type($state, $schema, 'array');
+  return E($state, '"%s" array is empty') if not @{$schema->{$state->{keyword}}};
 
   foreach my $idx (0 .. $#{$schema->{$state->{keyword}}}) {
     $self->evaluator->_traverse($schema->{$state->{keyword}}[$idx],
@@ -623,7 +626,7 @@ sub _assert_schema {
 sub _assert_schema_object {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'object');
+  return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{$state->{keyword}}}) {
     $self->evaluator->_traverse($schema->{$state->{keyword}}{$property},

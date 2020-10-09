@@ -263,7 +263,7 @@ subtest '$id with a non-empty fragment' => sub {
             instanceLocation => '',
             keywordLocation => '/$defs/foo/properties/bar/$id',
             absoluteKeywordLocation => 'http://secondary.com#/properties/bar/$id',
-            error => 'EXCEPTION: $id value "http://localhost:4242/my_foo#hello" cannot have a non-empty fragment',
+            error => '$id value "http://localhost:4242/my_foo#hello" cannot have a non-empty fragment',
           }),
         ],
       ),
@@ -289,7 +289,7 @@ subtest '$anchor not conforming to syntax' => sub {
         methods(TO_JSON => {
           instanceLocation => '',
           keywordLocation => '/$defs/foo/$anchor',
-          error => 'EXCEPTION: $anchor value "my_#bad_anchor" does not match required syntax',
+          error => '$anchor value "my_#bad_anchor" does not match required syntax',
         }),
       ],
     ),

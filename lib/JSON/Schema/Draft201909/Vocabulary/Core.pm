@@ -8,7 +8,7 @@ our $VERSION = '0.013';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
-use JSON::Schema::Draft201909::Utilities qw(is_type jsonp abort assert_keyword_type canonical_schema_uri);
+use JSON::Schema::Draft201909::Utilities qw(is_type jsonp assert_keyword_type canonical_schema_uri E);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -28,10 +28,10 @@ sub keywords {
 sub _traverse_keyword_id {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$id'});
-  abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
+  return E($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length $uri->fragment;
 
   $uri->fragment(undef);
@@ -59,18 +59,18 @@ sub _eval_keyword_id {
   }
 
   # this should never happen, if the pre-evaluation traversal was performed correctly
-  abort($state, 'failed to resolve $id to canonical uri');
+  return E($state, 'failed to resolve $id to canonical uri');
 }
 
 sub _traverse_keyword_schema {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 
   my $uri = canonical_schema_uri($state);
-  abort($state, '$schema can only appear at the schema resource root') if length($uri->fragment);
+  return E($state, '$schema can only appear at the schema resource root') if length($uri->fragment);
 
-  abort($state, 'custom $schema references are not yet supported')
+  return E($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
 }
 
@@ -85,9 +85,9 @@ sub _traverse_keyword_schema {
 sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 
-  abort($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
+  return E($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
     if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/;
 
   my $canonical_uri = canonical_schema_uri($state);
@@ -105,12 +105,12 @@ sub _traverse_keyword_anchor {
 sub _traverse_keyword_recursiveAnchor {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'boolean');
+  return if not assert_keyword_type($state, $schema, 'boolean');
 
   return if not $schema->{'$recursiveAnchor'};
 
   my $uri = canonical_schema_uri($state);
-  abort($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
+  return E($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
 }
 
 sub _eval_keyword_recursiveAnchor {
@@ -126,7 +126,7 @@ sub _eval_keyword_recursiveAnchor {
 
 sub _traverse_keyword_ref {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 }
 
 sub _eval_keyword_ref {
@@ -134,7 +134,7 @@ sub _eval_keyword_ref {
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{canonical_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $self->evaluator->_fetch_schema_from_uri($uri);
-  abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
+  return E($state, 'unable to find resource %s', $uri) if not defined $subschema;
 
   return $self->evaluator->_eval($data, $subschema,
     +{ %$state,
@@ -148,7 +148,7 @@ sub _eval_keyword_ref {
 
 sub _traverse_keyword_recursiveRef {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 }
 
 sub _eval_keyword_recursiveRef {
@@ -156,13 +156,13 @@ sub _eval_keyword_recursiveRef {
 
   my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{canonical_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $self->evaluator->_fetch_schema_from_uri($target_uri);
-  abort($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
+  return E($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
 
   if (is_type('boolean', $subschema->{'$recursiveAnchor'}) and $subschema->{'$recursiveAnchor'}) {
     my $uri = Mojo::URL->new($schema->{'$recursiveRef'})
       ->to_abs($state->{recursive_anchor_uri} // $state->{canonical_schema_uri});
     ($subschema, $canonical_uri, $document, $document_path) = $self->evaluator->_fetch_schema_from_uri($uri);
-    abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
+    return E($state, 'unable to find resource %s', $uri) if not defined $subschema;
   }
 
   return $self->evaluator->_eval($data, $subschema,
@@ -177,7 +177,7 @@ sub _eval_keyword_recursiveRef {
 
 sub _traverse_keyword_vocabulary {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'object');
+  return if not assert_keyword_type($state, $schema, 'object');
 }
 
 # we do nothing with $vocabulary yet at evaluation time. When we know we are in a metaschema,
@@ -186,7 +186,7 @@ sub _traverse_keyword_vocabulary {
 
 sub _traverse_keyword_comment {
   my ($self, $schema, $state) = @_;
-  assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string');
 }
 
 # we do nothing with $comment at evaluation time, including not collecting its value for annotations.
@@ -194,7 +194,7 @@ sub _traverse_keyword_comment {
 sub _traverse_keyword_defs {
   my ($self, $schema, $state) = @_;
 
-  assert_keyword_type($state, $schema, 'object');
+  return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{'$defs'}}) {
     $self->evaluator->_traverse($schema->{'$defs'}{$property},
