@@ -5,6 +5,7 @@ Revision history for JSON-Schema-Draft201909
             future support for custom vocabularies
           - traverse the schema before evaluation, for more correct
             and complete extraction of identifiers and invalid syntax
+          - add callbacks to traverse(), to easily find keywords of interest
 
 0.015     2020-10-20 03:08:36Z
           - fixed infinity/overflow checks for older perls

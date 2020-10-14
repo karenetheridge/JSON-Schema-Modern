@@ -192,6 +192,7 @@ sub traverse {
       $self,  # for discontinued keywords defined in the base schema
     ],
     identifiers => [],
+    callbacks => $config_override->{callbacks} // {},
   };
 
   try {
@@ -315,6 +316,10 @@ sub _traverse {
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
 
       $vocabulary->$method($schema, $state) if $vocabulary->can($method);
+
+      if (my $sub = $state->{callbacks}{$keyword}) {
+        $sub->($schema, $state);
+      }
     }
   }
 }
@@ -742,6 +747,23 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
 Traverses the provided schema data without evaluating it against any instance data. Returns the
 internal state object accumulated during the traversal, including any identifiers found therein, and
 any errors found during parsing. For internal purposes only.
+
+You can pass a series of callback subs to this method corresponding to keywords, which is useful for
+extracting data from within schemas and skipping properties that may look like keywords but actually
+are not (for example C<{"const":{"$ref": "this is not actually a $ref"}}>). This feature is highly
+experimental and is highly likely to change in the future.
+
+For example, to find the resolved targets of all C<$ref> keywords in a schema document:
+
+  my @refs;
+  JSON::Schema::Draft201909->new->traverse($schema, {
+    callbacks => {
+      '$ref' => sub ($schema, $state) {
+        push @refs, Mojo::URL->new($schema->{'$ref'})
+          ->to_abs(JSON::Schema::Draft201909::Utilities::canonical_schema_uri($state));
+      }
+    },
+  });
 
 =head2 add_schema
 
