@@ -881,6 +881,8 @@ sub _eval_keyword_unevaluatedItems {
   abort($state, '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
     if $state->{short_circuit};
 
+  return 1 if not $self->_is_type('array', $data);
+
   my @annotations = local_annotations($state);
   my @items_annotations = grep $_->keyword eq 'items', @annotations;
   my @additionalItems_annotations = grep $_->keyword eq 'additionalItems', @annotations;
