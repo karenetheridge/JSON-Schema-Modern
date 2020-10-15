@@ -70,27 +70,30 @@ sub format {
     };
   }
   if ($style eq 'terse') {
+    my @errors = grep {
+        my ($keyword, $error) = ($_->keyword, $_->error);
+        not $keyword
+          or ($keyword =~ /^unevaluated(?:Items|Properties)$/
+            and $error =~ /"$keyword" keyword present, but/)
+          or (
+            not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas items propertyNames)
+            and ($keyword ne 'oneOf' or $error ne 'no subschemas are valid')
+            and (not grep $keyword eq $_, qw(additionalItems unevaluatedItems)
+              or $error eq 'additional item not permitted')
+            and (not grep $keyword eq $_, qw(properties patternProperties)
+              or $error eq 'property not permitted')
+            and (not grep $keyword eq $_, qw(additionalProperties unevaluatedProperties)
+              or $error eq 'additional property not permitted'))
+      }
+      $self->errors;
+
+    die 'uh oh, have no errors left to report' if not $self->result and not @errors;
+
     return +{
       valid => $self->result,
       $self->result
         ? ($self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
-        : (errors => [ map $_->TO_JSON,
-            grep {
-              my ($keyword, $error) = ($_->keyword, $_->error);
-              not $keyword
-                or ($keyword =~ /^unevaluated(?:Items|Properties)$/
-                  and $error =~ /"$keyword" keyword present, but/)
-                or (
-                  not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas items propertyNames)
-                  and ($keyword ne 'oneOf' or $error ne 'no subschemas are valid')
-                  and (not grep $keyword eq $_, qw(additionalItems unevaluatedItems)
-                    or $error eq 'additional item not permitted')
-                  and (not grep $keyword eq $_, qw(properties patternProperties)
-                    or $error eq 'property not permitted')
-                  and (not grep $keyword eq $_, qw(additionalProperties unevaluatedProperties)
-                    or $error eq 'additional property not permitted'))
-            }
-            $self->errors ]),
+        : (errors => [ map $_->TO_JSON, @errors ]),
     };
   }
 
