@@ -78,6 +78,8 @@ sub format {
             grep {
               my ($keyword, $error) = ($_->keyword, $_->error);
               not $keyword
+                or ($keyword =~ /^unevaluated(?:Items|Properties)$/
+                  and $error =~ /"$keyword" keyword present, but/)
                 or (
                   not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas items propertyNames)
                   and ($keyword ne 'oneOf' or $error ne 'no subschemas are valid')

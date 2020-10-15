@@ -6,6 +6,8 @@ Revision history for JSON-Schema-Draft201909
           - fix detection of bad $recursiveAnchor
           - fix canonical uri calculation for $schema, $recursiveAnchor, and
             infinite loop detection
+          - for output_format=terse, do not omit the important errors for
+            unevaluated* when annotation collection is disabled
 
 0.013     2020-09-15 19:14:53Z
           - detect more cases of resource identifier collisions
