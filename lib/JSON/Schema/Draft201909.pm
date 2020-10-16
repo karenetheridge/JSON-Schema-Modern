@@ -472,6 +472,7 @@ sub _eval_keyword_multipleOf {
   abort($state, 'multipleOf value is not a positive number') if $schema->{multipleOf} <= 0;
 
   my $quotient = $data / $schema->{multipleOf};
+print STDERR "### got quotient: $quotient\n";
   return 1 if int($quotient) == $quotient and $quotient !~ /(?:NaN|Inf)/;
   return E($state, 'value is not a multiple of %g', $schema->{multipleOf});
 }

@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - temporary
 
 0.014     2020-10-16 19:21:17Z
           - ensure "enum" value is an array
