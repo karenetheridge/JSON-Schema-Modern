@@ -71,6 +71,7 @@ $accepter->acceptance(
         'optional/bignum.json',                     # TODO: see issue #10
         'optional/content.json',                    # per spec, should not be validated by default
         'optional/ecmascript-regex.json',           # TODO: see issue #27
+        'optional/float-overflow.json',             # see slack logs re multipleOf algo
         'optional/format/iri-reference.json',       # not yet implemented
         'optional/format/uri-template.json',        # not yet implemented
         $ENV{AUTOMATED_TESTING} ? (                 # these all depend on optional prereqs
