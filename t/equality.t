@@ -28,6 +28,8 @@ subtest 'equality, using inflated data' => sub {
     [ { a => 1 }, { a => 1.0 }, true ],
     [ [qw(école ಠ_ಠ)], ["\x{e9}cole", "\x{0ca0}_\x{0ca0}"], true ],
     [ { a => 1, b => 2 }, { a => 1, b => 3 }, false, '/b' ],
+    [ { a => { b => 1, c => 2 }, d => { e => 3, f => 4 } },
+      { a => { b => 1, c => 2 }, d => { e => 3, f => 5 } }, false, '/d/f' ],
   ) {
     my ($x, $y, $expected, $diff_path) = @$test;
     my @types = map $js->_get_type($_), $x, $y;
@@ -59,6 +61,9 @@ subtest 'equality, using JSON strings' => sub {
     [ '{"a":1}', '{"a":1.0}', true ],
     [ '["école","ಠ_ಠ"]', qq{["\x{e9}cole", "\x{0ca0}_\x{0ca0}"]}, true ],
     [ '{"a":1,"b":2}', '{"b":3,"a":1}', false, '/b' ],
+    [ '{"a":{"b":1,"c":2},"d":{"e":3,"f":4}}',
+      '{"a":{"b":1,"c":2},"d":{"e":3,"f":5}}', false, '/d/f' ],
+
   ) {
     my ($x, $y, $expected, $diff_path) = @$test;
     ($x, $y) = map $decoder->decode($_), $x, $y;
