@@ -1935,6 +1935,11 @@ To date, missing components (some of which are optional, but still quite useful)
 * examination of the C<$schema> keyword for deviation from the standard metaschema, including
   changes to vocabulary behaviour
 
+Additionally, some small errors in the specification (which have been fixed in the next draft
+specification version) are fixed here rather than implementing the precise but unintended behaviour,
+most notably in the use of json pointers rather than fragment-only URIs in C<instanceLocation> and
+C<keywordLocation> in annotations and errors.
+
 =head1 SECURITY CONSIDERATIONS
 
 The C<pattern> and C<patternProperties> keywords, and the C<regex> format validator,
