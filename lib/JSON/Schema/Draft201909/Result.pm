@@ -155,7 +155,7 @@ One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basi
 Returns a data structure suitable for serialization; requires one argument specifying the output
 format to use, which corresponds to the formats documented in
 L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4>. The only supported
-formats at this time are C<flag> and C<basic>.
+formats at this time are C<flag>, C<basic> and C<terse>.
 
 =head2 TO_JSON
 
