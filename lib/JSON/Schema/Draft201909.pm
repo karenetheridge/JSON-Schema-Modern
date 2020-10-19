@@ -633,6 +633,8 @@ sub _eval_keyword_dependentRequired {
   abort($state, '"dependentRequired" property is not an array')
     if any { !$self->_is_type('array', $schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
+  abort($state, '"dependentRequired" property element is not a string')
+    if any { !$self->_is_type('string', $_) } map @$_, values %{$schema->{dependentRequired}};
   abort($state, '"dependentRequired" property elements are not unique')
     if any { !$self->_is_elements_unique($schema->{dependentRequired}{$_}) }
       keys %{$schema->{dependentRequired}};
