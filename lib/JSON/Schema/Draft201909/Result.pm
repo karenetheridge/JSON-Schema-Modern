@@ -147,6 +147,10 @@ A boolean. Indicates whether validation was successful or failed.
 
 Returns an array of L<JSON::Schema::Draft201909::Error> objects.
 
+=head2 annotations
+
+Returns an array of L<JSON::Schema::Draft201909::Annotation> objects.
+
 =head2 output_format
 
 One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
