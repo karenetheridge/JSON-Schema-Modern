@@ -979,6 +979,10 @@ subtest 'bad regex in schema' => sub {
         patternProperties => { '(' => true },
         additionalProperties => false,
       },
+      my_runtime_pattern => {
+        type => 'string',
+        pattern => '\p{main::IsFoo}', # qr/$pattern/ will not find this error, but m/$pattern/ will
+      },
     },
   };
 
@@ -1016,6 +1020,40 @@ subtest 'bad regex in schema' => sub {
       ],
     },
     'bad "patternProperties" regex is properly noted in error',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { my_runtime_pattern => 'foo' },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/my_runtime_pattern',
+          keywordLocation => '/properties/my_runtime_pattern/pattern',
+          # in 5.28 and earlier: Can't find Unicode property definition "IsFoo"
+          # in 5.30 and later:   Unknown user-defined property name \p{main::IsFoo}
+          error => re(qr/^EXCEPTION: .*property.*IsFoo/),
+        },
+      ],
+    },
+    'bad "pattern" regex is properly noted in error',
+  );
+
+  no warnings 'once';
+  *IsFoo = sub { "0066\n006F\n" }; # accepts 'f', 'o'
+
+  cmp_deeply(
+    $js->evaluate(
+      { my_runtime_pattern => 'foo' },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    '"pattern" regex is now valid, due to the Unicode property becoming defined',
   );
 };
 
