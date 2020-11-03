@@ -1384,14 +1384,14 @@ sub _eval_keyword_examples {
 }
 
 sub _eval_keyword_definitions {
-  my ($self, $schema, $state) = @_;
+  my ($self, $data, $schema, $state) = @_;
   carp 'no-longer-supported "definitions" keyword present (at '
     .canonical_schema_uri($state).'): this should be rewritten as "$defs"';
   return 1;
 }
 
 sub _eval_keyword_dependencies {
-  my ($self, $schema, $state) = @_;
+  my ($self, $data, $schema, $state) = @_;
   carp 'no-longer-supported "dependencies" keyword present (at'
     .canonical_schema_uri($state)
     .'): this should be rewritten as "dependentSchemas" or "dependentRequired"';
