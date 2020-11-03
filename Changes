@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - further fixes to infinite loop detection
 
 0.015     2020-10-20 03:08:36Z
           - fixed infinity/overflow checks for older perls

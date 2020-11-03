@@ -77,4 +77,21 @@ cmp_deeply(
   'the seen counter does not confuse URI paths and fragments: /properties/foo vs #/properties/foo',
 );
 
+cmp_deeply(
+  $js->evaluate(
+    { foo => 1 },
+    {
+      '$defs' => {
+        int => { type => 'integer' },
+      },
+      anyOf => [
+        { additionalProperties => { '$ref' => '#/$defs/int' } },
+        { additionalProperties => { '$ref' => '#/$defs/int' } },
+      ],
+    }
+  )->TO_JSON,
+  { valid => bool(1) },
+  'the seen counter does not confuse two subschemas that both apply the same definition to the same instance location',
+);
+
 done_testing;
