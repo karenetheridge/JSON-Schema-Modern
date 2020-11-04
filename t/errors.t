@@ -997,7 +997,7 @@ subtest 'bad regex in schema' => sub {
         {
           instanceLocation => '/my_pattern',
           keywordLocation => '/properties/my_pattern/pattern',
-          error => re(qr/EXCEPTION: Unmatched \( in regex/),
+          error => re(qr/^EXCEPTION: Unmatched \( in regex/),
         },
       ],
     },
@@ -1015,7 +1015,7 @@ subtest 'bad regex in schema' => sub {
         {
           instanceLocation => '/my_patternProperties',
           keywordLocation => '/properties/my_patternProperties/patternProperties/(',
-          error => re(qr/EXCEPTION: Unmatched \( in regex/),
+          error => re(qr/^EXCEPTION: Unmatched \( in regex/),
         },
       ],
     },

@@ -103,20 +103,20 @@ my $file = __FILE__;
 my $line;
 like(
   exception { $line = __LINE__; $js->_is_type('foo', 'wharbarbl') },
-  qr/unknown type "foo" at $file line $line/,
+  qr/^unknown type "foo" at $file line $line/,
   'non-existent type results in exception',
 );
 
 like(
   exception { $line = __LINE__; $js->_get_type(dualvar(5, "five")) },
-  qr/ambiguous type for "five"/,
+  qr/^ambiguous type for "five"/,
   'ambiguous type results in exception',
 );
 
 subtest '_get_type for references' => sub {
   like(
     exception { $line = __LINE__; $js->_get_type($_->[0]) },
-    qr/unsupported reference type $_->[1]/,
+    qr/^unsupported reference type $_->[1]/,
     $_->[1].' reference type results in exception',
   ) foreach (
     [ \1, 'SCALAR' ],

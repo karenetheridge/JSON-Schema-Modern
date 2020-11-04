@@ -26,7 +26,7 @@ subtest 'local JSON pointer' => sub {
       my $result = $js->evaluate(true, { '$ref' => '#/$defs/nowhere' });
       like(
         (($result->errors)[0])->error,
-        qr{unable to find resource \#/\$defs/nowhere},
+        qr{^EXCEPTION: unable to find resource \#/\$defs/nowhere},
         'got error for unresolvable ref',
       );
     },
@@ -85,7 +85,7 @@ subtest 'local anchor' => sub {
       my $result = $js->evaluate(true, { '$ref' => '#nowhere' });
       like(
         (($result->errors)[0])->error,
-        qr{unable to find resource \#nowhere},
+        qr{^EXCEPTION: unable to find resource \#nowhere},
         'got error for unresolvable ref',
       );
     },

@@ -584,13 +584,13 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
 
   like(
     exception { $js->add_schema('https://uri2.com', { x => 1 }) },
-    qr!\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
+    qr!^\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
     'cannot call add_schema with the same URI as for another schema',
   );
 
   like(
     exception { $js->add_schema('https://uri3.com', { '$id' => 'https://foo.com', x => 1 }) },
-    qr!\Quri "https://foo.com" conflicts with an existing schema resource\E!,
+    qr!^\Quri "https://foo.com" conflicts with an existing schema resource\E!,
     'cannot reuse the same $id in another document',
   );
 

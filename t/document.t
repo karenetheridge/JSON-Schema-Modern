@@ -35,7 +35,7 @@ subtest 'boolean document' => sub {
         schema => false,
       )
     },
-    qr/canonical_uri cannot contain a fragment/,
+    qr/^canonical_uri cannot contain a fragment/,
     'boolean schema with invalid canonical_uri (fragment)',
   );
 
@@ -407,7 +407,7 @@ subtest 'resource collisions' => sub {
         },
       );
     },
-    qr{\Quri "https://foo.com/x/y/z" conflicts with an existing schema resource\E},
+    qr{^\Quri "https://foo.com/x/y/z" conflicts with an existing schema resource\E},
     'detected collision between document\'s initial uri and a subschema\'s uri',
   );
 
@@ -423,7 +423,7 @@ subtest 'resource collisions' => sub {
         },
       );
     },
-    qr{\Quri "https://foo.com/x/y/z" conflicts with an existing schema resource\E},
+    qr{^\Quri "https://foo.com/x/y/z" conflicts with an existing schema resource\E},
     'detected collision between two subschema uris in a document',
   );
 
