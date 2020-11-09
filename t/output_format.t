@@ -19,7 +19,11 @@ my $result = $js->evaluate(
   { alpha => 1, beta => 1, gamma => [ 0, 1 ], foo => 1, zulu => 2 },
   {
     required => [ 'bar' ],
-    allOf => [ { type => 'number' } ],
+    allOf => [
+      { type => 'number' },
+      { oneOf => [ { type => 'number' } ] },
+      { oneOf => [ true, true ] },
+    ],
     anyOf => [ { type => 'number' }, { if => true, then => { type => 'array' }, else => false } ],
     if => false, then => false, else => { type => 'number' },
     not => true,
@@ -58,8 +62,23 @@ cmp_deeply(
       },
       {
         instanceLocation => '',
+        keywordLocation => '/allOf/1/oneOf/0/type',
+        error => 'wrong type (expected number)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/1/oneOf',
+        error => 'no subschemas are valid',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/2/oneOf',
+        error => 'multiple subschemas are valid: 0, 1',
+      },
+      {
+        instanceLocation => '',
         keywordLocation => '/allOf',
-        error => 'subschema 0 is not valid',
+        error => 'subschemas 0, 1, 2 are not valid',
       },
       {
         instanceLocation => '',
@@ -210,6 +229,17 @@ cmp_deeply(
         instanceLocation => '',
         keywordLocation => '/allOf/0/type',
         error => 'wrong type (expected number)',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/1/oneOf/0/type',
+        error => 'wrong type (expected number)',
+      },
+      # "summary" error from /allOf/1/oneOf is omitted
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/2/oneOf',
+        error => 'multiple subschemas are valid: 0, 1',
       },
       # "summary" error from /allOf is omitted
       {
