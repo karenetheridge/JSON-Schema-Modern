@@ -31,7 +31,7 @@ my $result = $js->evaluate(
       alpha => false,
       beta => { multipleOf => 2 },
       gamma => {
-        items => [ false ], # this is silly. no reason to special-case do this.
+        items => [ false ],
         additionalItems => false,
         unevaluatedItems => false,
       },
@@ -128,7 +128,7 @@ cmp_deeply(
       {
         instanceLocation => '/gamma/0',
         keywordLocation => '/properties/gamma/items/0',
-        error => 'subschema is false',
+        error => 'item not permitted',
       },
       {
         instanceLocation => '/gamma',
@@ -235,13 +235,13 @@ cmp_deeply(
         keywordLocation => '/allOf/1/oneOf/0/type',
         error => 'wrong type (expected number)',
       },
-      # "summary" error from /allOf/1/oneOf is omitted
+      # - "summary" error from /allOf/1/oneOf is omitted
       {
         instanceLocation => '',
         keywordLocation => '/allOf/2/oneOf',
         error => 'multiple subschemas are valid: 0, 1',
       },
-      # "summary" error from /allOf is omitted
+      # - "summary" error from /allOf is omitted
       {
         instanceLocation => '',
         keywordLocation => '/anyOf/0/type',
@@ -252,8 +252,8 @@ cmp_deeply(
         keywordLocation => '/anyOf/1/then/type',
         error => 'wrong type (expected array)',
       },
-      # "summary" error from /anyOf/1/then is omitted
-      # "summary" error from /anyOf is omitted
+      # - "summary" error from /anyOf/1/then is omitted
+      # - "summary" error from /anyOf is omitted
       {
         instanceLocation => '',
         keywordLocation => '/not',
@@ -264,7 +264,7 @@ cmp_deeply(
         keywordLocation => '/else/type',
         error => 'wrong type (expected number)',
       },
-      # "summary" error from /else is omitted
+      # - "summary" error from /else is omitted
       {
         instanceLocation => '/alpha',
         keywordLocation => '/properties/alpha',
@@ -278,46 +278,41 @@ cmp_deeply(
       {
         instanceLocation => '/gamma/0',
         keywordLocation => '/properties/gamma/items/0',
-        error => 'subschema is false',
+        error => 'item not permitted',
       },
-      # "summary" error from /properties/gamma/items is omitted
+      # - "summary" error from /properties/gamma/items is omitted
       {
         instanceLocation => '/gamma/1',
         keywordLocation => '/properties/gamma/additionalItems',
         error => 'additional item not permitted',
       },
-      # "summary" error from /properties/gamma/additionalItems is omitted
-      (map +{
-        instanceLocation => '/gamma/'.$_,
-        keywordLocation => '/properties/gamma/unevaluatedItems',
-        error => 'additional item not permitted',
-      }, (0..1)),
-      # "summary" error from /properties/gamma/unevaluatedItems is omitted
-      # "summary" error from /properties is omitted
+      # - "summary" error from /properties/gamma/additionalItems is omitted
+      # - /properties/gamma/unevaluatedItems errors at /gamma/0, /gamma/1 are omitted because
+      # we do have a schema covering them at /properties/gamma/items -- those subschemas just
+      # evaluated to false
+      # - "summary" error from /properties/gamma/unevaluatedItems is omitted
+      # - "summary" error from /properties is omitted
       {
         instanceLocation => '/foo',
         keywordLocation => '/patternProperties/o',
         error => 'property not permitted',
       },
-      # "summary" error from /patternProperties is omitted
+      # - "summary" error from /patternProperties is omitted
       {
         instanceLocation => '/zulu',
         keywordLocation => '/additionalProperties',
         error => 'additional property not permitted',
       },
-      # "summary" error from /additionalProperties is omitted
-      (map +{
-        instanceLocation => '/'.$_,
-        keywordLocation => '/unevaluatedProperties',
-        error => 'additional property not permitted',
-      }, qw(alpha beta foo gamma zulu)),
-      # "summary" error from /unevaluatedProperties is omitted
+      # - "summary" error from /additionalProperties is omitted
+      # - /properties/gamma/unevaluatedproperties errors at /alpha, /beta, /gamma are removed because
+      # they are also covered at /properties/* and additionalProperties, despite evaluating to false
+      # - "summary" error from /unevaluatedProperties is omitted
       {
         instanceLocation => '/zulu',
         keywordLocation => '/propertyNames/pattern',
         error => 'pattern does not match',
       },
-      # "summary" error from /propertyNames is omitted
+      # - "summary" error from /propertyNames is omitted
     ],
   },
   'terse format omits errors from redundant applicator keywords',

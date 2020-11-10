@@ -806,7 +806,11 @@ sub _eval_keyword_items {
     my $valid = 1;
     foreach my $idx (0 .. $#{$data}) {
       my @annotations = @orig_annotations;
-      if ($self->_eval($data->[$idx], $schema->{items},
+      if ($self->_is_type('boolean', $schema->{items})) {
+        next if $schema->{items};
+        $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx }, 'item not permitted');
+      }
+      elsif ($self->_eval($data->[$idx], $schema->{items},
           +{ %$state, annotations => \@annotations,
             data_path => $state->{data_path}.'/'.$idx,
             schema_path => $state->{schema_path}.'/items' })) {
@@ -832,7 +836,12 @@ sub _eval_keyword_items {
     $last_index = $idx;
 
     my @annotations = @orig_annotations;
-    if ($self->_eval($data->[$idx], $schema->{items}[$idx],
+    if ($self->_is_type('boolean', $schema->{items}[$idx])) {
+      next if $schema->{items}[$idx];
+      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx,
+        _schema_path_suffix => $idx }, 'item not permitted');
+    }
+    elsif ($self->_eval($data->[$idx], $schema->{items}[$idx],
         +{ %$state, annotations => \@annotations,
           data_path => $state->{data_path}.'/'.$idx,
           schema_path => $state->{schema_path}.'/items/'.$idx })) {
