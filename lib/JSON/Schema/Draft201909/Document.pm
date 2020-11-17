@@ -60,8 +60,8 @@ has canonical_uri_index => (
   isa => HashRef[InstanceOf['Mojo::URL']],
   handles_via => 'Hash',
   handles => {
+    path_to_canonical_uri => 'get',
     _add_canonical_uri => 'set',
-    _path_to_canonical_uri => 'get',
   },
   init_arg => undef,
   lazy => 1,
@@ -216,6 +216,12 @@ L</resource_index> and is constructed as that is built up.
 =head1 METHODS
 
 =for Pod::Coverage BUILD FOREIGNBUILDARGS
+
+=head2 path_to_canonical_uri
+
+Given a JSON path within this document, returns the canonical URI corresponding to that location.
+Only fragmentless URIs can be looked up in this manner, so it is only suitable for finding the
+canonical URI corresponding to a subschema known to have an C<$id> keyword.
 
 =head2 contains
 

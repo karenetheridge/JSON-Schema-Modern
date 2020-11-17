@@ -303,7 +303,7 @@ sub _eval_keyword_id {
   abort($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length Mojo::URL->new($schema->{'$id'})->fragment;
 
-  if (my $canonical_uri = $state->{document}->_path_to_canonical_uri($state->{document_path}.$state->{schema_path})) {
+  if (my $canonical_uri = $state->{document}->path_to_canonical_uri($state->{document_path}.$state->{schema_path})) {
     $state->{canonical_schema_uri} = $canonical_uri->clone;
     $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
     $state->{document_path} = $state->{document_path}.$state->{schema_path};
