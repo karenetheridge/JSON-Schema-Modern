@@ -45,10 +45,10 @@ has resource_index => (
   handles_via => 'Hash',
   handles => {
     resource_index => 'elements',
+    resource_pairs => 'kv',
     _add_resources => 'set',
     _get_resource => 'get',
     _remove_resource => 'delete',
-    _resource_pairs => 'kv',
   },
   init_arg => undef,
   lazy => 1,
@@ -205,7 +205,8 @@ only when no other suitable identifier can be found for the root schema.
 This attribute should only be used by L<JSON::Schema::Draft201909> and not intended for use
 externally (you should use the public accessors in L<JSON::Schema::Draft201909> instead).
 
-When called as a method, returns the flattened list of tuples (path, uri).
+When called as a method, returns the flattened list of tuples (path, uri). You can also use
+C<resource_pairs> which returns a list of tuples as arrayrefs.
 
 =head2 canonical_uri_index
 

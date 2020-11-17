@@ -122,7 +122,7 @@ sub add_schema {
     }
     else {
       $self->_add_resources(map +($_->[0] => +{ %{$_->[1]}, document => $document }),
-        $document->_resource_pairs);
+        $document->resource_pairs);
     }
   }
 
@@ -1600,7 +1600,7 @@ sub _get_or_load_resource {
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
       map +($_->[0] => +{ %{$_->[1]}, document => $document }),
-        $document->_resource_pairs
+        $document->resource_pairs
     );
 
     return $self->_get_resource($uri);
