@@ -429,11 +429,31 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
   };
   my $schema2 = {
     anyOf => [
-      { '$id' => 'subschema1.json', type => 'string' },
-      { '$id' => 'subschema3.json', type => 'number' },
+      { '$id' => 'subschema3.json', type => 'string' },
+      { '$id' => 'subschema4.json', type => 'number' },
     ],
   };
-  $js->evaluate(1, $schema1);
+
+  cmp_deeply(
+    $js->evaluate(1, $schema1)->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/type',
+          absoluteKeywordLocation => 'subschema1.json#/type',
+          error => 'wrong type (expected string)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          error => 'subschema 0 is not valid',
+        },
+      ],
+    },
+    'evaluation of schema1',
+  );
 
   my $resource_index1 = +{ $js->_resource_index };
   my $document1 = $resource_index1->{''}{document};
@@ -460,7 +480,13 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
     'resources in initial schema are indexed',
   );
 
-  $js->evaluate(1, $schema2);
+  cmp_deeply(
+    $js->evaluate(1, $schema2)->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    'successful evaluation of schema2',
+  );
 
   my $resource_index2 = +{ $js->_resource_index };
   my $document2 = $resource_index2->{'subschema3.json'}{document};
@@ -473,23 +499,85 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         canonical_uri => str(''),
         document => shallow($document2),    # same uri as earlier, but now points to document2
       },
-      'subschema1.json' => {
-        path => '/anyOf/0',
-        canonical_uri => str('subschema1.json'),
-        document => shallow($document2),    # same uri as earlier, but now points to document2
-      },
-      # and subschema2.json is gone also
+      # subschema1 and subschema2 are now removed
       'subschema3.json' => {
-        path => '/anyOf/1',
+        path => '/anyOf/0',
         canonical_uri => str('subschema3.json'),
         document => shallow($document2),
       },
+      'subschema4.json' => {
+        path => '/anyOf/1',
+        canonical_uri => str('subschema4.json'),
+        document => shallow($document2),
+      },
     },
-    'resources in second schema are indexed; all resources from first schema are removed',
+    'resources in second schema are indexed; all resources from first schema are preserved except uri=""',
   );
 };
 
-subtest 'resource collisions' => sub {
+subtest 'multiple documents, each using canonical_uri = "", collisions in other resources' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+  my $schema1 = {
+    allOf => [
+      { '$id' => 'subschema1.json', type => 'string' },
+      { '$id' => 'subschema2.json', type => 'number' },
+    ],
+  };
+  my $schema2 = {
+    anyOf => [
+      { '$id' => 'subschema1.json', type => 'string' },
+      { '$id' => 'subschema3.json', type => 'number' },
+    ],
+  };
+
+  cmp_deeply(
+    $js->evaluate(1, $schema1)->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/type',
+          absoluteKeywordLocation => 'subschema1.json#/type',
+          error => 'wrong type (expected string)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          error => 'subschema 0 is not valid',
+        },
+      ],
+    },
+    'evaluation of schema1',
+  );
+
+  my $resource_index1 = +{ $js->_resource_index };
+  my $document1 = $resource_index1->{''}{document};
+
+  cmp_deeply(
+    $resource_index1,
+    {
+      '' => {
+        path => '',
+        canonical_uri => str(''),
+        document => shallow($document1),
+      },
+      'subschema1.json' => {
+        path => '/allOf/0',
+        canonical_uri => str('subschema1.json'),
+        document => shallow($document1),
+      },
+      'subschema2.json' => {
+        path => '/allOf/1',
+        canonical_uri => str('subschema2.json'),
+        document => shallow($document1),
+      },
+    },
+    'resources in initial schema are indexed',
+  );
+};
+
+subtest 'resource collisions in canonical uris' => sub {
   my $js = JSON::Schema::Draft201909->new;
   $js->add_schema({ '$id' => 'https://foo.com/x/y/z' });
 
