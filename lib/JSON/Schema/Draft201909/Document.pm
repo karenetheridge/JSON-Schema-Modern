@@ -205,6 +205,8 @@ only when no other suitable identifier can be found for the root schema.
 This attribute should only be used by L<JSON::Schema::Draft201909> and not intended for use
 externally (you should use the public accessors in L<JSON::Schema::Draft201909> instead).
 
+When called as a method, returns the flattened list of tuples (path, uri).
+
 =head2 canonical_uri_index
 
 An index of json paths (from the document root) to canonical URIs. This is the inversion of
