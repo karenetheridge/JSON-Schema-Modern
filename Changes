@@ -4,6 +4,8 @@ Revision history for JSON-Schema-Draft201909
           - further fixes to infinite loop detection
           - fix dereference error when evaluating "definitions",
             "dependencies"
+          - when adding another schema document with no canonical uri, do not
+            remove any identifiers found in the previous document
 
 0.015     2020-10-20 03:08:36Z
           - fixed infinity/overflow checks for older perls

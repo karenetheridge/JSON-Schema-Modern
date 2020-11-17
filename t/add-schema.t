@@ -698,4 +698,47 @@ subtest 'external resource with externally-supplied uri; main resource with mult
   );
 };
 
+subtest 'document with no canonical URI, but assigned a URI through add_schema' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  # the document itself doesn't know about this URI, but the evaluator does
+  $js->add_schema(
+    'https://localhost:1234/mydef.json',
+    JSON::Schema::Draft201909::Document->new(
+      schema => { '$defs' => { integer => { type => 'integer' } } },
+    ),
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 'string' },
+      {
+        # no $id here!
+        type => 'object',
+        additionalProperties => {
+          '$ref' => 'https://localhost:1234/mydef.json#/$defs/integer',
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/type',
+          # the canonical URI is what the evaluator knows it as, even if the document doesn't know
+          absoluteKeywordLocation => 'https://localhost:1234/mydef.json#/$defs/integer/type',
+          error => 'wrong type (expected integer)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+      ],
+    },
+    'evaluate a schema referencing a document given an ad-hoc uri',
+  );
+};
+
 done_testing;

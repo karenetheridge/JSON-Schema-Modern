@@ -126,9 +126,12 @@ sub add_schema {
     }
   }
 
+  # if the document doesn't have a canonical uri, default to the uri we are adding now.
+  my $canonical_uri = $document->canonical_uri.'' ? $document->canonical_uri : $uri;
+
   if ("$uri") {
-    $document->_add_resources($uri, { path => '', canonical_uri => $document->canonical_uri });
-    $self->_add_resources($uri => { path => '', canonical_uri => $document->canonical_uri, document => $document });
+    $document->_add_resources($uri, { path => '', canonical_uri => $canonical_uri });
+    $self->_add_resources($uri => { path => '', canonical_uri => $canonical_uri, document => $document });
   }
 
   return $document;
@@ -1542,13 +1545,9 @@ around _add_resources => sub {
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
     my ($key, $value) = @$pair;
     if (my $existing = $self->_get_resource($key)) {
-      if ($key eq '') {
-        # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
-        # lack all identifiers altogether; we drop *all* resources from that document
-        $self->_remove_resource(
-          grep $self->_get_resource($_)->{document} == $existing->{document}, $self->_resource_keys);
-      }
-      else {
+      # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
+      # lack all identifiers altogether, but preserve other resources from the original document
+      if ($key ne '') {
         next if $existing->{path} eq $value->{path}
           and $existing->{canonical_uri} eq $value->{canonical_uri}
           and $existing->{document} == $value->{document};
