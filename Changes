@@ -6,6 +6,8 @@ Revision history for JSON-Schema-Draft201909
             "dependencies"
           - when adding two schema documents with no canonical uri, preserve
             knowledge of other identifiers found in the first document
+          - add_schema() no longer adds additional URIs to the document
+            object, only the evaluator
 
 0.015     2020-10-20 03:08:36Z
           - fixed infinity/overflow checks for older perls

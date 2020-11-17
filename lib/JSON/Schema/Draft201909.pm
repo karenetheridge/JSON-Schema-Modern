@@ -127,7 +127,6 @@ sub add_schema {
   }
 
   if ("$uri") {
-    $document->_add_resources($uri, { path => '', canonical_uri => $document->canonical_uri });
     $self->_add_resources($uri => { path => '', canonical_uri => $document->canonical_uri, document => $document });
   }
 

@@ -577,9 +577,8 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     my $doc_resource_index = {
       'https://foo.com' => { path => '', canonical_uri => str('https://foo.com') },
       'https://foo.com#fooanchor' => { path => '/$defs/foo', canonical_uri => str('https://foo.com#/$defs/foo') },
-      'https://uri2.com' => { path => '', canonical_uri => str('https://foo.com') },
     },
-    'secondary uri added to the document also',
+    'secondary uri not also added to the document',
   );
 
   like(
@@ -608,11 +607,8 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
 
   cmp_deeply(
     { $document->resource_index },
-    {
-      'https://uri4.com' => { path => '', canonical_uri => str('https://foo.com') },
-      %$doc_resource_index,
-    },
-    'original document had the new uri added to it',
+    $doc_resource_index,
+    'original document remains unchanged - the new uri was not added to it',
   );
 
   cmp_deeply(
@@ -695,6 +691,82 @@ subtest 'external resource with externally-supplied uri; main resource with mult
     $js->evaluate('string', $schema)->TO_JSON,
     $result,
     'all uris in result are correct, using the literal schema as the target',
+  );
+};
+
+subtest 'document with no canonical URI, but assigned a URI through add_schema' => sub {
+  my $js = JSON::Schema::Draft201909->new;
+
+  # the document itself doesn't know about this URI, but the evaluator does
+  $js->add_schema(
+    'https://localhost:1234/mydef.json',
+    my $def_schema = { '$defs' => { integer => { type => 'integer' } } },
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 'string' },
+      my $schema = {
+        # no $id here!
+        type => 'object',
+        additionalProperties => {
+          '$ref' => 'https://localhost:1234/mydef.json#/$defs/integer',
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/type',
+          # the canonical URI is what the evaluator knows it as, even if the document doesn't know
+          absoluteKeywordLocation => 'https://localhost:1234/mydef.json#/$defs/integer/type',
+          error => 'wrong type (expected integer)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+      ],
+    },
+    'evaluate a schema referencing a document given an ad-hoc uri',
+  );
+
+  # start over with a new evaluator...
+  $js = JSON::Schema::Draft201909->new;
+
+  $js->add_schema(
+    'https://localhost:1234/mydef.json',
+    JSON::Schema::Draft201909::Document->new(schema => {
+      '$id' => 'https://otherhost.com/mydef.json',
+      %$def_schema,
+    }),
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 'string' },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/type',
+          absoluteKeywordLocation => 'https://otherhost.com/mydef.json#/$defs/integer/type',
+          error => 'wrong type (expected integer)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+      ],
+    },
+    'adding a uri to an existing document does not change its canonical uri',
   );
 };
 
