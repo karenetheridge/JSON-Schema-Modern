@@ -499,7 +499,16 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         canonical_uri => str(''),
         document => shallow($document2),    # same uri as earlier, but now points to document2
       },
-      # subschema1 and subschema2 are now removed
+      'subschema1.json' => {
+        path => '/allOf/0',
+        canonical_uri => str('subschema1.json'),
+        document => shallow($document1),    # still here! there is no reason to forget about it
+      },
+      'subschema2.json' => {
+        path => '/allOf/1',
+        canonical_uri => str('subschema2.json'),
+        document => shallow($document1),    # still here! there is no reason to forget about it
+      },
       'subschema3.json' => {
         path => '/anyOf/0',
         canonical_uri => str('subschema3.json'),
@@ -574,6 +583,21 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
       },
     },
     'resources in initial schema are indexed',
+  );
+
+  cmp_deeply(
+    $js->evaluate(1, $schema2)->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          error => re(qr/^EXCEPTION: uri "subschema1.json" conflicts with an existing schema resource/),
+          instanceLocation => '',
+          keywordLocation => '',
+        },
+      ],
+    },
+    'schema2 cannot be evaluated - an internal $id collides with an existing resource',
   );
 };
 
