@@ -23,6 +23,11 @@ use Test::JSON::Schema::Acceptance 1.000;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
 
+foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
+  note $env.': '.($ENV{$env} // '');
+}
+note '';
+
 my $accepter = Test::JSON::Schema::Acceptance->new(
   $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (specification => 'draft2019-09'),
   include_optional => 1,
