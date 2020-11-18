@@ -25,13 +25,15 @@ $accepter->acceptance(
   validate_data => sub {
     my ($schema, $instance_data) = @_;
     my $result = $js->evaluate($instance_data, $schema);
-    my $result_short = $js_short_circuit->evaluate($instance_data, $schema);
+    my $result_short = $ENV{NO_SHORT_CIRCUIT} || $js_short_circuit->evaluate($instance_data, $schema);
 
     note 'result: ', $encoder->encode($result);
-    note 'short-circuited result: ', $encoder->encode($result_short) if $result xor $result_short;
+    note 'short-circuited result: ', $encoder->encode($result_short)
+      if not $ENV{NO_SHORT_CIRCUIT} and ($result xor $result_short);
 
     die 'results inconsistent between short_circuit = false and true'
-      if ($result xor $result_short)
+      if not $ENV{NO_SHORT_CIRCUIT}
+        and ($result xor $result_short)
         and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
     $result;
