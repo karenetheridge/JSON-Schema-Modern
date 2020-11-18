@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.016     2020-11-18 18:18:40Z
           - further fixes to infinite loop detection
           - fix dereference error when evaluating "definitions",
             "dependencies"
