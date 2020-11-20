@@ -62,11 +62,13 @@ $accepter->acceptance(
         and ($result xor $result_short)
         and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
-    # if any errors contain an exception, propagate that upwards as an exception so we can be sure
-    # to count that as a failure.
+    # if any errors contain an exception, generate a warning so we can be sure
+    # to count that as a failure (an exception would be caught and perhaps TODO'd).
     # (This might change if tests are added that are expected to produce exceptions.)
-    if (my ($e) = grep $_->error =~ /^EXCEPTION/, $result->errors) {
-      die $e->error;
+    foreach my $r ($result, ($ENV{NO_SHORT_CIRCUIT} ? () : $result_short)) {
+      warn 'evaluation generated an exception'
+        if grep $_->{error} =~ /^EXCEPTION/ && $_->{error} !~ /but short_circuit is enabled/,
+          @{$r->TO_JSON->{errors}};
     }
 
     $result;
