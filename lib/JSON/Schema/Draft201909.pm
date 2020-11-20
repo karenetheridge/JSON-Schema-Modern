@@ -411,6 +411,10 @@ sub _eval_keyword_vocabulary {
   my ($self, $data, $schema, $state) = @_;
 
   assert_keyword_type($state, $schema, 'object');
+  foreach my $property (sort keys %{$schema->{'$vocabulary'}}) {
+    abort($state, '$vocabulary/'.$property.' value is not a boolean')
+      if not $self->_is_type('boolean', $schema->{'$vocabulary'}{$property});
+  }
 
   # we do nothing with this keyword yet. When we know we are in a metaschema,
   # we can scan the URIs included here and either abort if a vocabulary is enabled that we do not
