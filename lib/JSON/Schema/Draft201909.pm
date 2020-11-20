@@ -1322,6 +1322,8 @@ sub _eval_keyword_format {
 
   assert_keyword_type($state, $schema, 'string');
 
+  # TODO: instead of checking 'validate_formats', we should be referring to the metaschema's entry
+  # for $vocabulary: { <format url>: <bool> }
   if ($state->{validate_formats} and my $spec = $self->_get_format_validation($schema->{format})) {
     return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
       if $self->_is_type($spec->{type}, $data) and not $spec->{sub}->($data);
