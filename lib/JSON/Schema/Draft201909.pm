@@ -1727,6 +1727,8 @@ sub A {
 }
 
 # creates an error object, but also aborts evaluation immediately
+# only this error is returned, because other errors on the stack might not actually be "real"
+# errors (consider if we were in the middle of evaluating a "not" or "if")
 use namespace::clean 'abort';
 sub abort {
   my ($state, $error_string, @args) = @_;
