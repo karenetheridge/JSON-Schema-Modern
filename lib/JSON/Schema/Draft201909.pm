@@ -442,20 +442,28 @@ sub _eval_keyword_defs {
 sub _eval_keyword_type {
   my ($self, $data, $schema, $state) = @_;
 
-  foreach my $type (is_plain_arrayref($schema->{type}) ? @{$schema->{type}} : $schema->{type}) {
-    abort($state, 'unrecognized type "%s"', $type)
-      if not any { $type eq $_ } qw(null boolean object array string number integer);
-    return 1 if $self->_is_type($type, $data);
+  if (is_plain_arrayref($schema->{type})) {
+    abort($state, '"type" values are not unique') if not $self->_is_elements_unique($schema->{type});
+    foreach my $type (@{$schema->{type}}) {
+      abort($state, 'unrecognized type "%s"', $type)
+        if not any { $type eq $_ } qw(null boolean object array string number integer);
+      return 1 if $self->_is_type($type, $data);
+    }
+    return E($state, 'wrong type (expected one of %s)', join(', ', @{$schema->{type}}));
   }
-
-  return E($state, 'wrong type (expected %s)',
-    is_plain_arrayref($schema->{type}) ? ('one of '.join(', ', @{$schema->{type}})) : $schema->{type});
+  else {
+    abort($state, 'unrecognized type "%s"', $schema->{type})
+      if not any { $schema->{type} eq $_ } qw(null boolean object array string number integer);
+    return 1 if $self->_is_type($schema->{type}, $data);
+    return E($state, 'wrong type (expected %s)', $schema->{type});
+  }
 }
 
 sub _eval_keyword_enum {
   my ($self, $data, $schema, $state) = @_;
 
   assert_keyword_type($state, $schema, 'array');
+  abort($state, '"enum" values are not unique') if not $self->_is_elements_unique($schema->{enum});
 
   my @s; my $idx = 0;
   return 1 if any { $self->_is_equal($data, $_, $s[$idx++] = {}) } @{$schema->{enum}};
@@ -626,8 +634,11 @@ sub _eval_keyword_required {
 
   return 1 if not $self->_is_type('object', $data);
   assert_keyword_type($state, $schema, 'array');
+
   abort($state, '"required" element is not a string')
     if any { !$self->_is_type('string', $_) } @{$schema->{required}};
+
+  abort($state, '"required" values are not unique') if not $self->_is_elements_unique($schema->{required});
 
   my @missing = grep !exists $data->{$_}, @{$schema->{required}};
   return 1 if not @missing;
