@@ -17,7 +17,6 @@ use MooX::HandlesVia;
 use JSON::Schema::Draft201909::Annotation;
 use JSON::Schema::Draft201909::Error;
 use JSON::PP ();
-use constant { true => JSON::PP::true, false => JSON::PP::false };
 use namespace::clean;
 
 use overload
@@ -28,7 +27,7 @@ use overload
 has result => (
   is => 'ro',
   isa => InstanceOf['JSON::PP::Boolean'],
-  coerce => sub { $_[0] ? true : false },
+  coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
 );
 
 has $_.'s' => (
