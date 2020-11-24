@@ -226,7 +226,7 @@ __END__
 # unevaluatedProperties.json                    51          0     0
 # uniqueItems.json                              64          0     0
 # optional/bignum.json                           2          7     0
-# optional/content.json                          6          4     0
+# optional/content.json                         10          8     0
 # optional/ecmascript-regex.json                31          9     0
 # optional/float-overflow.json                   0          1     0
 # optional/non-bmp-regex.json                   12          0     0
@@ -251,4 +251,4 @@ __END__
 # optional/format/uri.json                      19          1     0
 # optional/format/uuid.json                     12          0     0
 # -----------------------------------------------------------------
-# TOTAL                                       1186         46     0
+# TOTAL                                       1184         48     0
