@@ -153,6 +153,7 @@ $accepter->acceptance(
 # 2020-08-13  1.000  Looks like you failed 44 tests of 1210.
 # 2020-08-14  1.000  Looks like you failed 42 tests of 1210.
 # 2020-10-16  1.001  Looks like you failed 42 tests of 1221.
+# 2020-11-24  1.002  Looks like you failed 46 tests of 1233.
 
 
 END {
@@ -170,9 +171,11 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.001
-# with commit 96742ba3c4a1eff6de45f0c50a66a975796b7c37 (2.0.0-276-g96742ba)
+# Results using Test::JSON::Schema::Acceptance 1.002
+# with commit 3b79a452fc2f3dbb0add34f520fed64de4f465cf (2.0.0-292-g3b79a45)
 # from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+# specification version: draft2019-09
+# optional tests included: yes
 #
 # filename                                    pass  todo-fail  fail
 # -----------------------------------------------------------------
@@ -194,6 +197,7 @@ __END__
 # format.json                                  114          0     0
 # id.json                                       13          0     0
 # if-then-else.json                             26          0     0
+# infinite-loop-detection.json                   2          0     0
 # items.json                                    26          0     0
 # maxContains.json                              10          0     0
 # maxItems.json                                  4          0     0
@@ -212,7 +216,7 @@ __END__
 # patternProperties.json                        22          0     0
 # properties.json                               20          0     0
 # propertyNames.json                            10          0     0
-# ref.json                                      32          0     0
+# ref.json                                      34          0     0
 # refRemote.json                                15          0     0
 # required.json                                  9          0     0
 # type.json                                     80          0     0
@@ -220,7 +224,7 @@ __END__
 # unevaluatedProperties.json                    51          0     0
 # uniqueItems.json                              64          0     0
 # optional/bignum.json                           4          5     0
-# optional/content.json                          6          4     0
+# optional/content.json                         10          8     0
 # optional/ecmascript-regex.json                31          9     0
 # optional/float-overflow.json                   0          1     0
 # optional/non-bmp-regex.json                   12          0     0
@@ -245,4 +249,4 @@ __END__
 # optional/format/uri.json                      19          1     0
 # optional/format/uuid.json                     12          0     0
 # -----------------------------------------------------------------
-# TOTAL                                       1178         42     0
+# TOTAL                                       1186         46     0
