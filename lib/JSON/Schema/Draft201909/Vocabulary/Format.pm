@@ -3,7 +3,7 @@ use warnings;
 package JSON::Schema::Draft201909::Vocabulary::Format;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 
-our $VERSION = '0.013';
+our $VERSION = '0.018';
 
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';

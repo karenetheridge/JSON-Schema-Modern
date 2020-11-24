@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
+{{$NEXT}}
+
 0.017     2020-11-24 19:15:18Z
           - refactor code into separate vocabulary classes, to faciliate
             future support for custom vocabularies
