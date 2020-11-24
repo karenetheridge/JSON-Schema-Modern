@@ -2,7 +2,7 @@
 
 =encoding UTF-8
 
-=for stopwords schema subschema metaschema validator evaluator
+=for stopwords schema subschema metaschema validator evaluator listref
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 SYNOPSIS
 
@@ -74,7 +74,7 @@ Defaults to false.
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD
+=for Pod::Coverage BUILD keywords
 
 =head2 evaluate_json_string
 
@@ -146,6 +146,32 @@ evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
+=head2 traverse
+
+  $result = $js->traverse($schema_data);
+  $result = $js->traverse($schema_data, { canonical_schema_uri => 'http://foo.com' });
+
+Traverses the provided schema data without evaluating it against any instance data. Returns the
+internal state object accumulated during the traversal, including any identifiers found therein, and
+any errors found during parsing. For internal purposes only.
+
+You can pass a series of callback subs to this method corresponding to keywords, which is useful for
+extracting data from within schemas and skipping properties that may look like keywords but actually
+are not (for example C<{"const":{"$ref": "this is not actually a $ref"}}>). This feature is highly
+experimental and is highly likely to change in the future.
+
+For example, to find the resolved targets of all C<$ref> keywords in a schema document:
+
+  my @refs;
+  JSON::Schema::Draft201909->new->traverse($schema, {
+    callbacks => {
+      '$ref' => sub ($schema, $state) {
+        push @refs, Mojo::URL->new($schema->{'$ref'})
+          ->to_abs(JSON::Schema::Draft201909::Utilities::canonical_schema_uri($state));
+      }
+    },
+  });
+
 =head2 add_schema
 
   $js->add_schema($uri => $schema);
@@ -163,6 +189,9 @@ as needed.
 
 Returns the L<JSON::Schema::Draft201909::Document> that contains the added schema, or C<undef>
 if the resource could not be found.
+
+May die with a listref of L<JSON::Schema::Draft201909::Error> object(s), if there were errors in the
+document.
 
 =head2 get
 
