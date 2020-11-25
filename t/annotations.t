@@ -252,7 +252,7 @@ subtest 'not' => sub {
     {
       valid => bool(1),
     },
-    'annotations are still collected inside a "not", otherwuse the unevaluatedProperties would have returned false',
+    'annotations are still collected inside a "not", otherwise the unevaluatedProperties would have returned false',
   );
 };
 
