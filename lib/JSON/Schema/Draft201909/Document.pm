@@ -126,13 +126,13 @@ sub BUILD {
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
 
   my $original_uri = $self->canonical_uri->clone;
-  my $traversed_state = $self->_evaluator->traverse($self->schema,
+  my $state = $self->_evaluator->traverse($self->schema,
     { canonical_schema_uri => $self->canonical_uri->clone });
 
-  $self->_set_canonical_uri($traversed_state->{canonical_schema_uri});
+  $self->_set_canonical_uri($state->{canonical_schema_uri});
 
-  if (@{$traversed_state->{errors}}) {
-    $self->_set_errors($traversed_state->{errors});
+  if (@{$state->{errors}}) {
+    $self->_set_errors($state->{errors});
     return;
   }
 
@@ -141,7 +141,7 @@ sub BUILD {
     if (not "$original_uri" and $original_uri eq $self->canonical_uri)
       or "$original_uri";
 
-  $self->_add_resources(@{$traversed_state->{identifiers}});
+  $self->_add_resources(@{$state->{identifiers}});
 }
 
 1;
