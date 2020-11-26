@@ -54,6 +54,7 @@ subtest 'equality, using JSON strings' => sub {
     [ '["a","b"]', '["b","a"]', false, '/0' ],
     [ '1', '1', true ],
     [ '1', '1.0', true ],
+    [ '10', '1e1', true ],
     [ '[1,2]', '[2,1]', false, '/0' ],
     [ '{"a":1,"b":2}', '{"a":1,"b":2}', true ],
     [ '{"a":1}', '{"a":1.0}', true ],
