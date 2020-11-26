@@ -6,8 +6,8 @@ Revision history for JSON-Schema-Draft201909
             explicitly set collect_annotations => 1 in the constructor
 
 0.017     2020-11-24 19:15:18Z
-          - refactor code into separate vocabulary classes, to faciliate
-            future support for custom vocabularies
+          - refactor keyword implementations into separate vocabulary classes,
+            to faciliate future support for custom vocabularies
           - traverse the schema before evaluation, for more correct
             and complete extraction of identifiers and invalid syntax
           - add callbacks to traverse(), to easily find keywords of interest
