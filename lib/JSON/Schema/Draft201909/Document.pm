@@ -96,6 +96,12 @@ has errors => (
   default => sub { [] },
 );
 
+has evaluator_configs => (
+  is => 'rwp',
+  isa => HashRef,
+  default => sub { {} },
+);
+
 around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
@@ -142,6 +148,9 @@ sub BUILD {
       or "$original_uri";
 
   $self->_add_resources(@{$state->{identifiers}});
+
+  # overlay the resulting configs with those that were provided by the caller
+  $self->_set_evaluator_configs(+{ %{$state->{configs}}, %{$self->evaluator_configs} });
 }
 
 1;
@@ -201,6 +210,14 @@ L</resource_index> and is constructed as that is built up.
 A list of L<JSON::Schema::Draft201909::Error> objects that resulted when the schema document was
 originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
 errors halt the parsing process.) Documents with errors cannot be evaluated.
+
+=head2 evaluator_configs
+
+An optional hashref of configuration values that will be provided to the evaluator during
+evaluation of this document. See the third parameter of L<JSON::Schema::Draft201909/evaluate>.
+This should never need to be set explicitly. This is sometimes populated automatically after
+creating a document object, depending on the keywords found in the schema, but they will never
+override anything you have already explicitly set.
 
 =head1 METHODS
 

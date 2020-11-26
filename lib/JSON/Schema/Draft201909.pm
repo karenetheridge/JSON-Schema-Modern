@@ -60,7 +60,7 @@ has validate_formats => (
 has collect_annotations => (
   is => 'ro',
   isa => Bool,
-  default => 0,
+  predicate => '_has_collect_annotations',
 );
 
 sub BUILD {
@@ -191,6 +191,7 @@ sub traverse {
       $self,  # for discontinued keywords defined in the base schema
     ],
     identifiers => [],
+    configs => {},
     callbacks => $config_override->{callbacks} // {},
   };
 
@@ -216,9 +217,6 @@ sub evaluate {
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
   my $state = {
-    short_circuit => $config_override->{short_circuit} // $self->short_circuit,
-    collect_annotations => $config_override->{collect_annotations} // $self->collect_annotations,
-    validate_formats => $config_override->{validate_formats} // $self->validate_formats,
     depth => 0,
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
@@ -255,6 +253,15 @@ sub evaluate {
 
     abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
 
+    $state = +{
+      %{$document->evaluator_configs},
+      (map {
+        my $val = $config_override->{$_} // $self->$_;
+        defined $val ? ( $_ => $val ) : ()
+      } qw(short_circuit collect_annotations validate_formats)),
+      %$state,
+    };
+
     @$state{qw(canonical_schema_uri document document_path)} = ($canonical_uri, $document, $document_path);
 
     $result = $self->_eval($data, $schema, $state);
@@ -277,7 +284,9 @@ sub evaluate {
     output_format => $self->output_format,
     result => $result,
     $result
-      ? ($state->{collect_annotations} ? (annotations => $state->{annotations}) : ())
+      # strip annotations from result if user didn't explicitly ask for them
+      ? ($config_override->{collect_annotations} // $self->collect_annotations
+          ? (annotations => $state->{annotations}) : ())
       : (errors => $state->{errors}),
   );
 }

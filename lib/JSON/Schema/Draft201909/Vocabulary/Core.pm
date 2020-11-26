@@ -138,7 +138,9 @@ sub _eval_keyword_ref {
   abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
 
   return $self->evaluator->_eval($data, $subschema,
-    +{ %$state,
+    +{
+      %{$document->evaluator_configs},
+      %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
       canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
       document => $document,
@@ -167,7 +169,9 @@ sub _eval_keyword_recursiveRef {
   }
 
   return $self->evaluator->_eval($data, $subschema,
-    +{ %$state,
+    +{
+      %{$document->evaluator_configs},
+      %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
       canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
       document => $document,

@@ -256,4 +256,216 @@ subtest 'not' => sub {
   );
 };
 
+subtest 'collect_annotations and unevaluated keywords' => sub {
+  my $js = JSON::Schema::Draft201909->new(collect_annotations => 0);
+
+  cmp_deeply(
+    $js->evaluate(
+      [ 1 ],
+      {
+        '$id' => 'unevaluatedItems.json',
+        items => [ true ],
+        unevaluatedItems => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedItems',
+          absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
+          error => 'EXCEPTION: "unevaluatedItems" keyword present, but annotation collection is disabled',
+        },
+      ],
+    },
+    'when "collect_annotations" is explicitly set to false, unevaluatedItems cannot be used',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        '$id' => 'unevaluatedProperties.json',
+        properties => { foo => true },
+        unevaluatedProperties => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedProperties',
+          absoluteKeywordLocation => 'unevaluatedProperties.json#/unevaluatedProperties',
+          error => 'EXCEPTION: "unevaluatedProperties" keyword present, but annotation collection is disabled',
+        },
+      ],
+    },
+    'when "collect_annotations" is explicitly set to false, unevaluatedProperties cannot be used',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        item => [ 1 ],
+        property => { foo => 1 },
+      },
+      {
+        properties => {
+          item => { '$ref' => 'unevaluatedItems.json' },
+          property => { '$ref' => 'unevaluatedProperties.json' },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(0),
+      errors => [
+        {
+          instanceLocation => '/item',
+          keywordLocation => '/properties/item/$ref/unevaluatedItems',
+          absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
+          error => 'EXCEPTION: "unevaluatedItems" keyword present, but annotation collection is disabled',
+        },
+      ],
+    },
+    'when "collect_annotations" is explicitly set to false, unevaluatedProperties cannot be used, even in other documents',
+  );
+
+  $js = JSON::Schema::Draft201909->new(collect_annotations => 1);
+
+  cmp_deeply(
+    $js->evaluate(
+      [ 1 ],
+      {
+        items => [ true ],
+        unevaluatedItems => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          annotation => 0,
+        },
+      ],
+    },
+    'when "collect_annotations" is set to true, unevaluatedItems works, and annotations are returned',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        properties => { foo => true },
+        unevaluatedProperties => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          annotation => [ 'foo' ],
+        },
+      ],
+    },
+    'when "collect_annotations" is set to true, unevaluatedProperties works, and annotations are returned',
+  );
+
+  $js = JSON::Schema::Draft201909->new();
+
+  cmp_deeply(
+    $js->evaluate(
+      [ 1 ],
+      {
+        '$id' => 'unevaluatedItems.json',
+        items => [ true ],
+        unevaluatedItems => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    'when "collect_annotations" is not set, unevaluatedItems still works, but annotations are not returned',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        '$id' => 'unevaluatedProperties.json',
+        properties => { foo => true },
+        unevaluatedProperties => false,
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    'when "collect_annotations" is not set, unevaluatedProperties still works, but annotations are not returned',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        item => [ 1 ],
+        property => { foo => 1 },
+      },
+      {
+        properties => {
+          item => { '$ref' => 'unevaluatedItems.json' },
+          property => { '$ref' => 'unevaluatedProperties.json' },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    '... still works when unevaluated keywords are in a separate document',
+  );
+
+  my $doc_items = $js->add_schema('items.json', { items => [ true ] });
+  my $doc_properties = $js->add_schema('properties.json', { properties => { foo => true } });
+
+  cmp_deeply(
+    $doc_items->evaluator_configs,
+    {},
+    'items.json does not need collect_annotations => 1 to evaluate itself',
+  );
+
+  cmp_deeply(
+    $doc_properties->evaluator_configs,
+    {},
+    'properties.json does not need collect_annotations => 1 to evaluate itself',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        item => [ 1 ],
+        property => { foo => 1 },
+      },
+      {
+        properties => {
+          item => {
+            '$ref' => 'items.json',
+            unevaluatedItems => false,
+          },
+          property => {
+            '$ref' => 'properties.json',
+            unevaluatedProperties => false,
+          },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    'referenced schemas still produce annotations internally when needed, even when not required to evaluate themselves in isolation',
+  );
+};
+
 done_testing;
