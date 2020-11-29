@@ -68,8 +68,8 @@ sub _traverse_keyword_schema {
 
   return if not assert_keyword_type($state, $schema, 'string');
 
-  my $uri = canonical_schema_uri($state);
-  return E($state, '$schema can only appear at the schema resource root') if length($uri->fragment);
+  return E($state, '$schema can only appear at the schema resource root')
+    if length(canonical_schema_uri($state)->fragment);
 
   return E($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
@@ -110,8 +110,8 @@ sub _traverse_keyword_recursiveAnchor {
 
   return if not $schema->{'$recursiveAnchor'};
 
-  my $uri = canonical_schema_uri($state);
-  return E($state, '"$recursiveAnchor" keyword used without "$id"') if length $uri->fragment;
+  return E($state, '"$recursiveAnchor" keyword used without "$id"')
+    if length canonical_schema_uri($state)->fragment;
 }
 
 sub _eval_keyword_recursiveAnchor {
