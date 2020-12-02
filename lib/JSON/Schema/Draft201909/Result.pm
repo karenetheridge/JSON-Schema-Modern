@@ -70,18 +70,14 @@ sub format {
   }
   if ($style eq 'terse') {
     # we can also drop errors for unevaluatedItems, unevaluatedProperties
-    # when there is another error at the same instance location (indicating that "unevaluated"
-    # is actually "unsuccessfully evaluated").
+    # when there is another (non-discarded) error at the same instance location (indicating that
+    # "unevaluated" is actually "unsuccessfully evaluated").
     my %instance_locations;
 
     my @errors = grep {
-        my ($keyword, $error) = ($_->keyword, $_->error);
+      my ($keyword, $error) = ($_->keyword, $_->error);
 
-        ++$instance_locations{$_->instance_location}->{unevaluatedItems}
-          if $keyword and grep $keyword eq $_, qw(items additionalItems unevaluatedItems);
-        ++$instance_locations{$_->instance_location}->{unevaluatedProperties}
-          if $keyword and grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties);
-
+      my $keep = 0+!!(
         not $keyword
           or ($keyword =~ /^unevaluated(?:Items|Properties)$/
             and $error =~ /"$keyword" keyword present, but/)
@@ -91,14 +87,22 @@ sub format {
             and ($keyword ne 'items' or $error eq 'item not permitted')
             and ($keyword ne 'additionalItems' or $error eq 'additional item not permitted')
             and ($keyword ne 'unevaluatedItems'
-              or ($error eq 'additional item not permitted' and $instance_locations{$_->instance_location}{$keyword} == 1))
+              or ($error eq 'additional item not permitted' and not $instance_locations{$_->instance_location}{$keyword}))
             and (not grep $keyword eq $_, qw(properties patternProperties)
               or $error eq 'property not permitted')
             and ($keyword ne 'additionalProperties' or $error eq 'additional property not permitted'))
             and ($keyword ne 'unevaluatedProperties'
-              or ($error eq 'additional item not permitted' and $instance_locations{$_->instance_location}{$keyword} == 1))
-      }
-      $self->errors;
+              or ($error eq 'additional property not permitted' and not $instance_locations{$_->instance_location}{$keyword}))
+        );
+
+      ++$instance_locations{$_->instance_location}->{unevaluatedItems}
+        if $keep and $keyword and grep $keyword eq $_, qw(items additionalItems unevaluatedItems);
+      ++$instance_locations{$_->instance_location}->{unevaluatedProperties}
+        if $keep and $keyword and grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties);
+
+      $keep;
+    }
+    $self->errors;
 
     die 'uh oh, have no errors left to report' if not $self->result and not @errors;
 

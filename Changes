@@ -4,6 +4,8 @@ Revision history for JSON-Schema-Draft201909
           - now can correctly evaluate schemas containing unevaluatedItems,
             unevaluatedProperties keywords without the user having to
             explicitly set collect_annotations => 1 in the constructor
+          - fix error in "terse" output formatting that mistakenly dropped
+            some unevaluatedProperties errors
 
 0.017     2020-11-24 19:15:18Z
           - refactor keyword implementations into separate vocabulary classes,

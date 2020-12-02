@@ -16,7 +16,7 @@ my $js = JSON::Schema::Draft201909->new(short_circuit => 0, collect_annotations 
 is($js->output_format, 'basic', 'output_format defaults to basic');
 
 my $result = $js->evaluate(
-  { alpha => 1, beta => 1, gamma => [ 0, 1 ], foo => 1, zulu => 2 },
+  { alpha => 1, beta => 1, foo => 1, gamma => [ 0, 1 ], zulu => 2 },
   {
     required => [ 'bar' ],
     allOf => [
@@ -304,8 +304,18 @@ cmp_deeply(
         error => 'additional property not permitted',
       },
       # - "summary" error from /additionalProperties is omitted
-      # - /properties/gamma/unevaluatedproperties errors at /alpha, /beta, /gamma are removed because
-      # they are also covered at /properties/* and additionalProperties, despite evaluating to false
+      # - /properties/alpha/unevaluatedProperties error at /alpha is removed because it is also
+      # covered at /properties/alpha
+      {
+        instanceLocation => '/beta',
+        keywordLocation => '/unevaluatedProperties',
+        error => 'additional property not permitted',
+      },
+      {
+        instanceLocation => '/gamma',
+        keywordLocation => '/unevaluatedProperties',
+        error => 'additional property not permitted',
+      },
       # - "summary" error from /unevaluatedProperties is omitted
       {
         instanceLocation => '/zulu',
