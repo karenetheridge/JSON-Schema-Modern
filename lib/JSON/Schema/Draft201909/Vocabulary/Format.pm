@@ -29,8 +29,6 @@ sub _traverse_keyword_format {
 sub _eval_keyword_format {
   my ($self, $data, $schema, $state) = @_;
 
-  return if not assert_keyword_type($state, $schema, 'string');
-
   # TODO: instead of checking 'validate_formats', we should be referring to the metaschema's entry
   # for $vocabulary: { <format url>: <bool> }
   if ($state->{validate_formats}
