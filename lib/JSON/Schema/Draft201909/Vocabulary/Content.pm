@@ -8,7 +8,6 @@ our $VERSION = '0.018';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
-use List::Util 'any';
 use Storable 'dclone';
 use JSON::Schema::Draft201909::Utilities qw(is_type A assert_keyword_type);
 use Moo;
