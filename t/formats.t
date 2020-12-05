@@ -127,7 +127,7 @@ subtest 'override a format sub' => sub {
         format_validations => +{ uuid => 1 },
       )
     },
-    qr/^overrides to existing format_validations must be coderefs/,
+    qr/Value "1" did not pass type constraint "Optional\[CodeRef\]"/,
     'check syntax of override to existing format',
   );
 
@@ -138,7 +138,7 @@ subtest 'override a format sub' => sub {
         format_validations => +{ mult_5 => 1 },
       )
     },
-    qr/^Value "1" did not pass type constraint "Dict.../,
+    qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
     'check syntax of implementation for a new format',
   );
 
