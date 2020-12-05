@@ -80,7 +80,7 @@ $accepter->acceptance(
   $ENV{NO_TODO} ? () : ( todo_tests => [
     { file => [
         'optional/bignum.json',                     # TODO: see issue #10
-        'optional/content.json',                    # per spec, should not be validated by default
+        'optional/content.json',                    # removed in TJSA 1.003
         'optional/ecmascript-regex.json',           # TODO: see issue #27
         'optional/float-overflow.json',             # see slack logs re multipleOf algo
         'optional/format/iri-reference.json',       # not yet implemented
@@ -156,6 +156,7 @@ $accepter->acceptance(
 # 2020-08-14  1.000  Looks like you failed 42 tests of 1210.
 # 2020-10-16  1.001  Looks like you failed 42 tests of 1221.
 # 2020-11-24  1.002  Looks like you failed 46 tests of 1233.
+# 2020-12-04  1.003  Looks like you failed 40 tests of 1265.
 
 
 END {
@@ -173,8 +174,8 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.002
-# with commit 3b79a452fc2f3dbb0add34f520fed64de4f465cf (2.0.0-292-g3b79a45)
+# Results using Test::JSON::Schema::Acceptance 1.003
+# with commit 6505944d38c414039cd8f27e3312b9e3831a0a16 (2.0.0-299-g6505944)
 # from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 # specification version: draft2019-09
 # optional tests included: yes
@@ -189,6 +190,7 @@ __END__
 # boolean_schema.json                           18          0     0
 # const.json                                    50          0     0
 # contains.json                                 18          0     0
+# content.json                                  18          0     0
 # default.json                                   4          0     0
 # defs.json                                      2          0     0
 # dependentRequired.json                        20          0     0
@@ -218,6 +220,7 @@ __END__
 # patternProperties.json                        22          0     0
 # properties.json                               20          0     0
 # propertyNames.json                            10          0     0
+# recursiveRef.json                             32          0     0
 # ref.json                                      34          0     0
 # refRemote.json                                15          0     0
 # required.json                                  9          0     0
@@ -226,7 +229,6 @@ __END__
 # unevaluatedProperties.json                    51          0     0
 # uniqueItems.json                              64          0     0
 # optional/bignum.json                           2          7     0
-# optional/content.json                         10          8     0
 # optional/ecmascript-regex.json                31          9     0
 # optional/float-overflow.json                   0          1     0
 # optional/non-bmp-regex.json                   12          0     0
@@ -251,4 +253,4 @@ __END__
 # optional/format/uri.json                      19          1     0
 # optional/format/uuid.json                     12          0     0
 # -----------------------------------------------------------------
-# TOTAL                                       1184         48     0
+# TOTAL                                       1224         40     0
