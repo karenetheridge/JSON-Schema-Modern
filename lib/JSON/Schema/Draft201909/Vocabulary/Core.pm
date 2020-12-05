@@ -2,6 +2,7 @@ use strict;
 use warnings;
 package JSON::Schema::Draft201909::Vocabulary::Core;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
+# ABSTRACT: Implementation of the JSON Schema Draft 2019-09 Core vocabulary
 
 our $VERSION = '0.018';
 
@@ -217,11 +218,11 @@ __END__
 
 =for Pod::Coverage vocabulary keywords
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 =for stopwords metaschema
 
-Implementation of the JSON Schema Draft 2019-09 "content" vocabulary, indicated in metaschemas
+Implementation of the JSON Schema Draft 2019-09 "Core" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/core> and formally specified in
 L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8>.
 
