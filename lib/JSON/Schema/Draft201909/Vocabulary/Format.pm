@@ -166,4 +166,12 @@ Implementation of the JSON Schema Draft 2019-09 "Format" vocabulary, indicated i
 with the URI C<https://json-schema.org/draft/2019-09/vocab/format> and formally specified in
 L<https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7>.
 
+Overrides to particular format implementations, or additions of new ones, can be done through
+L<JSON::Schema::Draft201909/format_validations>.
+
+=head1 SEE ALSO
+
+=for :list
+* L<JSON::Schema::Draft201909/Format Validation>
+
 =cut
