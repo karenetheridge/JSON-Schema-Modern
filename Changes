@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.018     2020-12-07 18:22:07Z
           - now can correctly evaluate schemas containing unevaluatedItems,
             unevaluatedProperties keywords without the user having to
             explicitly set collect_annotations => 1 in the constructor
