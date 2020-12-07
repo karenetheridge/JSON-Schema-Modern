@@ -373,19 +373,15 @@ sub _eval_keyword_contains {
     return 0 if $state->{short_circuit};
   }
 
-  if (exists $schema->{maxContains}) {
-    local $state->{keyword} = 'maxContains';
-
-    if ($num_valid > $schema->{maxContains}) {
-      $valid = 0;
-      E($state, 'contains too many matching items');
-      return 0 if $state->{short_circuit};
-    }
+  # TODO: in the future, we can move these implementations to the Validation vocabulary
+  # and inspect the annotation produced by the 'contains' keyword.
+  if (exists $schema->{maxContains} and $num_valid > $schema->{maxContains}) {
+    $valid = E({ %$state, keyword => 'maxContains' }, 'contains too many matching items');
+    return 0 if $state->{short_circuit};
   }
 
   if ($num_valid < ($schema->{minContains} // 1)) {
-    $valid = 0;
-    E({ %$state, keyword => 'minContains' }, 'contains too few matching items');
+    $valid = E({ %$state, keyword => 'minContains' }, 'contains too few matching items');
     return 0 if $state->{short_circuit};
   }
 
