@@ -305,17 +305,9 @@ cmp_deeply(
       },
       # - "summary" error from /additionalProperties is omitted
       # - /properties/alpha/unevaluatedProperties error at /alpha is removed because it is also
-      # covered at /properties/alpha
-      {
-        instanceLocation => '/beta',
-        keywordLocation => '/unevaluatedProperties',
-        error => 'additional property not permitted',
-      },
-      {
-        instanceLocation => '/gamma',
-        keywordLocation => '/unevaluatedProperties',
-        error => 'additional property not permitted',
-      },
+      #   covered at /properties/alpha
+      # - /unevaluatedProperties errors at /beta, /gamma are removed because they are also covered
+      #   at /properties/{alpha,beta}
       # - "summary" error from /unevaluatedProperties is omitted
       {
         instanceLocation => '/zulu',

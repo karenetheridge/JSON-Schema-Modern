@@ -17,6 +17,7 @@ use MooX::HandlesVia;
 use JSON::Schema::Draft201909::Annotation;
 use JSON::Schema::Draft201909::Error;
 use JSON::PP ();
+use List::Util 1.50 'head';
 use namespace::clean;
 
 use overload
@@ -70,35 +71,41 @@ sub format {
   }
   if ($style eq 'terse') {
     # we can also drop errors for unevaluatedItems, unevaluatedProperties
-    # when there is another (non-discarded) error at the same instance location (indicating that
-    # "unevaluated" is actually "unsuccessfully evaluated").
-    my %instance_locations;
+    # when there is another (non-discarded) error at the same instance location or parent keyword
+    # location (indicating that "unevaluated" is actually "unsuccessfully evaluated").
+    my (%instance_locations, %keyword_locations);
 
     my @errors = grep {
       my ($keyword, $error) = ($_->keyword, $_->error);
 
       my $keep = 0+!!(
         not $keyword
-          or ($keyword =~ /^unevaluated(?:Items|Properties)$/
-            and $error =~ /"$keyword" keyword present, but/)
           or (
-            not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas propertyNames)
+            not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas contains propertyNames)
             and ($keyword ne 'oneOf' or $error ne 'no subschemas are valid')
-            and ($keyword ne 'items' or $error eq 'item not permitted')
+            and ($keyword ne 'items'    # list form of items (prefixItems)
+              or $error eq 'item not permitted' and $_->keyword_location =~ m{/[0-9]+$})
             and ($keyword ne 'additionalItems' or $error eq 'additional item not permitted')
-            and ($keyword ne 'unevaluatedItems'
-              or ($error eq 'additional item not permitted' and not $instance_locations{$_->instance_location}{$keyword}))
             and (not grep $keyword eq $_, qw(properties patternProperties)
               or $error eq 'property not permitted')
             and ($keyword ne 'additionalProperties' or $error eq 'additional property not permitted'))
-            and ($keyword ne 'unevaluatedProperties'
-              or ($error eq 'additional property not permitted' and not $instance_locations{$_->instance_location}{$keyword}))
         );
 
-      ++$instance_locations{$_->instance_location}->{unevaluatedItems}
-        if $keep and $keyword and grep $keyword eq $_, qw(items additionalItems unevaluatedItems);
-      ++$instance_locations{$_->instance_location}->{unevaluatedProperties}
-        if $keep and $keyword and grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties);
+        if ($keep and $keyword and $keyword =~ /^unevaluated(?:Items|Properties)$/
+            and $error !~ /"$keyword" keyword present, but/) {
+          my $parent_keyword_location = join('/', head(-1, split('/', $_->keyword_location)));
+          my $parent_instance_location = join('/', head(-1, split('/', $_->instance_location)));
+
+          $keep = (
+            (($keyword eq 'unevaluatedProperties' and $error eq 'additional property not permitted')
+              or ($keyword eq 'unevaluatedItems' and $error eq 'additional item not permitted'))
+            and not $instance_locations{$_->instance_location}
+            and not grep m/^$parent_keyword_location/, keys %keyword_locations
+          );
+        }
+
+      ++$instance_locations{$_->instance_location} if $keep;
+      ++$keyword_locations{$_->keyword_location} if $keep;
 
       $keep;
     }
