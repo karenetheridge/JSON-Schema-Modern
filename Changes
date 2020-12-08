@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.019     2020-12-08 18:40:10Z
           - further improvements to the "terse" output format
           - add_schema will now die with a Result object rather than a
             listref of Error objects, when the document contains errors.

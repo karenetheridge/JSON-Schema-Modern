@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.018
+version 0.019
 
 =head1 SYNOPSIS
 
@@ -187,11 +187,10 @@ You B<MUST> call C<add_schema> for any external resources that a schema may refe
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
 
-Returns the L<JSON::Schema::Draft201909::Document> that contains the added schema, or C<undef>
-if the resource could not be found.
-
-May die with a listref of L<JSON::Schema::Draft201909::Error> object(s), if there were errors in the
-document.
+Returns C<undef> if the resource could not be found;
+if there were errors in the document, will die with a L<JSON::Schema::Draft201909::Result> object
+containing the errors;
+otherwise returns the L<JSON::Schema::Draft201909::Document> that contains the added schema.
 
 =head2 get
 
