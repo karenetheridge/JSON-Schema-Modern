@@ -2,6 +2,8 @@ Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
           - further improvements to the "terse" output format
+          - add_schema will now die with a Result object rather than a
+            listref of Error objects, when the document contains errors.
 
 0.018     2020-12-07 18:22:07Z
           - now can correctly evaluate schemas containing unevaluatedItems,
