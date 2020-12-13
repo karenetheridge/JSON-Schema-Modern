@@ -1,0 +1,44 @@
+[
+    {
+        "description": "validation of relative-json-pointer strings",
+        "schema": {"format": "relative-json-pointer"},
+        "comment": "see https://json-schema.org/draft/2019-09/relative-json-pointer.html#rfc.section.3",
+        "tests": [
+            {
+                "description": "non-negative-integer with empty json-pointer",
+                "data": "0",
+                "valid": true
+            },
+            {
+                "description": "non-negative-integer with one-char json-pointer",
+                "data": "0/",
+                "valid": true
+            },
+            {
+                "description": "non-negative-integer with longer json-pointer",
+                "data": "0/a",
+                "valid": true
+            },
+            {
+                "description": "non-negative-integer #",
+                "data": "0#",
+                "valid": true
+            },
+            {
+                "description": "## is not a valid json-pointer",
+                "data": "0##",
+                "valid": false
+            },
+            {
+                "description": "zero cannot be followed by other digits, plus json-pointer",
+                "data": "01/a",
+                "valid": false
+            },
+            {
+                "description": "zero cannot be followed by other digits, plus octothorpe",
+                "data": "01#",
+                "valid": false
+            }
+        ]
+    }
+]
