@@ -11,11 +11,12 @@ use Test::Deep;
 use Test::Fatal;
 use JSON::Schema::Draft201909;
 
+my ($annotation_result, $validation_result);
 subtest 'no validation' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 0)
       ->evaluate('abc', { format => 'uuid' })->TO_JSON,
-    my $result = {
+    $annotation_result = {
       valid => bool(1),
       annotations => [
         {
@@ -31,7 +32,7 @@ subtest 'no validation' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1)
       ->evaluate('abc', { format => 'uuid' }, { validate_formats => 0 })->TO_JSON,
-    $result,
+    $annotation_result,
     'format validation can be turned off in evaluate()',
   );
 };
@@ -41,16 +42,7 @@ subtest 'simple validation' => sub {
 
   cmp_deeply(
     $js->evaluate(123, { format => 'uuid' })->TO_JSON,
-    {
-      valid => bool(1),
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          annotation => 'uuid',
-        },
-      ],
-    },
+    $annotation_result,
     'non-string values are valid, and produce an annotation',
   );
 
@@ -59,22 +51,13 @@ subtest 'simple validation' => sub {
       '2eb8aa08-aa98-11ea-b4aa-73b441d16380',
       { format => 'uuid' },
     )->TO_JSON,
-    {
-      valid => bool(1),
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          annotation => 'uuid',
-        },
-      ],
-    },
+    $annotation_result,
     'simple success',
   );
 
   cmp_deeply(
     $js->evaluate('123', { format => 'uuid' })->TO_JSON,
-    my $result = {
+    $validation_result = {
       valid => bool(0),
       errors => [
         {
@@ -88,14 +71,14 @@ subtest 'simple validation' => sub {
   );
 
   $js = JSON::Schema::Draft201909->new(collect_annotations => 1);
-  ok(!$js->validate_formats, 'format_validation defaults to false');
+  ok($js->validate_formats, 'format_validation defaults to true');
   cmp_deeply(
-    $js->evaluate('123', { format => 'uuid' }, { validate_formats => 1 })->TO_JSON,
-    $result,
-    'format validation can be turned on in evaluate()',
+    $js->evaluate('123', { format => 'uuid' }, { validate_formats => 0 })->TO_JSON,
+    $annotation_result,
+    'format validation can be turned off in evaluate()',
   );
 
-  ok(!$js->validate_formats, '...but the value is still false on the object');
+  ok($js->validate_formats, '...but the value is still true on the object');
 };
 
 subtest 'unknown format attribute' => sub {

@@ -54,7 +54,7 @@ has max_traversal_depth => (
 has validate_formats => (
   is => 'ro',
   isa => Bool,
-  default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
+  default => 1,
 );
 
 has collect_annotations => (
@@ -569,8 +569,10 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 
 =head2 validate_formats
 
-When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to false.
+When false, the C<format> keyword will be treated as an annotation only (that is, no evaluation
+failure will result if the format of the data string is not as specified). When true, the C<format>
+keyword will be treated as an assertion, where failure is possible.
+Defaults to true.
 
 =head2 format_validations
 
