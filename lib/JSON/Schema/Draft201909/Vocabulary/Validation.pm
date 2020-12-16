@@ -34,14 +34,14 @@ sub _traverse_keyword_type {
 
   if (is_plain_arrayref($schema->{type})) {
     foreach my $type (@{$schema->{type}}) {
-      return E($state, 'unrecognized type "%s"', $type)
-        if not any { $type eq $_ } qw(null boolean object array string number integer);
+      return E($state, 'unrecognized type "%s"', $type//'<null>')
+        if not any { ($type//'') eq $_ } qw(null boolean object array string number integer);
     }
     return E($state, '"type" values are not unique') if not is_elements_unique($schema->{type});
   }
   else {
-    return E($state, 'unrecognized type "%s"', $schema->{type})
-      if not any { $schema->{type} eq $_ } qw(null boolean object array string number integer);
+    return E($state, 'unrecognized type "%s"', $schema->{type}//'<null>')
+      if not any { ($schema->{type}//'') eq $_ } qw(null boolean object array string number integer);
   }
 }
 

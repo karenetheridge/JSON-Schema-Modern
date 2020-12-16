@@ -1,0 +1,28 @@
+[
+    {
+        "description": "invalid user input: type (string)",
+        "schema": {
+            "type": null
+        },
+        "tests": [
+            {
+                "description": "graceful error from 'type' (string)",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "invalid user input: type (array)",
+        "schema": {
+            "type": [ "string", null ]
+        },
+        "tests": [
+            {
+                "description": "graceful error from 'type' (array)",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
