@@ -593,7 +593,7 @@ Defaults to false.
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD keywords
+=for Pod::Coverage keywords
 
 =head2 evaluate_json_string
 
