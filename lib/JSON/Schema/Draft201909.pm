@@ -29,7 +29,7 @@ use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef 
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
 use JSON::Schema::Draft201909::Document;
-use JSON::Schema::Draft201909::Utilities qw(get_type canonical_schema_uri E abort);
+use JSON::Schema::Draft201909::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
 use namespace::clean;
 
 has output_format => (
@@ -60,7 +60,6 @@ has validate_formats => (
 has collect_annotations => (
   is => 'ro',
   isa => Bool,
-  predicate => '_has_collect_annotations',
 );
 
 has _format_validations => (
