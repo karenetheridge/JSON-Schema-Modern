@@ -468,4 +468,80 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
   );
 };
 
+subtest 'annotate_unknown_keywords' => sub {
+  my $data = {
+    item => [ 1 ],
+    property => { foo => 1 },
+  };
+  my $schema = {
+    properties => {
+      item => {
+        items => [ true, true ],
+        unevaluatedItems => false,
+        bloop => 5,
+      },
+      property => {
+        properties => { foo => true },
+        unevaluatedProperties => false,
+        blap => { hi => 1 },
+      },
+    },
+    blip => [ 1, 2, 3 ],
+  };
+
+  cmp_deeply(
+    JSON::Schema::Draft201909->new(annotate_unknown_keywords => 1)->evaluate(
+      $data,
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(1),
+    },
+    'no annotations even when config value is true but collect_annotations is false',
+  );
+
+  cmp_deeply(
+    JSON::Schema::Draft201909->new(collect_annotations => 1, annotate_unknown_keywords => 1)->evaluate(
+      $data,
+      $schema,
+    )->TO_JSON,
+    {
+      valid => bool(1),
+      annotations => [
+        {
+          instanceLocation => '/item',
+          keywordLocation => '/properties/item/items',
+          annotation => 0,
+        },
+        {
+          instanceLocation => '/item',
+          keywordLocation => '/properties/item/bloop',
+          annotation => 5,
+        },
+        {
+          instanceLocation => '/property',
+          keywordLocation => '/properties/property/properties',
+          annotation => [ 'foo' ],
+        },
+        {
+          instanceLocation => '/property',
+          keywordLocation => '/properties/property/blap',
+          annotation => { hi => 1 },
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          annotation => [ 'item', 'property' ],
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/blip',
+          annotation => [ 1, 2, 3 ],
+        },
+      ],
+    },
+    'unknown keywords are collected as annotations',
+  );
+};
+
 done_testing;

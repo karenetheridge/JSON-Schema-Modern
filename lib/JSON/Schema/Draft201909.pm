@@ -62,6 +62,11 @@ has collect_annotations => (
   isa => Bool,
 );
 
+has annotate_unknown_keywords => (
+  is => 'ro',
+  isa => Bool,
+);
+
 has _format_validations => (
   is => 'bare',
   isa => Dict[
@@ -251,7 +256,7 @@ sub evaluate {
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(short_circuit collect_annotations validate_formats)),
+      } qw(short_circuit collect_annotations validate_formats annotate_unknown_keywords)),
       %$state,
     };
 
@@ -351,6 +356,8 @@ sub _eval {
 
   my $result = 1;
 
+  my %unknown_keywords = map +($_ => undef), keys %$schema;
+
   foreach my $vocabulary (@{$state->{vocabularies}}) {
     foreach my $keyword ($vocabulary->keywords) {
       next if not exists $schema->{$keyword};
@@ -359,9 +366,12 @@ sub _eval {
       my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
       $result = 0 if $vocabulary->can($method) and not $vocabulary->$method($data, $schema, $state);
 
+      delete $unknown_keywords{$keyword};
       last if not $result and $state->{short_circuit};
     }
   }
+
+  annotate_self(+{ %$state, keyword => $_ }, $schema) foreach sort keys %unknown_keywords;
 
   @{$state->{annotations}} = @parent_annotations if not $result;
   return $result;
@@ -590,6 +600,13 @@ When true, annotations are collected from keywords that produce them, when valid
 These annotations are available in the returned result (see L<JSON::Schema::Draft201909::Result>).
 Defaults to false.
 
+=head2 annotate_unknown_keywords
+
+When true, keywords that are not recognized by any vocabulary are collected as annotations (where
+the value of the annotation is the value of the keyword). L</collect_annotations> must also be true
+in order for this to have any effect.
+Defaults to false (for now).
+
 =head1 METHODS
 
 =for Pod::Coverage keywords
@@ -613,8 +630,8 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
-evaluation call.
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
+L</validate_formats> settings for just this evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -637,7 +654,8 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
+L</validate_formats> settings for just this
 evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
