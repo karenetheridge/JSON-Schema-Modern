@@ -123,7 +123,7 @@ has _format_validations => (
     };
 
     # the subrefs from JSON::Schema::Draft201909->new(format_evaluations => { ... })
-    my $args = +{ $self->evaluator->format_validations };
+    my $args = +{ $self->evaluator->_format_validations };
 
     return +{
       map +(

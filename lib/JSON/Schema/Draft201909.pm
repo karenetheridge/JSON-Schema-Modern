@@ -63,15 +63,16 @@ has collect_annotations => (
   predicate => '_has_collect_annotations',
 );
 
-has format_validations => (
+has _format_validations => (
   is => 'bare',
   isa => Dict[
     (map +($_ => Optional[CodeRef]), qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex)),
     slurpy HashRef[Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef]],
   ],
+  init_arg => 'format_validations',
   handles_via => 'Hash',
   handles => {
-    format_validations => 'elements',
+    _format_validations => 'elements',
   },
   lazy => 1,
   default => sub { {} },
