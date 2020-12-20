@@ -14,6 +14,7 @@ use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use Syntax::Keyword::Try 0.11;
+use Storable 'dclone';
 use strictures 2;
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Annotation;
@@ -34,6 +35,7 @@ our @EXPORT_OK = qw(
   abort
   assert_keyword_type
   assert_pattern
+  annotate_self
   true
   false
 );
@@ -237,6 +239,13 @@ sub assert_pattern {
   try { qr/$pattern/; }
   catch { return E($state, $@); };
   return 1;
+}
+
+# produces an annotation whose value is the same as that of the current keyword
+sub annotate_self {
+  my ($state, $schema) = @_;
+  A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
+    : $schema->{$state->{keyword}});
 }
 
 1;

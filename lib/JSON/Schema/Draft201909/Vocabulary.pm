@@ -10,7 +10,6 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use Ref::Util 0.100 'is_ref';
-use Storable 'dclone';
 use JSON::Schema::Draft201909::Utilities qw(jsonp A assert_keyword_type);
 use Moo::Role;
 use strictures 2;
@@ -54,12 +53,6 @@ sub traverse_object_schemas {
     $self->evaluator->_traverse($schema->{$state->{keyword}}{$property},
       +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
   }
-}
-
-sub annotate_self {
-  my (undef, $data, $schema, $state) = @_;
-  A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
-    : $schema->{$state->{keyword}});
 }
 
 1;
@@ -111,9 +104,5 @@ Recursively traverses the list of subschemas at the current keyword.
 =head2 traverse_object_schemas
 
 Recursively traverses the (subschema) values of the object at the current keyword.
-
-=head2 annotate_self
-
-Produces an annotation whose value is the same as that of the current keyword.
 
 =cut

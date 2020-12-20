@@ -9,7 +9,7 @@ our $VERSION = '0.020';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
-use JSON::Schema::Draft201909::Utilities qw(assert_keyword_type);
+use JSON::Schema::Draft201909::Utilities qw(assert_keyword_type annotate_self);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -27,35 +27,38 @@ sub _traverse_keyword_title {
   return if not assert_keyword_type($state, $schema, 'string');
 }
 
-sub _eval_keyword_title { shift->annotate_self(@_) }
+sub _eval_keyword_title {
+  my ($self, $data, $schema, $state) = @_;
+  annotate_self($state, $schema);
+}
 
 sub _traverse_keyword_description { goto \&_traverse_keyword_title }
 
-sub _eval_keyword_description { shift->annotate_self(@_) }
+sub _eval_keyword_description { goto \&_eval_keyword_title }
 
-sub _eval_keyword_default { shift->annotate_self(@_) }
+sub _eval_keyword_default { goto \&_eval_keyword_title }
 
 sub _traverse_keyword_deprecated {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'boolean');
 }
 
-sub _eval_keyword_deprecated { shift->annotate_self(@_) }
+sub _eval_keyword_deprecated { goto \&_eval_keyword_title }
 
 sub _traverse_keyword_readOnly { goto \&_traverse_keyword_deprecated }
 
-sub _eval_keyword_readOnly { shift->annotate_self(@_) }
+sub _eval_keyword_readOnly { goto \&_eval_keyword_title }
 
 sub _traverse_keyword_writeOnly { goto \&_traverse_keyword_deprecated }
 
-sub _eval_keyword_writeOnly { shift->annotate_self(@_) }
+sub _eval_keyword_writeOnly { goto \&_eval_keyword_title }
 
 sub _traverse_keyword_examples {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'array');
 }
 
-sub _eval_keyword_examples { shift->annotate_self(@_) }
+sub _eval_keyword_examples { goto \&_eval_keyword_title }
 
 1;
 __END__
