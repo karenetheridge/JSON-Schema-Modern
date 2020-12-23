@@ -35,6 +35,7 @@ our @EXPORT_OK = qw(
   abort
   assert_keyword_type
   assert_pattern
+  assert_uri_ref
   annotate_self
   true
   false
@@ -241,6 +242,18 @@ sub assert_pattern {
   return 1;
 }
 
+sub assert_uri_ref {
+  my ($state, $schema) = @_;
+
+  # for now, we just check for fragment validity
+  my $ref = $schema->{$state->{keyword}};
+  return 1 if $ref !~ /#/
+    or $ref =~ /#$/                           # empty fragment
+    or $ref =~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
+    or $ref =~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
+  E($state, '%s value is not a valid schema reference', $state->{keyword});
+}
+
 # produces an annotation whose value is the same as that of the current keyword
 sub annotate_self {
   my ($state, $schema) = @_;
@@ -262,6 +275,6 @@ __END__
 This class contains internal utilities to be used by L<JSON::Schema::Draft201909>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
-canonical_schema_uri E A abort assert_keyword_type assert_pattern annotate_self
+canonical_schema_uri E A abort assert_keyword_type assert_pattern assert_uri_ref annotate_self
 
 =cut
