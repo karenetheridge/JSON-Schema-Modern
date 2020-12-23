@@ -231,7 +231,7 @@ sub abort {
 sub assert_keyword_type {
   my ($state, $schema, $type) = @_;
   return 1 if is_type($type, $schema->{$state->{keyword}});
-  E($state, $state->{keyword}.' value is not a%s %s', ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
+  E($state, '%s value is not a%s %s', $state->{keyword}, ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
 }
 
 sub assert_pattern {

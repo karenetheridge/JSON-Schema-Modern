@@ -186,7 +186,7 @@ sub _traverse_keyword_vocabulary {
   return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{'$vocabulary'}}) {
-    E($state, '$vocabulary/'.$property.' value is not a boolean')
+    E($state, '$vocabulary/%s value is not a boolean', $property)
       if not is_type('boolean', $schema->{'$vocabulary'}{$property});
   }
 
