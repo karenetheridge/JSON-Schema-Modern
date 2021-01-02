@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.019
+version 0.020
 
 =head1 SYNOPSIS
 
@@ -53,8 +53,10 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 
 =head2 validate_formats
 
-When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to false.
+When false, the C<format> keyword will be treated as an annotation only (that is, no evaluation
+failure will result if the format of the data string is not as specified). When true, the C<format>
+keyword will be treated as an assertion, where failure is possible.
+Defaults to true.
 
 =head2 format_validations
 
@@ -72,9 +74,16 @@ When true, annotations are collected from keywords that produce them, when valid
 These annotations are available in the returned result (see L<JSON::Schema::Draft201909::Result>).
 Defaults to false.
 
+=head2 annotate_unknown_keywords
+
+When true, keywords that are not recognized by any vocabulary are collected as annotations (where
+the value of the annotation is the value of the keyword). L</collect_annotations> must also be true
+in order for this to have any effect.
+Defaults to false (for now).
+
 =head1 METHODS
 
-=for Pod::Coverage BUILD keywords
+=for Pod::Coverage keywords
 
 =head2 evaluate_json_string
 
@@ -106,8 +115,8 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
-evaluation call.
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
+L</validate_formats> settings for just this evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
 
@@ -141,7 +150,8 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations> and/or L</validate_formats> settings for just this
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
+L</validate_formats> settings for just this
 evaluation call.
 
 The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.

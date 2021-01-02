@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.020     2021-01-02 17:12:09Z
           - the default value for "validate_formats" is now true, to reflect
             the most typical usecase.
           - gracefully handle the erroneous schema { "type": null }
