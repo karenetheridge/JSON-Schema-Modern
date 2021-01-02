@@ -138,6 +138,8 @@ has _format_validations => (
 sub _traverse_keyword_format {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'string');
+  # TODO: if the metaschema's $vocabulary entry is true, then we must die on
+  # encountering unimplemented formats specified by the vocabulary (iri-reference, uri-template).
 }
 
 sub _eval_keyword_format {
