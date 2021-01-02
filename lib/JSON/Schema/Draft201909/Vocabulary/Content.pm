@@ -4,7 +4,7 @@ package JSON::Schema::Draft201909::Vocabulary::Content;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Implementation of the JSON Schema Draft 2019-09 Content vocabulary
 
-our $VERSION = '0.020';
+our $VERSION = '0.021';
 
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
