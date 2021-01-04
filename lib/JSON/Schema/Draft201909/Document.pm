@@ -126,6 +126,9 @@ around _add_resources => sub {
 sub data { goto \&schema }
 sub FOREIGNBUILDARGS { () }
 
+# for JSON serializers
+sub TO_JSON { goto \&schema }
+
 sub BUILD {
   my $self = shift;
 
@@ -240,5 +243,9 @@ See L<Mojo::JSON::Pointer/contains>.
 
 Extract value from L</"schema"> identified by the given JSON Pointer.
 See L<Mojo::JSON::Pointer/get>.
+
+=head2 TO_JSON
+
+Returns a data structure suitable for serialization. See L</schema>.
 
 =cut
