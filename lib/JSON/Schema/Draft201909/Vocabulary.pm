@@ -10,7 +10,7 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 use Ref::Util 0.100 'is_ref';
-use JSON::Schema::Draft201909::Utilities qw(jsonp A assert_keyword_type);
+use JSON::Schema::Draft201909::Utilities qw(jsonp assert_keyword_type);
 use Moo::Role;
 use strictures 2;
 use Types::Standard 1.010002 'InstanceOf';
