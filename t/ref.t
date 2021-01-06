@@ -116,7 +116,7 @@ subtest '$id with an empty fragment' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -153,7 +153,7 @@ subtest '$recursiveRef without nesting' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -236,7 +236,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/foo/bar',
@@ -284,7 +284,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
   cmp_deeply(
     $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -302,7 +302,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
   cmp_deeply(
     $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'schema now valid when an $id is added',
   );
@@ -323,7 +323,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -349,7 +349,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -393,7 +393,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   cmp_deeply(
     $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
 # 0 data: ''     schema: $ref/anyOf/0  - fails, not bool
 #   data: ''     schema: $ref/anyOf/1  - passes, is object
@@ -450,7 +450,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   cmp_deeply(
     $js->evaluate({ foo => true }, $schema)->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '$recursiveRef with both $recursiveAnchors in scope',
   );
@@ -480,7 +480,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
       $schema,
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => my $errors = [
         {
           instanceLocation => '',
@@ -531,7 +531,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
       $js->_json_decoder->decode($js->_json_decoder->encode($schema) =~ s/\$ref/\$recursiveRef/gr),
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => $js->_json_decoder->decode($js->_json_decoder->encode($errors) =~ s/\$ref/\$recursiveRef/gr),
     },
     '$recursiveRef with no $recursiveAnchor in scope has the same outcome',
@@ -564,7 +564,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
       $schema,
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '$recursiveAnchor does not exist in the target schema - local recursion only, so integers match',
   );
@@ -575,7 +575,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
       $schema,
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -624,7 +624,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
       $schema,
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',

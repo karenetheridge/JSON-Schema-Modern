@@ -36,7 +36,7 @@ foreach my $test (@tests) {
 cmp_deeply(
   $js->evaluate('hello', [])->TO_JSON,
   {
-    valid => bool(0),
+    valid => false,
     errors => [
       {
         instanceLocation => '',

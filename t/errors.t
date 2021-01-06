@@ -39,7 +39,7 @@ subtest 'multiple types' => sub {
   cmp_deeply(
     $result->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -76,7 +76,7 @@ subtest 'multipleOf' => sub {
   cmp_deeply(
     $result->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -113,7 +113,7 @@ subtest 'uniqueItems' => sub {
   cmp_deeply(
     $result->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -165,7 +165,7 @@ subtest 'allOf, not, and false schema' => sub {
   cmp_deeply(
     $result->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -190,7 +190,7 @@ subtest 'allOf, not, and false schema' => sub {
   cmp_deeply(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -247,7 +247,7 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
   cmp_deeply(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -413,7 +413,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
   cmp_deeply(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/0',
@@ -514,7 +514,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
   cmp_deeply(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -654,7 +654,7 @@ subtest 'const and enum' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/foo',
@@ -686,7 +686,7 @@ subtest 'exceptions' => sub {
   cmp_deeply(
     $js->evaluate_json_string('[ 1, 2, 3, whargarbl ]', true)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -709,7 +709,7 @@ subtest 'exceptions' => sub {
       }
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -732,7 +732,7 @@ subtest 'exceptions' => sub {
       }
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -783,7 +783,7 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -858,7 +858,7 @@ subtest 'unresolvable $ref' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -876,7 +876,7 @@ subtest 'unresolvable $ref to plain-name fragment' => sub {
   cmp_deeply(
     $js->evaluate(1, { '$ref' => '#nowhere' })->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -902,7 +902,7 @@ subtest 'abort due to a schema error' => sub {
       }
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -928,7 +928,7 @@ subtest 'sorted property names' => sub {
       }
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/bar',
@@ -993,7 +993,7 @@ subtest 'bad regex in schema' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1026,7 +1026,7 @@ subtest 'bad regex in schema' => sub {
       $schema,
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1049,7 +1049,7 @@ subtest 'bad regex in schema' => sub {
       $schema,
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '"pattern" regex is now valid, due to the Unicode property becoming defined',
   );
@@ -1081,7 +1081,7 @@ subtest 'JSON pointer escaping' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => my $errors = [
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
@@ -1142,7 +1142,7 @@ subtest 'JSON pointer escaping' => sub {
       $schema->{'$defs'}{mydef},
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         map +{
           error => $_->{error},
@@ -1173,7 +1173,7 @@ subtest 'JSON pointer escaping' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1199,7 +1199,7 @@ subtest 'invalid $schema' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1223,7 +1223,7 @@ subtest 'invalid $schema' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1251,7 +1251,7 @@ subtest 'invalid $schema' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '$schema can appear adjacent to any $id',
   );
@@ -1270,7 +1270,7 @@ subtest 'invalid $schema' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1291,7 +1291,7 @@ subtest 'absoluteKeywordLocation' => sub {
       { items => { '$ref' => '#' } },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/0',
@@ -1307,7 +1307,7 @@ subtest 'absoluteKeywordLocation' => sub {
   cmp_deeply(
     $js->evaluate(1, { '$ref' => '#does_not_exist' })->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -1323,7 +1323,7 @@ subtest 'absoluteKeywordLocation' => sub {
   cmp_deeply(
     $js->evaluate(1, '#')->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',

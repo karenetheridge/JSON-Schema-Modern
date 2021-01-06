@@ -28,7 +28,7 @@ subtest 'evaluate a document' => sub {
   cmp_deeply(
     $js->evaluate(1, $document)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => my $errors = [
         {
           instanceLocation => '',
@@ -62,7 +62,7 @@ subtest 'evaluate a document' => sub {
   cmp_deeply(
     $js->evaluate(1, $document)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => $errors,
     },
     'evaluate a Document object again without error',
@@ -75,7 +75,7 @@ subtest 'evaluate a uri' => sub {
   cmp_deeply(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => my $errors = [
         {
           instanceLocation => '/$schema',
@@ -121,7 +121,7 @@ subtest 'evaluate a uri' => sub {
   cmp_deeply(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => $errors,
     },
     'evaluate against the metaschema again',
@@ -137,7 +137,7 @@ subtest 'evaluate a uri' => sub {
       'https://json-schema.org/draft/2019-09/meta/core#/properties/$schema',
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -156,7 +156,7 @@ subtest 'evaluate a uri' => sub {
       METASCHEMA.'#/does/not/exist',
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -257,7 +257,7 @@ subtest 'add a schema associated with a uri' => sub {
   cmp_deeply(
     my $result = $js->evaluate(1, 'https://bar.com#/allOf/0')->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -273,7 +273,7 @@ subtest 'add a schema associated with a uri' => sub {
   cmp_deeply(
     $js->evaluate(1, 'https://foo.com')->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => my $errors = [
         {
           instanceLocation => '',
@@ -662,7 +662,7 @@ subtest 'external resource with externally-supplied uri; main resource with mult
   cmp_deeply(
     my $result = $js->evaluate('string', 'https://secondary.com')->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -715,7 +715,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/foo',
@@ -751,7 +751,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
       $schema,
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/foo',

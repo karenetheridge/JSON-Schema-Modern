@@ -48,7 +48,7 @@ is($result->output_format, 'basic', 'Result object gets the output_format from t
 cmp_deeply(
   $result->TO_JSON,
   {
-    valid => bool(0),
+    valid => false,
     errors => [
       {
         instanceLocation => '',
@@ -209,7 +209,7 @@ $result->output_format('flag');
 cmp_deeply(
   $result->TO_JSON,
   {
-    valid => bool(0),
+    valid => false,
   },
   'flag format only includes the valid property',
 );
@@ -218,7 +218,7 @@ $result->output_format('terse');
 cmp_deeply(
   $result->TO_JSON,
   {
-    valid => bool(0),
+    valid => false,
     errors => [
       {
         instanceLocation => '',
@@ -331,7 +331,7 @@ foreach my $keyword (qw(unevaluatedItems unevaluatedProperties)) {
   cmp_deeply(
     $result->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => my $errors = [
         {
           instanceLocation => '',
@@ -347,7 +347,7 @@ foreach my $keyword (qw(unevaluatedItems unevaluatedProperties)) {
   cmp_deeply(
     $result->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => $errors,
     },
     'terse format does not omit these crucial errors',
