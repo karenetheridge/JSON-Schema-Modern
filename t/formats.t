@@ -11,13 +11,16 @@ use Test::Deep;
 use Test::Fatal;
 use JSON::Schema::Draft201909;
 
+use lib 't/lib';
+use Helper;
+
 my ($annotation_result, $validation_result);
 subtest 'no validation' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 0)
       ->evaluate('abc', { format => 'uuid' })->TO_JSON,
     $annotation_result = {
-      valid => bool(1),
+      valid => true,
       annotations => [
         {
           instanceLocation => '',
@@ -58,7 +61,7 @@ subtest 'simple validation' => sub {
   cmp_deeply(
     $js->evaluate('123', { format => 'uuid' })->TO_JSON,
     $validation_result = {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -89,7 +92,7 @@ subtest 'unknown format attribute' => sub {
   cmp_deeply(
     $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
       annotations => [
         {
           instanceLocation => '',
@@ -145,7 +148,7 @@ subtest 'override a format sub' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/mult_5',

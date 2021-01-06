@@ -93,7 +93,7 @@ subtest 'allOf' => sub {
 
   cmp_deeply(
     $js->evaluate(1, $pass_schema, { collect_annotations => 0 })->TO_JSON,
-    { valid => bool(1) },
+    { valid => true },
     'annotation collection can be turned off in evaluate()',
   );
 
@@ -105,7 +105,7 @@ subtest 'allOf' => sub {
     cmp_deeply(
       $js->evaluate(1, $pass_schema, { collect_annotations => 1 })->TO_JSON,
       {
-        valid => bool(1),
+        valid => true,
         annotations => [
           {
             instanceLocation => '',
@@ -250,7 +250,7 @@ subtest 'not' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'annotations are still collected inside a "not", otherwise the unevaluatedProperties would have returned false',
   );
@@ -269,7 +269,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -292,7 +292,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -319,7 +319,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/item',
@@ -343,7 +343,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
       annotations => [
         {
           instanceLocation => '',
@@ -364,7 +364,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
       annotations => [
         {
           instanceLocation => '',
@@ -388,7 +388,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'when "collect_annotations" is not set, unevaluatedItems still works, but annotations are not returned',
   );
@@ -403,7 +403,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'when "collect_annotations" is not set, unevaluatedProperties still works, but annotations are not returned',
   );
@@ -422,7 +422,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '... still works when unevaluated keywords are in a separate document',
   );
@@ -462,7 +462,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'referenced schemas still produce annotations internally when needed, even when not required to evaluate themselves in isolation',
   );
@@ -495,7 +495,7 @@ subtest 'annotate_unknown_keywords' => sub {
       $schema,
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'no annotations even when config value is true but collect_annotations is false',
   );
@@ -506,7 +506,7 @@ subtest 'annotate_unknown_keywords' => sub {
       $schema,
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
       annotations => [
         {
           instanceLocation => '/item',

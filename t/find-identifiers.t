@@ -28,7 +28,7 @@ subtest '$id sets canonical uri' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -103,7 +103,7 @@ subtest 'anchors' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -179,7 +179,7 @@ subtest '$anchor at root without $id' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -235,7 +235,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '$anchor is legal in a subschema',
   );
@@ -286,7 +286,7 @@ subtest 'invalid $id and $anchor' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -330,7 +330,7 @@ subtest 'invalid $id and $anchor' => sub {
       },
     )->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     '"bad" $ids and $anchors that are not actually keywords are not reported as errors',
   );
@@ -372,7 +372,7 @@ subtest 'nested $ids' => sub {
       $schema,
     )->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '/alpha',
@@ -461,7 +461,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
   cmp_deeply(
     $js->evaluate(1, $schema1)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -507,7 +507,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
   cmp_deeply(
     $js->evaluate(1, $schema2)->TO_JSON,
     {
-      valid => bool(1),
+      valid => true,
     },
     'successful evaluation of schema2',
   );
@@ -566,7 +566,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
   cmp_deeply(
     $js->evaluate(1, $schema1)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -612,7 +612,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
   cmp_deeply(
     $js->evaluate(1, $schema2)->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           error => re(qr/^EXCEPTION: uri "subschema1.json" conflicts with an existing schema resource/),
@@ -632,7 +632,7 @@ subtest 'resource collisions in canonical uris' => sub {
   cmp_deeply(
     $js->evaluate(1, { '$id' => 'https://foo.com', anyOf => [ { '$id' => '/x/y/z' } ] })->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
@@ -653,7 +653,7 @@ subtest 'resource collisions in canonical uris' => sub {
   cmp_deeply(
     $js->evaluate(1, { allOf => [ { '$id' => 'https://foo.com/x/y/z' } ] })->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',

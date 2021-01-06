@@ -10,6 +10,9 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use JSON::Schema::Draft201909;
 
+use lib 't/lib';
+use Helper;
+
 my $js = JSON::Schema::Draft201909->new(max_traversal_depth => 6);
 cmp_deeply(
   $js->evaluate(
@@ -19,7 +22,7 @@ cmp_deeply(
     },
   )->TO_JSON,
   {
-    valid => bool(0),
+    valid => false,
     errors => [
       {
         instanceLocation => '/0/0/0/0',
@@ -48,7 +51,7 @@ cmp_deeply(
     },
   )->TO_JSON,
   {
-    valid => bool(0),
+    valid => false,
     errors => [
       {
         instanceLocation => '',
@@ -73,7 +76,7 @@ cmp_deeply(
       },
     },
   )->TO_JSON,
-  { valid => bool(1) },
+  { valid => true },
   'the seen counter does not confuse URI paths and fragments: /properties/foo vs #/properties/foo',
 );
 
@@ -90,7 +93,7 @@ cmp_deeply(
       ],
     }
   )->TO_JSON,
-  { valid => bool(1) },
+  { valid => true },
   'the seen counter does not confuse two subschemas that both apply the same definition to the same instance location',
 );
 

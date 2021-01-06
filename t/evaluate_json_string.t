@@ -11,6 +11,9 @@ use Test::Fatal;
 use Test::Deep;
 use JSON::Schema::Draft201909;
 
+use lib 't/lib';
+use Helper;
+
 my $js = JSON::Schema::Draft201909->new;
 
 like(ref($js->_json_decoder), qr/^(?:Cpanel::JSON::XS|JSON::PP)$/, 'we have a JSON decoder');
@@ -28,7 +31,7 @@ is(
     cmp_deeply(
       $js->evaluate_json_string('blargh', {})->TO_JSON,
       {
-        valid => bool(0),
+        valid => false,
         errors => [
           {
             instanceLocation => '',

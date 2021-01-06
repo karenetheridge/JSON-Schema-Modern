@@ -10,6 +10,9 @@ use Test::Deep;
 use JSON::Schema::Draft201909;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 
+use lib 't/lib';
+use Helper;
+
 subtest 'load cached metaschema' => sub {
   my $js = JSON::Schema::Draft201909->new;
 
@@ -51,7 +54,7 @@ subtest 'resource collision with cached metaschema' => sub {
   cmp_deeply(
     $js->evaluate(1, { '$id' => 'https://json-schema.org/draft/2019-09/schema' })->TO_JSON,
     {
-      valid => bool(0),
+      valid => false,
       errors => [
         {
           instanceLocation => '',
