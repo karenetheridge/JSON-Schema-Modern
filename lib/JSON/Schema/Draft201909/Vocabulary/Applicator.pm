@@ -428,7 +428,7 @@ sub _eval_keyword_properties {
 
   return E($state, 'not all properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
-  return @valid_properties ? A($state, \@valid_properties) : 1;
+  return A($state, \@valid_properties);
 }
 
 sub _traverse_keyword_patternProperties {
@@ -482,7 +482,7 @@ sub _eval_keyword_patternProperties {
 
   return E($state, 'not all properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
-  return @valid_properties ? A($state, [ uniqstr @valid_properties ]) : 1;
+  return A($state, [ uniqstr @valid_properties ]);
 }
 
 sub _traverse_keyword_additionalProperties { shift->traverse_schema(@_) }
@@ -527,7 +527,7 @@ sub _eval_keyword_additionalProperties {
 
   return E($state, 'not all additional properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
-  return @valid_properties ? A($state, \@valid_properties) : 1;
+  return A($state, \@valid_properties);
 }
 
 sub _traverse_keyword_unevaluatedProperties {
@@ -589,7 +589,7 @@ sub _eval_keyword_unevaluatedProperties {
 
   return E($state, 'not all additional properties are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
-  return @valid_properties ? A($state, \@valid_properties) : 1;
+  return A($state, \@valid_properties);
 }
 
 sub _traverse_keyword_propertyNames { shift->traverse_schema(@_) }
