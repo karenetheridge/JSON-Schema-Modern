@@ -371,9 +371,14 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
           keywordLocation => '/properties',
           annotation => [ 'foo' ],
         },
+        {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedProperties',
+          annotation => [],
+        },
       ],
     },
-    'when "collect_annotations" is set to true, unevaluatedProperties works, and annotations are returned',
+    'when "collect_annotations" is set to true, unevaluatedProperties passes, and annotations are returned',
   );
 
   $js = JSON::Schema::Draft201909->new();
@@ -522,6 +527,11 @@ subtest 'annotate_unknown_keywords' => sub {
           instanceLocation => '/property',
           keywordLocation => '/properties/property/properties',
           annotation => [ 'foo' ],
+        },
+        {
+          instanceLocation => '/property',
+          keywordLocation => '/properties/property/unevaluatedProperties',
+          annotation => [],
         },
         {
           instanceLocation => '/property',

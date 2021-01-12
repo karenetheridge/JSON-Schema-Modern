@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - [Pp]roperties$ keywords now always produce annotations when
+            evaluating successfully, even if there were no matching properties
 
 0.020     2021-01-02 17:12:09Z
           - the default value for "validate_formats" is now true, to reflect
