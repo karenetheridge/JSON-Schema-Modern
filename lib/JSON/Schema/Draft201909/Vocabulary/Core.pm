@@ -194,6 +194,9 @@ sub _traverse_keyword_vocabulary {
 
   return E($state, '$vocabulary can only appear at the schema resource root')
     if length(canonical_schema_uri($state)->fragment);
+
+  return E($state, '$vocabulary can only appear at the document root')
+    if length($state->{traversed_schema_path}.$state->{schema_path});
 }
 
 # we do nothing with $vocabulary yet at evaluation time. When we know we are in a metaschema,
