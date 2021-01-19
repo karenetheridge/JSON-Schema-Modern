@@ -20,6 +20,7 @@ BEGIN {
 
 use Test::Warnings 0.027 ':fail_on_warning';
 use Test::JSON::Schema::Acceptance 1.000;
+use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
 
@@ -120,6 +121,10 @@ $accepter->acceptance(
       : (),
   ] ),
 );
+
+memory_cycle_ok($js, 'no leaks in the main evaluator object');
+memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator object');
+
 
 # date        Test::JSON::Schema::Acceptance version
 #                    result count of running *all* tests (with no TODOs)
