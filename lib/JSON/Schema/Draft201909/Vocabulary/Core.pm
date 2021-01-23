@@ -9,6 +9,7 @@ our $VERSION = '0.021';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
+no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::Schema::Draft201909::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_ref);
 use Moo;
 use strictures 2;

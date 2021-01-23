@@ -9,6 +9,7 @@ our $VERSION = '0.021';
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
+no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use List::Util 1.45 qw(any uniqstr max);
 use Ref::Util 0.100 'is_plain_arrayref';
 use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort assert_keyword_type assert_pattern true);
