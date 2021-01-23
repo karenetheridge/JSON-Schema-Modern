@@ -10,6 +10,7 @@ our $VERSION = '0.021';
 use 5.016;  # for fc, unicode_strings features
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
+no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::MaybeXS;
 use Syntax::Keyword::Try 0.11;
 use Carp qw(croak carp);
