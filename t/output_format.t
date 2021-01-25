@@ -53,11 +53,6 @@ cmp_deeply(
     errors => [
       {
         instanceLocation => '',
-        keywordLocation => '/required',
-        error => 'missing property: bar',
-      },
-      {
-        instanceLocation => '',
         keywordLocation => '/allOf/0/type',
         error => 'wrong type (expected number)',
       },
@@ -201,6 +196,11 @@ cmp_deeply(
         keywordLocation => '/propertyNames',
         error => 'not all property names are valid',
       },
+      {
+        instanceLocation => '',
+        keywordLocation => '/required',
+        error => 'missing property: bar',
+      },
     ],
   },
   'basic format includes all errors linearly',
@@ -221,11 +221,6 @@ cmp_deeply(
   {
     valid => false,
     errors => [
-      {
-        instanceLocation => '',
-        keywordLocation => '/required',
-        error => 'missing property: bar',
-      },
       {
         instanceLocation => '',
         keywordLocation => '/allOf/0/type',
@@ -316,6 +311,11 @@ cmp_deeply(
         error => 'pattern does not match',
       },
       # - "summary" error from /propertyNames is omitted
+      {
+        instanceLocation => '',
+        keywordLocation => '/required',
+        error => 'missing property: bar',
+      },
     ],
   },
   'terse format omits errors from redundant applicator keywords',

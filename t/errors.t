@@ -788,12 +788,6 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$ref/$ref/$ref/$ref/type',
-          absoluteKeywordLocation => 'http://localhost:4242/object.json#/type',
-          error => 'wrong type (expected object)',
-        },
-        {
-          instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/$ref/anyOf/0',
           absoluteKeywordLocation => 'http://localhost:4242/object.json#/anyOf/0',
           error => 'subschema is false',
@@ -803,6 +797,12 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
           keywordLocation => '/$ref/$ref/$ref/$ref/anyOf',
           absoluteKeywordLocation => 'http://localhost:4242/object.json#/anyOf',
           error => 'no subschemas are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/$ref/$ref/type',
+          absoluteKeywordLocation => 'http://localhost:4242/object.json#/type',
+          error => 'wrong type (expected object)',
         },
         {
           instanceLocation => '',

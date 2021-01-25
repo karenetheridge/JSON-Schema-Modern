@@ -186,7 +186,7 @@ sub traverse {
     vocabularies => [
       (map use_module($_)->new(evaluator => $self),
         map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
-          qw(Core Validation Applicator Format Content MetaData)),
+          qw(Core Applicator Validation MetaData Format Content)),
       $self,  # for discontinued keywords defined in the base schema
     ],
     identifiers => [],
@@ -231,7 +231,7 @@ sub evaluate {
     vocabularies => [
       (map use_module($_)->new(evaluator => $self),
         map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
-          qw(Core Validation Applicator Format Content MetaData)),
+          qw(Core Applicator Validation MetaData Format Content)),
       $self,  # for discontinued keywords defined in the base schema
     ],
   };
