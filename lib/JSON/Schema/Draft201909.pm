@@ -12,7 +12,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::MaybeXS;
-use Carp qw(croak carp);
+use Carp 'croak';
 use List::Util 1.55 qw(pairs first uniqint);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref is_plain_coderef);
 use Mojo::URL;
@@ -20,7 +20,6 @@ use Safe::Isa;
 use Path::Tiny;
 use Storable 'dclone';
 use File::ShareDir 'dist_dir';
-use Module::Runtime 'use_module';
 use Moo;
 use strictures 2;
 use MooX::TypeTiny 0.002002;
@@ -29,6 +28,7 @@ use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef 
 use Feature::Compat::Try;
 use JSON::Schema::Draft201909::Error;
 use JSON::Schema::Draft201909::Result;
+use JSON::Schema::Draft201909::Dialect;
 use JSON::Schema::Draft201909::Document;
 use JSON::Schema::Draft201909::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
 use namespace::clean;
@@ -180,14 +180,10 @@ sub traverse {
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
-    # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
-    # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
-    # keyword in the schema and the '$vocabulary' keyword in the metaschema.
-    vocabularies => [
-      (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
-        qw(Core Validation Applicator Format Content MetaData)),
-      $self,  # for discontinued keywords defined in the base schema
-    ],
+    # for now, this is hardcoded, but in the future the dialect will start off just with the Core
+    # vocabulary and then fetch and parse the document to determine the actual vocabularies from the
+    # '$vocabulary' keyword at its root.
+    dialect => JSON::Schema::Draft201909::Dialect->default_dialect,
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
@@ -226,14 +222,8 @@ sub evaluate {
     errors => [],
     annotations => [],
     seen => {},
-    # for now, this is hardcoded, but in the future the dialect will be determined by the
-    # traverse() pass on the schema and examination of the referenced metaschema.
-    vocabularies => [
-      (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
-        qw(Core Validation Applicator Format Content MetaData)),
-      $self,  # for discontinued keywords defined in the base schema
-    ],
     evaluator => $self,
+    dialect => 'SEE BELOW',             # the ::Dialect object describing the metaschema
   };
 
   my $result;
@@ -261,7 +251,8 @@ sub evaluate {
       %$state,
     };
 
-    @$state{qw(canonical_schema_uri document document_path)} = ($canonical_uri, $document, $document_path);
+    @$state{qw(canonical_schema_uri document document_path dialect)} =
+      ($canonical_uri, $document, $document_path, $document->dialect);
 
     $result = $self->_eval($data, $schema, $state);
   }
@@ -314,7 +305,9 @@ sub _traverse {
 
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
-  foreach my $vocabulary (@{$state->{vocabularies}}) {
+  # loop through vocabularies, with the understanding that the list may be appended to mid-loop
+  my $vocab_num = 0; while ($vocab_num < $state->{dialect}->num_vocabularies) {
+    my $vocabulary = $state->{dialect}->get_vocabulary($vocab_num);
     foreach my $keyword ($vocabulary->keywords) {
       next if not exists $schema->{$keyword};
 
@@ -328,6 +321,7 @@ sub _traverse {
       }
     }
   }
+  continue { ++$vocab_num }
 }
 
 sub _eval {
@@ -359,7 +353,8 @@ sub _eval {
 
   my %unknown_keywords = map +($_ => undef), keys %$schema;
 
-  foreach my $vocabulary (@{$state->{vocabularies}}) {
+  foreach my $vocab_num (0..($state->{dialect}->num_vocabularies-1)) {
+    my $vocabulary = $state->{dialect}->get_vocabulary($vocab_num);
     foreach my $keyword ($vocabulary->keywords) {
       next if not exists $schema->{$keyword};
 
@@ -375,24 +370,11 @@ sub _eval {
   annotate_self(+{ %$state, keyword => $_ }, $schema) foreach sort keys %unknown_keywords;
 
   @{$state->{annotations}} = @parent_annotations if not $result;
+
+  # handle deprecated keywords at this level of the schema
+  $state->{dialect}->post_evaluate($data, $schema, $state);
+
   return $result;
-}
-
-sub keywords { qw(definitions dependencies) }
-
-sub _eval_keyword_definitions {
-  my ($self, $data, $schema, $state) = @_;
-  carp 'no-longer-supported "definitions" keyword present (at '
-    .canonical_schema_uri($state).'): this should be rewritten as "$defs"';
-  return 1;
-}
-
-sub _eval_keyword_dependencies {
-  my ($self, $data, $schema, $state) = @_;
-  carp 'no-longer-supported "dependencies" keyword present (at'
-    .canonical_schema_uri($state)
-    .'): this should be rewritten as "dependentSchemas" or "dependentRequired"';
-  return 1;
 }
 
 has _resource_index => (

@@ -19,6 +19,7 @@ use strictures 2;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
 use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef);
+use JSON::Schema::Draft201909::Dialect;
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer', 'Moo::Object';
@@ -95,6 +96,12 @@ has evaluation_configs => (
   default => sub { {} },
 );
 
+has dialect => (
+  is => 'rwp',
+  isa => InstanceOf['JSON::Schema::Draft201909::Dialect'],
+  init_arg => undef,
+);
+
 around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
@@ -146,6 +153,7 @@ sub BUILD {
     { canonical_schema_uri => $self->canonical_uri->clone });
 
   $self->_set_canonical_uri($state->{canonical_schema_uri});
+  $self->_set_dialect($state->{dialect});
 
   if (@{$state->{errors}}) {
     $self->_set_errors($state->{errors});
@@ -228,6 +236,13 @@ evaluation of this document. See the third parameter of L<JSON::Schema::Draft201
 This should never need to be set explicitly. This is sometimes populated automatically after
 creating a document object, depending on the keywords found in the schema, but they will never
 override anything you have already explicitly set.
+
+=head2 dialect
+
+=for stopwords metaschema
+
+The L<JSON::Schema::Draft201909::Dialect> object representing the document's metaschema, which is
+derived during construction.
 
 =head1 METHODS
 

@@ -23,11 +23,14 @@ my $initial_state = {
   data_path => '',
   schema_path => '',
   traversed_schema_path => '',
-  vocabularies => [
-    (map use_module($_)->new(evaluator => $js),
-      map 'JSON::Schema::Draft201909::Vocabulary::'.$_, qw(Applicator MetaData)),
-  ],
   evaluator => $js,
+  dialect => JSON::Schema::Draft201909::Dialect->new(
+    vocabularies => [
+      map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+        qw(Applicator MetaData),
+    ],
+    uri => 'https://json-schema.org/draft/2019-09/schema',
+  ),
 };
 
 subtest 'allOf' => sub {
@@ -46,7 +49,7 @@ subtest 'allOf' => sub {
   };
 
   ok(
-    !$state->{vocabularies}[0]->_eval_keyword_allOf(1, $fail_schema, $state),
+    !$state->{dialect}{vocabularies}[0]->_eval_keyword_allOf(1, $fail_schema, $state),
     'evaluation of the allOf keyword fails',
   );
 
@@ -73,7 +76,7 @@ subtest 'allOf' => sub {
   };
 
   ok(
-    $state->{vocabularies}[0]->_eval_keyword_allOf(1, $pass_schema, $state),
+    $state->{dialect}{vocabularies}[0]->_eval_keyword_allOf(1, $pass_schema, $state),
     'evaluation of the allOf keyword succeeds',
   );
 
@@ -138,7 +141,7 @@ subtest 'oneOf' => sub {
   };
 
   ok(
-    !$state->{vocabularies}[0]->_eval_keyword_oneOf(1, $fail_schema, $state),
+    !$state->{dialect}{vocabularies}[0]->_eval_keyword_oneOf(1, $fail_schema, $state),
     'evaluation of the oneOf keyword fails',
   );
 
@@ -164,7 +167,7 @@ subtest 'oneOf' => sub {
   };
 
   ok(
-    $state->{vocabularies}[0]->_eval_keyword_oneOf(1, $pass_schema, $state),
+    $state->{dialect}{vocabularies}[0]->_eval_keyword_oneOf(1, $pass_schema, $state),
     'evaluation of the oneOf keyword succeeds',
   );
 
@@ -198,7 +201,7 @@ subtest 'not' => sub {
   };
 
   ok(
-    !$state->{vocabularies}[0]->_eval_keyword_not(1, $fail_schema, $state),
+    !$state->{dialect}{vocabularies}[0]->_eval_keyword_not(1, $fail_schema, $state),
     'evaluation of the not keyword fails',
   );
 
@@ -220,7 +223,7 @@ subtest 'not' => sub {
   };
 
   ok(
-    $state->{vocabularies}[0]->_eval_keyword_not(1, $pass_schema, $state),
+    $state->{dialect}{vocabularies}[0]->_eval_keyword_not(1, $pass_schema, $state),
     'evaluation of the not keyword succeeds',
   );
 

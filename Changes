@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - addition of JSON::Schema::Draft201909::Dialect, for customizing
+            vocabulary usage
 
 0.023     2021-02-21 18:36:32Z
           - fix "try/catch is experimental" warnings in perl 5.33.7
