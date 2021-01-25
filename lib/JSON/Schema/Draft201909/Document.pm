@@ -21,7 +21,7 @@ use MooX::HandlesVia;
 use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef);
 use namespace::clean;
 
-extends 'Mojo::JSON::Pointer';
+extends 'Mojo::JSON::Pointer', 'Moo::Object';
 
 has schema => (
   is => 'ro',
@@ -76,14 +76,6 @@ has _serialized_schema => (
   init_arg => undef,
 );
 
-has _evaluator => (
-  is => 'ro',
-  isa => InstanceOf['JSON::Schema::Draft201909'],
-  weak_ref => 1,
-  lazy => 1,
-  default => sub { JSON::Schema::Draft201909->new },
-);
-
 has errors => (
   is => 'bare',
   handles_via => 'Array',
@@ -130,13 +122,27 @@ sub FOREIGNBUILDARGS { () }
 # for JSON serializers
 sub TO_JSON { goto \&schema }
 
+around BUILDARGS => sub {
+  my ($orig, $class, @args) = @_;
+
+  my $args = $class->$orig(@args);
+
+  # evaluator is only needed for traversal in BUILD; a different evaluator may be used for
+  # the actual evaluation.
+  croak '_evaluator is not a JSON::Schema::Draft201909'
+    if exists $args->{_evaluator} and not $args->{_evaluator}->$_isa('JSON::Schema::Draft201909');
+
+  $args->{_evaluator} //= JSON::Schema::Draft201909->new;
+  return $args;
+};
+
 sub BUILD {
-  my $self = shift;
+  my ($self, $args) = @_;
 
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
 
   my $original_uri = $self->canonical_uri->clone;
-  my $state = $self->_evaluator->traverse($self->schema,
+  my $state = $args->{_evaluator}->traverse($self->schema,
     { canonical_schema_uri => $self->canonical_uri->clone });
 
   $self->_set_canonical_uri($state->{canonical_schema_uri});
@@ -225,7 +231,7 @@ override anything you have already explicitly set.
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD FOREIGNBUILDARGS
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD
 
 =head2 path_to_canonical_uri
 

@@ -13,27 +13,19 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::Schema::Draft201909::Utilities qw(jsonp assert_keyword_type);
 use Moo::Role;
 use strictures 2;
-use Types::Standard 1.010002 'InstanceOf';
 use namespace::clean;
-
-has evaluator => (
-  is => 'ro',
-  isa => InstanceOf['JSON::Schema::Draft201909'],
-  required => 1,
-  weak_ref => 1,
-);
 
 requires qw(vocabulary keywords);
 
 sub traverse {
   my ($self, $schema, $state) = @_;
-  $self->evaluator->_traverse($schema, $state);
+  $state->{evaluator}->_traverse($schema, $state);
 }
 
 sub traverse_schema {
   my ($self, $schema, $state) = @_;
 
-  $self->evaluator->_traverse($schema->{$state->{keyword}},
+  $state->{evaluator}->_traverse($schema->{$state->{keyword}},
     +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword} });
 }
 
@@ -44,7 +36,7 @@ sub traverse_array_schemas {
   return E($state, '"%s" array is empty') if not @{$schema->{$state->{keyword}}};
 
   foreach my $idx (0 .. $#{$schema->{$state->{keyword}}}) {
-    $self->evaluator->_traverse($schema->{$state->{keyword}}[$idx],
+    $state->{evaluator}->_traverse($schema->{$state->{keyword}}[$idx],
       +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx });
   }
 }
@@ -55,14 +47,14 @@ sub traverse_object_schemas {
   return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{$state->{keyword}}}) {
-    $self->evaluator->_traverse($schema->{$state->{keyword}}{$property},
+    $state->{evaluator}->_traverse($schema->{$state->{keyword}}{$property},
       +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
   }
 }
 
 sub eval {
   my ($self, $data, $schema, $state) = @_;
-  $self->evaluator->_eval($data, $schema, $state);
+  $state->{evaluator}->_eval($data, $schema, $state);
 }
 
 1;
@@ -84,11 +76,6 @@ must compose, describing the basic structure expected of a vocabulary class.
 User-defined custom vocabularies are not supported at this time.
 
 =head1 ATTRIBUTES
-
-=head2 evaluator
-
-The L<JSON::Schema::Draft201909> evaluator object, used for implementing C<_traverse_keyword_*> and
-C<_eval_keyword_*>.
 
 =head1 METHODS
 

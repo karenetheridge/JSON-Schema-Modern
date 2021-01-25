@@ -77,7 +77,7 @@ has _format_validations => (
   init_arg => 'format_validations',
   handles_via => 'Hash',
   handles => {
-    _format_validations => 'elements',
+    _get_format_validation => 'get',
   },
   lazy => 1,
   default => sub { {} },
@@ -103,7 +103,7 @@ sub add_schema {
     : JSON::Schema::Draft201909::Document->new(
       schema => shift,
       $uri ? (canonical_uri => $uri) : (),
-      _evaluator => $self,
+      _evaluator => $self,  # used only for traversal during document construction
     );
 
   die JSON::Schema::Draft201909::Result->new(
@@ -184,14 +184,14 @@ sub traverse {
     # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
     vocabularies => [
-      (map use_module($_)->new(evaluator => $self),
-        map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
-          qw(Core Validation Applicator Format Content MetaData)),
+      (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+        qw(Core Validation Applicator Format Content MetaData)),
       $self,  # for discontinued keywords defined in the base schema
     ],
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
+    evaluator => $self,
   };
 
   try {
@@ -229,11 +229,11 @@ sub evaluate {
     # for now, this is hardcoded, but in the future the dialect will be determined by the
     # traverse() pass on the schema and examination of the referenced metaschema.
     vocabularies => [
-      (map use_module($_)->new(evaluator => $self),
-        map 'JSON::Schema::Draft201909::Vocabulary::'.$_,
-          qw(Core Validation Applicator Format Content MetaData)),
+      (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+        qw(Core Validation Applicator Format Content MetaData)),
       $self,  # for discontinued keywords defined in the base schema
     ],
+    evaluator => $self,
   };
 
   my $result;

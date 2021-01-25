@@ -27,6 +27,7 @@ my $initial_state = {
     (map use_module($_)->new(evaluator => $js),
       map 'JSON::Schema::Draft201909::Vocabulary::'.$_, qw(Applicator MetaData)),
   ],
+  evaluator => $js,
 };
 
 subtest 'allOf' => sub {
