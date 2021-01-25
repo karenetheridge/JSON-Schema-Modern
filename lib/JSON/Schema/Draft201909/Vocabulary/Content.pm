@@ -47,8 +47,7 @@ sub _traverse_keyword_contentSchema {
 
   # since contentSchema should never be evaluated in the context of the containing schema, it is
   # not appropriate to gather identifiers found therein -- but we can still validate the subschema.
-  $self->evaluator->_traverse($schema->{contentSchema},
-    +{ %$state, identifiers => [], schema_path => $state->{schema_path}.'/contentSchema' });
+  $self->traverse_schema($schema, +{ %$state, identifiers => [] });
 }
 
 sub _eval_keyword_contentSchema {
