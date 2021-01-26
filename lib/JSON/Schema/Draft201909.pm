@@ -253,7 +253,7 @@ sub evaluate {
     abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
 
     $state = +{
-      %{$document->evaluator_configs},
+      %{$document->evaluation_configs},
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()

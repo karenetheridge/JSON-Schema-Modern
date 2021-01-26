@@ -437,13 +437,13 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
   my $doc_properties = $js->add_schema('properties.json', { properties => { foo => true } });
 
   cmp_deeply(
-    $doc_items->evaluator_configs,
+    $doc_items->evaluation_configs,
     {},
     'items.json does not need collect_annotations => 1 to evaluate itself',
   );
 
   cmp_deeply(
-    $doc_properties->evaluator_configs,
+    $doc_properties->evaluation_configs,
     {},
     'properties.json does not need collect_annotations => 1 to evaluate itself',
   );

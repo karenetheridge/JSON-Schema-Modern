@@ -97,7 +97,7 @@ has errors => (
   default => sub { [] },
 );
 
-has evaluator_configs => (
+has evaluation_configs => (
   is => 'rwp',
   isa => HashRef,
   default => sub { {} },
@@ -154,7 +154,7 @@ sub BUILD {
   $self->_add_resources(@{$state->{identifiers}});
 
   # overlay the resulting configs with those that were provided by the caller
-  $self->_set_evaluator_configs(+{ %{$state->{configs}}, %{$self->evaluator_configs} });
+  $self->_set_evaluation_configs(+{ %{$state->{configs}}, %{$self->evaluation_configs} });
 }
 
 1;
@@ -215,7 +215,7 @@ A list of L<JSON::Schema::Draft201909::Error> objects that resulted when the sch
 originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
 errors halt the parsing process.) Documents with errors cannot be evaluated.
 
-=head2 evaluator_configs
+=head2 evaluation_configs
 
 An optional hashref of configuration values that will be provided to the evaluator during
 evaluation of this document. See the third parameter of L<JSON::Schema::Draft201909/evaluate>.

@@ -144,7 +144,7 @@ sub _eval_keyword_ref {
 
   return $self->eval($data, $subschema,
     +{
-      %{$document->evaluator_configs},
+      %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
       canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
@@ -176,7 +176,7 @@ sub _eval_keyword_recursiveRef {
 
   return $self->eval($data, $subschema,
     +{
-      %{$document->evaluator_configs},
+      %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
       canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
