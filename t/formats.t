@@ -172,4 +172,54 @@ subtest 'override a format sub' => sub {
   );
 };
 
+subtest 'different formats after document creation' => sub {
+  # the default evaluator does not know the mult_5 format
+  my $document = JSON::Schema::Draft201909::Document->new(schema => { format => 'mult_5' });
+
+  my $js1 = JSON::Schema::Draft201909->new(validate_formats => 1, collect_annotations => 0);
+  cmp_deeply(
+    $js1->evaluate(3, $document)->TO_JSON,
+    {
+      valid => true,
+    },
+    'the default evaluator does not know the mult_5 format',
+  );
+
+  my $js2 = JSON::Schema::Draft201909->new(
+    collect_annotations => 1,
+    validate_formats => 1,
+    format_validations => +{ mult_5 => +{ type => 'integer', sub => sub { ($_[0] % 5) == 0 } } },
+  );
+
+  cmp_deeply(
+    $js2->evaluate(5, $document)->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          annotation => 'mult_5',
+        },
+      ],
+    },
+    'the runtime evaluator is used for annotation configs',
+  );
+
+  cmp_deeply(
+    $js2->evaluate(3, $document)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          error => 'not a mult_5',
+        },
+      ],
+    },
+    'the runtime evaluator is used to fetch the format implementations',
+  );
+};
+
 done_testing;
