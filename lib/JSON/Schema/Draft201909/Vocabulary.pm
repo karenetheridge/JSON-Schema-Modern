@@ -25,6 +25,11 @@ has evaluator => (
 
 requires qw(vocabulary keywords);
 
+sub traverse {
+  my ($self, $schema, $state) = @_;
+  $self->evaluator->_traverse($schema, $state);
+}
+
 sub traverse_schema {
   my ($self, $schema, $state) = @_;
 
@@ -53,6 +58,11 @@ sub traverse_object_schemas {
     $self->evaluator->_traverse($schema->{$state->{keyword}}{$property},
       +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
   }
+}
+
+sub eval {
+  my ($self, $data, $schema, $state) = @_;
+  $self->evaluator->_eval($data, $schema, $state);
 }
 
 1;
@@ -93,6 +103,10 @@ L<JSON Schema Core Meta-specification, section 8.1.2|https://json-schema.org/dra
 
 The list of keywords defined by the vocabulary. Must be implemented by the composing class.
 
+=head2 traverse
+
+Traverses a subschema.
+
 =head2 traverse_schema
 
 Recursively traverses the schema at the current keyword.
@@ -104,5 +118,9 @@ Recursively traverses the list of subschemas at the current keyword.
 =head2 traverse_object_schemas
 
 Recursively traverses the (subschema) values of the object at the current keyword.
+
+=head2 eval
+
+Evaluates a subschema.
 
 =cut
