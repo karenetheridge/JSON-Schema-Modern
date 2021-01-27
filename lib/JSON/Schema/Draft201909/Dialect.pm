@@ -44,7 +44,8 @@ sub default_dialect {
 
   $class->new(
     vocabularies => [
-      map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+      map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)
+          ->new(required => ($_ eq 'Format' ? 0 : 1)),
         qw(Core Validation Applicator Format Content MetaData),
     ],
     uri => 'https://json-schema.org/draft/2019-09/schema',

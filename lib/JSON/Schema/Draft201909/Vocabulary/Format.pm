@@ -116,8 +116,10 @@ sub keywords {
 sub _traverse_keyword_format {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'string');
-  # TODO: if the metaschema's $vocabulary entry is true, then we must die on
-  # encountering unimplemented formats specified by the vocabulary (iri-reference, uri-template).
+
+  E($state, '"%s" format is not supported at this time', $schema->{format})
+    if ($schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template')
+      and $self->required;
 }
 
 sub _eval_keyword_format {
@@ -133,6 +135,14 @@ sub _eval_keyword_format {
       $evaluator_spec ? ($default_spec ? +{ type => 'string', sub => $evaluator_spec } : $evaluator_spec)
         : $default_spec ? +{ type => 'string', sub => $default_spec }
         : undef;
+
+    # this is redundant with traverse, but check it anyway..
+    return E($state, '"%s" format is not supported at this time', $schema->{format})
+      if ($schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template')
+        and $self->required;
+
+    return E($state, 'no implementation found for custom "%s" format', $schema->{format})
+      if not $spec and $self->required;
 
     return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
       if $spec and is_type($spec->{type}, $data) and not $spec->{sub}->($data);

@@ -12,10 +12,17 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::Schema::Draft201909::Utilities qw(jsonp assert_keyword_type);
 use Moo::Role;
+use Types::Standard 1.010002 'Bool';
 use strictures 2;
 use namespace::clean;
 
 requires qw(vocabulary keywords);
+
+has required => (
+  is => 'ro',
+  isa => Bool,
+  required => 1,
+);
 
 sub traverse {
   my ($self, $schema, $state) = @_;
@@ -62,6 +69,9 @@ __END__
 
 =pod
 
+=for :header
+=for stopwords schema subschema metaschema
+
 =head1 SYNOPSIS
 
   package MyApp::Vocabulary::Awesome;
@@ -77,9 +87,12 @@ User-defined custom vocabularies are not supported at this time.
 
 =head1 ATTRIBUTES
 
-=head1 METHODS
+=head2 required
 
-=for stopwords schema subschema
+Boolean, required. Indicates the boolean value of the vocabulary in the C<$vocabulary> keyword
+in the metaschema using this vocabulary. See L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.1.2>.
+
+=head1 METHODS
 
 =head2 vocabulary
 

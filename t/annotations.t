@@ -26,7 +26,7 @@ my $initial_state = {
   evaluator => $js,
   dialect => JSON::Schema::Draft201909::Dialect->new(
     vocabularies => [
-      map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+      map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new(required => 1),
         qw(Applicator MetaData),
     ],
     uri => 'https://json-schema.org/draft/2019-09/schema',

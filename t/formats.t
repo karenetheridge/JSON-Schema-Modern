@@ -222,4 +222,73 @@ subtest 'different formats after document creation' => sub {
   );
 };
 
+subtest 'vocabulary is required' => sub {
+  my $document = JSON::Schema::Draft201909::Document->new(schema => {
+    anyOf => [ { format => 'uri-template' }, { format => 'whargarbl' } ]
+  });
+
+  my $vocab = $document->dialect->get_vocabulary(3);
+  ok(!$vocab->required, 'required flag defaults to false for Format vocabulary');
+
+  cmp_deeply(
+    JSON::Schema::Draft201909->new->evaluate('abcd', $document)->TO_JSON,
+    { valid => true },
+    'by default, schemas using uri-template or an unrecognized format can be used for validation',
+  );
+
+  # this is a hack, but until the $vocabulary keyword is fully supported, it is the only
+  # way to test this.
+  $vocab->{required} = 1;
+
+  my $js = JSON::Schema::Draft201909->new;
+  my $state = {
+    depth => 0,
+    data_path => '',
+    traversed_schema_path => '',
+    canonical_schema_uri => Mojo::URL->new(''),
+    schema_path => '',
+    errors => [],
+    dialect => $document->dialect,
+    evaluator => $js,
+  };
+  $js->_traverse($document->schema, $state);
+
+  cmp_deeply(
+    [ map $_->TO_JSON, $state->{errors}->@* ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/anyOf/0/format',
+        error => '"uri-template" format is not supported at this time',
+      },
+    ],
+    'traversing the schema with the format vocabulary set to true generates an error',
+  );
+
+  cmp_deeply(
+    JSON::Schema::Draft201909->new->evaluate('abcd', $document)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf/0/format',
+          error => '"uri-template" format is not supported at this time',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf/1/format',
+          error => 'no implementation found for custom "whargarbl" format',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf',
+          error => 'no subschemas are valid',
+        },
+      ],
+    },
+    'evaluating the schema with the format vocabulary set to true generates an error',
+  );
+};
+
 done_testing;
