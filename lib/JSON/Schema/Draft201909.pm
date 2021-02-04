@@ -12,7 +12,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::MaybeXS;
-use Syntax::Keyword::Try 0.11;
+use Feature::Compat::Try;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref is_plain_coderef);
@@ -145,7 +145,7 @@ sub evaluate_json_string {
   try {
     $data = $self->_json_decoder->decode($json_data)
   }
-  catch {
+  catch ($e) {
     return JSON::Schema::Draft201909::Result->new(
       output_format => $self->output_format,
       result => 0,
@@ -154,7 +154,7 @@ sub evaluate_json_string {
           keyword => undef,
           instance_location => '',
           keyword_location => '',
-          error => $@,
+          error => $e,
         )
       ],
     );
@@ -197,12 +197,12 @@ sub traverse {
   try {
     $self->_traverse($schema_reference, $state);
   }
-  catch {
-    if ($@->$_isa('JSON::Schema::Draft201909::Error')) {
-      push @{$state->{errors}}, $@;
+  catch ($e) {
+    if ($e->$_isa('JSON::Schema::Draft201909::Error')) {
+      push @{$state->{errors}}, $e;
     }
     else {
-      E($state, 'EXCEPTION: '.$@);
+      E($state, 'EXCEPTION: '.$e);
     }
   }
 
@@ -265,15 +265,15 @@ sub evaluate {
 
     $result = $self->_eval($data, $schema, $state);
   }
-  catch {
-    if ($@->$_isa('JSON::Schema::Draft201909::Result')) {
-      return $@;
+  catch ($e) {
+    if ($e->$_isa('JSON::Schema::Draft201909::Result')) {
+      return $e;
     }
-    elsif ($@->$_isa('JSON::Schema::Draft201909::Error')) {
-      push @{$state->{errors}}, $@;
+    elsif ($e->$_isa('JSON::Schema::Draft201909::Error')) {
+      push @{$state->{errors}}, $e;
     }
     else {
-      E($state, 'EXCEPTION: '.$@);
+      E($state, 'EXCEPTION: '.$e);
     }
 
     $result = 0;

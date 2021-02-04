@@ -14,7 +14,7 @@ use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
-use Syntax::Keyword::Try 0.11;
+use Feature::Compat::Try;
 use Storable 'dclone';
 use strictures 2;
 use JSON::Schema::Draft201909::Error;
@@ -239,7 +239,7 @@ sub assert_keyword_type {
 sub assert_pattern {
   my ($state, $pattern) = @_;
   try { qr/$pattern/; }
-  catch { return E($state, $@); };
+  catch ($e) { return E($state, $e); };
   return 1;
 }
 

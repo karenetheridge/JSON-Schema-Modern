@@ -13,7 +13,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::Schema::Draft201909::Utilities qw(is_type E A assert_keyword_type);
 use Moo;
 use strictures 2;
-use Syntax::Keyword::Try 0.11;
+use Feature::Compat::Try;
 use namespace::clean;
 
 with 'JSON::Schema::Draft201909::Vocabulary';
@@ -41,7 +41,7 @@ sub keywords {
   };
   my $idn_decode = sub {
     eval { require Net::IDN::Encode; 1 } or return $_[0];
-    try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch { return $_[0]; }
+    try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch ($e) { return $_[0]; }
   };
   my $is_ipv4 = sub {
     my @o = split(/\./, $_[0], 5);
