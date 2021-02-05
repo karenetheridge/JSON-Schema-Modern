@@ -44,7 +44,7 @@ has $_.'s' => (
   },
 ) foreach qw(error annotation);
 
-use constant OUTPUT_FORMATS => [qw(flag basic detailed verbose terse)];
+use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse)];
 
 has output_format => (
   is => 'rw',
@@ -68,6 +68,15 @@ sub format {
       $self->result
         ? ($self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, $self->errors ]),
+    };
+  }
+  # note: strict_basic will NOT be supported after draft 2019-09!
+  if ($style eq 'strict_basic') {
+    return +{
+      valid => $self->result,
+      $self->result
+        ? ($self->annotation_count ? (annotations => [ map _map_uris($_->TO_JSON), $self->annotations ]) : ())
+        : (errors => [ map _map_uris($_->TO_JSON), $self->errors ]),
     };
   }
   if ($style eq 'terse') {
@@ -132,6 +141,17 @@ sub TO_JSON {
   $self->format($self->output_format);
 }
 
+# turns the json pointers in instance_location, keyword_location  into a URI fragments,
+# for strict draft-201909 adherence
+sub _map_uris {
+  my $data = shift;
+  return +{
+    $data->%*,
+    map +($_ => Mojo::URL->new->fragment($data->{$_})->to_string),
+      qw(instanceLocation keywordLocation),
+  };
+}
+
 1;
 __END__
 
@@ -178,7 +198,22 @@ Returns an array of L<JSON::Schema::Draft201909::Annotation> objects.
 
 =head2 output_format
 
-One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
+=for stopwords subschemas
+
+One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
+
+=for :list
+* C<flag> returns just the result of the evaluation: either C<{"valid": true}> or C<{"valid": false}>.
+* C<basic> adds the list of C<errors> or C<annotations> to the boolean evaluation result.
+C<instance_location> and C<keyword_location> are always included, as json pointers, describing the
+path to the evaluation location; C<absolute_keyword_location> is added (as a resolved URI) whenever
+it is known and different from C<keyword_location>.
+* C<strict_basic> is like C<basic> but follows the draft-2019-09 specification precisely, including
+replicating an error fixed in the next draft, in that C<instance_location> and C<keyword_location>
+values are provided as fragment-only URI references rather than json pointers.
+* C<terse> is not described in any specification; it is like C<basic>, but omits some redundant
+errors (for example the one for the C<allOf> keyword that is added when any of the subschemas under
+C<allOf> failed evaluation).
 
 =head1 METHODS
 
@@ -189,7 +224,7 @@ One of: C<flag>, C<basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basi
 Returns a data structure suitable for serialization; requires one argument specifying the output
 format to use, which corresponds to the formats documented in
 L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4>. The only supported
-formats at this time are C<flag>, C<basic> and C<terse>.
+formats at this time are C<flag>, C<basic>, C<strict_basic>, and C<terse>.
 
 =head2 TO_JSON
 
