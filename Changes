@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.021     2021-02-06 18:50:42Z
           - [Pp]roperties$ keywords now always produce annotations when
             evaluating successfully, even if there were no matching properties
           - added the "strict_basic" output format, for strict (but incorrect)
