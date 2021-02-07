@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.022     2021-02-07 17:33:14Z
           - fix erroneous use of postfix dereference (closes #42).
 
 0.021     2021-02-06 18:50:42Z
