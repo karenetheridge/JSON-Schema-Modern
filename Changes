@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - fix erroneous use of postfix dereference (closes #42).
 
 0.021     2021-02-06 18:50:42Z
           - [Pp]roperties$ keywords now always produce annotations when

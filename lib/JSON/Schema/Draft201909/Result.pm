@@ -146,7 +146,7 @@ sub TO_JSON {
 sub _map_uris {
   my $data = shift;
   return +{
-    $data->%*,
+    %$data,
     map +($_ => Mojo::URL->new->fragment($data->{$_})->to_string),
       qw(instanceLocation keywordLocation),
   };
