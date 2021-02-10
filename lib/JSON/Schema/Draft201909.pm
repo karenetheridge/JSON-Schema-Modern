@@ -180,10 +180,7 @@ sub traverse {
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
-    # for now, this is hardcoded, but in the future the dialect will start off just with the Core
-    # vocabulary and then fetch and parse the document to determine the actual vocabularies from the
-    # '$vocabulary' keyword at its root.
-    dialect => JSON::Schema::Draft201909::Dialect->default_dialect,
+    dialect => JSON::Schema::Draft201909::Dialect->dialect_for_schema($schema_reference),
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},

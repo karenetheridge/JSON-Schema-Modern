@@ -39,6 +39,15 @@ has uri => (
   required => 1,
 );
 
+sub dialect_for_schema {
+  my ($class, $schema) = @_;
+
+  # for now, this is hardcoded, but in the future the dialect will start off just with the Core
+  # vocabulary and then fetch and parse the document to determine the actual vocabularies from the
+  # '$vocabulary' keyword at its root.
+  return $class->default_dialect;
+}
+
 sub default_dialect {
   my $class = shift;
 
@@ -93,6 +102,11 @@ The URI of the metaschema which defines this dialect. Required.
 =head1 METHODS
 
 =for Pod::Coverage post_evaluate
+
+=head2 dialect_for_schema
+
+A class method that examines the provided schema (boolean or hashref, i.e. corresponding to a JSON
+boolean or object) and returns an instance representing the dialect used in the schema.
 
 =head2 default_dialect
 
