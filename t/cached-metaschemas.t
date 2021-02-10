@@ -11,6 +11,8 @@ use Test::Deep;
 use JSON::Schema::Draft201909;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 
+use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
+
 use lib 't/lib';
 use Helper;
 
@@ -18,24 +20,24 @@ subtest 'load cached metaschema' => sub {
   my $js = JSON::Schema::Draft201909->new;
 
   cmp_deeply(
-    $js->_get_resource('https://json-schema.org/draft/2019-09/schema'),
+    $js->_get_resource(METASCHEMA),
     undef,
     'this resource is not yet known',
   );
 
   cmp_deeply(
-    $js->_get_or_load_resource('https://json-schema.org/draft/2019-09/schema'),
+    $js->_get_or_load_resource(METASCHEMA),
     my $resource = +{
-      canonical_uri => str('https://json-schema.org/draft/2019-09/schema'),
+      canonical_uri => str(METASCHEMA),
       path => '',
       document => all(
         isa('JSON::Schema::Draft201909::Document'),
         methods(
           schema => superhashof({
-            '$schema' => str('https://json-schema.org/draft/2019-09/schema'),
-            '$id' => 'https://json-schema.org/draft/2019-09/schema',
+            '$schema' => str(METASCHEMA),
+            '$id' => METASCHEMA,
           }),
-          canonical_uri => str('https://json-schema.org/draft/2019-09/schema'),
+          canonical_uri => str(METASCHEMA),
           resource_index => ignore,
         ),
       ),
@@ -44,7 +46,7 @@ subtest 'load cached metaschema' => sub {
   );
 
   cmp_deeply(
-    $js->_get_resource('https://json-schema.org/draft/2019-09/schema'),
+    $js->_get_resource(METASCHEMA),
     $resource,
     'this resource is now in the resource index',
   );
@@ -53,7 +55,7 @@ subtest 'load cached metaschema' => sub {
 subtest 'resource collision with cached metaschema' => sub {
   my $js = JSON::Schema::Draft201909->new;
   cmp_deeply(
-    $js->evaluate(1, { '$id' => 'https://json-schema.org/draft/2019-09/schema' })->TO_JSON,
+    $js->evaluate(1, { '$id' => METASCHEMA })->TO_JSON,
     {
       valid => false,
       errors => [
