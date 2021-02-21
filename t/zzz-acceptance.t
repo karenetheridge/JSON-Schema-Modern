@@ -19,7 +19,7 @@ BEGIN {
     if not -d '.git' and not grep $ENV{$_}, @variables;
 }
 
-use Test::Warnings 0.027 ':fail_on_warning';
+use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
 use Test::JSON::Schema::Acceptance 1.000;
 use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };

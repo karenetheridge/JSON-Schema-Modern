@@ -8,7 +8,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
-use Test::Warnings 0.027 ':fail_on_warning';
+use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
 use Test::JSON::Schema::Acceptance 0.993;
 use Test::Memory::Cycle;
 use JSON::Schema::Draft201909;
