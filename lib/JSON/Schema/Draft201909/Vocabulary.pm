@@ -4,7 +4,7 @@ package JSON::Schema::Draft201909::Vocabulary;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Base role for JSON Schema vocabulary classes
 
-our $VERSION = '0.023';
+our $VERSION = '0.024';
 
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
