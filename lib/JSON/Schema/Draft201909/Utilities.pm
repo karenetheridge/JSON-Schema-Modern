@@ -252,7 +252,7 @@ sub assert_uri_ref {
     or $ref =~ /#$/                           # empty fragment
     or $ref =~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
     or $ref =~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
-  E($state, '%s value is not a valid schema reference', $state->{keyword});
+  E($state, '%s value is not a valid URI reference', $state->{keyword});
 }
 
 # produces an annotation whose value is the same as that of the current keyword
