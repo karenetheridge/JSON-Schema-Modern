@@ -10,7 +10,7 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use JSON::Schema::Draft201909::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_ref);
+use JSON::Schema::Draft201909::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -132,7 +132,7 @@ sub _eval_keyword_recursiveAnchor {
 sub _traverse_keyword_ref {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'string');
-  return if not assert_uri_ref($state, $schema);
+  return if not assert_uri_reference($state, $schema);
 }
 
 sub _eval_keyword_ref {
@@ -157,7 +157,7 @@ sub _eval_keyword_ref {
 sub _traverse_keyword_recursiveRef {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'string');
-  return if not assert_uri_ref($state, $schema);
+  return if not assert_uri_reference($state, $schema);
 }
 
 sub _eval_keyword_recursiveRef {
