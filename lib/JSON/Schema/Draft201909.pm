@@ -163,6 +163,18 @@ sub evaluate_json_string {
   return $self->evaluate($data, $schema, $config_override);
 }
 
+
+# +ponderings, re dialects.
+# +
+# +the call to construct the dialect in traverse() should be moved off into the dialect object.
+# +it can inspect $schema and if exists $schema->{'$schema'} do one thing, or do the other thing.
+# +Dialect should have a versioned and nonversioned copy (subclassed), so we can support multiple versions
+# +i.e. return a Dialect::Draft201909 or Dialect::Draft202012.
+# +
+# +Vocabulary::Draft201919::Applicator can subclass Vocabulary::Draft202912::Applicator *and* Vocabulary::Draft202912::Unevaluated.
+# +
+# +should also split Error and Annotation into versions -- so we can support 'basic' vs 'strictbasic' formats for 201919.
+
 # this is called whenever we need to walk a document for something.
 # for now it is just called when a ::Document object is created, to identify
 # $id and $anchor keywords within.
@@ -180,7 +192,11 @@ sub traverse {
     canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last traversed $ref
     errors => [],
-    dialect => JSON::Schema::Draft201909::Dialect->dialect_for_schema($schema_reference),
+
+    # XXX if exists $schema->{'$schema'}, start with Dialect containing Core only.
+    # otherwise, use default dialect as today.
+    dialect => JSON::Schema::Draft201909::Dialect->initial_dialect($schema_reference),
+
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
@@ -231,6 +247,10 @@ sub evaluate {
       # TODO: resolve $uri against base_uri
       ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($schema_reference);
     }
+
+    # hey, we called traverse from Document::BUILD, but here we are not having a document yet --
+    # is this a circular ref?
+    # I need to figure out some prereqs for each phase!
     else {
       $document = $self->add_schema($state->{canonical_schema_uri}, $schema_reference);
       ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);

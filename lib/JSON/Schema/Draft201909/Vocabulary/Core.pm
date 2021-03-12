@@ -75,6 +75,14 @@ sub _traverse_keyword_schema {
 
   return E($state, 'custom $schema references are not yet supported')
     if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
+
+  # now we examine the contents of this keyword to swap out our dialect object.
+  # my ($metaschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($schema->{'$schema'});
+  # at this point, the document has already been traversed and syntax validated
+  # which means we should now be able to extract which vocabularies it is using.
+  # this is a simple matter of getting the $vocabulary uris and required flags out of the schema.
+  # $state->{dialect} = ...
+  #
 }
 
 # we do nothing with $schema yet at evaluation time. In the future, at traversal time we will fetch
@@ -84,6 +92,9 @@ sub _traverse_keyword_schema {
 # If no $schema is provided at the top level, we will use the default dialect defined by the
 # specification metaschema (all six vocabularies).
 # At evaluation time we simply swap out the dialect instance in $state.
+
+# !!! what if we change $schemas midway inside a document (where there is an $id)?
+# we will want to store this in the resource index, I think? or is that a waste?
 
 sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;

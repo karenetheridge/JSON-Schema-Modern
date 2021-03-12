@@ -21,6 +21,11 @@ use Carp 'carp';
 use JSON::Schema::Draft201909::Utilities 'canonical_schema_uri';
 use namespace::clean;
 
+# XXX this needs to be a hashref to bools, as in the $vocabulary structure.
+# but we also need an ordering - core is always first, and also consistency for testing.
+
+# the bools are contained in the vocab object itself on the 'required' attribute.
+
 has vocabularies => (
   is => 'bare',
   isa => ArrayRef[ConsumerOf['JSON::Schema::Draft201909::Vocabulary']],
@@ -39,13 +44,30 @@ has uri => (
   required => 1,
 );
 
-sub dialect_for_schema {
+sub initial_dialect {
   my ($class, $schema) = @_;
 
-  # for now, this is hardcoded, but in the future the dialect will start off just with the Core
-  # vocabulary and then fetch and parse the document to determine the actual vocabularies from the
-  # '$vocabulary' keyword at its root.
-  return $class->default_dialect;
+  if (exists $schema->{'$schema'}) {
+    # a $schema keyword exists at the root of this schema. Start out with just the Core vocabulary,
+    # and when we traverse the schema and examine the $schema keyword, we will fetch the document
+    # referenced by its URI and determine which vocabularies are in use.
+    return $class->new(
+      vocabularies => [
+        use_module('JSON::Schema::Draft201909::Vocabulary::Core') ->new(required => 1),
+      ],
+      uri => 'https://json-schema.org/draft/2019-09/schema',
+    );
+  }
+  else {
+    return $class->default_dialect;
+  }
+}
+
+sub dialect_from_schema {
+  my ($class, $metaschema) = @_;
+
+
+
 }
 
 sub default_dialect {
