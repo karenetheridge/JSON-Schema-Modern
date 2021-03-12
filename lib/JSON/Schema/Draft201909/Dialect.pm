@@ -18,7 +18,7 @@ use Types::Standard 1.010002 qw(ArrayRef ConsumerOf Str);
 use Mojo::URL;
 use Module::Runtime 'use_module';
 use Carp 'carp';
-use JSON::Schema::Draft201909::Utilities 'canonical_schema_uri';
+use JSON::Schema::Draft201909::Utilities qw(is_type canonical_schema_uri);
 use namespace::clean;
 
 # XXX this needs to be a hashref to bools, as in the $vocabulary structure.
@@ -47,7 +47,7 @@ has uri => (
 sub initial_dialect {
   my ($class, $schema) = @_;
 
-  if (exists $schema->{'$schema'}) {
+  if (is_type('object', $schema) and exists $schema->{'$schema'}) {
     # a $schema keyword exists at the root of this schema. Start out with just the Core vocabulary,
     # and when we traverse the schema and examine the $schema keyword, we will fetch the document
     # referenced by its URI and determine which vocabularies are in use.
