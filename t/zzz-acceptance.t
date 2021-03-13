@@ -159,10 +159,8 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.003
-# with commit 6505944d38c414039cd8f27e3312b9e3831a0a16 (2.0.0-299-g6505944)
-# from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
-# specification version: draft2019-09
+# Results using Test::JSON::Schema::Acceptance 1.004
+# using custom test directory: /Volumes/amaretto/Users/ether/git/JSON-Schema-Test-Suite/tests/draft2019-09
 # optional tests included: yes
 #
 # filename                           pass  todo-fail  fail
@@ -183,7 +181,7 @@ __END__
 # enum.json                            33          0     0
 # exclusiveMaximum.json                 4          0     0
 # exclusiveMinimum.json                 4          0     0
-# format.json                         114          0     0
+# format.json                         133          0     0
 # id.json                              13          0     0
 # if-then-else.json                    26          0     0
 # infinite-loop-detection.json          2          0     0
@@ -219,4 +217,4 @@ __END__
 # optional/non-bmp-regex.json          12          0     0
 # optional/refOfUnknownKeyword.json     4          0     0
 # --------------------------------------------------------
-# TOTAL                              1007         17     0
+# TOTAL                              1026         17     0
