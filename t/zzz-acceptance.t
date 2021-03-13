@@ -20,7 +20,7 @@ BEGIN {
 }
 
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 1.000;
+use Test::JSON::Schema::Acceptance 1.004;
 use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
@@ -33,10 +33,11 @@ note '';
 my $accepter = Test::JSON::Schema::Acceptance->new(
   $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (specification => 'draft2019-09'),
   include_optional => 1,
+  skip_dir => 'optional/format',
   verbose => 1,
 );
 
-my %options = (validate_formats => 1);
+my %options = (validate_formats => 0);
 my $js = JSON::Schema::Draft201909->new(%options);
 my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
 
@@ -85,31 +86,8 @@ $accepter->acceptance(
         'optional/content.json',                    # removed in TJSA 1.003
         'optional/ecmascript-regex.json',           # TODO: see issue #27
         'optional/float-overflow.json',             # see slack logs re multipleOf algo
-        'optional/format/iri-reference.json',       # not yet implemented
-        'optional/format/uri-template.json',        # not yet implemented
-        $ENV{AUTOMATED_TESTING} ? (                 # these all depend on optional prereqs
-        qw(
-          optional/format/date-time.json
-          optional/format/date.json
-          optional/format/time.json
-          optional/format/email.json
-          optional/format/hostname.json
-          optional/format/idn-hostname.json
-          optional/format/idn-email.json
-        ) ) : (),
       ] },
     # various edge cases that are difficult to accomodate
-    { file => 'optional/format/date-time.json', group_description => 'validation of date-time strings',
-      test_description => 'case-insensitive T and Z' },
-    { file => 'optional/format/date.json', group_description => 'validation of date strings',
-      test_description => 'only RFC3339 not all of ISO 8601 are valid' },
-    { file => 'optional/format/iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
-      test_description => 'an invalid IRI based on IPv6' },
-    { file => 'optional/format/idn-hostname.json',
-      group_description => 'validation of internationalized host names' }, # IDN decoder, Data::Validate::Domain both have issues
-    { file => 'optional/format/uri.json',
-      test_description => 'validation of URIs',
-      test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate
     $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
       { file => 'const.json',
         group_description => 'float and integers are equal up to 64-bit representation limits',
@@ -163,6 +141,7 @@ memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator o
 # 2020-10-16  1.001  Looks like you failed 42 tests of 1221.
 # 2020-11-24  1.002  Looks like you failed 46 tests of 1233.
 # 2020-12-04  1.003  Looks like you failed 40 tests of 1265.
+# 2021-03-17  1.004  Looks like you failed 17 tests of 1026. <-- manually edited to remove optional/format
 
 
 END {
@@ -186,77 +165,58 @@ __END__
 # specification version: draft2019-09
 # optional tests included: yes
 #
-# filename                                    pass  todo-fail  fail
-# -----------------------------------------------------------------
-# additionalItems.json                          13          0     0
-# additionalProperties.json                     15          0     0
-# allOf.json                                    30          0     0
-# anchor.json                                    6          0     0
-# anyOf.json                                    18          0     0
-# boolean_schema.json                           18          0     0
-# const.json                                    50          0     0
-# contains.json                                 18          0     0
-# content.json                                  18          0     0
-# default.json                                   4          0     0
-# defs.json                                      2          0     0
-# dependentRequired.json                        20          0     0
-# dependentSchemas.json                         13          0     0
-# enum.json                                     33          0     0
-# exclusiveMaximum.json                          4          0     0
-# exclusiveMinimum.json                          4          0     0
-# format.json                                  114          0     0
-# id.json                                       13          0     0
-# if-then-else.json                             26          0     0
-# infinite-loop-detection.json                   2          0     0
-# items.json                                    26          0     0
-# maxContains.json                              10          0     0
-# maxItems.json                                  4          0     0
-# maxLength.json                                 5          0     0
-# maxProperties.json                             8          0     0
-# maximum.json                                   8          0     0
-# minContains.json                              23          0     0
-# minItems.json                                  4          0     0
-# minLength.json                                 5          0     0
-# minProperties.json                             6          0     0
-# minimum.json                                  11          0     0
-# multipleOf.json                                9          0     0
-# not.json                                      12          0     0
-# oneOf.json                                    27          0     0
-# pattern.json                                   9          0     0
-# patternProperties.json                        22          0     0
-# properties.json                               20          0     0
-# propertyNames.json                            10          0     0
-# recursiveRef.json                             32          0     0
-# ref.json                                      34          0     0
-# refRemote.json                                15          0     0
-# required.json                                  9          0     0
-# type.json                                     80          0     0
-# unevaluatedItems.json                         33          0     0
-# unevaluatedProperties.json                    51          0     0
-# uniqueItems.json                              64          0     0
-# optional/bignum.json                           2          7     0
-# optional/ecmascript-regex.json                31          9     0
-# optional/float-overflow.json                   0          1     0
-# optional/non-bmp-regex.json                   12          0     0
-# optional/refOfUnknownKeyword.json              4          0     0
-# optional/format/date-time.json                10          1     0
-# optional/format/date.json                      4          1     0
-# optional/format/duration.json                 17          0     0
-# optional/format/email.json                     9          0     0
-# optional/format/hostname.json                 12          0     0
-# optional/format/idn-email.json                 4          0     0
-# optional/format/idn-hostname.json             29         16     0
-# optional/format/ipv4.json                      6          0     0
-# optional/format/ipv6.json                     29          0     0
-# optional/format/iri-reference.json             5          2     0
-# optional/format/iri.json                       8          1     0
-# optional/format/json-pointer.json             32          0     0
-# optional/format/regex.json                     2          0     0
-# optional/format/relative-json-pointer.json     6          0     0
-# optional/format/time.json                      3          0     0
-# optional/format/uri-reference.json             7          0     0
-# optional/format/uri-template.json              3          1     0
-# optional/format/uri.json                      19          1     0
-# optional/format/uuid.json                     12          0     0
-# -----------------------------------------------------------------
-# TOTAL                                       1224         40     0
+# filename                           pass  todo-fail  fail
+# --------------------------------------------------------
+# additionalItems.json                 13          0     0
+# additionalProperties.json            15          0     0
+# allOf.json                           30          0     0
+# anchor.json                           6          0     0
+# anyOf.json                           18          0     0
+# boolean_schema.json                  18          0     0
+# const.json                           50          0     0
+# contains.json                        18          0     0
+# content.json                         18          0     0
+# default.json                          4          0     0
+# defs.json                             2          0     0
+# dependentRequired.json               20          0     0
+# dependentSchemas.json                13          0     0
+# enum.json                            33          0     0
+# exclusiveMaximum.json                 4          0     0
+# exclusiveMinimum.json                 4          0     0
+# format.json                         114          0     0
+# id.json                              13          0     0
+# if-then-else.json                    26          0     0
+# infinite-loop-detection.json          2          0     0
+# items.json                           26          0     0
+# maxContains.json                     10          0     0
+# maxItems.json                         4          0     0
+# maxLength.json                        5          0     0
+# maxProperties.json                    8          0     0
+# maximum.json                          8          0     0
+# minContains.json                     23          0     0
+# minItems.json                         4          0     0
+# minLength.json                        5          0     0
+# minProperties.json                    6          0     0
+# minimum.json                         11          0     0
+# multipleOf.json                       9          0     0
+# not.json                             12          0     0
+# oneOf.json                           27          0     0
+# pattern.json                          9          0     0
+# patternProperties.json               22          0     0
+# properties.json                      20          0     0
+# propertyNames.json                   10          0     0
+# recursiveRef.json                    32          0     0
+# ref.json                             34          0     0
+# refRemote.json                       15          0     0
+# required.json                         9          0     0
+# type.json                            80          0     0
+# unevaluatedItems.json                33          0     0
+# unevaluatedProperties.json           51          0     0
+# uniqueItems.json                     64          0     0
+# optional/bignum.json                  2          7     0
+# optional/ecmascript-regex.json       31          9     0
+# optional/float-overflow.json          0          1     0
+# optional/non-bmp-regex.json          12          0     0
+# optional/refOfUnknownKeyword.json     4          0     0
+# --------------------------------------------------------
+# TOTAL                              1007         17     0
