@@ -136,10 +136,8 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.003
-# with commit 6505944d38c414039cd8f27e3312b9e3831a0a16 (2.0.0-299-g6505944)
-# from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
-# specification version: draft2019-09
+# Results using Test::JSON::Schema::Acceptance 1.004
+# using custom test directory: /Volumes/amaretto/Users/ether/git/JSON-Schema-Test-Suite/tests/draft2019-09/optional/format
 # optional tests included: yes
 #
 # filename                    pass  todo-fail  fail
@@ -157,11 +155,11 @@ __END__
 # iri.json                       8          1     0
 # json-pointer.json             32          0     0
 # regex.json                     2          0     0
-# relative-json-pointer.json     6          0     0
+# relative-json-pointer.json     9          0     0
 # time.json                      3          0     0
 # uri-reference.json             7          0     0
 # uri-template.json              3          1     0
 # uri.json                      19          1     0
 # uuid.json                     12          0     0
 # -------------------------------------------------
-# TOTAL                        217         23     0
+# TOTAL                        220         23     0
