@@ -75,14 +75,14 @@ subtest 'simple validation' => sub {
   );
 
   $js = JSON::Schema::Draft201909->new(collect_annotations => 1);
-  ok($js->validate_formats, 'format_validation defaults to true');
+  ok(!$js->validate_formats, 'format_validation defaults to false');
   cmp_deeply(
-    $js->evaluate('123', { format => 'uuid' }, { validate_formats => 0 })->TO_JSON,
-    $annotation_result,
-    'format validation can be turned off in evaluate()',
+    $js->evaluate('123', { format => 'uuid' }, { validate_formats => 1 })->TO_JSON,
+    $validation_result,
+    'format validation can be turned on in evaluate()',
   );
 
-  ok($js->validate_formats, '...but the value is still true on the object');
+  ok(!$js->validate_formats, '...but the value is still false on the object');
 };
 
 subtest 'unknown format attribute' => sub {
