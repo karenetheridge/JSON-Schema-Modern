@@ -249,7 +249,7 @@ sub assert_uri_reference {
   # for now, we just check for fragment validity
   my $ref = $schema->{$state->{keyword}};
   return 1 if $ref !~ /#/
-    or $ref =~ /#$/                           # empty fragment
+    or $ref =~ m{#$}                          # empty fragment
     or $ref =~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
     or $ref =~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
   E($state, '%s value is not a valid URI reference', $state->{keyword});
