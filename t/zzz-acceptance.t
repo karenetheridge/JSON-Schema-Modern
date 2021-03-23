@@ -142,6 +142,7 @@ memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator o
 # 2020-11-24  1.002  Looks like you failed 46 tests of 1233.
 # 2020-12-04  1.003  Looks like you failed 40 tests of 1265.
 # 2021-03-17  1.004  Looks like you failed 17 tests of 1026. <-- manually edited to remove optional/format
+# 2021-03-23  1.005  Looks like you failed 17 tests of 1045.
 
 
 END {
@@ -159,8 +160,10 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.004
-# using custom test directory: /Volumes/amaretto/Users/ether/git/JSON-Schema-Test-Suite/tests/draft2019-09
+# Results using Test::JSON::Schema::Acceptance 1.005
+# with commit cd73775f22d4cae64587486c0ee7efca9131643c (2.0.0-311-gcd73775)
+# from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+# specification version: draft2019-09
 # optional tests included: yes
 #
 # filename                           pass  todo-fail  fail
