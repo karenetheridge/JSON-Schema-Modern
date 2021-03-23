@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
+{{$NEXT}}
+
 0.024     2021-03-23 21:53:42Z
           - the default value for "validate_formats" is once again false (it
             became true in v0.020), to properly conform to the specification
