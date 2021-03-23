@@ -662,7 +662,7 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
 =head2 traverse
 
   $result = $js->traverse($schema_data);
-  $result = $js->traverse($schema_data, { canonical_schema_uri => 'http://foo.com' });
+  $result = $js->traverse($schema_data, { canonical_schema_uri => 'http://example.com' });
 
 Traverses the provided schema data without evaluating it against any instance data. Returns the
 internal state object accumulated during the traversal, including any identifiers found therein, and
