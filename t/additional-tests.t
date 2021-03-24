@@ -38,6 +38,16 @@ $accepter->acceptance(
         and ($result xor $result_short)
         and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
 
+    # if any errors contain an exception, generate a warning so we can be sure
+    # to count that as a failure (an exception would be caught and perhaps TODO'd).
+    # (This might change if tests are added that are expected to produce exceptions.)
+    foreach my $r ($result, ($ENV{NO_SHORT_CIRCUIT} ? () : $result_short)) {
+      map warn('evaluation generated an exception: '.$encoder->encode($_)),
+        grep $_->{error} =~ /^EXCEPTION/
+            && $_->{error} !~ /but short_circuit is enabled/,         # unevaluated*
+          @{$r->TO_JSON->{errors}};
+    }
+
     $result;
   },
   @ARGV ? (tests => { file => \@ARGV }) : (),
