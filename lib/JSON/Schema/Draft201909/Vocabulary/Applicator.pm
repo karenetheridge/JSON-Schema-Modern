@@ -303,10 +303,10 @@ sub _traverse_keyword_unevaluatedItems {
 sub _eval_keyword_unevaluatedItems {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedItems" keyword present, but annotation collection is disabled')
+  abort($state, 'EXCEPTION: "unevaluatedItems" keyword present, but annotation collection is disabled')
     if not $state->{collect_annotations};
 
-  abort($state, '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
+  abort($state, 'EXCEPTION: "unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable')
     if $state->{short_circuit};
 
   return 1 if not is_type('array', $data);
@@ -558,10 +558,10 @@ sub _traverse_keyword_unevaluatedProperties {
 sub _eval_keyword_unevaluatedProperties {
   my ($self, $data, $schema, $state) = @_;
 
-  abort($state, '"unevaluatedProperties" keyword present, but annotation collection is disabled')
+  abort($state, 'EXCEPTION: "unevaluatedProperties" keyword present, but annotation collection is disabled')
     if not $state->{collect_annotations};
 
-  abort($state, '"unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable')
+  abort($state, 'EXCEPTION: "unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable')
     if $state->{short_circuit};
 
   return 1 if not is_type('object', $data);

@@ -140,7 +140,7 @@ sub _eval_keyword_ref {
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{canonical_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-  abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
+  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
 
   return $self->eval($data, $subschema,
     +{
@@ -165,13 +165,13 @@ sub _eval_keyword_recursiveRef {
 
   my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{canonical_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($target_uri);
-  abort($state, 'unable to find resource %s', $target_uri) if not defined $subschema;
+  abort($state, 'EXCEPTION: unable to find resource %s', $target_uri) if not defined $subschema;
 
   if (is_type('boolean', $subschema->{'$recursiveAnchor'}) and $subschema->{'$recursiveAnchor'}) {
     my $uri = Mojo::URL->new($schema->{'$recursiveRef'})
       ->to_abs($state->{recursive_anchor_uri} // $state->{canonical_schema_uri});
     ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-    abort($state, 'unable to find resource %s', $uri) if not defined $subschema;
+    abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
   }
 
   return $self->eval($data, $subschema,

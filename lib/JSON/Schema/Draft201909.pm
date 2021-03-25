@@ -250,7 +250,8 @@ sub evaluate {
       $document_path = '';
     }
 
-    abort($state, 'unable to find resource %s', $schema_reference) if not defined $schema;
+    abort($state, 'EXCEPTION: unable to find resource %s', $schema_reference)
+      if not defined $schema;
 
     $state = +{
       %{$document->evaluation_configs},
@@ -306,7 +307,7 @@ sub _traverse {
 
   delete $state->{keyword};
 
-  return E($state, 'maximum traversal depth exceeded')
+  return E($state, 'EXCEPTION: maximum traversal depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
 
   my $schema_type = get_type($schema);
@@ -337,14 +338,14 @@ sub _eval {
   my @parent_annotations = @{$state->{annotations}};
   delete $state->{keyword};
 
-  abort($state, 'maximum evaluation depth exceeded')
+  abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
 
   # find all schema locations in effect at this data path + canonical_uri combination
   # if any of them are absolute prefix of this schema location, we are in a loop.
   my $canonical_uri = canonical_schema_uri($state);
   my $schema_location = $state->{traversed_schema_path}.$state->{schema_path};
-  abort($state, 'infinite loop detected (same location evaluated twice)')
+  abort($state, 'EXCEPTION: infinite loop detected (same location evaluated twice)')
     if grep substr($schema_location, 0, length) eq $_,
       keys %{$state->{seen}{$state->{data_path}}{$canonical_uri}};
   $state->{seen}{$state->{data_path}}{$canonical_uri}{$schema_location}++;

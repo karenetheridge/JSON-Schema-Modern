@@ -226,7 +226,7 @@ sub A {
 # errors (consider if we were in the middle of evaluating a "not" or "if")
 sub abort {
   my ($state, $error_string, @args) = @_;
-  E($state, 'EXCEPTION: '.$error_string, @args);
+  E($state, $error_string, @args);
   die pop @{$state->{errors}};
 }
 
