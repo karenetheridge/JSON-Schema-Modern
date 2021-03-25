@@ -113,7 +113,7 @@ sub _eval_keyword_not {
 
   return 1 if not $self->eval($data, $schema->{not},
     +{ %$state, schema_path => $state->{schema_path}.'/not',
-      short_circuit => (!$state->{short_circuit} || $state->{collect_annotations} ? 0 : 1),
+      short_circuit => $state->{short_circuit} || !$state->{collect_annotations},
       errors => [], annotations => [ @{$state->{annotations}} ] });
 
   return E($state, 'subschema is valid');
