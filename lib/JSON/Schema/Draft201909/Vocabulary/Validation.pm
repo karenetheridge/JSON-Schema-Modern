@@ -183,7 +183,6 @@ sub _eval_keyword_maxItems {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('array', $data);
-
   return 1 if @$data <= $schema->{maxItems};
   return E($state, 'more than %d item%s', $schema->{maxItems}, $schema->{maxItems} > 1 ? 's' : '');
 }

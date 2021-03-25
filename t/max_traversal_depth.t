@@ -15,6 +15,7 @@ use lib 't/lib';
 use Helper;
 
 my $js = JSON::Schema::Draft201909->new(max_traversal_depth => 6);
+
 cmp_deeply(
   $js->evaluate(
     [ [ [ [ [ 1 ] ] ] ] ],
