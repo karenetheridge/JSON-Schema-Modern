@@ -767,7 +767,7 @@ validation will always succeed):
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
-To date, missing components (some of which are optional, but still quite useful) include:
+To date, missing features (some of which are optional, but still quite useful) include:
 
 =for :list
 * loading schema documents from disk
