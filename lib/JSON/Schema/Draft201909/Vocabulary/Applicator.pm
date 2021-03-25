@@ -175,62 +175,77 @@ sub _eval_keyword_dependentSchemas {
 sub _traverse_keyword_items {
   my ($self, $schema, $state) = @_;
 
-  # Note: the metaschema says "items" has minItems:1 but the written spec omits this.
-  my $method = is_plain_arrayref($schema->{items}) ? 'traverse_array_schemas' : 'traverse_schema';
-  $self->$method($schema, $state);
+  # Note: this is valid for draft2019-09 only.
+  goto \&_traverse_keyword_prefixItems if is_plain_arrayref($schema->{items});
+  $self->traverse_schema($schema, $state);
 }
+
+# Note: the draft2019-09 metaschema says "items" has minItems:1 but the written spec omits this.
+# in draft2019-09, this is part of the 'items' keyword
+sub _traverse_keyword_prefixItems { shift->traverse_array_schemas(@_) }
 
 sub _traverse_keyword_additionalItems { shift->traverse_schema(@_) }
 
 sub _eval_keyword_items {
   my ($self, $data, $schema, $state) = @_;
 
+  # Note: this is valid for draft2019-09 only.
+  goto \&_eval_keyword_prefixItems if is_plain_arrayref($schema->{items});
+
   return 1 if not is_type('array', $data);
 
   my @orig_annotations = @{$state->{annotations}};
   my @new_annotations;
+  my $valid = 1;
 
-  if (not is_plain_arrayref($schema->{items})) {
-    my $valid = 1;
-    foreach my $idx (0 .. $#{$data}) {
-      my @annotations = @orig_annotations;
-      if (is_type('boolean', $schema->{items})) {
-        next if $schema->{items};
-        $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx }, 'item not permitted');
-      }
-      elsif ($self->eval($data->[$idx], $schema->{items},
-          +{ %$state, annotations => \@annotations,
-            data_path => $state->{data_path}.'/'.$idx,
-            schema_path => $state->{schema_path}.'/items' })) {
-        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
-        next;
-      }
-
-      $valid = 0;
-      last if $state->{short_circuit};
+  foreach my $idx (0 .. $#{$data}) {
+    my @annotations = @orig_annotations;
+    if (is_type('boolean', $schema->{items})) {
+      next if $schema->{items};
+      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx }, 'item not permitted');
+    }
+    elsif ($self->eval($data->[$idx], $schema->{items},
+        +{ %$state, annotations => \@annotations,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/items' })) {
+      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      next;
     }
 
-    return E($state, 'subschema is not valid against all items') if not $valid;
-    push @{$state->{annotations}}, @new_annotations;
-    return A($state, true);
+    $valid = 0;
+    last if $state->{short_circuit};
   }
 
+  return E($state, 'subschema is not valid against all items') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return A($state, true);
+}
+
+# in draft2019-09, this is part of the 'items' keyword
+sub _eval_keyword_prefixItems {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not is_type('array', $data);
+
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
   my $last_index = -1;
   my $valid = 1;
+
   foreach my $idx (0 .. $#{$data}) {
-    last if $idx > $#{$schema->{items}};
+    last if $idx > $#{$schema->{$state->{keyword}}};
     $last_index = $idx;
 
     my @annotations = @orig_annotations;
-    if (is_type('boolean', $schema->{items}[$idx])) {
-      next if $schema->{items}[$idx];
+    if (is_type('boolean', $schema->{$state->{keyword}}[$idx])) {
+      next if $schema->{$state->{keyword}}[$idx];
       $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx,
         _schema_path_suffix => $idx }, 'item not permitted');
     }
-    elsif ($self->eval($data->[$idx], $schema->{items}[$idx],
+    elsif ($self->eval($data->[$idx], $schema->{$state->{keyword}}[$idx],
         +{ %$state, annotations => \@annotations,
           data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/items/'.$idx })) {
+          schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx })) {
       push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
       next;
     }
