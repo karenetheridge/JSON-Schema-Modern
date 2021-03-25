@@ -47,7 +47,7 @@ sub _eval_keyword_allOf {
     }
   }
 
-  if (not @invalid) {
+  if (@invalid == 0) {
     push @{$state->{annotations}}, @new_annotations;
     return 1;
   }
