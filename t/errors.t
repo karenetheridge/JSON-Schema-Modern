@@ -714,7 +714,37 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
   );
 };
 
-subtest 'unresolvable $ref' => sub {
+subtest 'unresolvable $ref to a local resource' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$ref' => '#/$defs/myint',
+        '$defs' => {
+          myint => {
+            '$ref' => '#/$defs/does-not-exist',
+          },
+        },
+        anyOf => [ false ],
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref',
+          absoluteKeywordLocation => '#/$defs/myint/$ref',
+          error => 'EXCEPTION: unable to find resource #/$defs/does-not-exist',
+        },
+      ],
+    },
+    'error for a bad $ref reports the correct absolute location that was referred to',
+  );
+};
+
+subtest 'unresolvable $ref to a remote resource' => sub {
+  # new evaluator, with no resources remembered
   my $js = JSON::Schema::Draft201909->new;
 
   cmp_deeply(
