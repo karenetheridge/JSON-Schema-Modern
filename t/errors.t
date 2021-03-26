@@ -878,7 +878,7 @@ subtest 'bad regex in schema' => sub {
         my_pattern => 'foo',
         my_patternProperties => { foo => 1 },
       },
-      {
+      my $schema = {
         type => 'object',
         properties => {
           my_pattern => {
@@ -916,19 +916,13 @@ subtest 'bad regex in schema' => sub {
     'bad "pattern" and "patternProperties" regexes are properly noted in error',
   );
 
-  my $schema = {
-    type => 'object',
-    properties => {
-      my_runtime_pattern => {
-        type => 'string',
-        pattern => '\p{main::IsFoo}', # qr/$pattern/ will not find this error, but m/$pattern/ will
-      },
-    },
-  };
   cmp_deeply(
     $js->evaluate(
       { my_runtime_pattern => 'foo' },
-      $schema,
+      $schema = {
+        type => @{$schema}{type},
+        properties => +{ my_runtime_pattern => @{$schema->{properties}}{my_runtime_pattern} },
+      },
     )->TO_JSON,
     {
       valid => false,
