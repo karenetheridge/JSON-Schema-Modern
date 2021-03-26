@@ -165,6 +165,7 @@ __END__
 # from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 # specification version: draft2019-09
 # optional tests included: yes
+# skipping directory: optional/format
 #
 # filename                           pass  todo-fail  fail
 # --------------------------------------------------------
