@@ -643,7 +643,7 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
-allows (null, boolean, string, number, object, array).
+allows: null, boolean, string, number, object, array. (See L</TYPES> below.)
 
 The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
 L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
