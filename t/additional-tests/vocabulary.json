@@ -1,0 +1,32 @@
+[
+    {
+        "description": "invalid $vocabulary: need boolean values",
+        "schema": {
+            "$vocabulary": {
+                "https://foo.com": "not-bool"
+            }
+        },
+        "tests": [
+            {
+                "description": "an invalid $vocabulary value (value should be a boolean)",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "valid $vocabulary",
+        "schema": {
+            "$vocabulary": {
+                "https://foo.com": false
+            }
+        },
+        "tests": [
+            {
+                "description": "an valid $vocabulary value",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    }
+]
