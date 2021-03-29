@@ -37,6 +37,7 @@ our @EXPORT_OK = qw(
   assert_keyword_type
   assert_pattern
   assert_uri_reference
+  assert_uri
   annotate_self
   true
   false
@@ -263,6 +264,25 @@ sub assert_uri_reference {
   return 1;
 }
 
+sub assert_uri {
+  my ($state, $schema, $override) = @_;
+
+  my $string = $override // $schema->{$state->{keyword}};
+  my $uri = Mojo::URL->new($string);
+
+  return E($state, '"%s" is not a valid URI', $string)
+    # see also uri format sub
+    if fc($uri->to_unsafe_string) ne fc($string)
+      or $string =~ /[^[:ascii:]]/
+      or not $uri->is_abs
+      or $string =~ /#/
+        and $string !~ m{#$}                          # empty fragment
+        and $string !~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
+        and $string !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
+
+  return 1;
+}
+
 # produces an annotation whose value is the same as that of the current keyword
 sub annotate_self {
   my ($state, $schema) = @_;
@@ -284,6 +304,7 @@ __END__
 This class contains internal utilities to be used by L<JSON::Schema::Draft201909>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
-canonical_schema_uri E A abort assert_keyword_type assert_pattern assert_uri_reference annotate_self
+canonical_schema_uri E A abort assert_keyword_type assert_pattern assert_uri_reference assert_uri
+annotate_self
 
 =cut

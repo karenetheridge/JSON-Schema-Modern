@@ -10,7 +10,7 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use JSON::Schema::Draft201909::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference);
+use JSON::Schema::Draft201909::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference assert_uri);
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -69,6 +69,8 @@ sub _traverse_keyword_schema {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'string');
+
+  assert_uri($state, $schema);
 
   return E($state, '$schema can only appear at the schema resource root')
     if length($state->{schema_path});
@@ -193,6 +195,8 @@ sub _traverse_keyword_vocabulary {
   foreach my $property (sort keys %{$schema->{'$vocabulary'}}) {
     E($state, '$vocabulary/%s value is not a boolean', $property)
       if not is_type('boolean', $schema->{'$vocabulary'}{$property});
+
+    assert_uri($state, $schema, $property);
   }
 
   return E($state, '$vocabulary can only appear at the schema resource root')

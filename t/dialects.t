@@ -19,7 +19,7 @@ subtest '$vocabulary' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909->new->evaluate(
       1,
-      { '$vocabulary' => { 'foo' => 1 } },
+      { '$vocabulary' => { 'https://foo' => 1 } },
     )->TO_JSON,
     {
       valid => false,
@@ -27,7 +27,7 @@ subtest '$vocabulary' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$vocabulary',
-          error => '$vocabulary/foo value is not a boolean',
+          error => '$vocabulary/https://foo value is not a boolean',
         },
       ],
     },
@@ -37,7 +37,7 @@ subtest '$vocabulary' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909->new->evaluate(
       1,
-      { items => { '$vocabulary' => { 'foo' => true } } },
+      { items => { '$vocabulary' => { 'https://foo' => true } } },
     )->TO_JSON,
     {
       valid => false,
@@ -55,7 +55,7 @@ subtest '$vocabulary' => sub {
   cmp_deeply(
     JSON::Schema::Draft201909->new->evaluate(
       1,
-      { items => { '$id' => 'foobar', '$vocabulary' => { 'foo' => true } } },
+      { items => { '$id' => 'foobar', '$vocabulary' => { 'https://foo' => true } } },
     )->TO_JSON,
     {
       valid => false,

@@ -15,6 +15,52 @@
         ]
     },
     {
+        "description": "invalid $vocabulary: uri must not have unencoded characters",
+        "comment": "when properly encoded, this would be http://foo%5Ebar/path",
+        "schema": {
+            "$vocabulary": {
+                "http://foo^bar/path": false
+            }
+        },
+        "tests": [
+            {
+                "description": "unencoded characters in $vocabulary uri",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "invalid $vocabulary: non-ascii characters in uri",
+        "schema": {
+            "$vocabulary": {
+                "https://ಠ_ಠ.com": false
+            }
+        },
+        "tests": [
+            {
+                "description": "non-ascii characters in $vocabulary uri",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "invalid $vocabulary: missing scheme",
+        "schema": {
+            "$vocabulary": {
+                "foo.com": false
+            }
+        },
+        "tests": [
+            {
+                "description": "$vocabulary uri is missing a scheme",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "valid $vocabulary",
         "schema": {
             "$vocabulary": {
