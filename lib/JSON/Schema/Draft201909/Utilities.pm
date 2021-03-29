@@ -249,13 +249,18 @@ sub assert_pattern {
 sub assert_uri_reference {
   my ($state, $schema) = @_;
 
-  # for now, we just check for fragment validity
   my $ref = $schema->{$state->{keyword}};
-  return 1 if $ref !~ /#/
-    or $ref =~ m{#$}                          # empty fragment
-    or $ref =~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
-    or $ref =~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
-  E($state, '%s value is not a valid URI reference', $state->{keyword});
+
+  return E($state, '%s value is not a valid URI reference', $state->{keyword})
+    # see also uri-reference format sub
+    if fc(Mojo::URL->new($ref)->to_unsafe_string) ne fc($ref)
+      or $ref =~ /[^[:ascii:]]/
+      or $ref =~ /#/
+        and $ref !~ m{#$}                          # empty fragment
+        and $ref !~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
+        and $ref !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
+
+  return 1;
 }
 
 # produces an annotation whose value is the same as that of the current keyword

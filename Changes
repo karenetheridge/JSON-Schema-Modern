@@ -6,6 +6,7 @@ Revision history for JSON-Schema-Draft201909
             that only arise during runtime evaluation (such as URIs that
             map to missing schema documents, or inconsistent configuration
             values).
+          - more validity checks at traversal time of $ref values
 
 0.024     2021-03-23 21:53:42Z
           - the default value for "validate_formats" is once again false (it
