@@ -8,6 +8,8 @@ Revision history for JSON-Schema-Draft201909
             values).
           - more validity checks at traversal time of $ref, $schema,
             $vocabulary values
+          - update ipv4 format validation to reject leading zeroes in octets,
+            helping avoid a newly-discovered vulnerability in netmasks
 
 0.024     2021-03-23 21:53:42Z
           - the default value for "validate_formats" is once again false (it

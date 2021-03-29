@@ -45,7 +45,7 @@ sub keywords {
   };
   my $is_ipv4 = sub {
     my @o = split(/\./, $_[0], 5);
-    @o == 4 && (grep /^[0-9]{1,3}$/, @o) == 4 && (grep $_ < 256, @o) == 4;
+    @o == 4 && (grep /^(0|[1-9][0-9]{0,2})$/, @o) == 4 && (grep $_ < 256, @o) == 4;
   };
   # https://tools.ietf.org/html/rfc3339#appendix-A with some additions for the 2000 version
   # as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
