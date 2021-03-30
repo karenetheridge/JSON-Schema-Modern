@@ -83,16 +83,11 @@ $accepter->acceptance(
     { file => [
         'iri-reference.json',                       # not yet implemented
         'uri-template.json',                        # not yet implemented
-        $ENV{AUTOMATED_TESTING} ? (                 # these all depend on optional prereqs
-        qw(
-          date-time.json
-          date.json
-          time.json
-          email.json
-          hostname.json
-          idn-hostname.json
-          idn-email.json
-        ) ) : (),
+        # these all depend on optional prereqs
+        $ENV{AUTOMATED_TESTING} && !eval { +require 'Time::Moment'; 1 } ? qw(date-time.json date.json time.json) : (),
+        $ENV{AUTOMATED_TESTING} && !eval { +require 'Email::Address::XS'; Email::Address::XS->VERSION(1.01); 1 } ? qw(email.json idn-email.json) : (),
+        $ENV{AUTOMATED_TESTING} && !eval { +require 'Data::Validate::Domain'; 1 } ? 'hostname.json' : (),
+        $ENV{AUTOMATED_TESTING} && !eval { +require 'Net::IDN::Encode'; 1 } ? 'idn-hostname.json' : (),
       ] },
     # various edge cases that are difficult to accomodate
     { file => 'date-time.json', group_description => 'validation of date-time strings',
