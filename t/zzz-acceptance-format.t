@@ -109,11 +109,12 @@ memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator o
 
 
 # date        Test::JSON::Schema::Acceptance version
-#                    result count of running *all* tests (with no TODOs)
-# ----        -----  --------------------------------------
-# 2020-12-04  1.003  Looks like you failed 40 tests of 1265.
-# 2021-03-17  1.004  Looks like you failed 23 tests of 242. <-- manually edited to only include optional/format
-# 2021-03-23  1.005  Looks like you failed 23 tests of 245.
+#                    JSON::Schema::Draft201909 version
+#                           result count of running *all* tests (with no TODOs)
+# ----        -----  -----  --------------------------------------
+# 2020-12-04  1.003  0.018  Looks like you failed 40 tests of 1265.
+# 2021-03-17  1.004  0.024  Looks like you failed 23 tests of 242. <-- manually edited to only include optional/format
+# 2021-03-23  1.005  0.024  Looks like you failed 23 tests of 245.
 
 
 END {
