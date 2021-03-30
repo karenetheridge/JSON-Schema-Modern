@@ -1062,7 +1062,7 @@ subtest 'JSON pointer escaping' => sub {
             properties => {
               '{}' => {
                 patternProperties => {
-                  '(' => { minimum => 2 },  # this is a broken regex
+                  'a{' => { minimum => 2 }, # this is a broken regex
                 },
               },
             },
@@ -1076,14 +1076,14 @@ subtest 'JSON pointer escaping' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$defs/mydef/properties/{}/patternProperties/(',
-          error => re(qr{^\QUnmatched ( in regex; marked by <-- HERE in m/( <-- HERE\E}),
+          keywordLocation => '/$defs/mydef/properties/{}/patternProperties/a{',
+          error => re(qr/^Unescaped left brace in regex is (deprecated|illegal|passed through)/),
         },
       ],
     },
     # all the other _schema_path_suffix cases are tested in the earlier test case
     'use of _schema_path_suffix in a fatal error',
-  );
+  ) if "$]" >= 5.022;
 };
 
 subtest 'invalid $schema' => sub {

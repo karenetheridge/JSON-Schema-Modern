@@ -238,7 +238,10 @@ sub assert_keyword_type {
 
 sub assert_pattern {
   my ($state, $pattern) = @_;
-  try { qr/$pattern/; }
+  try {
+    local $SIG{__WARN__} = sub { die @_ };
+    qr/$pattern/;
+  }
   catch ($e) { return E($state, $e); };
   return 1;
 }

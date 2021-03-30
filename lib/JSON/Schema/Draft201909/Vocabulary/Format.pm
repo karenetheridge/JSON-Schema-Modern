@@ -99,7 +99,10 @@ sub keywords {
     uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}$/ },
     'json-pointer' => sub { (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])} },
     'relative-json-pointer' => sub { $_[0] =~ m{^(?:0|[1-9][0-9]*)(?:#$|$|/)} && $_[0] !~ m{~(?![01])} },
-    regex => sub { eval { qr/$_[0]/; 1 ? 1 : 0 } },
+    regex => sub {
+      local $SIG{__WARN__} = sub { die @_ };
+      eval { qr/$_[0]/; 1 ? 1 : 0 };
+    },
 
     # TODO: if the metaschema's $vocabulary entry is true, then we must die on
     # encountering these unimplemented formats.
