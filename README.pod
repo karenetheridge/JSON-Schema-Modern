@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.024
+version 0.025
 
 =head1 SYNOPSIS
 
@@ -126,7 +126,7 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
-allows (null, boolean, string, number, object, array).
+allows: null, boolean, string, number, object, array. (See L</TYPES> below.)
 
 The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
 L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
@@ -329,7 +329,7 @@ C<idn-hostname> requires L<Net::IDN::Encode>
 
 Until version 1.000 is released, this implementation is not fully specification-compliant.
 
-To date, missing components (some of which are optional, but still quite useful) include:
+To date, missing features (some of which are optional, but still quite useful) include:
 
 =over 4
 

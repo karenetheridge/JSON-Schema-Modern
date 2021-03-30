@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.025     2021-03-30 05:36:14Z
           - minor changes to error strings to distinguish between issues that
             can be determined from static inspection of schema(s), and those
             that only arise during runtime evaluation (such as URIs that
