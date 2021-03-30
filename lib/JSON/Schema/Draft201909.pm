@@ -800,7 +800,8 @@ SOURCES.>
 * L<https://json-schema.org>
 * L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://tools.ietf.org/html/rfc8259>
 * L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://tools.ietf.org/html/rfc3986>
-* L<Test::JSON::Schema::Acceptance>
+* L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
+* L<JSON::Schema::Tiny>: a more minimal implementation of the specification, with fewer dependencies
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
 
 =cut
