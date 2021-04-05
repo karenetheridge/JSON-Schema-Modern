@@ -9,6 +9,8 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use List::Util 1.50 'head';
+use Safe::Isa;
+use Feature::Compat::Try;
 use Config;
 
 BEGIN {
@@ -41,14 +43,19 @@ my %options = (validate_formats => 0);
 my $js = JSON::Schema::Draft201909->new(%options);
 my $js_short_circuit = JSON::Schema::Draft201909->new(%options, short_circuit => 1);
 
-my $add_resource = sub {
-  my ($uri, $schema) = @_;
-  $js->add_schema($uri => $schema);
-  $js_short_circuit->add_schema($uri => $schema);
-};
-
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
 $encoder->indent_length(2) if $encoder->can('indent_length');
+
+my $add_resource = sub {
+  my ($uri, $schema) = @_;
+  try {
+    $js->add_schema($uri => $schema);
+    $js_short_circuit->add_schema($uri => $schema);
+  }
+  catch ($e) {
+    die $e->$_isa('JSON::Schema::Draft201909::Result') ? $encoder->encode($e->TO_JSON) : $e;
+  }
+};
 
 $accepter->acceptance(
   validate_data => sub {
