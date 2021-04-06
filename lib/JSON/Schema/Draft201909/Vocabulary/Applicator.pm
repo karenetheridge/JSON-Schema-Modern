@@ -21,6 +21,11 @@ with 'JSON::Schema::Draft201909::Vocabulary';
 
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 
+# the keyword order is arbitrary, except:
+# - in-place applicators (allOf, anyOf, oneOf, not, if/then/else, dependentSchemas) and items,
+#   additionalItems must be evaluated before unevaluatedItems
+# - in-place applicators and properties, patternProperties, additionalProperties must be evaluated
+#   before unevaluatedProperties
 sub keywords {
   qw(allOf anyOf oneOf not if then else dependentSchemas
     items additionalItems unevaluatedItems contains

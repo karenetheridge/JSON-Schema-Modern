@@ -360,7 +360,9 @@ sub _eval {
 
   my $result = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
-  my @parent_annotations = @{$state->{annotations}};
+  my $orig_annotations = $state->{annotations};
+  $state->{annotations} = [];
+  my @new_annotations;
 
   ALL_KEYWORDS:
   foreach my $vocabulary (@{$state->{vocabularies}}) {
@@ -376,12 +378,18 @@ sub _eval {
       $result = 0 if not $vocabulary->$method($data, $schema, $state);
 
       last ALL_KEYWORDS if not $result and $state->{short_circuit};
+
+      push @new_annotations, @{$state->{annotations}}[$#new_annotations+1 .. $#{$state->{annotations}}];
     }
   }
 
-  annotate_self(+{ %$state, keyword => $_ }, $schema) foreach sort keys %unknown_keywords;
+  $state->{annotations} = $orig_annotations;
 
-  @{$state->{annotations}} = @parent_annotations if not $result;
+  if ($result) {
+    push @{$state->{annotations}}, @new_annotations;
+    annotate_self(+{ %$state, keyword => $_ }, $schema) foreach sort keys %unknown_keywords;
+  }
+
   return $result;
 }
 

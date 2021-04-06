@@ -159,7 +159,8 @@ sub jsonp {
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, grep defined, @_);
 }
 
-# get all annotations produced for the current instance data location
+# get all annotations produced for the current instance data location (that are visible to this
+# schema location)
 sub local_annotations {
   my ($state) = @_;
   grep $_->instance_location eq $state->{data_path}, @{$state->{annotations}};
