@@ -245,6 +245,7 @@ sub evaluate {
       ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($schema_reference);
     }
     else {
+      # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
       $document = $self->add_schema($state->{canonical_schema_uri}, $schema_reference);
       ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
       $document_path = '';
@@ -334,7 +335,9 @@ sub _traverse {
 sub _eval {
   my ($self, $data, $schema, $state) = @_;
 
-  $state = { %$state };     # changes to $state should only affect subschemas, not parents
+  # do not propagate upwards changes to depth, traversed paths,
+  # but additions to annotations, errors are by reference and will be retained
+  $state = { %$state };
   my @parent_annotations = @{$state->{annotations}};
   delete $state->{keyword};
 
