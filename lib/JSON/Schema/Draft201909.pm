@@ -338,7 +338,6 @@ sub _eval {
   # do not propagate upwards changes to depth, traversed paths,
   # but additions to annotations, errors are by reference and will be retained
   $state = { %$state };
-  my @parent_annotations = @{$state->{annotations}};
   delete $state->{keyword};
 
   abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
@@ -360,19 +359,23 @@ sub _eval {
   abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $result = 1;
-
   my %unknown_keywords = map +($_ => undef), keys %$schema;
+  my @parent_annotations = @{$state->{annotations}};
 
+  ALL_KEYWORDS:
   foreach my $vocabulary (@{$state->{vocabularies}}) {
     foreach my $keyword ($vocabulary->keywords) {
       next if not exists $schema->{$keyword};
 
-      $state->{keyword} = $keyword;
-      my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
-      $result = 0 if $vocabulary->can($method) and not $vocabulary->$method($data, $schema, $state);
-
       delete $unknown_keywords{$keyword};
-      last if not $result and $state->{short_circuit};
+
+      my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
+      next if not $vocabulary->can($method);
+
+      $state->{keyword} = $keyword;
+      $result = 0 if not $vocabulary->$method($data, $schema, $state);
+
+      last ALL_KEYWORDS if not $result and $state->{short_circuit};
     }
   }
 
