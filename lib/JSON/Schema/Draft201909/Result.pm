@@ -63,7 +63,7 @@ sub format {
   if ($style eq 'flag') {
     return +{ valid => $self->valid };
   }
-  if ($style eq 'basic') {
+  elsif ($style eq 'basic') {
     return +{
       valid => $self->valid,
       $self->valid
@@ -72,7 +72,7 @@ sub format {
     };
   }
   # note: strict_basic will NOT be supported after draft 2019-09!
-  if ($style eq 'strict_basic') {
+  elsif ($style eq 'strict_basic') {
     return +{
       valid => $self->valid,
       $self->valid
@@ -80,7 +80,7 @@ sub format {
         : (errors => [ map _map_uris($_->TO_JSON), $self->errors ]),
     };
   }
-  if ($style eq 'terse') {
+  elsif ($style eq 'terse') {
     # we can also drop errors for unevaluatedItems, unevaluatedProperties
     # when there is another (non-discarded) error at the same instance location or parent keyword
     # location (indicating that "unevaluated" is actually "unsuccessfully evaluated").
