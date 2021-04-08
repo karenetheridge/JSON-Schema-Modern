@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Draft201909
 
-{{$NEXT}}
+0.026     2021-04-08 20:13:27Z
           - fix scoping of annotations from uncle keywords (siblings of the
             schema's parent) that were improperly visible to unevaluatedItems,
             unevaluatedProperties
