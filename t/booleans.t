@@ -17,9 +17,9 @@ use Helper;
 my $js = JSON::Schema::Draft201909->new;
 
 my @tests = (
-  { schema => false, result => false },
-  { schema => true, result => true },
-  { schema => {}, result => true },
+  { schema => false, valid => false },
+  { schema => true, valid => true },
+  { schema => {}, valid => true },
 );
 
 foreach my $test (@tests) {
@@ -27,7 +27,7 @@ foreach my $test (@tests) {
   is(
     exception {
       my $result = $js->evaluate($data, $test->{schema});
-      ok(!($result xor $test->{result}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{result}));
+      ok(!($result xor $test->{valid}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{valid}));
     },
     undef,
     'no exceptions in evaluate',

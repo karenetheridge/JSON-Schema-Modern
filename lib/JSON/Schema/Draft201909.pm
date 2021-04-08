@@ -108,7 +108,7 @@ sub add_schema {
 
   die JSON::Schema::Draft201909::Result->new(
     output_format => $self->output_format,
-    result => 0,
+    valid => 0,
     errors => [ $document->errors ],
   ) if $document->has_errors;
 
@@ -148,7 +148,7 @@ sub evaluate_json_string {
   catch ($e) {
     return JSON::Schema::Draft201909::Result->new(
       output_format => $self->output_format,
-      result => 0,
+      valid => 0,
       errors => [
         JSON::Schema::Draft201909::Error->new(
           keyword => undef,
@@ -236,7 +236,7 @@ sub evaluate {
     evaluator => $self,
   };
 
-  my $result;
+  my $valid;
   try {
     my ($schema, $canonical_uri, $document, $document_path);
 
@@ -265,7 +265,7 @@ sub evaluate {
 
     @$state{qw(canonical_schema_uri document document_path)} = ($canonical_uri, $document, $document_path);
 
-    $result = $self->_eval($data, $schema, $state);
+    $valid = $self->_eval($data, $schema, $state);
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Draft201909::Result')) {
@@ -278,13 +278,13 @@ sub evaluate {
       E($state, 'EXCEPTION: '.$e);
     }
 
-    $result = 0;
+    $valid = 0;
   }
 
   return JSON::Schema::Draft201909::Result->new(
     output_format => $self->output_format,
-    result => $result,
-    $result
+    valid => $valid,
+    $valid
       # strip annotations from result if user didn't explicitly ask for them
       ? ($config_override->{collect_annotations} // $self->collect_annotations
           ? (annotations => $state->{annotations}) : ())
@@ -358,7 +358,7 @@ sub _eval {
   # this should never happen, due to checks in traversal
   abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
-  my $result = 1;
+  my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
   my $orig_annotations = $state->{annotations};
   $state->{annotations} = [];
@@ -375,9 +375,9 @@ sub _eval {
       next if not $vocabulary->can($method);
 
       $state->{keyword} = $keyword;
-      $result = 0 if not $vocabulary->$method($data, $schema, $state);
+      $valid = 0 if not $vocabulary->$method($data, $schema, $state);
 
-      last ALL_KEYWORDS if not $result and $state->{short_circuit};
+      last ALL_KEYWORDS if not $valid and $state->{short_circuit};
 
       push @new_annotations, @{$state->{annotations}}[$#new_annotations+1 .. $#{$state->{annotations}}];
     }
@@ -385,12 +385,12 @@ sub _eval {
 
   $state->{annotations} = $orig_annotations;
 
-  if ($result) {
+  if ($valid) {
     push @{$state->{annotations}}, @new_annotations;
     annotate_self(+{ %$state, keyword => $_ }, $schema) foreach sort keys %unknown_keywords;
   }
 
-  return $result;
+  return $valid;
 }
 
 sub keywords { qw(definitions dependencies) }

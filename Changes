@@ -4,6 +4,8 @@ Revision history for JSON-Schema-Draft201909
           - fix scoping of annotations from uncle keywords (siblings of the
             schema's parent) that were improperly visible to unevaluatedItems,
             unevaluatedProperties
+          - 'result' attribute in JSON::Schema::Draft201909::Result has been
+            renamed to 'valid', to better match what it represents (a boolean)
 
 0.025     2021-03-30 05:36:14Z
           - minor changes to error strings to distinguish between issues that
