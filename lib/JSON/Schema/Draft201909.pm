@@ -199,6 +199,7 @@ sub traverse {
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Draft201909::Error')) {
+      # note: we should never be here, since traversal subs are no longer be fatal
       push @{$state->{errors}}, $e;
     }
     else {
@@ -355,7 +356,7 @@ sub _eval {
   my $schema_type = get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
 
-  # this should never happen, due to checks in traversal
+  # this should never happen, due to checks in traverse
   abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $valid = 1;
