@@ -172,7 +172,7 @@ sub _eval_keyword_dependentSchemas {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all subschemas are valid') if not $valid;
+  return E($state, 'not all dependencies are satisfied') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
   return 1;
 }
