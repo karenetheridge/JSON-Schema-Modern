@@ -260,14 +260,19 @@ sub _traverse_keyword_dependentRequired {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'object');
-  return E($state, '"dependentRequired" property is not an array')
-    if any { !is_type('array', $schema->{dependentRequired}{$_}) }
-      keys %{$schema->{dependentRequired}};
-  return E($state, '"dependentRequired" property element is not a string')
-    if any { !is_type('string', $_) } map @$_, values %{$schema->{dependentRequired}};
-  return E($state, '"dependentRequired" property elements are not unique')
-    if any { !is_elements_unique($schema->{dependentRequired}{$_}) }
-      keys %{$schema->{dependentRequired}};
+
+  foreach my $property (keys %{$schema->{dependentRequired}}) {
+    E({ %$state, _schema_path_suffix => $property }, 'dependentRequired value is not an array'), next
+      if not is_type('array', $schema->{dependentRequired}{$property});
+
+    foreach my $index (0..$#{$schema->{dependentRequired}{$property}}) {
+      E({ %$state, _schema_path_suffix => $property }, 'element #%d is not a string', $index)
+        if not is_type('string', $schema->{dependentRequired}{$property}[$index]);
+    }
+
+    E({ %$state, _schema_path_suffix => $property }, 'elements are not unique')
+      if not is_elements_unique($schema->{dependentRequired}{$property});
+  }
 }
 
 sub _eval_keyword_dependentRequired {
@@ -275,12 +280,18 @@ sub _eval_keyword_dependentRequired {
 
   return 1 if not is_type('object', $data);
 
-  my @missing = grep
-    +(exists $data->{$_} && any { !exists $data->{$_} } @{ $schema->{dependentRequired}{$_} }),
-    keys %{$schema->{dependentRequired}};
+  my $valid = 1;
+  foreach my $property (keys %{$schema->{dependentRequired}}) {
+    next if not exists $data->{$property};
 
-  return 1 if not @missing;
-  return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', sort @missing));
+    if (my @missing = grep !exists($data->{$_}), @{$schema->{dependentRequired}{$property}}) {
+      $valid = E({ %$state, _schema_path_suffix => $property },
+        'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
+    }
+  }
+
+  return 1 if $valid;
+  return E($state, 'not all dependencies are satisfied');
 }
 
 sub _assert_number {

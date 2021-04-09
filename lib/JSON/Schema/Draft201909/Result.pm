@@ -100,6 +100,7 @@ sub format {
             and (not grep $keyword eq $_, qw(properties patternProperties)
               or $error eq 'property not permitted')
             and ($keyword ne 'additionalProperties' or $error eq 'additional property not permitted'))
+            and ($keyword ne 'dependentRequired' or $error ne 'not all dependencies are satisfied')
         );
 
         if ($keep and $keyword and $keyword =~ /^unevaluated(?:Items|Properties)$/

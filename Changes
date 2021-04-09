@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - fixed error strings used for failing "dependentRequired"
 
 0.026     2021-04-08 20:13:27Z
           - fix scoping of annotations from uncle keywords (siblings of the
