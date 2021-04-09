@@ -52,10 +52,6 @@ $accepter->acceptance(
     $result;
   },
   @ARGV ? (tests => { file => \@ARGV }) : (),
-  # optional prereqs
-  todo_tests => [
-    eval { require Email::Address::XS; 1 } ? () : { file => 'format-idn-email.json' },
-  ],
 );
 
 memory_cycle_ok($js, 'no leaks in the main evaluator object');
