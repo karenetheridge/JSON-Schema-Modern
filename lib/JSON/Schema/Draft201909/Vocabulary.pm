@@ -33,7 +33,7 @@ sub traverse_array_schemas {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'array');
-  return E($state, '"%s" array is empty') if not @{$schema->{$state->{keyword}}};
+  return E($state, '%s array is empty', $state->{keyword}) if not @{$schema->{$state->{keyword}}};
 
   foreach my $idx (0 .. $#{$schema->{$state->{keyword}}}) {
     $state->{evaluator}->_traverse($schema->{$state->{keyword}}[$idx],
