@@ -8,7 +8,7 @@ anchor.json                           2          0     0
 badRef.json                           3          0     0
 faux-buggy-schemas.json               2          0     0
 format-duration.json                  5          0     0
-format-ipv4.json                      2          0     0
+format-ipv4.json                      3          0     0
 format-relative-json-pointer.json     7          0     0
 future-keywords-draft2019-09.json    10          0     0
 id.json                               2          0     0
@@ -25,4 +25,4 @@ short-circuit.json                   20          0     0
 unicode.json                          4          0     0
 vocabulary.json                       5          0     0
 --------------------------------------------------------
-TOTAL                               807          0     0
+TOTAL                               808          0     0
