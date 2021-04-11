@@ -556,4 +556,28 @@ subtest 'annotate_unknown_keywords' => sub {
   );
 };
 
+subtest 'items + additionalItems' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      [ 1, 2, 3 ],
+      {
+        items => { maximum => 5 },
+        additionalItems => { maximum => 0 },
+      }
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          annotation => true,
+        },
+        # no error nor annotation from additionalItems
+      ],
+    },
+    'schema-based items + additionalItems',
+  );
+};
+
 done_testing;
