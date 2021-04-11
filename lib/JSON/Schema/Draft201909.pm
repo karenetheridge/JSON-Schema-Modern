@@ -339,7 +339,7 @@ sub _eval {
   # do not propagate upwards changes to depth, traversed paths,
   # but additions to annotations, errors are by reference and will be retained
   $state = { %$state };
-  delete $state->{keyword};
+  delete @{$state}{'keyword', grep /^_/, keys %$state};
 
   abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;

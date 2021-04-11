@@ -22,6 +22,7 @@ with 'JSON::Schema::Draft201909::Vocabulary';
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 
 # the keyword order is arbitrary, except:
+# - items must be evaluated before additionalItems
 # - in-place applicators (allOf, anyOf, oneOf, not, if/then/else, dependentSchemas) and items,
 #   additionalItems must be evaluated before unevaluatedItems
 # - in-place applicators and properties, patternProperties, additionalProperties must be evaluated
@@ -180,66 +181,41 @@ sub _eval_keyword_dependentSchemas {
 sub _traverse_keyword_items {
   my ($self, $schema, $state) = @_;
 
-  # Note: this is valid for draft2019-09 only.
-  goto \&_traverse_keyword_prefixItems if is_plain_arrayref($schema->{items});
+  return $self->traverse_array_schemas($schema, $state) if is_plain_arrayref($schema->{items});
   $self->traverse_schema($schema, $state);
 }
-
-# Note: the draft2019-09 metaschema says "items" has minItems:1 but the written spec omits this.
-# in draft2019-09, this is part of the 'items' keyword
-sub _traverse_keyword_prefixItems { shift->traverse_array_schemas(@_) }
-
-sub _traverse_keyword_additionalItems { shift->traverse_schema(@_) }
 
 sub _eval_keyword_items {
   my ($self, $data, $schema, $state) = @_;
 
-  # Note: this is valid for draft2019-09 only.
-  goto \&_eval_keyword_prefixItems if is_plain_arrayref($schema->{items});
+  goto \&_eval_keyword__items_array_schemas if is_plain_arrayref($schema->{items});
 
-  return 1 if not is_type('array', $data);
-
-  my @orig_annotations = @{$state->{annotations}};
-  my @new_annotations;
-  my $valid = 1;
-
-  foreach my $idx (0 .. $#{$data}) {
-    my @annotations = @orig_annotations;
-    if (is_type('boolean', $schema->{items})) {
-      next if $schema->{items};
-      $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx }, 'item not permitted');
-    }
-    elsif ($self->eval($data->[$idx], $schema->{items},
-        +{ %$state, annotations => \@annotations,
-          data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/items' })) {
-      push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
-      next;
-    }
-
-    $valid = 0;
-    last if $state->{short_circuit};
-  }
-
-  return E($state, 'subschema is not valid against all items') if not $valid;
-  push @{$state->{annotations}}, @new_annotations;
-  return A($state, true);
+  $state->{_last_items_index} //= -1;
+  goto \&_eval_keyword__items_schema;
 }
 
-# in draft2019-09, this is part of the 'items' keyword
-sub _eval_keyword_prefixItems {
+sub _traverse_keyword_additionalItems { shift->traverse_schema(@_) }
+
+sub _eval_keyword_additionalItems {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not exists $state->{_last_items_index};
+  goto \&_eval_keyword__items_schema;
+}
+
+# array-based items
+sub _eval_keyword__items_array_schemas {
   my ($self, $data, $schema, $state) = @_;
 
   return 1 if not is_type('array', $data);
 
   my @orig_annotations = @{$state->{annotations}};
   my @new_annotations;
-  my $last_index = -1;
   my $valid = 1;
 
   foreach my $idx (0 .. $#{$data}) {
     last if $idx > $#{$schema->{$state->{keyword}}};
-    $last_index = $idx;
+    $state->{_last_items_index} = $idx;
 
     my @annotations = @orig_annotations;
     if (is_type('boolean', $schema->{$state->{keyword}}[$idx])) {
@@ -259,29 +235,34 @@ sub _eval_keyword_prefixItems {
     last if $state->{short_circuit} and not exists $schema->{additionalItems};
   }
 
-  if ($valid) {
-    push @{$state->{annotations}}, @new_annotations;
-    A($state, $last_index);
-  }
-  else {
-    E($state, 'not all items are valid');
-  }
+  return E($state, 'not all items are valid') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return A($state, $state->{_last_items_index});
+}
 
-  return $valid if not exists $schema->{additionalItems} or $last_index == $#{$data};
-  $state->{keyword} = 'additionalItems';
-  @orig_annotations = @{$state->{annotations}};
+# schema-based items and additionalItems
+sub _eval_keyword__items_schema {
+  my ($self, $data, $schema, $state) = @_;
 
-  foreach my $idx ($last_index+1 .. $#{$data}) {
-    if (is_type('boolean', $schema->{additionalItems})) {
-      next if $schema->{additionalItems};
+  return 1 if not is_type('array', $data);
+  return 1 if $state->{_last_items_index} == $#{$data};
+
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
+  my $valid = 1;
+
+  foreach my $idx ($state->{_last_items_index}+1 .. $#{$data}) {
+    if (is_type('boolean', $schema->{$state->{keyword}})) {
+      next if $schema->{$state->{keyword}};
       $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx },
-          'additional item not permitted');
+        '%sitem not permitted', $state->{keyword} eq 'additionalItems' ? 'additional ' : '');
     }
     else {
       my @annotations = @orig_annotations;
-      if ($self->eval($data->[$idx], $schema->{additionalItems},
-          +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/additionalItems', annotations => \@annotations })) {
+      if ($self->eval($data->[$idx], $schema->{$state->{keyword}},
+        +{ %$state, annotations => \@annotations,
+          data_path => $state->{data_path}.'/'.$idx,
+          schema_path => $state->{schema_path}.'/'.$state->{keyword} })) {
         push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
         next;
       }
@@ -291,7 +272,10 @@ sub _eval_keyword_prefixItems {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'subschema is not valid against all additional items') if not $valid;
+  $state->{_last_items_index} = $#{$data};
+
+  return E($state, 'subschema is not valid against all %sitems',
+    $state->{keyword} eq 'additionalItems' ? 'additional ' : '') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
   return A($state, true);
 }
