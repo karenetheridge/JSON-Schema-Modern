@@ -12,6 +12,7 @@ use List::Util 1.50 'head';
 use Safe::Isa;
 use Feature::Compat::Try;
 use Config;
+use Path::Tiny;
 
 BEGIN {
   my @variables = qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING);
@@ -22,7 +23,7 @@ BEGIN {
 }
 
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 1.004;
+use Test::JSON::Schema::Acceptance 1.007;
 use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
@@ -114,6 +115,8 @@ $accepter->acceptance(
 memory_cycle_ok($js, 'no leaks in the main evaluator object');
 memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator object');
 
+path('t/results/draft2019-09-format.txt')->spew_utf8($accepter->results_text)
+  if -d '.git' or $ENV{AUTHOR_TESTING} or $ENV{RELEASE_TESTING};
 
 # date        Test::JSON::Schema::Acceptance version
 #                    JSON::Schema::Draft201909 version

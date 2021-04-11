@@ -9,8 +9,9 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 0.993;
+use Test::JSON::Schema::Acceptance 1.007;
 use Test::Memory::Cycle;
+use Path::Tiny;
 use JSON::Schema::Draft201909;
 
 my $accepter = Test::JSON::Schema::Acceptance->new(test_dir => 't/additional-tests', verbose => 1);
@@ -60,4 +61,10 @@ $accepter->acceptance(
 memory_cycle_ok($js, 'no leaks in the main evaluator object');
 memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator object');
 
+path('t/results/additional-tests.txt')->spew_utf8($accepter->results_text)
+  if -d '.git' or $ENV{AUTHOR_TESTING} or $ENV{RELEASE_TESTING};
+
 done_testing;
+__END__
+
+see t/results/additional-tests.txt for test results

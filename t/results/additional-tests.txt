@@ -1,0 +1,28 @@
+Results using Test::JSON::Schema::Acceptance 1.007
+using custom test directory: /Volumes/amaretto/Users/ether/git/JSON-Schema-Draft201909/t/additional-tests
+optional tests included: no
+
+filename                           pass  todo-fail  fail
+--------------------------------------------------------
+anchor.json                           2          0     0
+badRef.json                           3          0     0
+faux-buggy-schemas.json               2          0     0
+format-duration.json                  5          0     0
+format-ipv4.json                      2          0     0
+format-relative-json-pointer.json     7          0     0
+future-keywords-draft2019-09.json    10          0     0
+id.json                               2          0     0
+invalid-input.json                    2          0     0
+keyword-independence.json           688          0     0
+loose-types-const-enum.json           8          0     0
+not-an-anchor.json                    2          0     0
+not-an-id.json                        2          0     0
+recursive-dynamic.json                2          0     0
+recursiveRef.json                    27          0     0
+ref-and-id.json                       4          0     0
+ref.json                             10          0     0
+short-circuit.json                   20          0     0
+unicode.json                          4          0     0
+vocabulary.json                       5          0     0
+--------------------------------------------------------
+TOTAL                               807          0     0
