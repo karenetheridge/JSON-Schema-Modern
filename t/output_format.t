@@ -135,7 +135,7 @@ cmp_deeply(
       {
         instanceLocation => '/gamma',
         keywordLocation => '/properties/gamma/items',
-        error => 'subschema is not valid against all items',
+        error => 'not all items are valid',
       },
       {
         instanceLocation => '/gamma/1',

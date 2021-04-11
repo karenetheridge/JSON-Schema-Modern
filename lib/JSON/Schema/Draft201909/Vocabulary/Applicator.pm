@@ -264,7 +264,7 @@ sub _eval_keyword_prefixItems {
     A($state, $last_index);
   }
   else {
-    E($state, 'subschema is not valid against all items');
+    E($state, 'not all items are valid');
   }
 
   return $valid if not exists $schema->{additionalItems} or $last_index == $#{$data};
