@@ -94,8 +94,7 @@ sub format {
           or (
             not grep $keyword eq $_, qw(allOf anyOf if then else dependentSchemas contains propertyNames)
             and ($keyword ne 'oneOf' or $error ne 'no subschemas are valid')
-            and ($keyword ne 'items'    # list form of items (prefixItems)
-              or $error eq 'item not permitted' and $_->keyword_location =~ m{/[0-9]+$})
+            and ($keyword ne 'items' or $error eq 'item not permitted' )
             and ($keyword ne 'additionalItems' or $error eq 'additional item not permitted')
             and (not grep $keyword eq $_, qw(properties patternProperties)
               or $error eq 'property not permitted')
