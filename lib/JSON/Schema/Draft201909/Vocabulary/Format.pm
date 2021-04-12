@@ -10,9 +10,9 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
+use strictures 2;
 use JSON::Schema::Draft201909::Utilities qw(is_type E A assert_keyword_type);
 use Moo;
-use strictures 2;
 use Feature::Compat::Try;
 use namespace::clean;
 
