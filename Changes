@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - skip acceptance test for integer overflow when nvsize is too
             large to produce the expected error
+          - support for specification version draft7, through the "$schema"
+            keyword and the new 'specification_version' constructor option
 
 0.512     2021-06-09 02:29:23Z
           - distribution has been renamed from JSON-Schema-Draft201909 to

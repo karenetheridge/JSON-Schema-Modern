@@ -39,7 +39,7 @@ has canonical_uri => (
 
 has specification_version => (
   is => 'rwp',
-  isa => Enum([qw(draft2019-09)]),
+  isa => Enum([qw(draft7 draft2019-09)]),
 );
 
 has resource_index => (

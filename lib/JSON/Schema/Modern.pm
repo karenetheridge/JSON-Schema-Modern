@@ -39,7 +39,7 @@ use constant SPECIFICATION_VERSION_DEFAULT => 'draft2019-09';
 
 has specification_version => (
   is => 'ro',
-  isa => Enum(['draft2019-09']),
+  isa => Enum([qw(draft7 draft2019-09)]),
 );
 
 has output_format => (
@@ -317,6 +317,9 @@ sub get {
 
 # current spec version => { keyword => undef, or arrayref of alternatives }
 my %removed_keywords = (
+  'draft7' => {
+    id => [ '$id' ],
+  },
   'draft2019-09' => {
     id => [ '$id' ],
     definitions => [ '$defs' ],
@@ -339,8 +342,11 @@ sub _traverse_subschema {
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   foreach my $vocabulary (@{$state->{vocabularies}}) {
-    foreach my $keyword ($vocabulary->keywords) {
+    foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
       next if not exists $schema->{$keyword};
+
+      # keywords adjacent to $ref are not evaluated before draft2019-09
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
 
       $state->{keyword} = $keyword;
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
@@ -404,8 +410,11 @@ sub _eval_subschema {
 
   ALL_KEYWORDS:
   foreach my $vocabulary (@{$state->{vocabularies}}) {
-    foreach my $keyword ($vocabulary->keywords) {
+    foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
       next if not exists $schema->{$keyword};
+
+      # keywords adjacent to $ref are not evaluated before draft2019-09
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
 
       delete $unknown_keywords{$keyword};
 
@@ -501,6 +510,9 @@ use constant CACHED_METASCHEMAS => {
   'https://json-schema.org/draft/2019-09/output/hyper-schema' => 'draft2019-09/output/hyper-schema.json',
   'https://json-schema.org/draft/2019-09/output/schema'       => 'draft2019-09/output/schema.json',
   'https://json-schema.org/draft/2019-09/schema'              => 'draft2019-09/schema.json',
+
+  # trailing # is omitted because we always cache documents by its canonical (fragmentless) URI
+  'http://json-schema.org/draft-07/schema' => 'draft7/schema.json',
 };
 
 # returns the same as _get_resource
@@ -615,14 +627,16 @@ version of the specification.
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
 this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest (supported) version.
+the latest (supported) version (draft2010-09). When left unset, the use of C<$schema> keywords in
+the schema is permitted, to switch between draft versions.
 
 May be one of:
 
 =for :list
-
 * L<C<draft2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
+* L<C<draft7>|https://json-schema.org/specification-links.html#draft-7>,
+  corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
 
 =head2 output_format
 

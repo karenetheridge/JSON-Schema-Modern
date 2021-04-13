@@ -1,0 +1,34 @@
+[
+    {
+        "description": "unicode characters do not match ascii ranges",
+        "schema": {"pattern": "[a-z]cole"},
+        "tests": [
+            {
+                "description": "literal unicode character in json string",
+                "data": "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire.",
+                "valid": false
+            },
+            {
+                "description": "unicode character in hex format in string",
+                "data": "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'\u00e9cole, l'église et la patinoire; mais la vraie vie était sur la patinoire.",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unicode semantics should be used for all pattern matching, even for characters in the latin1 range",
+        "schema": {"pattern": "\\wcole"},
+        "tests": [
+            {
+                "description": "literal unicode character in json string",
+                "data": "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire.",
+                "valid": true
+            },
+            {
+                "description": "unicode character in hex format in string",
+                "data": "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'\u00e9cole, l'église et la patinoire; mais la vraie vie était sur la patinoire.",
+                "valid": true
+            }
+        ]
+    }
+]

@@ -17,10 +17,20 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/meta-data' }
+sub vocabulary {
+  my ($self, $spec_version) = @_;
+  return
+      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/meta-data'
+    : undef;
+}
 
 sub keywords {
-  qw(title description default deprecated readOnly writeOnly examples);
+  my ($self, $spec_version) = @_;
+  return (
+    qw(title description default),
+    $spec_version ne 'draft7' ? 'deprecated' : (),
+    qw(readOnly writeOnly examples),
+  );
 }
 
 sub _traverse_keyword_title {

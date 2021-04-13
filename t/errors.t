@@ -1178,7 +1178,7 @@ subtest 'absoluteKeywordLocation' => sub {
   cmp_deeply(
     $js->evaluate(
       1,
-      {
+      my $schema = {
         '$id' => 'https://localhost:1234/bloop',
         allOf => [
           {
@@ -1194,6 +1194,7 @@ subtest 'absoluteKeywordLocation' => sub {
               },
             ],
           },
+          { type => 'object' },
         ],
       },
     )->TO_JSON,
@@ -1220,13 +1221,59 @@ subtest 'absoluteKeywordLocation' => sub {
         },
         {
           instanceLocation => '',
+          keywordLocation => '/allOf/2/type',
+          absoluteKeywordLocation => 'https://localhost:1234/bloop#/allOf/2/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/allOf',
           absoluteKeywordLocation => 'https://localhost:1234/bloop#/allOf',
-          error => 'subschemas 0, 1 are not valid',
+          error => 'subschemas 0, 1, 2 are not valid',
         },
       ],
     },
     'absoluteKeywordLocation reflects the canonical schema uri as it changes when passing through $id',
+  );
+
+  $schema->{'$id'} = '#my_anchor';
+  $schema->{allOf}[2]{'$id'} = '#my_anchor2';
+  cmp_deeply(
+    JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(1, $schema)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/type',
+          absoluteKeywordLocation => 'foo.json#/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/allOf/0/type',
+          absoluteKeywordLocation => 'bar/alpha#/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/allOf',
+          absoluteKeywordLocation => 'bar/#/allOf',
+          error => 'subschema 0 is not valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/2/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          error => 'subschemas 0, 1, 2 are not valid',
+        },
+      ],
+    },
+    'plain-name fragment in $id does not change canonical schema uri',
   );
 };
 

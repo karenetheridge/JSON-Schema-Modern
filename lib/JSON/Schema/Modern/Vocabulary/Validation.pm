@@ -19,15 +19,24 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/validation' }
+sub vocabulary {
+  my ($self, $spec_version) = @_;
+  return
+      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/validation'
+    : undef;
+}
 
 sub keywords {
-  qw(type enum const
-    multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
-    maxLength minLength pattern
-    maxItems minItems uniqueItems
-    maxContains minContains
-    maxProperties minProperties required dependentRequired);
+  my ($self, $spec_version) = @_;
+  return (
+    qw(type enum const
+      multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
+      maxLength minLength pattern
+      maxItems minItems uniqueItems),
+    $spec_version ne 'draft7' ? qw(maxContains minContains) : (),
+    qw(maxProperties minProperties required),
+    $spec_version ne 'draft7' ? 'dependentRequired' : (),
+  );
 }
 
 sub _traverse_keyword_type {

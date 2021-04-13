@@ -1,0 +1,45 @@
+[
+    {
+        "description": "identifiers in non-schemas that look like schemas",
+        "schema": {
+            "$id": "http://localhost:1234/faux.json",
+            "anyOf": [
+                {
+                    "type": "integer",
+                    "examples": [
+                        { "$id": "faux.json#/foo/bar" },
+                        { "$anchor": "my$foo" }
+                    ]
+                },
+                {
+                    "type": "integer",
+                    "default": { "$anchor": "not$an$anchor" }
+                },
+                {
+                    "$anchor": "my_const",
+                    "const": { "$anchor": "my_const" }
+                },
+                {
+                    "$id": "enum.json",
+                    "$anchor": "my_enum",
+                    "enum": [
+                        { "$id": "enum.json" },
+                        { "$anchor": "my_enum" }
+                     ]
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "match the type checks",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "match none of the options",
+                "data": "a string",
+                "valid": false
+            }
+        ]
+    }
+]

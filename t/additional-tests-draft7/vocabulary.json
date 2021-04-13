@@ -1,0 +1,17 @@
+[
+    {
+        "description": "valid $vocabulary",
+        "schema": {
+            "$vocabulary": {
+                "https://foo.com": false
+            }
+        },
+        "tests": [
+            {
+                "description": "an valid $vocabulary value",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    }
+]

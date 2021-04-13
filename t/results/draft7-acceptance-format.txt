@@ -1,0 +1,28 @@
+Results using Test::JSON::Schema::Acceptance 1.011
+with commit b6769f2b9ae8b3adbe8117d155a1f8ade092fb88 (2.0.0-382-gb6769f2)
+from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+specification version: draft7
+using custom test directory: <base test directory>/optional/format
+optional tests included: yes
+
+filename                                  pass  todo-fail  fail
+---------------------------------------------------------------
+date-time.json                              11          0     0
+date.json                                   32          0     0
+email.json                                   9          0     0
+hostname.json                               12          0     0
+idn-email.json                               4          0     0
+idn-hostname.json                           29         16     0
+ipv4.json                                    8          0     0
+ipv6.json                                   29          0     0
+iri-reference.json                           5          2     0
+iri.json                                     8          1     0
+json-pointer.json                           32          0     0
+regex.json                                   2          0     0
+relative-json-pointer.json                   6          0     0
+time.json                                   18          0     0
+uri-reference.json                           7          0     0
+uri-template.json                            3          1     0
+uri.json                                    19          1     0
+---------------------------------------------------------------
+TOTAL                                      234         21     0

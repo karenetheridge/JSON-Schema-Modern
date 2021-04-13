@@ -93,7 +93,10 @@ User-defined custom vocabularies are not supported at this time.
 =head2 vocabulary
 
 The canonical URI describing the vocabulary, as described in
-L<JSON Schema Core Meta-specification, section 8.1.2|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.1.2>. Must be implemented by the composing class.
+L<JSON Schema Core Meta-specification, section 8.1.2|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.1.2>.
+Must be implemented by the composing class. May require the C<specification_version> from the
+L<JSON::Schema::Modern> object (or the C<spec_version> field from the C<$state> object) as an
+argument.
 
 =head2 keywords
 

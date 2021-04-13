@@ -26,6 +26,7 @@ my %schemas = (
 );
 
 my @warnings = (
+  [ draft7 => [ qw(id) ] ],
   [ 'draft2019-09' => [ qw(id definitions dependencies) ] ],
 );
 
@@ -50,7 +51,7 @@ foreach my $index (0 .. $#warnings) {
       warn @_ if $_[0] =~ /^no-longer-supported "$keyword" keyword present/;
     };
     cmp_deeply(
-      [ warnings { ok($js->evaluate(true, { $keyword => $schemas{$keyword} }), 'schema with "'.$keyword.'" still validates') } ],
+      [ warnings { ok($js->evaluate(true, { $keyword => $schemas{$keyword} }), 'schema with "'.$keyword.'" validates in '.$spec_version) } ],
       [],
       'did not warn for "'.$keyword.'" in '.$spec_version,
     );

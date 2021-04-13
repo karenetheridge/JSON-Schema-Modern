@@ -13,7 +13,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
 use List::Util 1.45 qw(any uniqstr);
 use Ref::Util 0.100 'is_plain_arrayref';
-use JSON::Schema::Modern::Utilities qw(is_type jsonp E A assert_keyword_type assert_pattern true);
+use JSON::Schema::Modern::Utilities qw(is_type jsonp E A assert_keyword_type assert_pattern true is_elements_unique);
 use JSON::Schema::Modern::Vocabulary::Unevaluated;
 use Moo;
 use MooX::TypeTiny 0.002002;
@@ -22,7 +22,12 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
+sub vocabulary {
+  my ($self, $spec_version) = @_;
+  return
+      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/applicator'
+    : undef;
+}
 
 # the keyword order is arbitrary, except:
 # - if must be evaluated before then, else
@@ -34,11 +39,14 @@ sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 #   before unevaluatedProperties (in the Unevaluated vocabulary)
 # - contains must be evaluated before maxContains, minContains (in the Validator vocabulary)
 sub keywords {
-  my $self = shift;
-  qw(allOf anyOf oneOf not if then else dependentSchemas
-    items additionalItems contains
-    properties patternProperties additionalProperties propertyNames),
-  $self->unevaluated_vocabulary->keywords;
+  my ($self, $spec_version) = @_;
+  return (
+    qw(allOf anyOf oneOf not if then else),
+    $spec_version eq 'draft7' ? 'dependencies' : 'dependentSchemas',
+    qw(items additionalItems contains
+      properties patternProperties additionalProperties propertyNames),
+    $spec_version ne 'draft7' ? $self->unevaluated_vocabulary->keywords($spec_version) : (),
+  );
 }
 
 # in draft2019-09, the unevaluated keywords were part of the Applicator vocabulary
@@ -196,6 +204,71 @@ sub _eval_keyword_dependentSchemas {
   return 1;
 }
 
+sub _traverse_keyword_dependencies {
+  my ($self, $schema, $state) = @_;
+
+  return if not assert_keyword_type($state, $schema, 'object');
+
+  foreach my $property (sort keys %{$schema->{dependencies}}) {
+    if (is_type('array', $schema->{dependencies}{$property})) {
+      # as in dependentRequired
+
+      E($state, 'dependencies array at %s is empty', $property)
+        if $state->{spec_version} eq 'draft4' and not @{$schema->{dependencies}{$property}};
+
+      foreach my $index (0..$#{$schema->{dependencies}{$property}}) {
+        E({ %$state, _schema_path_suffix => $property }, 'element #%d is not a string', $index)
+          if not is_type('string', $schema->{dependencies}{$property}[$index]);
+      }
+
+      E({ %$state, _schema_path_suffix => $property }, 'elements are not unique')
+        if not is_elements_unique($schema->{dependencies}{$property});
+    }
+    else {
+      # as in dependentSchemas
+      $self->traverse_property_schema($schema, $state, $property);
+    }
+  }
+}
+
+sub _eval_keyword_dependencies {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not is_type('object', $data);
+
+  my $valid = 1;
+  my @orig_annotations = @{$state->{annotations}};
+  my @new_annotations;
+  foreach my $property (sort keys %{$schema->{dependencies}}) {
+    next if not exists $data->{$property};
+
+    if (is_type('array', $schema->{dependencies}{$property})) {
+      # as in dependentRequired
+      if (my @missing = grep !exists($data->{$_}), @{$schema->{dependencies}{$property}}) {
+        $valid = E({ %$state, _schema_path_suffix => $property },
+          'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
+      }
+    }
+    else {
+      # as in dependentSchemas
+      my @annotations = @orig_annotations;
+      if ($self->eval($data, $schema->{dependencies}{$property},
+          +{ %$state, annotations => \@annotations,
+            schema_path => jsonp($state->{schema_path}, 'dependencies', $property) })) {
+        push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+        next;
+      }
+
+      $valid = 0;
+      last if $state->{short_circuit};
+    }
+  }
+
+  return E($state, 'not all dependencies are satisfied') if not $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return 1;
+}
+
 sub _traverse_keyword_items {
   my ($self, $schema, $state) = @_;
 
@@ -324,7 +397,8 @@ sub _eval_keyword_contains {
   }
 
   # note: no items contained is only valid when minContains is explicitly 0
-  if (not $state->{_num_contains} and ($schema->{minContains}//1) > 0) {
+  if (not $state->{_num_contains}
+      and (($schema->{minContains}//1) > 0 or $state->{spec_version} eq 'draft7')) {
     push @{$state->{errors}}, @errors;
     return E($state, 'subschema is not valid against any item');
   }

@@ -17,15 +17,29 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/core' }
+sub vocabulary {
+  my ($self, $spec_version) = @_;
+  return
+      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/core'
+    : undef;
+}
 
 sub keywords {
-  qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs);
+  my ($self, $spec_version) = @_;
+  return (
+    qw($id $schema),
+    $spec_version ne 'draft7' ? '$anchor' : (),
+    $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
+    '$ref',
+    $spec_version ne 'draft7' ? qw($recursiveRef $vocabulary $comment) : (),
+    $spec_version eq 'draft7' ? 'definitions' : '$defs',
+  );
 }
 
 # supported metaschema URIs. is a subset of JSON::Schema::Modern::CACHED_METASCHEMAS
 my %version_uris = (
   'https://json-schema.org/draft/2019-09/schema'  => 'draft2019-09',
+  'http://json-schema.org/draft-07/schema#'       => 'draft7',
 );
 
 # adds the following keys to $state during traversal:
@@ -40,8 +54,19 @@ sub _traverse_keyword_id {
 
   my $uri = Mojo::URL->new($schema->{'$id'});
   return E($state, '$id value should not equal "%s"', $uri) if $uri eq '' or $uri eq '#';
-  return E($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
-    if length $uri->fragment;
+
+  if ($state->{spec_version} eq 'draft7') {
+    if (length($uri->fragment)) {
+      return E($state, '$id cannot change the base uri at the same time as declaring an anchor')
+        if length($uri->clone->fragment(undef));
+
+      return $self->_traverse_keyword_anchor({ %$schema, $state->{keyword} => $uri->fragment }, $state);
+    }
+  }
+  else {
+    return E($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
+      if length $uri->fragment;
+  }
 
   $uri->fragment(undef);
   $state->{initial_schema_uri} = $uri->is_abs ? $uri : $uri->to_abs($state->{initial_schema_uri});
@@ -68,7 +93,7 @@ sub _eval_keyword_id {
   }
 
   # this should never happen, if the pre-evaluation traversal was performed correctly
-  abort($state, 'failed to resolve $id to canonical uri');
+  abort($state, 'failed to resolve %s to canonical uri', $state->{keyword});
 }
 
 sub _traverse_keyword_schema {
@@ -95,13 +120,16 @@ sub _traverse_keyword_schema {
     if $state->{evaluator}->specification_version
       and $spec_version ne $state->{evaluator}->specification_version;
 
+  # we special-case this because the check in _eval for older drafts + $ref has already happened
+  return E($state, '$schema and $ref cannot be used together in older drafts')
+    if exists $schema->{'$ref'} and $spec_version eq 'draft7';
+
   $state->{spec_version} = $spec_version;
 }
 
-# we do nothing with $schema yet at evaluation time. In the future, at traversal time we will fetch
-# the schema at the value of this keyword and examine its $vocabulary keyword to determine which
-# dialect shall be in effect when considering this schema, then storing that dialect instance in
-# $state.
+# In the future, at traversal time we will fetch the schema at the value of this keyword and examine
+# its $vocabulary keyword to determine which dialect shall be in effect when considering this
+# schema, then storing that dialect instance in $state.
 # If no $schema is provided at the top level, we will use the default dialect defined by the
 # specification metaschema (all six vocabularies).
 # At evaluation time we simply swap out the dialect instance in $state.
@@ -110,13 +138,15 @@ sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'string');
-  return E($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
-    if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/;
+
+  return E($state, '%s value "%s" does not match required syntax',
+      $state->{keyword}, $schema->{$state->{keyword}})
+    if $schema->{$state->{keyword}} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/;
 
   my $canonical_uri = canonical_schema_uri($state);
 
   push @{$state->{identifiers}},
-    Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{'$anchor'}) => {
+    Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}}) => {
       path => $state->{traversed_schema_path}.$state->{schema_path},
       canonical_uri => $canonical_uri,
     };
@@ -238,6 +268,7 @@ sub _traverse_keyword_comment {
 
 # we do nothing with $comment at evaluation time, including not collecting its value for annotations.
 
+sub _traverse_keyword_definitions { shift->traverse_object_schemas(@_) }
 sub _traverse_keyword_defs { shift->traverse_object_schemas(@_) }
 
 # we do nothing directly with $defs at evaluation time, including not collecting its value for

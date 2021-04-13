@@ -1,0 +1,33 @@
+[
+    {
+        "description": "object that is not a schema containing an $anchor property",
+        "schema": {
+            "definitions": {
+                "const_not_anchor": {
+                    "const": {
+                        "$anchor": "not_a_real_anchor"
+                    }
+                }
+            },
+            "if": {
+                "const": "skip not_a_real_anchor"
+            },
+            "then": true,
+            "else" : {
+                "$ref": "#/definitions/const_not_anchor"
+            }
+        },
+        "tests": [
+            {
+                "description": "skip traversing definition for a valid result",
+                "data": "skip not_a_real_anchor",
+                "valid": true
+            },
+            {
+                "description": "const at const_not_anchor does not match",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
