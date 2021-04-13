@@ -350,7 +350,7 @@ sub _eval_keyword_contains {
 
   return 1 if not is_type('array', $data);
 
-  my $num_valid = 0;
+  $state->{_num_contains} = 0;
   my @orig_annotations = @{$state->{annotations}};
   my (@errors, @new_annotations);
   foreach my $idx (0 .. $#{$data}) {
@@ -359,38 +359,23 @@ sub _eval_keyword_contains {
         +{ %$state, errors => \@errors, annotations => \@annotations,
           data_path => $state->{data_path}.'/'.$idx,
           schema_path => $state->{schema_path}.'/contains' })) {
-      ++$num_valid;
+      ++$state->{_num_contains};
       push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+
       last if $state->{short_circuit}
-        and (not exists $schema->{maxContains} or $num_valid > $schema->{maxContains})
-        and ($num_valid >= ($schema->{minContains} // 1));
+        and (not exists $schema->{maxContains} or $state->{_num_contains} > $schema->{maxContains})
+        and ($state->{_num_contains} >= ($schema->{minContains}//1));
     }
   }
 
-  push @{$state->{annotations}}, @new_annotations if $num_valid;
-
-  my $valid = 1;
-  # note: no items contained is only valid when minContains=0
-  if (not $num_valid and ($schema->{minContains} // 1) > 0) {
-    $valid = 0;
+  # note: no items contained is only valid when minContains is explicitly 0
+  if (not $state->{_num_contains} and ($schema->{minContains}//1) > 0) {
     push @{$state->{errors}}, @errors;
-    E($state, 'subschema is not valid against any item');
-    return 0 if $state->{short_circuit};
+    return E($state, 'subschema is not valid against any item');
   }
 
-  # TODO: in the future, we can move these implementations to the Validation vocabulary
-  # and inspect the annotation produced by the 'contains' keyword.
-  if (exists $schema->{maxContains} and $num_valid > $schema->{maxContains}) {
-    $valid = E({ %$state, keyword => 'maxContains' }, 'contains too many matching items');
-    return 0 if $state->{short_circuit};
-  }
-
-  if ($num_valid < ($schema->{minContains} // 1)) {
-    $valid = E({ %$state, keyword => 'minContains' }, 'contains too few matching items');
-    return 0 if $state->{short_circuit};
-  }
-
-  return $valid;
+  push @{$state->{annotations}}, @new_annotations;
+  return 1;
 }
 
 sub _traverse_keyword_properties { shift->traverse_object_schemas(@_) }

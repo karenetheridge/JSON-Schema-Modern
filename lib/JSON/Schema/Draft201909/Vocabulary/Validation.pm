@@ -26,7 +26,7 @@ sub keywords {
     multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
     maxLength minLength pattern
     maxItems minItems uniqueItems
-    minContains maxContains
+    maxContains minContains
     maxProperties minProperties required dependentRequired);
 }
 
@@ -212,8 +212,33 @@ sub _eval_keyword_uniqueItems {
 }
 
 # Note: no effort is made to check if the 'contains' keyword has been disabled via its vocabulary.
-sub _traverse_keyword_minContains { goto \&_assert_non_negative_integer }
 sub _traverse_keyword_maxContains { goto \&_assert_non_negative_integer }
+
+sub _eval_keyword_maxContains {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not exists $state->{_num_contains};
+  return 1 if not is_type('array', $data);
+
+  return E($state, 'contains too many matching items')
+    if $state->{_num_contains} > $schema->{maxContains};
+
+  return 1;
+}
+
+sub _traverse_keyword_minContains { goto \&_assert_non_negative_integer }
+
+sub _eval_keyword_minContains {
+  my ($self, $data, $schema, $state) = @_;
+
+  return 1 if not exists $state->{_num_contains};
+  return 1 if not is_type('array', $data);
+
+  return E($state, 'contains too few matching items')
+    if $state->{_num_contains} < $schema->{minContains};
+
+  return 1;
+}
 
 sub _traverse_keyword_maxProperties { goto \&_assert_non_negative_integer }
 
