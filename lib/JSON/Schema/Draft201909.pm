@@ -185,7 +185,7 @@ sub traverse {
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
     vocabularies => [
       (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
-        qw(Core Validation Applicator Format Content MetaData)),
+        qw(Core Applicator Validation Format Content MetaData)),
       $self,  # for discontinued keywords defined in the base schema
     ],
     identifiers => [],
@@ -231,7 +231,7 @@ sub evaluate {
     # traverse() pass on the schema and examination of the referenced metaschema.
     vocabularies => [
       (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
-        qw(Core Validation Applicator Format Content MetaData)),
+        qw(Core Applicator Validation Format Content MetaData)),
       $self,  # for discontinued keywords defined in the base schema
     ],
     evaluator => $self,
