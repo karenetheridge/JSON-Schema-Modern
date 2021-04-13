@@ -1,0 +1,29 @@
+Results using Test::JSON::Schema::Acceptance 1.007
+with commit dfcd4a19f857b85e344d6d14e37ca7b2e5d11bdf (2.0.0-333-gdfcd4a1)
+from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+using custom test directory: /Volumes/amaretto/Users/ether/.perlbrew/libs/33.8@std/lib/perl5/auto/share/dist/Test-JSON-Schema-Acceptance/tests/draft2019-09/optional/format
+optional tests included: yes
+
+filename                    pass  todo-fail  fail
+-------------------------------------------------
+date-time.json                10          1     0
+date.json                      4          1     0
+duration.json                 17          0     0
+email.json                     9          0     0
+hostname.json                 12          0     0
+idn-email.json                 4          0     0
+idn-hostname.json             29         16     0
+ipv4.json                      8          0     0
+ipv6.json                     29          0     0
+iri-reference.json             5          2     0
+iri.json                       8          1     0
+json-pointer.json             32          0     0
+regex.json                     2          0     0
+relative-json-pointer.json     9          0     0
+time.json                      3          0     0
+uri-reference.json             7          0     0
+uri-template.json              3          1     0
+uri.json                      19          1     0
+uuid.json                     12          0     0
+-------------------------------------------------
+TOTAL                        222         23     0
