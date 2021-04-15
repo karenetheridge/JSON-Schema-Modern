@@ -136,7 +136,7 @@ sub _eval_keyword_if {
   my $keyword = $self->eval($data, $schema->{if},
      +{ %$state,
         schema_path => $state->{schema_path}.'/if',
-        short_circuit => (!$state->{short_circuit} || $state->{collect_annotations} ? 0 : 1),
+        short_circuit => $state->{short_circuit} || !$state->{collect_annotations},
         errors => [],
       })
     ? 'then' : 'else';
