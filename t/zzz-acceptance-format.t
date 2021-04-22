@@ -98,10 +98,6 @@ $accepter->acceptance(
         $ENV{AUTOMATED_TESTING} && !eval { +require 'Net::IDN::Encode'; 1 } ? 'idn-hostname.json' : (),
       ] },
     # various edge cases that are difficult to accomodate
-    { file => 'date-time.json', group_description => 'validation of date-time strings',
-      test_description => 'case-insensitive T and Z' },
-    { file => 'date.json', group_description => 'validation of date strings',
-      test_description => 'only RFC3339 not all of ISO 8601 are valid' },
     { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
       test_description => 'an invalid IRI based on IPv6' },
     { file => 'idn-hostname.json',

@@ -6,8 +6,8 @@ optional tests included: yes
 
 filename                    pass  todo-fail  fail
 -------------------------------------------------
-date-time.json                10          1     0
-date.json                      4          1     0
+date-time.json                11          0     0
+date.json                      5          0     0
 duration.json                 17          0     0
 email.json                     9          0     0
 hostname.json                 12          0     0
@@ -26,4 +26,4 @@ uri-template.json              3          1     0
 uri.json                      19          1     0
 uuid.json                     12          0     0
 -------------------------------------------------
-TOTAL                        222         23     0
+TOTAL                        224         21     0
