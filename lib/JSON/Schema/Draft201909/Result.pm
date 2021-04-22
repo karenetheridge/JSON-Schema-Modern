@@ -60,6 +60,7 @@ sub BUILD {
 
 sub format {
   my ($self, $style) = @_;
+
   if ($style eq 'flag') {
     return +{ valid => $self->valid };
   }

@@ -62,5 +62,4 @@ path('t/results/additional-tests.txt')->spew_utf8($accepter->results_text)
 
 done_testing;
 __END__
-
 see t/results/additional-tests.txt for test results

@@ -135,8 +135,7 @@ sub _eval_keyword_if {
   return 1 if not exists $schema->{then} and not exists $schema->{else}
     and not $state->{collect_annotations};
   my $keyword = $self->eval($data, $schema->{if},
-     +{ %$state,
-        schema_path => $state->{schema_path}.'/if',
+     +{ %$state, schema_path => $state->{schema_path}.'/if',
         short_circuit => $state->{short_circuit} || !$state->{collect_annotations},
         errors => [],
       })

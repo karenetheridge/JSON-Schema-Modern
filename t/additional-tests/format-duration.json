@@ -1,35 +1,35 @@
 [
-  {
-      "description": "validation of duration strings",
-      "schema": {"format": "duration"},
-      "comment": "see https://en.wikipedia.org/wiki/ISO_8601#Durations for examples and clarifications",
-      "tests": [
-          {
-              "description": "elements may be omitted if their value is zero",
-              "data": "PT1H1S",
-              "valid": true
-          },
-          {
-              "description": "half a year duration, with full stop decimal point",
-              "comment": "ISO 8601 revision in year 2000 added decimals",
-              "data": "P0.5Y",
-              "valid": true
-          },
-          {
-              "description": "half a year duration, with comma decimal point",
-              "data": "P0,5Y",
-              "valid": true
-          },
-          {
-              "description": "only one unit can have a non-integer quantity",
-              "data": "P0.5Y2.1M",
-              "valid": false
-          },
-          {
-              "description": "only the smallest unit can have a non-integer quantity",
-              "data": "P0.5Y2M",
-              "valid": false
-          }
-      ]
-  }
+    {
+        "description": "validation of duration strings",
+        "schema": { "format": "duration" },
+        "comment": "see https://en.wikipedia.org/wiki/ISO_8601#Durations for examples and clarifications",
+        "tests": [
+            {
+                "description": "elements may be omitted if their value is zero",
+                "data": "PT1H1S",
+                "valid": true
+            },
+            {
+                "description": "half a year duration, with full stop decimal point",
+                "comment": "ISO 8601 revision in year 2000 added decimals",
+                "data": "P0.5Y",
+                "valid": true
+            },
+            {
+                "description": "half a year duration, with comma decimal point",
+                "data": "P0,5Y",
+                "valid": true
+            },
+            {
+                "description": "only one unit can have a non-integer quantity",
+                "data": "P0.5Y2.1M",
+                "valid": false
+            },
+            {
+                "description": "only the smallest unit can have a non-integer quantity",
+                "data": "P0.5Y2M",
+                "valid": false
+            }
+        ]
+    }
 ]

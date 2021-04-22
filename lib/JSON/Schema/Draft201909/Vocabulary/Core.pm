@@ -69,7 +69,6 @@ sub _traverse_keyword_schema {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'string');
-
   assert_uri($state, $schema);
 
   return E($state, '$schema can only appear at the schema resource root')
@@ -91,7 +90,6 @@ sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'string');
-
   return E($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
     if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/;
 
