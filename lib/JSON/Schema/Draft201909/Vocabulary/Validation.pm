@@ -34,6 +34,7 @@ sub _traverse_keyword_type {
   my ($self, $schema, $state) = @_;
 
   if (is_plain_arrayref($schema->{type})) {
+    abort($state, 'type array is empty') if not @{$schema->{type}};
     foreach my $type (@{$schema->{type}}) {
       return E($state, 'unrecognized type "%s"', $type//'<null>')
         if not any { ($type//'') eq $_ } qw(null boolean object array string number integer);
@@ -41,6 +42,7 @@ sub _traverse_keyword_type {
     return E($state, '"type" values are not unique') if not is_elements_unique($schema->{type});
   }
   else {
+    return if not assert_keyword_type($state, $schema, 'string');
     return E($state, 'unrecognized type "%s"', $schema->{type}//'<null>')
       if not any { ($schema->{type}//'') eq $_ } qw(null boolean object array string number integer);
   }
