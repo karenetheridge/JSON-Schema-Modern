@@ -23,7 +23,7 @@ BEGIN {
 }
 
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 1.007;
+use Test::JSON::Schema::Acceptance 1.008;
 use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
 use JSON::Schema::Draft201909;
@@ -34,11 +34,13 @@ foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TE
 note '';
 
 my $accepter = Test::JSON::Schema::Acceptance->new(
-  test_dir => $ENV{TEST_DIR} ? $ENV{TEST_DIR}
-    : Test::JSON::Schema::Acceptance->new(specification => 'draft2019-09')->test_dir->child('optional/format'),
+  specification => 'draft2019-09',
   include_optional => 1,
   verbose => 1,
+  $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (),
 );
+$accepter = $accepter->new(%$accepter, test_dir => $accepter->test_dir->child('optional/format'))
+  if not $ENV{TEST_DIR};
 
 my %options = (validate_formats => 1);
 my $js = JSON::Schema::Draft201909->new(%options);
