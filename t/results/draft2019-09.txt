@@ -1,4 +1,4 @@
-Results using Test::JSON::Schema::Acceptance 1.007
+Results using Test::JSON::Schema::Acceptance 1.008
 with commit dfcd4a19f857b85e344d6d14e37ca7b2e5d11bdf (2.0.0-333-gdfcd4a1)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2019-09

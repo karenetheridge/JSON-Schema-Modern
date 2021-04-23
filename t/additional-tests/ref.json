@@ -88,41 +88,6 @@
         ]
     },
     {
-        "description": "invalid $ref: unencoded characters",
-        "comment": "when properly encoded, this would be http://foo%5Ebar/path",
-        "schema": {
-            "$defs": {
-                "foo": {
-                    "$ref": "http://foo^bar/path"
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "unencoded characters in $ref uri",
-                "data": 1,
-                "valid": false
-            }
-        ]
-    },
-    {
-        "description": "invalid $ref: non-ascii characters",
-        "schema": {
-            "$defs": {
-                "foo": {
-                    "$ref": "https://ಠ_ಠ.com"
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "non-ascii characters in $ref uri",
-                "data": 1,
-                "valid": false
-            }
-        ]
-    },
-    {
         "description": "invalid $ref: invalid anchor fragment",
         "schema": {
             "$defs": {

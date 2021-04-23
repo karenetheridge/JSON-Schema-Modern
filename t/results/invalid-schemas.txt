@@ -1,0 +1,10 @@
+Results using Test::JSON::Schema::Acceptance 1.008
+using custom test directory: /Volumes/amaretto/Users/ether/git/JSON-Schema-Draft201909/t/invalid-schemas
+optional tests included: no
+
+filename            pass  todo-fail  fail
+-----------------------------------------
+invalid-input.json     2          0     0
+ref.json               6          0     0
+-----------------------------------------
+TOTAL                  8          0     0
