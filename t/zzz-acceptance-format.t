@@ -38,6 +38,7 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
   include_optional => 1,
   verbose => 1,
   $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (),
+  test_schemas => -d '.git' || $ENV{AUTHOR_TESTING},
 );
 $accepter = $accepter->new(%$accepter, test_dir => $accepter->test_dir->child('optional/format'))
   if not $ENV{TEST_DIR};

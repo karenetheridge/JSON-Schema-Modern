@@ -39,6 +39,7 @@ my $accepter = Test::JSON::Schema::Acceptance->new(
   skip_dir => 'optional/format',
   verbose => 1,
   $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (),
+  test_schemas => -d '.git' || $ENV{AUTHOR_TESTING},
 );
 
 my %options = (validate_formats => 0);

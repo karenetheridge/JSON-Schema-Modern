@@ -9,12 +9,17 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
-use Test::JSON::Schema::Acceptance 1.007;
+use Test::JSON::Schema::Acceptance 1.008;
 use Test::Memory::Cycle;
 use Path::Tiny;
 use JSON::Schema::Draft201909;
 
-my $accepter = Test::JSON::Schema::Acceptance->new(test_dir => 't/additional-tests', verbose => 1);
+my $accepter = Test::JSON::Schema::Acceptance->new(
+  specification => 'draft2019-09',
+  test_dir => 't/additional-tests',
+  verbose => 1,
+  test_schemas => -d '.git' || $ENV{AUTHOR_TESTING},
+);
 
 plan skip_all => 'no tests in this directory to test' if not @{$accepter->_test_data};
 
