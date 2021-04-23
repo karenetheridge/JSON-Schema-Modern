@@ -1,9 +1,29 @@
 [
     {
         "description": "validation of duration strings",
-        "schema": { "format": "duration" },
+        "schema": {"format": "duration"},
         "comment": "see https://en.wikipedia.org/wiki/ISO_8601#Durations for examples and clarifications",
         "tests": [
+            {
+                "description": "years and months can appear without days",
+                "data": "P1Y2M",
+                "valid": true
+            },
+            {
+                "description": "months and days can appear without years",
+                "data": "P1M2D",
+                "valid": true
+            },
+            {
+                "description": "hours and minutes can appear without seconds",
+                "data": "PT1H2M",
+                "valid": true
+            },
+            {
+                "description": "minutes and seconds can appear without hour",
+                "data": "PT1M2S",
+                "valid": true
+            },
             {
                 "description": "elements may be omitted if their value is zero",
                 "data": "PT1H1S",

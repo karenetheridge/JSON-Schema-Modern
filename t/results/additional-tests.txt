@@ -7,7 +7,7 @@ filename                           pass  todo-fail  fail
 anchor.json                           2          0     0
 badRef.json                           3          0     0
 faux-buggy-schemas.json               2          0     0
-format-duration.json                  5          0     0
+format-duration.json                  9          0     0
 format-ipv4.json                      3          0     0
 format-relative-json-pointer.json     7          0     0
 format-time.json                     11          0     0
@@ -26,4 +26,4 @@ short-circuit.json                   20          0     0
 unicode.json                          4          0     0
 vocabulary.json                       5          0     0
 --------------------------------------------------------
-TOTAL                               819          0     0
+TOTAL                               823          0     0
