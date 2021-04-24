@@ -123,6 +123,7 @@ memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator o
 # 2021-03-17  1.004  0.024  Looks like you failed 23 tests of 242. <-- manually edited to only include optional/format
 # 2021-03-23  1.005  0.024  Looks like you failed 23 tests of 245.
 # 2021-04-08  1.006  0.025  Looks like you failed 23 tests of 247.
+# 2021-04-14  1.007  0.026  Looks like you failed 23 tests of 247.
 
 
 END {
@@ -140,8 +141,8 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.006
-# with commit fc68499eafa2cdbe52b4ed4d219dbb1c8c99fb2b (2.0.0-322-gfc68499)
+# Results using Test::JSON::Schema::Acceptance 1.007
+# with commit dfcd4a19f857b85e344d6d14e37ca7b2e5d11bdf (2.0.0-333-gdfcd4a1)
 # from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 # using custom test directory: /Volumes/amaretto/Users/ether/.perlbrew/libs/33.8@std/lib/perl5/auto/share/dist/Test-JSON-Schema-Acceptance/tests/draft2019-09/optional/format
 # optional tests included: yes

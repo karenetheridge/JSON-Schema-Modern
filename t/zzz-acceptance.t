@@ -152,6 +152,7 @@ memory_cycle_ok($js_short_circuit, 'no leaks in the short-circuiting evaluator o
 # 2021-03-17  1.004  0.024  Looks like you failed 17 tests of 1026. <-- manually edited to remove optional/format
 # 2021-03-23  1.005  0.024  Looks like you failed 17 tests of 1045.
 # 2021-04-08  1.006  0.025  Looks like you failed 17 tests of 1055.
+# 2021-04-14  1.007  0.026  Looks like you failed 17 tests of 1068.
 
 
 END {
@@ -169,8 +170,8 @@ DIAG
 done_testing;
 __END__
 
-# Results using Test::JSON::Schema::Acceptance 1.006
-# with commit fc68499eafa2cdbe52b4ed4d219dbb1c8c99fb2b (2.0.0-322-gfc68499)
+# Results using Test::JSON::Schema::Acceptance 1.007
+# with commit dfcd4a19f857b85e344d6d14e37ca7b2e5d11bdf (2.0.0-333-gdfcd4a1)
 # from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 # specification version: draft2019-09
 # optional tests included: yes
@@ -178,16 +179,16 @@ __END__
 #
 # filename                           pass  todo-fail  fail
 # --------------------------------------------------------
-# additionalItems.json                 13          0     0
+# additionalItems.json                 15          0     0
 # additionalProperties.json            15          0     0
 # allOf.json                           30          0     0
-# anchor.json                           6          0     0
+# anchor.json                          10          0     0
 # anyOf.json                           18          0     0
 # boolean_schema.json                  18          0     0
 # const.json                           50          0     0
 # contains.json                        18          0     0
 # content.json                         18          0     0
-# default.json                          4          0     0
+# default.json                          7          0     0
 # defs.json                             2          0     0
 # dependentRequired.json               20          0     0
 # dependentSchemas.json                13          0     0
@@ -195,7 +196,7 @@ __END__
 # exclusiveMaximum.json                 4          0     0
 # exclusiveMinimum.json                 4          0     0
 # format.json                         133          0     0
-# id.json                              13          0     0
+# id.json                              16          0     0
 # if-then-else.json                    26          0     0
 # infinite-loop-detection.json          2          0     0
 # items.json                           26          0     0
@@ -217,7 +218,7 @@ __END__
 # properties.json                      20          0     0
 # propertyNames.json                   10          0     0
 # recursiveRef.json                    32          0     0
-# ref.json                             34          0     0
+# ref.json                             35          0     0
 # refRemote.json                       15          0     0
 # required.json                         9          0     0
 # type.json                            80          0     0
@@ -230,4 +231,4 @@ __END__
 # optional/non-bmp-regex.json          12          0     0
 # optional/refOfUnknownKeyword.json     4          0     0
 # --------------------------------------------------------
-# TOTAL                              1036         17     0
+# TOTAL                              1049         17     0
