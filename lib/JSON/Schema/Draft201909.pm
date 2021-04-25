@@ -559,7 +559,7 @@ __END__
 
   use JSON::Schema::Draft201909;
 
-  $js = JSON::Schema::Draft2019->new(
+  $js = JSON::Schema::Draft201909->new(
     output_format => 'flag',
     ... # other options
   );
