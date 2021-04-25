@@ -21,6 +21,7 @@ acceptance_tests(
     test_schemas => 0,
   },
   evaluator => {
+    specification_version => $version,
     validate_formats => 1,
   },
   output_file => $version.'-invalid-schemas.txt',

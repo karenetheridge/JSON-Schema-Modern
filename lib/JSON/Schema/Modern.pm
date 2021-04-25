@@ -35,6 +35,11 @@ use namespace::clean;
 
 our @CARP_NOT = qw(JSON::Schema::Modern::Document);
 
+has specification_version => (
+  is => 'ro',
+  isa => Enum(['draft2019-09']),
+);
+
 has output_format => (
   is => 'ro',
   isa => Enum(JSON::Schema::Modern::Result->OUTPUT_FORMATS),
@@ -598,6 +603,19 @@ L<Draft 2019-09|https://json-schema.org/specification-links.html#2019-09-formerl
 version of the specification.
 
 =head1 CONFIGURATION OPTIONS
+
+=head2 specification_version
+
+Indicates which version of the JSON Schema specification is used during evaluation. When not set,
+this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
+the latest (supported) version.
+
+May be one of:
+
+=for :list
+
+* L<C<draft2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
+  corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
 
 =head2 output_format
 

@@ -20,6 +20,7 @@ acceptance_tests(
     test_dir => 't/additional-tests-'.$version,
   },
   evaluator => {
+    specification_version => $version,
     validate_formats => 1,
   },
   output_file => $version.'-additional-tests.txt',
