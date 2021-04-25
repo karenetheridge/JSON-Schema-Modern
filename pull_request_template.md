@@ -1,8 +1,5 @@
 
-This project is still under active development, including undergoing
-significant refactoring, so it is not accepting pull requests at this time.
-Instead, please
-[submit an issue](https://github.com/karenetheridge/JSON-Schema-Draft201909/issues/new)
-describing your bug or proposed change.
+This project is now deprecated, but development actively continues under
+[JSOn-Schema-Modern](https://github.com/karenetheridge/JSON-Schema-Modern).
 
 -------------------------

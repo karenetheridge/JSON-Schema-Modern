@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - delegate all logic to JSON::Schema::Modern; this distribution now
+            remains as a deprecated compatibility layer.
 
 0.028     2021-06-08 02:48:07Z
           - fix validation regex for the $anchor keyword
