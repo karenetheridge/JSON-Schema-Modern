@@ -491,7 +491,11 @@ sub _get_or_load_resource {
     my $document = JSON::Schema::Draft201909::Document->new(schema => $schema, _evaluator => $self);
 
     # this should be caught by the try/catch in evaluate()
-    die [ $document->errors ] if $document->has_errors;
+    die JSON::Schema::Draft201909::Result->new(
+      output_format => $self->output_format,
+      valid => 0,
+      errors => [ $document->errors ],
+    ) if $document->has_errors;
 
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
