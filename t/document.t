@@ -10,13 +10,13 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::Deep::UnorderedPairs;
 use Test::Fatal;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
 subtest 'boolean document' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(schema => false),
+    JSON::Schema::Modern::Document->new(schema => false),
     listmethods(
       resource_index => [
         '' => {
@@ -31,7 +31,7 @@ subtest 'boolean document' => sub {
 
   like(
     exception {
-      JSON::Schema::Draft201909::Document->new(
+      JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com#/x/y/z'),
         schema => false,
       )
@@ -41,7 +41,7 @@ subtest 'boolean document' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => false,
     ),
@@ -60,7 +60,7 @@ subtest 'boolean document' => sub {
 
 subtest 'object document' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(schema => {}),
+    JSON::Schema::Modern::Document->new(schema => {}),
     listmethods(
       resource_index => [
         '' => {
@@ -74,7 +74,7 @@ subtest 'object document' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {},
     ),
@@ -92,7 +92,7 @@ subtest 'object document' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       defined $_ ? ( canonical_uri => $_ ) : (),
       schema => { '$id' => 'https://bar.com' },
     ),
@@ -111,7 +111,7 @@ subtest 'object document' => sub {
   foreach (undef, '', Mojo::URL->new);
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
         '$id' => 'https://bar.com',
@@ -146,7 +146,7 @@ subtest 'object document' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
           foo => {
@@ -170,7 +170,7 @@ subtest 'object document' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
           foo => {
@@ -195,7 +195,7 @@ subtest 'object document' => sub {
 
 subtest '$id and $anchor as properties' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         type => 'object',
         properties => {
@@ -215,7 +215,7 @@ subtest '$id and $anchor as properties' => sub {
 
 subtest '$id with an empty fragment' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
           foo => {
@@ -240,7 +240,7 @@ subtest '$id with an empty fragment' => sub {
 
 subtest '$id with a non-empty fragment' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         '$id' => 'http://main.com',
         '$defs' => {
@@ -275,7 +275,7 @@ subtest '$id with a non-empty fragment' => sub {
 
 subtest '$anchor not conforming to syntax' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
           foo => {
@@ -300,7 +300,7 @@ subtest '$anchor not conforming to syntax' => sub {
 
 subtest '$anchor and $id below an $id that is not at the document root' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
         allOf => [
@@ -340,7 +340,7 @@ subtest '$anchor and $id below an $id that is not at the document root' => sub {
 
 subtest 'JSON pointer and URI escaping' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
           foo => {
@@ -410,7 +410,7 @@ subtest 'JSON pointer and URI escaping' => sub {
 subtest 'resource collisions' => sub {
   like(
     exception {
-      JSON::Schema::Draft201909::Document->new(
+      JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
         schema => {
           allOf => [
@@ -426,7 +426,7 @@ subtest 'resource collisions' => sub {
 
   like(
     exception {
-      JSON::Schema::Draft201909::Document->new(
+      JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com'),
         schema => {
           allOf => [
@@ -442,7 +442,7 @@ subtest 'resource collisions' => sub {
 
   is(
     exception {
-      JSON::Schema::Draft201909::Document->new(
+      JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
         schema => {
           examples => [
@@ -463,7 +463,7 @@ subtest 'resource collisions' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
       schema => {
         '$id' => 'https://bar.com',
@@ -479,7 +479,7 @@ subtest 'resource collisions' => sub {
 
 subtest 'create document with explicit canonical_uri set to the same as root $id' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://foo.com/x/y/z',
       schema => { '$id' => 'https://foo.com/x/y/z' },
     ),
@@ -498,7 +498,7 @@ subtest 'create document with explicit canonical_uri set to the same as root $id
 
 subtest 'canonical_uri identification from a document with errors' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909::Document->new(
+    JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://foo.com/x/y/z',
       schema => {
         '$id' => 'https://bar.com',

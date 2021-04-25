@@ -10,22 +10,22 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::Fatal;
 use Test::Deep::UnorderedPairs;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 
 use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
 
 subtest 'evaluate a document' => sub {
-  my $document = JSON::Schema::Draft201909::Document->new(
+  my $document = JSON::Schema::Modern::Document->new(
     schema => {
       '$id' => 'https://foo.com',
       allOf => [ false, true ],
     });
 
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->evaluate(1, $document)->TO_JSON,
     {
@@ -71,7 +71,7 @@ subtest 'evaluate a document' => sub {
 };
 
 subtest 'evaluate a uri' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
@@ -108,7 +108,7 @@ subtest 'evaluate a uri' => sub {
         $_ => {
           path => '',
           canonical_uri => str($_),
-          document => isa('JSON::Schema::Draft201909::Document'),
+          document => isa('JSON::Schema::Modern::Document'),
         }
       ),
       METASCHEMA,
@@ -171,11 +171,11 @@ subtest 'evaluate a uri' => sub {
 };
 
 subtest 'add a uri resource' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->add_schema(METASCHEMA),
     all(
-      isa('JSON::Schema::Draft201909::Document'),
+      isa('JSON::Schema::Modern::Document'),
       listmethods(
         resource_index => [
           METASCHEMA() => {
@@ -223,7 +223,7 @@ subtest 'add a uri resource' => sub {
 };
 
 subtest 'add a schema associated with a uri' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   like(
     exception { $js->add_schema('https://foo.com#/x/y/z', {}) },
@@ -237,7 +237,7 @@ subtest 'add a schema associated with a uri' => sub {
       { '$id' => 'https://bar.com', allOf => [ false, true ] },
     ),
     all(
-      isa('JSON::Schema::Draft201909::Document'),
+      isa('JSON::Schema::Modern::Document'),
       listmethods(
         resource_index => unordered_pairs(
           'https://foo.com' => {
@@ -313,15 +313,15 @@ subtest 'add a schema associated with a uri' => sub {
 };
 
 subtest 'add a document without associating it with a uri' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->add_schema(
-      my $document = JSON::Schema::Draft201909::Document->new(
+      my $document = JSON::Schema::Modern::Document->new(
         schema => { '$id' => 'https://bar.com', allOf => [ false, true ] },
       )),
     all(
-      isa('JSON::Schema::Draft201909::Document'),
+      isa('JSON::Schema::Modern::Document'),
       listmethods(
         resource_index => [
           'https://bar.com' => {
@@ -347,14 +347,14 @@ subtest 'add a document without associating it with a uri' => sub {
 };
 
 subtest 'add a schema without a uri' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     my $document = $js->add_schema(
       { '$id' => 'https://bar.com', allOf => [ false, true ] },
     ),
     all(
-      isa('JSON::Schema::Draft201909::Document'),
+      isa('JSON::Schema::Modern::Document'),
       listmethods(
         resource_index => [
           'https://bar.com' => {
@@ -398,7 +398,7 @@ subtest '$ref to non-canonical uri' => sub {
     },
   };
 
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   $js->add_schema('http://otherhost:4242/another_uri', $schema);
 
   cmp_deeply(
@@ -524,8 +524,8 @@ subtest '$ref to non-canonical uri' => sub {
 };
 
 subtest 'register a document against multiple uris; do not allow duplicate uris' => sub {
-  my $js = JSON::Schema::Draft201909->new;
-  my $document = JSON::Schema::Draft201909::Document->new(
+  my $js = JSON::Schema::Modern->new;
+  my $document = JSON::Schema::Modern::Document->new(
     schema => {
       '$id' => 'https://foo.com',
       maximum => 1,
@@ -647,7 +647,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
 };
 
 subtest 'external resource with externally-supplied uri; main resource with multiple uris' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   $js->add_schema('http://localhost:1234/integer.json', { type => 'integer' });
 
@@ -696,7 +696,7 @@ subtest 'external resource with externally-supplied uri; main resource with mult
 };
 
 subtest 'document with no canonical URI, but assigned a URI through add_schema' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   # the document itself doesn't know about this URI, but the evaluator does
   $js->add_schema(
@@ -736,11 +736,11 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
   );
 
   # start over with a new evaluator...
-  $js = JSON::Schema::Draft201909->new;
+  $js = JSON::Schema::Modern->new;
 
   $js->add_schema(
     'https://localhost:1234/mydef.json',
-    JSON::Schema::Draft201909::Document->new(schema => {
+    JSON::Schema::Modern::Document->new(schema => {
       '$id' => 'https://otherhost.com/mydef.json',
       %$def_schema,
     }),

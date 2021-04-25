@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Vocabulary;
+package JSON::Schema::Modern::Vocabulary;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Base role for JSON Schema vocabulary classes
 
@@ -11,7 +11,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
-use JSON::Schema::Draft201909::Utilities qw(jsonp assert_keyword_type);
+use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type);
 use Moo::Role;
 use namespace::clean;
 
@@ -75,11 +75,11 @@ __END__
 
   package MyApp::Vocabulary::Awesome;
   use Moo::Role;
-  with 'JSON::Schema::Draft201909::Vocabulary';
+  with 'JSON::Schema::Modern::Vocabulary';
 
 =head1 DESCRIPTION
 
-This package is the role which all all vocabulary classes for L<JSON::Schema::Draft201909>
+This package is the role which all all vocabulary classes for L<JSON::Schema::Modern>
 must compose, describing the basic structure expected of a vocabulary class.
 
 User-defined custom vocabularies are not supported at this time.

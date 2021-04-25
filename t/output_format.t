@@ -9,11 +9,11 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new(short_circuit => 0, collect_annotations => 1);
+my $js = JSON::Schema::Modern->new(short_circuit => 0, collect_annotations => 1);
 is($js->output_format, 'basic', 'output_format defaults to basic');
 
 my $result = $js->evaluate(
@@ -337,7 +337,7 @@ cmp_deeply(
 );
 
 
-$js = JSON::Schema::Draft201909->new(short_circuit => 0, collect_annotations => 0);
+$js = JSON::Schema::Modern->new(short_circuit => 0, collect_annotations => 0);
 foreach my $keyword (qw(unevaluatedItems unevaluatedProperties)) {
   $result = $js->evaluate(
     1,
@@ -374,7 +374,7 @@ subtest 'strict_basic' => sub {
   # see "JSON pointer escaping" in t/errors.t
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new(output_format => 'strict_basic')->evaluate(
+    JSON::Schema::Modern->new(output_format => 'strict_basic')->evaluate(
       { '{}' => { 'my~tilde/slash-property' => 1 } },
       {
         '$id' => 'foo.json',

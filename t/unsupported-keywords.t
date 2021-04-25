@@ -9,7 +9,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use Test::Warnings 'warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
@@ -18,7 +18,7 @@ my %warnings = (
   dependencies => qr/^no-longer-supported "dependencies" keyword present \(at location ""\): this should be rewritten as "dependentSchemas" or "dependentRequired" at /,
 );
 
-my $js = JSON::Schema::Draft201909->new;
+my $js = JSON::Schema::Modern->new;
 
 foreach my $keyword (keys %warnings) {
   cmp_deeply(

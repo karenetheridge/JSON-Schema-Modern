@@ -9,12 +9,12 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
 subtest '$id sets canonical uri' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->evaluate(
       1,
@@ -76,7 +76,7 @@ subtest '$id sets canonical uri' => sub {
 };
 
 subtest 'anchors' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->evaluate(
       1,
@@ -164,7 +164,7 @@ subtest 'anchors' => sub {
 };
 
 subtest '$anchor at root without $id' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->evaluate(
       1,
@@ -209,7 +209,7 @@ subtest '$anchor at root without $id' => sub {
 };
 
 subtest '$ids and $anchors in subschemas after $id changes' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->evaluate(
       1,
@@ -269,7 +269,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
 };
 
 subtest 'invalid $id and $anchor' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->evaluate(
@@ -338,7 +338,7 @@ subtest 'invalid $id and $anchor' => sub {
 };
 
 subtest 'nested $ids' => sub {
-  my $js = JSON::Schema::Draft201909->new(short_circuit => 0);
+  my $js = JSON::Schema::Modern->new(short_circuit => 0);
   my $schema = {
     '$id' => '/foo/bar/baz.json',
     '$ref' => '/foo/bar/baz.json#/properties/alpha',  # not the canonical URI for that location
@@ -445,7 +445,7 @@ subtest 'nested $ids' => sub {
 };
 
 subtest 'multiple documents, each using canonical_uri = ""' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   my $schema1 = {
     allOf => [
       { '$id' => 'subschema1.json', type => 'string' },
@@ -550,7 +550,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
 };
 
 subtest 'multiple documents, each using canonical_uri = "", collisions in other resources' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   my $schema1 = {
     allOf => [
       { '$id' => 'subschema1.json', type => 'string' },
@@ -627,7 +627,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
 };
 
 subtest 'resource collisions in canonical uris' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   $js->add_schema({ '$id' => 'https://foo.com/x/y/z' });
 
   cmp_deeply(
@@ -645,7 +645,7 @@ subtest 'resource collisions in canonical uris' => sub {
     'detected collision between a document\'s initial uri and a document\'s subschema\'s uri',
   );
 
-  $js = JSON::Schema::Draft201909->new;
+  $js = JSON::Schema::Modern->new;
   $js->add_schema({
     '$id' => 'https://foo.com',
     anyOf => [ { '$id' => '/x/y/z' } ],
@@ -669,7 +669,7 @@ subtest 'resource collisions in canonical uris' => sub {
 
 subtest 'relative uri in $id' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909->new->evaluate(
+    JSON::Schema::Modern->new->evaluate(
       1,
       {
         '$id' => 'foo/bar/baz.json',
@@ -691,7 +691,7 @@ subtest 'relative uri in $id' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new->evaluate(
+    JSON::Schema::Modern->new->evaluate(
       [ 1, [ 2, 3 ] ],
       {
         '$id' => 'foo/bar/baz.json',

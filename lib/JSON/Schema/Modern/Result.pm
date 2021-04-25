@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Result;
+package JSON::Schema::Modern::Result;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Contains the result of a JSON Schema evaluation
 
@@ -15,8 +15,8 @@ use Moo;
 use MooX::TypeTiny;
 use Types::Standard qw(ArrayRef InstanceOf Enum);
 use MooX::HandlesVia;
-use JSON::Schema::Draft201909::Annotation;
-use JSON::Schema::Draft201909::Error;
+use JSON::Schema::Modern::Annotation;
+use JSON::Schema::Modern::Error;
 use JSON::PP ();
 use List::Util 1.50 'head';
 use namespace::clean;
@@ -35,7 +35,7 @@ sub result { goto \&valid } # backcompat only
 
 has $_.'s' => (
   is => 'bare',
-  isa => ArrayRef[InstanceOf['JSON::Schema::Draft201909::'.ucfirst]],
+  isa => ArrayRef[InstanceOf['JSON::Schema::Modern::'.ucfirst]],
   lazy => 1,
   default => sub { [] },
   handles_via => 'Array',
@@ -161,8 +161,8 @@ __END__
 
 =head1 SYNOPSIS
 
-  use JSON::Schema::Draft201909;
-  my $js = JSON::Schema::Draft201909->new;
+  use JSON::Schema::Modern;
+  my $js = JSON::Schema::Modern->new;
   my $result = $js->evaluate($data, $schema);
   my @errors = $result->errors;
 
@@ -177,12 +177,12 @@ __END__
 =head1 DESCRIPTION
 
 This object holds the complete results of evaluating a data payload against a JSON Schema using
-L<JSON::Schema::Draft201909>.
+L<JSON::Schema::Modern>.
 
 =head1 OVERLOADS
 
 The object contains a boolean overload, which evaluates to the value of L</valid>, so you can
-use the result of L<JSON::Schema::Draft201909/evaluate> in boolean context.
+use the result of L<JSON::Schema::Modern/evaluate> in boolean context.
 
 =head1 ATTRIBUTES
 
@@ -192,11 +192,11 @@ A boolean. Indicates whether validation was successful or failed.
 
 =head2 errors
 
-Returns an array of L<JSON::Schema::Draft201909::Error> objects.
+Returns an array of L<JSON::Schema::Modern::Error> objects.
 
 =head2 annotations
 
-Returns an array of L<JSON::Schema::Draft201909::Annotation> objects.
+Returns an array of L<JSON::Schema::Modern::Annotation> objects.
 
 =head2 output_format
 

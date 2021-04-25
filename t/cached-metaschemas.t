@@ -8,8 +8,8 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
+use JSON::Schema::Modern;
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 
 use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
 
@@ -17,7 +17,7 @@ use lib 't/lib';
 use Helper;
 
 subtest 'load cached metaschema' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->_get_resource(METASCHEMA),
@@ -31,7 +31,7 @@ subtest 'load cached metaschema' => sub {
       canonical_uri => str(METASCHEMA),
       path => '',
       document => all(
-        isa('JSON::Schema::Draft201909::Document'),
+        isa('JSON::Schema::Modern::Document'),
         methods(
           schema => superhashof({
             '$schema' => str(METASCHEMA),
@@ -53,7 +53,7 @@ subtest 'load cached metaschema' => sub {
 };
 
 subtest 'resource collision with cached metaschema' => sub {
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   cmp_deeply(
     $js->evaluate(1, { '$id' => METASCHEMA })->TO_JSON,
     {

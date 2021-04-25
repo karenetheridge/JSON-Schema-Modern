@@ -10,12 +10,12 @@ use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Fatal;
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new;
+my $js = JSON::Schema::Modern->new;
 
 like(ref($js->_json_decoder), qr/^(?:Cpanel::JSON::XS|JSON::PP)$/, 'we have a JSON decoder');
 

@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Vocabulary::Applicator;
+package JSON::Schema::Modern::Vocabulary::Applicator;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Implementation of the JSON Schema Draft 2019-09 Applicator vocabulary
+# ABSTRACT: Implementation of the JSON Schema Applicator vocabulary
 
 our $VERSION = '0.512';
 
@@ -13,11 +13,11 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
 use List::Util 1.45 qw(any uniqstr max);
 use Ref::Util 0.100 'is_plain_arrayref';
-use JSON::Schema::Draft201909::Utilities qw(is_type jsonp local_annotations E A abort assert_keyword_type assert_pattern true);
+use JSON::Schema::Modern::Utilities qw(is_type jsonp local_annotations E A abort assert_keyword_type assert_pattern true);
 use Moo;
 use namespace::clean;
 
-with 'JSON::Schema::Draft201909::Vocabulary';
+with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 

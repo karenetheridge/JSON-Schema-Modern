@@ -9,12 +9,12 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new(short_circuit => 0);
-my $js_short = JSON::Schema::Draft201909->new(short_circuit => 1);
+my $js = JSON::Schema::Modern->new(short_circuit => 0);
+my $js_short = JSON::Schema::Modern->new(short_circuit => 1);
 
 subtest 'multiple types' => sub {
   my $result = $js->evaluate(true, { type => ['string','number'] });
@@ -25,7 +25,7 @@ subtest 'multiple types' => sub {
     [ $result->errors ],
     [
       all(
-        isa('JSON::Schema::Draft201909::Error'),
+        isa('JSON::Schema::Modern::Error'),
         methods(
           instance_location => '',
           keyword_location => '/type',
@@ -783,7 +783,7 @@ subtest 'unresolvable $ref to a local resource' => sub {
 
 subtest 'unresolvable $ref to a remote resource' => sub {
   # new evaluator, with no resources remembered
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->evaluate(
@@ -1126,7 +1126,7 @@ subtest 'JSON pointer escaping' => sub {
 
 subtest 'absoluteKeywordLocation' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909->new(max_traversal_depth => 1)->evaluate(
+    JSON::Schema::Modern->new(max_traversal_depth => 1)->evaluate(
       [ [ 1 ] ],
       { items => { '$ref' => '#' } },
     )->TO_JSON,

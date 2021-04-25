@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Utilities;
+package JSON::Schema::Modern::Utilities;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Internal utilities for JSON::Schema::Draft201909
+# ABSTRACT: Internal utilities for JSON::Schema::Modern
 
 our $VERSION = '0.512';
 
@@ -17,8 +17,8 @@ use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use Storable 'dclone';
 use Feature::Compat::Try;
-use JSON::Schema::Draft201909::Error;
-use JSON::Schema::Draft201909::Annotation;
+use JSON::Schema::Modern::Error;
+use JSON::Schema::Modern::Annotation;
 use namespace::clean;
 
 use Exporter 'import';
@@ -189,7 +189,7 @@ sub E {
   undef $uri if $uri eq '' and $keyword_location eq ''
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
-  push @{$state->{errors}}, JSON::Schema::Draft201909::Error->new(
+  push @{$state->{errors}}, JSON::Schema::Modern::Error->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
@@ -213,7 +213,7 @@ sub A {
   undef $uri if $uri eq '' and $keyword_location eq ''
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
-  push @{$state->{annotations}}, JSON::Schema::Draft201909::Annotation->new(
+  push @{$state->{annotations}}, JSON::Schema::Modern::Annotation->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
@@ -299,11 +299,11 @@ __END__
 
 =head1 SYNOPSIS
 
-  use JSON::Schema::Draft201909::Utilities qw(func1 func2..);
+  use JSON::Schema::Modern::Utilities qw(func1 func2..);
 
 =head1 DESCRIPTION
 
-This class contains internal utilities to be used by L<JSON::Schema::Draft201909>.
+This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
 canonical_schema_uri E A abort assert_keyword_type assert_pattern assert_uri_reference assert_uri

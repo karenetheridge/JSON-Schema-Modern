@@ -10,11 +10,11 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Module::Runtime 'use_module';
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit => 0);
+my $js = JSON::Schema::Modern->new(collect_annotations => 1, short_circuit => 0);
 
 my $initial_state = {
   short_circuit => 0,
@@ -25,7 +25,7 @@ my $initial_state = {
   traversed_schema_path => '',
   vocabularies => [
     (map use_module($_)->new(evaluator => $js),
-      map 'JSON::Schema::Draft201909::Vocabulary::'.$_, qw(Applicator MetaData)),
+      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator MetaData)),
   ],
   evaluator => $js,
 };
@@ -102,7 +102,7 @@ subtest 'allOf' => sub {
   ok($js->collect_annotations, '...but the value is still true on the object');
 
   {
-    my $js = JSON::Schema::Draft201909->new;
+    my $js = JSON::Schema::Modern->new;
     ok(!$js->collect_annotations, 'collect_annotations defaults to false');
     cmp_deeply(
       $js->evaluate(1, $pass_schema, { collect_annotations => 1 })->TO_JSON,
@@ -259,7 +259,7 @@ subtest 'not' => sub {
 };
 
 subtest 'collect_annotations and unevaluated keywords' => sub {
-  my $js = JSON::Schema::Draft201909->new(collect_annotations => 0);
+  my $js = JSON::Schema::Modern->new(collect_annotations => 0);
 
   cmp_deeply(
     $js->evaluate(
@@ -334,7 +334,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is explicitly set to false, unevaluatedProperties cannot be used, even in other documents',
   );
 
-  $js = JSON::Schema::Draft201909->new(collect_annotations => 1);
+  $js = JSON::Schema::Modern->new(collect_annotations => 1);
 
   cmp_deeply(
     $js->evaluate(
@@ -383,7 +383,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is set to true, unevaluatedProperties passes, and annotations are returned',
   );
 
-  $js = JSON::Schema::Draft201909->new();
+  $js = JSON::Schema::Modern->new();
 
   cmp_deeply(
     $js->evaluate(
@@ -497,7 +497,7 @@ subtest 'annotate_unknown_keywords' => sub {
   };
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new(annotate_unknown_keywords => 1)->evaluate(
+    JSON::Schema::Modern->new(annotate_unknown_keywords => 1)->evaluate(
       $data,
       $schema,
     )->TO_JSON,
@@ -508,7 +508,7 @@ subtest 'annotate_unknown_keywords' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new(collect_annotations => 1, annotate_unknown_keywords => 1)->evaluate(
+    JSON::Schema::Modern->new(collect_annotations => 1, annotate_unknown_keywords => 1)->evaluate(
       $data,
       $schema,
     )->TO_JSON,

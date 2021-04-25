@@ -9,11 +9,11 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new(short_circuit => 0);
+my $js = JSON::Schema::Modern->new(short_circuit => 0);
 
 subtest 'invalid $schema' => sub {
   cmp_deeply(
@@ -114,7 +114,7 @@ subtest 'invalid $schema' => sub {
 
 subtest '$vocabulary' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909->new->evaluate(
+    JSON::Schema::Modern->new->evaluate(
       1,
       { '$vocabulary' => { 'https://foo' => 1 } },
     )->TO_JSON,
@@ -132,7 +132,7 @@ subtest '$vocabulary' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new->evaluate(
+    JSON::Schema::Modern->new->evaluate(
       1,
       { items => { '$vocabulary' => { 'https://foo' => true } } },
     )->TO_JSON,
@@ -150,7 +150,7 @@ subtest '$vocabulary' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new->evaluate(
+    JSON::Schema::Modern->new->evaluate(
       1,
       { items => { '$id' => 'foobar', '$vocabulary' => { 'https://foo' => true } } },
     )->TO_JSON,

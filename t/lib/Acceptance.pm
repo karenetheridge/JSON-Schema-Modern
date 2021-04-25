@@ -15,8 +15,8 @@ use Path::Tiny;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
 use Test::JSON::Schema::Acceptance 1.008;
 use Test::Memory::Cycle;
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Draft201909' => 'share' } };
-use JSON::Schema::Draft201909;
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
+use JSON::Schema::Modern;
 
 foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
   note $env.': '.($ENV{$env} // '');
@@ -38,8 +38,8 @@ sub acceptance_tests {
       test_dir => $accepter->test_dir->child($options{acceptance}{test_subdir}))
     if not $ENV{TEST_DIR} and $options{acceptance}{test_subdir};
 
-  my $js = JSON::Schema::Draft201909->new(%{$options{evaluator}});
-  my $js_short_circuit = JSON::Schema::Draft201909->new(%{$options{evaluator}}, short_circuit => 1);
+  my $js = JSON::Schema::Modern->new(%{$options{evaluator}});
+  my $js_short_circuit = JSON::Schema::Modern->new(%{$options{evaluator}}, short_circuit => 1);
 
   my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
   $encoder->indent_length(2) if $encoder->can('indent_length');
@@ -51,7 +51,7 @@ sub acceptance_tests {
       $js_short_circuit->add_schema($uri => $schema);
     }
     catch ($e) {
-      die $e->$_isa('JSON::Schema::Draft201909::Result') ? $encoder->encode($e->TO_JSON) : $e;
+      die $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e->TO_JSON) : $e;
     }
   };
 

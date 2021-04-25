@@ -10,12 +10,12 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new;
+my $js = JSON::Schema::Modern->new;
 
 my $tests = sub {
   my ($char, $test_substr) = @_;

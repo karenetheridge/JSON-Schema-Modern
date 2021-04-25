@@ -8,8 +8,8 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
-use JSON::Schema::Draft201909::Utilities 'canonical_schema_uri';
+use JSON::Schema::Modern;
+use JSON::Schema::Modern::Utilities 'canonical_schema_uri';
 
 subtest 'traversal with callbacks' => sub {
   my $schema = {
@@ -45,7 +45,7 @@ subtest 'traversal with callbacks' => sub {
 
     $refs{$state->{traversed_schema_path}.$state->{schema_path}} = $ref_uri->to_string;
   };
-  my $js = JSON::Schema::Draft201909->new;
+  my $js = JSON::Schema::Modern->new;
   my $state = $js->traverse($schema, { callbacks => { '$ref' => $ref_callback }});
 
   cmp_deeply(

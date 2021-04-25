@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Vocabulary::Format;
+package JSON::Schema::Modern::Vocabulary::Format;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Implementation of the JSON Schema Draft 2019-09 Format vocabulary
+# ABSTRACT: Implementation of the JSON Schema Format vocabulary
 
 our $VERSION = '0.512';
 
@@ -11,12 +11,12 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
-use JSON::Schema::Draft201909::Utilities qw(is_type E A assert_keyword_type);
+use JSON::Schema::Modern::Utilities qw(is_type E A assert_keyword_type);
 use Moo;
 use Feature::Compat::Try;
 use namespace::clean;
 
-with 'JSON::Schema::Draft201909::Vocabulary';
+with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/format' }
 
@@ -144,7 +144,7 @@ sub _eval_keyword_format {
   my ($self, $data, $schema, $state) = @_;
 
   if ($state->{validate_formats}) {
-    # first check the subrefs from JSON::Schema::Draft201909->new(format_evaluations => { ... })
+    # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
     # and add in the type if needed
     my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
     my $default_spec = $self->_get_default_format_validation($schema->{format});
@@ -177,11 +177,11 @@ with the URI C<https://json-schema.org/draft/2019-09/vocab/format> and formally 
 L<https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7>.
 
 Overrides to particular format implementations, or additions of new ones, can be done through
-L<JSON::Schema::Draft201909/format_validations>.
+L<JSON::Schema::Modern/format_validations>.
 
 =head1 SEE ALSO
 
 =for :list
-* L<JSON::Schema::Draft201909/Format Validation>
+* L<JSON::Schema::Modern/Format Validation>
 
 =cut

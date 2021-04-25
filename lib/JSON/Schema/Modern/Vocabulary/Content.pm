@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Vocabulary::Content;
+package JSON::Schema::Modern::Vocabulary::Content;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Implementation of the JSON Schema Draft 2019-09 Content vocabulary
+# ABSTRACT: Implementation of the JSON Schema Content vocabulary
 
 our $VERSION = '0.512';
 
@@ -12,11 +12,11 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
 use Storable 'dclone';
-use JSON::Schema::Draft201909::Utilities qw(is_type A assert_keyword_type);
+use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type);
 use Moo;
 use namespace::clean;
 
-with 'JSON::Schema::Draft201909::Vocabulary';
+with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/content' }
 

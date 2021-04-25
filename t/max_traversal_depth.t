@@ -9,12 +9,12 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new(max_traversal_depth => 6);
+my $js = JSON::Schema::Modern->new(max_traversal_depth => 6);
 
 cmp_deeply(
   $js->evaluate(

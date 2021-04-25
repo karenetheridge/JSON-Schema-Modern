@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Document;
+package JSON::Schema::Modern::Document;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: One JSON Schema document
 
@@ -85,7 +85,7 @@ has errors => (
     has_errors => 'count',
   },
   writer => '_set_errors',
-  isa => ArrayRef[InstanceOf['JSON::Schema::Draft201909::Error']],
+  isa => ArrayRef[InstanceOf['JSON::Schema::Modern::Error']],
   lazy => 1,
   default => sub { [] },
 );
@@ -130,10 +130,10 @@ around BUILDARGS => sub {
 
   # evaluator is only needed for traversal in BUILD; a different evaluator may be used for
   # the actual evaluation.
-  croak '_evaluator is not a JSON::Schema::Draft201909'
-    if exists $args->{_evaluator} and not $args->{_evaluator}->$_isa('JSON::Schema::Draft201909');
+  croak '_evaluator is not a JSON::Schema::Modern'
+    if exists $args->{_evaluator} and not $args->{_evaluator}->$_isa('JSON::Schema::Modern');
 
-  $args->{_evaluator} //= JSON::Schema::Draft201909->new;
+  $args->{_evaluator} //= JSON::Schema::Modern->new;
   return $args;
 };
 
@@ -175,9 +175,9 @@ __END__
 
 =head1 SYNOPSIS
 
-    use JSON::Schema::Draft201909::Document;
+    use JSON::Schema::Modern::Document;
 
-    my $document = JSON::Schema::Draft201909::Document->new(
+    my $document = JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://example.com/v1/schema',
       schema => $schema,
     );
@@ -186,7 +186,7 @@ __END__
 
 =head1 DESCRIPTION
 
-This class represents one JSON Schema document, to be used by L<JSON::Schema::Draft201909>.
+This class represents one JSON Schema document, to be used by L<JSON::Schema::Modern>.
 
 =head1 ATTRIBUTES
 
@@ -206,8 +206,8 @@ An index of URIs to subschemas (json path to reach the location, and the canonic
 location) for all identifiable subschemas found in the document. An entry for URI C<''> is added
 only when no other suitable identifier can be found for the root schema.
 
-This attribute should only be used by L<JSON::Schema::Draft201909> and not intended for use
-externally (you should use the public accessors in L<JSON::Schema::Draft201909> instead).
+This attribute should only be used by L<JSON::Schema::Modern> and not intended for use
+externally (you should use the public accessors in L<JSON::Schema::Modern> instead).
 
 When called as a method, returns the flattened list of tuples (path, uri). You can also use
 C<resource_pairs> which returns a list of tuples as arrayrefs.
@@ -219,14 +219,14 @@ L</resource_index> and is constructed as that is built up.
 
 =head2 errors
 
-A list of L<JSON::Schema::Draft201909::Error> objects that resulted when the schema document was
+A list of L<JSON::Schema::Modern::Error> objects that resulted when the schema document was
 originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
 errors halt the parsing process.) Documents with errors cannot be evaluated.
 
 =head2 evaluation_configs
 
 An optional hashref of configuration values that will be provided to the evaluator during
-evaluation of this document. See the third parameter of L<JSON::Schema::Draft201909/evaluate>.
+evaluation of this document. See the third parameter of L<JSON::Schema::Modern/evaluate>.
 This should never need to be set explicitly. This is sometimes populated automatically after
 creating a document object, depending on the keywords found in the schema, but they will never
 override anything you have already explicitly set.

@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Vocabulary::MetaData;
+package JSON::Schema::Modern::Vocabulary::MetaData;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Implementation of the JSON Schema Draft 2019-09 Meta-Data vocabulary
+# ABSTRACT: Implementation of the JSON Schema Meta-Data vocabulary
 
 our $VERSION = '0.512';
 
@@ -11,11 +11,11 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
-use JSON::Schema::Draft201909::Utilities qw(assert_keyword_type annotate_self);
+use JSON::Schema::Modern::Utilities qw(assert_keyword_type annotate_self);
 use Moo;
 use namespace::clean;
 
-with 'JSON::Schema::Draft201909::Vocabulary';
+with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/meta-data' }
 

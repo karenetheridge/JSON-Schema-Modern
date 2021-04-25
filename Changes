@@ -1,6 +1,9 @@
-Revision history for JSON-Schema-Draft201909
+Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - distribution has been renamed from JSON-Schema-Draft201909 to
+            JSON-Schema-Modern. JSON::Schema::Draft201909 lives on as a
+            compatibility wrapper.
 
 0.028     2021-06-08 02:48:07Z
           - fix validation regex for the $anchor keyword

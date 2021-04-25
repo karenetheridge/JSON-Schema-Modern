@@ -9,11 +9,11 @@ use Test::More 0.96;
 use Test::Fatal;
 use Test::Deep;
 use Storable 'dclone';
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Draft201909->new;
+my $js = JSON::Schema::Modern->new;
 
 subtest 'local JSON pointer' => sub {
   ok($js->evaluate(true, { '$defs' => { true => true }, '$ref' => '#/$defs/true' }),
@@ -96,7 +96,7 @@ subtest 'local anchor' => sub {
 };
 
 subtest '$id with an empty fragment' => sub {
-  my $js = JSON::Schema::Draft201909->new(max_traversal_depth => 2);
+  my $js = JSON::Schema::Modern->new(max_traversal_depth => 2);
   cmp_deeply(
     $js->evaluate(
       1,

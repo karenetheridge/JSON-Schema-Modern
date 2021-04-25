@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909::Error;
+package JSON::Schema::Modern::Error;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Contains a single error from a JSON Schema evaluation
 
@@ -60,8 +60,8 @@ __END__
 
 =head1 SYNOPSIS
 
-  use JSON::Schema::Draft201909;
-  my $js = JSON::Schema::Draft201909->new;
+  use JSON::Schema::Modern;
+  my $js = JSON::Schema::Modern->new;
   my $result = $js->evaluate($data, $schema);
   my @errors = $result->errors;
 
@@ -73,7 +73,7 @@ __END__
 =head1 DESCRIPTION
 
 An instance of this class holds one error from evaluating a JSON Schema with
-L<JSON::Schema::Draft201909>.
+L<JSON::Schema::Modern>.
 
 =head1 ATTRIBUTES
 
@@ -111,7 +111,7 @@ Returns a data structure suitable for serialization. Corresponds to one output u
 L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.2> and
 L<https://json-schema.org/draft/2019-09/output/schema>, except that C<instanceLocation> and
 C<keywordLocation> are json pointers, B<not> URI fragments. (See the
-C<strict_basic> L<JSON::Schema::Draft201909/output_format>
+C<strict_basic> L<JSON::Schema::Modern/output_format>
 if the distinction is important to you.)
 
 =cut

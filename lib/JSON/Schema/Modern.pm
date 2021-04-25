@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package JSON::Schema::Draft201909;
+package JSON::Schema::Modern;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Validate data against a schema
 # KEYWORDS: JSON Schema data validation structure specification
@@ -27,17 +27,17 @@ use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy);
 use Feature::Compat::Try;
-use JSON::Schema::Draft201909::Error;
-use JSON::Schema::Draft201909::Result;
-use JSON::Schema::Draft201909::Document;
-use JSON::Schema::Draft201909::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
+use JSON::Schema::Modern::Error;
+use JSON::Schema::Modern::Result;
+use JSON::Schema::Modern::Document;
+use JSON::Schema::Modern::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
 use namespace::clean;
 
-our @CARP_NOT = qw(JSON::Schema::Draft201909::Document);
+our @CARP_NOT = qw(JSON::Schema::Modern::Document);
 
 has output_format => (
   is => 'ro',
-  isa => Enum(JSON::Schema::Draft201909::Result->OUTPUT_FORMATS),
+  isa => Enum(JSON::Schema::Modern::Result->OUTPUT_FORMATS),
   default => 'basic',
 );
 
@@ -101,14 +101,14 @@ sub add_schema {
     return $document;
   }
 
-  my $document = $_[0]->$_isa('JSON::Schema::Draft201909::Document') ? shift
-    : JSON::Schema::Draft201909::Document->new(
+  my $document = $_[0]->$_isa('JSON::Schema::Modern::Document') ? shift
+    : JSON::Schema::Modern::Document->new(
       schema => shift,
       $uri ? (canonical_uri => $uri) : (),
       _evaluator => $self,  # used only for traversal during document construction
     );
 
-  die JSON::Schema::Draft201909::Result->new(
+  die JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,
     valid => 0,
     errors => [ $document->errors ],
@@ -149,11 +149,11 @@ sub evaluate_json_string {
     $data = $self->_json_decoder->decode($json_data)
   }
   catch ($e) {
-    return JSON::Schema::Draft201909::Result->new(
+    return JSON::Schema::Modern::Result->new(
       output_format => $self->output_format,
       valid => 0,
       errors => [
-        JSON::Schema::Draft201909::Error->new(
+        JSON::Schema::Modern::Error->new(
           keyword => undef,
           instance_location => '',
           keyword_location => '',
@@ -187,7 +187,7 @@ sub traverse {
     # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
     vocabularies => [
-      (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+      (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
         qw(Core Applicator Validation Format Content MetaData)),
     ],
     identifiers => [],
@@ -200,7 +200,7 @@ sub traverse {
     $self->_traverse($schema_reference, $state);
   }
   catch ($e) {
-    if ($e->$_isa('JSON::Schema::Draft201909::Error')) {
+    if ($e->$_isa('JSON::Schema::Modern::Error')) {
       # note: we should never be here, since traversal subs are no longer be fatal
       push @{$state->{errors}}, $e;
     }
@@ -256,7 +256,7 @@ sub evaluate {
       # for now, this is hardcoded, but in the future the dialect will be determined by the
       # traverse() pass on the schema and examination of the referenced metaschema.
       vocabularies => [
-        (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+        (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
           qw(Core Applicator Validation Format Content MetaData)),
       ],
       evaluator => $self,
@@ -271,10 +271,10 @@ sub evaluate {
     warn 'result is false but there are no errors' if not $valid and not @{$state->{errors}};
   }
   catch ($e) {
-    if ($e->$_isa('JSON::Schema::Draft201909::Result')) {
+    if ($e->$_isa('JSON::Schema::Modern::Result')) {
       return $e;
     }
-    elsif ($e->$_isa('JSON::Schema::Draft201909::Error')) {
+    elsif ($e->$_isa('JSON::Schema::Modern::Error')) {
       push @{$state->{errors}}, $e;
     }
     else {
@@ -284,7 +284,7 @@ sub evaluate {
     $valid = 0;
   }
 
-  return JSON::Schema::Draft201909::Result->new(
+  return JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,
     valid => $valid,
     $valid
@@ -429,7 +429,7 @@ has _resource_index => (
   isa => HashRef[Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,
-      document => InstanceOf['JSON::Schema::Draft201909::Document'],
+      document => InstanceOf['JSON::Schema::Modern::Document'],
     ]],
   handles_via => 'Hash',
   handles => {
@@ -499,12 +499,12 @@ sub _get_or_load_resource {
   return $resource if $resource;
 
   if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
-    my $file = path(dist_dir('JSON-Schema-Draft201909'), $local_filename);
+    my $file = path(dist_dir('JSON-Schema-Modern'), $local_filename);
     my $schema = $self->_json_decoder->decode($file->slurp_raw);
-    my $document = JSON::Schema::Draft201909::Document->new(schema => $schema, _evaluator => $self);
+    my $document = JSON::Schema::Modern::Document->new(schema => $schema, _evaluator => $self);
 
     # this should be caught by the try/catch in evaluate()
-    die JSON::Schema::Draft201909::Result->new(
+    die JSON::Schema::Modern::Result->new(
       output_format => $self->output_format,
       valid => 0,
       errors => [ $document->errors ],
@@ -527,7 +527,7 @@ sub _get_or_load_resource {
 };
 
 # returns a schema (which may not be at a document root), the canonical uri for that schema,
-# the JSON::Schema::Draft201909::Document object that holds that schema, and the path relative
+# the JSON::Schema::Modern::Document object that holds that schema, and the path relative
 # to the document root for this schema.
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_schema_from_uri {
@@ -582,9 +582,9 @@ __END__
 
 =head1 SYNOPSIS
 
-  use JSON::Schema::Draft201909;
+  use JSON::Schema::Modern;
 
-  $js = JSON::Schema::Draft201909->new(
+  $js = JSON::Schema::Modern->new(
     output_format => 'flag',
     ... # other options
   );
@@ -602,7 +602,7 @@ version of the specification.
 =head2 output_format
 
 One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
-Passed to L<JSON::Schema::Draft201909::Result/output_format>.
+Passed to L<JSON::Schema::Modern::Result/output_format>.
 
 =head2 short_circuit
 
@@ -637,7 +637,7 @@ number, or integer) the instance value must be for the format validation to be c
 =head2 collect_annotations
 
 When true, annotations are collected from keywords that produce them, when validation succeeds.
-These annotations are available in the returned result (see L<JSON::Schema::Draft201909::Result>).
+These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
 Defaults to false.
 
 =head2 annotate_unknown_keywords
@@ -666,14 +666,14 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 
 =for :list
 * a Perl data structure, such as what is returned from a JSON decode operation,
-* a L<JSON::Schema::Draft201909::Document> object,
+* a L<JSON::Schema::Modern::Document> object,
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
 L</validate_formats> settings for just this evaluation call.
 
-The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
+The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
 
@@ -690,7 +690,7 @@ L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
 
 =for :list
 * a Perl data structure, such as what is returned from a JSON decode operation,
-* a L<JSON::Schema::Draft201909::Document> object,
+* a L<JSON::Schema::Modern::Document> object,
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
@@ -698,7 +698,7 @@ L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
 L</validate_formats> settings for just this
 evaluation call.
 
-The result is a L<JSON::Schema::Draft201909::Result> object, which can also be used as a boolean.
+The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
 =head2 traverse
 
@@ -717,11 +717,11 @@ experimental and is highly likely to change in the future.
 For example, to find the resolved targets of all C<$ref> keywords in a schema document:
 
   my @refs;
-  JSON::Schema::Draft201909->new->traverse($schema, {
+  JSON::Schema::Modern->new->traverse($schema, {
     callbacks => {
       '$ref' => sub ($schema, $state) {
         push @refs, Mojo::URL->new($schema->{'$ref'})
-          ->to_abs(JSON::Schema::Draft201909::Utilities::canonical_schema_uri($state));
+          ->to_abs(JSON::Schema::Modern::Utilities::canonical_schema_uri($state));
       }
     },
   });
@@ -733,7 +733,7 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
   $js->add_schema($schema);
   $js->add_schema($document);
 
-Introduces the (unblessed, nested) Perl data structure or L<JSON::Schema::Draft201909::Document>
+Introduces the (unblessed, nested) Perl data structure or L<JSON::Schema::Modern::Document>
 object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
 provided (and if not, C<''> will be used if no other identifier can be found within).
 
@@ -742,9 +742,9 @@ before calling L</evaluate>, other than the standard metaschemas which are loade
 as needed.
 
 Returns C<undef> if the resource could not be found;
-if there were errors in the document, will die with a L<JSON::Schema::Draft201909::Result> object
+if there were errors in the document, will die with a L<JSON::Schema::Modern::Result> object
 containing the errors;
-otherwise returns the L<JSON::Schema::Draft201909::Document> that contains the added schema.
+otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
 
 =head2 get
 
@@ -823,7 +823,7 @@ Additionally, some small errors in the specification (which have been fixed in t
 specification version) are fixed here rather than implementing the precise but unintended behaviour,
 most notably in the use of json pointers rather than fragment-only URIs in C<instanceLocation> and
 C<keywordLocation> in annotations and errors. (Use the C<strict_basic>
-L<JSON::Schema::Draft201909/output_format> to revert this change.)
+L<JSON::Schema::Modern/output_format> to revert this change.)
 
 =head1 SECURITY CONSIDERATIONS
 

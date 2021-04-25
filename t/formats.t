@@ -10,7 +10,7 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::Fatal;
-use JSON::Schema::Draft201909;
+use JSON::Schema::Modern;
 
 use lib 't/lib';
 use Helper;
@@ -18,7 +18,7 @@ use Helper;
 my ($annotation_result, $validation_result);
 subtest 'no validation' => sub {
   cmp_deeply(
-    JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 0)
+    JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 0)
       ->evaluate('abc', { format => 'uuid' })->TO_JSON,
     $annotation_result = {
       valid => true,
@@ -34,7 +34,7 @@ subtest 'no validation' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1)
+    JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1)
       ->evaluate('abc', { format => 'uuid' }, { validate_formats => 0 })->TO_JSON,
     $annotation_result,
     'format validation can be turned off in evaluate()',
@@ -42,7 +42,7 @@ subtest 'no validation' => sub {
 };
 
 subtest 'simple validation' => sub {
-  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1);
+  my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
 
   cmp_deeply(
     $js->evaluate(123, { format => 'uuid' })->TO_JSON,
@@ -74,7 +74,7 @@ subtest 'simple validation' => sub {
     'simple failure',
   );
 
-  $js = JSON::Schema::Draft201909->new(collect_annotations => 1);
+  $js = JSON::Schema::Modern->new(collect_annotations => 1);
   ok(!$js->validate_formats, 'format_validation defaults to false');
   cmp_deeply(
     $js->evaluate('123', { format => 'uuid' }, { validate_formats => 1 })->TO_JSON,
@@ -89,7 +89,7 @@ subtest 'unknown format attribute' => sub {
   # see https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.3
   # "An implementation MUST NOT fail validation or cease processing due to an unknown format
   # attribute."
-  my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, validate_formats => 1);
+  my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
   cmp_deeply(
     $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
     {
@@ -109,7 +109,7 @@ subtest 'unknown format attribute' => sub {
 subtest 'override a format sub' => sub {
   like(
     exception {
-      JSON::Schema::Draft201909->new(
+      JSON::Schema::Modern->new(
         validate_formats => 1,
         format_validations => +{ uuid => 1 },
       )
@@ -120,7 +120,7 @@ subtest 'override a format sub' => sub {
 
   like(
     exception {
-      JSON::Schema::Draft201909->new(
+      JSON::Schema::Modern->new(
         validate_formats => 1,
         format_validations => +{ mult_5 => 1 },
       )
@@ -129,7 +129,7 @@ subtest 'override a format sub' => sub {
     'check syntax of implementation for a new format',
   );
 
-  my $js = JSON::Schema::Draft201909->new(
+  my $js = JSON::Schema::Modern->new(
     collect_annotations => 1,
     validate_formats => 1,
     format_validations => +{
@@ -174,9 +174,9 @@ subtest 'override a format sub' => sub {
 
 subtest 'different formats after document creation' => sub {
   # the default evaluator does not know the mult_5 format
-  my $document = JSON::Schema::Draft201909::Document->new(schema => { format => 'mult_5' });
+  my $document = JSON::Schema::Modern::Document->new(schema => { format => 'mult_5' });
 
-  my $js1 = JSON::Schema::Draft201909->new(validate_formats => 1, collect_annotations => 0);
+  my $js1 = JSON::Schema::Modern->new(validate_formats => 1, collect_annotations => 0);
   cmp_deeply(
     $js1->evaluate(3, $document)->TO_JSON,
     {
@@ -185,7 +185,7 @@ subtest 'different formats after document creation' => sub {
     'the default evaluator does not know the mult_5 format',
   );
 
-  my $js2 = JSON::Schema::Draft201909->new(
+  my $js2 = JSON::Schema::Modern->new(
     collect_annotations => 1,
     validate_formats => 1,
     format_validations => +{ mult_5 => +{ type => 'integer', sub => sub { ($_[0] % 5) == 0 } } },
