@@ -477,18 +477,18 @@ around _add_resources => sub {
 };
 
 use constant CACHED_METASCHEMAS => {
-  'https://json-schema.org/draft/2019-09/hyper-schema'        => '2019-09/hyper-schema.json',
-  'https://json-schema.org/draft/2019-09/links'               => '2019-09/links.json',
-  'https://json-schema.org/draft/2019-09/meta/applicator'     => '2019-09/meta/applicator.json',
-  'https://json-schema.org/draft/2019-09/meta/content'        => '2019-09/meta/content.json',
-  'https://json-schema.org/draft/2019-09/meta/core'           => '2019-09/meta/core.json',
-  'https://json-schema.org/draft/2019-09/meta/format'         => '2019-09/meta/format.json',
-  'https://json-schema.org/draft/2019-09/meta/hyper-schema'   => '2019-09/meta/hyper-schema.json',
-  'https://json-schema.org/draft/2019-09/meta/meta-data'      => '2019-09/meta/meta-data.json',
-  'https://json-schema.org/draft/2019-09/meta/validation'     => '2019-09/meta/validation.json',
-  'https://json-schema.org/draft/2019-09/output/hyper-schema' => '2019-09/output/hyper-schema.json',
-  'https://json-schema.org/draft/2019-09/output/schema'       => '2019-09/output/schema.json',
-  'https://json-schema.org/draft/2019-09/schema'              => '2019-09/schema.json',
+  'https://json-schema.org/draft/2019-09/hyper-schema'        => 'draft2019-09/hyper-schema.json',
+  'https://json-schema.org/draft/2019-09/links'               => 'draft2019-09/links.json',
+  'https://json-schema.org/draft/2019-09/meta/applicator'     => 'draft2019-09/meta/applicator.json',
+  'https://json-schema.org/draft/2019-09/meta/content'        => 'draft2019-09/meta/content.json',
+  'https://json-schema.org/draft/2019-09/meta/core'           => 'draft2019-09/meta/core.json',
+  'https://json-schema.org/draft/2019-09/meta/format'         => 'draft2019-09/meta/format.json',
+  'https://json-schema.org/draft/2019-09/meta/hyper-schema'   => 'draft2019-09/meta/hyper-schema.json',
+  'https://json-schema.org/draft/2019-09/meta/meta-data'      => 'draft2019-09/meta/meta-data.json',
+  'https://json-schema.org/draft/2019-09/meta/validation'     => 'draft2019-09/meta/validation.json',
+  'https://json-schema.org/draft/2019-09/output/hyper-schema' => 'draft2019-09/output/hyper-schema.json',
+  'https://json-schema.org/draft/2019-09/output/schema'       => 'draft2019-09/output/schema.json',
+  'https://json-schema.org/draft/2019-09/schema'              => 'draft2019-09/schema.json',
 };
 
 # returns the same as _get_resource
