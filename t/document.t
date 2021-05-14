@@ -496,4 +496,36 @@ subtest 'create document with explicit canonical_uri set to the same as root $id
   );
 };
 
+subtest 'canonical_uri identification from a document with errors' => sub {
+  cmp_deeply(
+    JSON::Schema::Draft201909::Document->new(
+      canonical_uri => 'https://foo.com/x/y/z',
+      schema => {
+        '$id' => 'https://bar.com',
+        allOf => [
+          {
+            '$id' => 'https://baz.com',
+            oneOf => [
+              { '$id' => 'https://quux.com' },
+              [ 'not a subschema' ],
+            ],
+          },
+        ],
+      },
+    ),
+    listmethods(
+      canonical_uri => [ str('https://bar.com') ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/oneOf/1',
+          absoluteKeywordLocation => 'https://baz.com#/oneOf/1',
+          error => 'invalid schema type: array',
+        }),
+      ],
+    ),
+    'error lower down in document does not result in an inner identifier being used as canonical_uri',
+  );
+};
+
 done_testing;
