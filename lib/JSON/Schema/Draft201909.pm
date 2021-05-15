@@ -267,6 +267,7 @@ sub evaluate {
     @$state{qw(canonical_schema_uri document document_path)} = ($canonical_uri, $document, $document_path);
 
     $valid = $self->_eval($data, $schema, $state);
+    warn 'result is false but there are no errors' if not $valid and not @{$state->{errors}};
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Draft201909::Result')) {
@@ -376,7 +377,12 @@ sub _eval {
       next if not $vocabulary->can($method);
 
       $state->{keyword} = $keyword;
-      $valid = 0 if not $vocabulary->$method($data, $schema, $state);
+      my $error_count = @{$state->{errors}};
+      if (not $vocabulary->$method($data, $schema, $state)) {
+        warn 'result is false but there are no errors (keyword: '.$keyword.')'
+          if $error_count == @{$state->{errors}};
+        $valid = 0;
+      }
 
       last ALL_KEYWORDS if not $valid and $state->{short_circuit};
 
