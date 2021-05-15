@@ -10,13 +10,13 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.026
+version 0.027
 
 =head1 SYNOPSIS
 
   use JSON::Schema::Draft201909;
 
-  $js = JSON::Schema::Draft2019->new(
+  $js = JSON::Schema::Draft201909->new(
     output_format => 'flag',
     ... # other options
   );
@@ -397,6 +397,10 @@ L<JSON::Schema::Tiny>: a more minimal implementation of the specification, with 
 =item *
 
 L<https://json-schema.org/draft/2019-09/release-notes.html>
+
+=item *
+
+L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
 
 =back
 
