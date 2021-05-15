@@ -822,5 +822,6 @@ SOURCES.>
 * L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
 * L<JSON::Schema::Tiny>: a more minimal implementation of the specification, with fewer dependencies
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
+* L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
 
 =cut
