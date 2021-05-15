@@ -1,5 +1,5 @@
 Results using Test::JSON::Schema::Acceptance 1.008
-with commit dfcd4a19f857b85e344d6d14e37ca7b2e5d11bdf (2.0.0-333-gdfcd4a1)
+with commit bf383b4cf2a0b83957b232d3ba5a92222f632a08 (2.0.0-357-gbf383b4)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 using custom test directory: <base test directory>/optional/format
 optional tests included: yes
@@ -20,10 +20,10 @@ iri.json                       8          1     0
 json-pointer.json             32          0     0
 regex.json                     2          0     0
 relative-json-pointer.json     9          0     0
-time.json                      3          0     0
+time.json                     18          0     0
 uri-reference.json             7          0     0
 uri-template.json              3          1     0
 uri.json                      19          1     0
 uuid.json                     12          0     0
 -------------------------------------------------
-TOTAL                        224         21     0
+TOTAL                        239         21     0

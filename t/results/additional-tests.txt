@@ -20,9 +20,9 @@ not-an-id.json                        2          0     0
 recursive-dynamic.json                2          0     0
 recursiveRef.json                    27          0     0
 ref-and-id.json                       4          0     0
-ref.json                              8          0     0
+ref.json                             10          0     0
 short-circuit.json                   20          0     0
 unicode.json                          4          0     0
 vocabulary.json                       1          0     0
 --------------------------------------------------------
-TOTAL                               815          0     0
+TOTAL                               817          0     0

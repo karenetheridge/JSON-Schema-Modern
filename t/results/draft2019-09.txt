@@ -1,5 +1,5 @@
 Results using Test::JSON::Schema::Acceptance 1.008
-with commit dfcd4a19f857b85e344d6d14e37ca7b2e5d11bdf (2.0.0-333-gdfcd4a1)
+with commit bf383b4cf2a0b83957b232d3ba5a92222f632a08 (2.0.0-357-gbf383b4)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2019-09
 optional tests included: yes
@@ -53,10 +53,11 @@ type.json                            80          0     0
 unevaluatedItems.json                35          0     0
 unevaluatedProperties.json           59          0     0
 uniqueItems.json                     64          0     0
+unknownKeyword.json                   3          0     0
 optional/bignum.json                  2          7     0
 optional/ecmascript-regex.json       31          9     0
 optional/float-overflow.json          0          1     0
 optional/non-bmp-regex.json          12          0     0
 optional/refOfUnknownKeyword.json     4          0     0
 --------------------------------------------------------
-TOTAL                              1049         17     0
+TOTAL                              1052         17     0
