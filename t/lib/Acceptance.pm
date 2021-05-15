@@ -26,7 +26,7 @@ note '';
 sub acceptance_tests {
   my (%options) = @_;
 
-
+  local $Test::Builder::Level = $Test::Builder::Level + 1;
   my $accepter = Test::JSON::Schema::Acceptance->new(
     include_optional => 1,
     verbose => 1,
