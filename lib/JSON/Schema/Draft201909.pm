@@ -84,8 +84,8 @@ has _format_validations => (
 );
 
 sub add_schema {
+  croak 'insufficient arguments' if @_ < 2;
   my $self = shift;
-  die 'insufficient arguments' if @_ < 1;
 
   # TODO: resolve $uri against $self->base_uri
   my $uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
@@ -138,8 +138,9 @@ sub add_schema {
 }
 
 sub evaluate_json_string {
+  croak 'evaluate_json_string called in void context' if not defined wantarray;
+  croak 'insufficient arguments' if @_ < 3;
   my ($self, $json_data, $schema, $config_override) = @_;
-  die 'insufficient arguments' if @_ < 3;
 
   my $data;
   try {
@@ -168,8 +169,8 @@ sub evaluate_json_string {
 # $id and $anchor keywords within.
 # Returns the internal $state object accumulated during the traversal.
 sub traverse {
+  croak 'insufficient arguments' if @_ < 2;
   my ($self, $schema_reference, $config_override) = @_;
-  die 'insufficient arguments' if @_ < 2;
 
   my $base_uri = Mojo::URL->new($config_override->{canonical_schema_uri} // '');
 
@@ -211,8 +212,9 @@ sub traverse {
 }
 
 sub evaluate {
+  croak 'evaluate called in void context' if not defined wantarray;
+  croak 'insufficient arguments' if @_ < 3;
   my ($self, $data, $schema_reference, $config_override) = @_;
-  die 'insufficient arguments' if @_ < 3;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
@@ -295,8 +297,8 @@ sub evaluate {
 }
 
 sub get {
+  croak 'insufficient arguments' if @_ < 2;
   my ($self, $uri) = @_;
-  die 'insufficient arguments' if @_ < 2;
 
   my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
   $subschema = dclone($subschema) if is_ref($subschema);
@@ -306,6 +308,7 @@ sub get {
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
 sub _traverse {
+  croak 'insufficient arguments' if @_ < 3;
   my ($self, $schema, $state) = @_;
 
   delete $state->{keyword};
@@ -335,6 +338,8 @@ sub _traverse {
 }
 
 sub _eval {
+  croak '_eval called in void context' if not defined wantarray;
+  croak 'insufficient arguments' if @_ < 4;
   my ($self, $data, $schema, $state) = @_;
 
   # do not propagate upwards changes to depth, traversed paths,
