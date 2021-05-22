@@ -91,7 +91,7 @@ sub _traverse_keyword_anchor {
 
   return if not assert_keyword_type($state, $schema, 'string');
   return E($state, '$anchor value "%s" does not match required syntax', $schema->{'$anchor'})
-    if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]+$/;
+    if $schema->{'$anchor'} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/;
 
   my $canonical_uri = canonical_schema_uri($state);
 

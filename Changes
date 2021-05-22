@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
 {{$NEXT}}
+          - fix validation regex for the $anchor keyword
 
 0.027     2021-05-15 18:13:21Z
           - fixed error strings used for failing "dependentRequired"
