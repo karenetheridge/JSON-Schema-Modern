@@ -32,8 +32,9 @@ sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 # - contains must be evaluated before maxContains, minContains (in the Validator vocabulary)
 sub keywords {
   qw(allOf anyOf oneOf not if then else dependentSchemas
-    items additionalItems unevaluatedItems contains
-    properties patternProperties additionalProperties unevaluatedProperties propertyNames);
+    items additionalItems contains
+    properties patternProperties additionalProperties propertyNames
+    unevaluatedItems unevaluatedProperties);
 }
 
 sub _traverse_keyword_allOf { shift->traverse_array_schemas(@_) }

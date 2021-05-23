@@ -187,16 +187,6 @@ cmp_deeply(
         keywordLocation => '/additionalProperties',
         error => 'not all additional properties are valid',
       },
-      (map +{
-        instanceLocation => '/'.$_,
-        keywordLocation => '/unevaluatedProperties',
-        error => 'additional property not permitted',
-      }, qw(alpha beta foo gamma theta zulu)),
-      {
-        instanceLocation => '',
-        keywordLocation => '/unevaluatedProperties',
-        error => 'not all additional properties are valid',
-      },
       {
         instanceLocation => '/zulu',
         keywordLocation => '/propertyNames/pattern',
@@ -206,6 +196,16 @@ cmp_deeply(
         instanceLocation => '',
         keywordLocation => '/propertyNames',
         error => 'not all property names are valid',
+      },
+      (map +{
+        instanceLocation => '/'.$_,
+        keywordLocation => '/unevaluatedProperties',
+        error => 'additional property not permitted',
+      }, qw(alpha beta foo gamma theta zulu)),
+      {
+        instanceLocation => '',
+        keywordLocation => '/unevaluatedProperties',
+        error => 'not all additional properties are valid',
       },
       {
         instanceLocation => '',
