@@ -29,6 +29,7 @@ sub vocabulary { 'https://json-schema.org/draft/2019-09/vocab/applicator' }
 # - properties and patternProperties must be evaluated before additionalProperties
 # - in-place applicators and properties, patternProperties, additionalProperties must be evaluated
 #   before unevaluatedProperties
+# - contains must be evaluated before maxContains, minContains (in the Validator vocabulary)
 sub keywords {
   qw(allOf anyOf oneOf not if then else dependentSchemas
     items additionalItems unevaluatedItems contains
