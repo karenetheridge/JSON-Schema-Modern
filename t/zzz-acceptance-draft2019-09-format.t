@@ -20,15 +20,17 @@ BEGIN {
     if not -d '.git' and not grep $ENV{$_}, @variables;
 }
 
+my $version = 'draft2019-09';
+
 acceptance_tests(
   acceptance => {
-    specification => 'draft2019-09',
+    specification => $version,
     test_subdir => 'optional/format',
   },
   evaluator => {
     validate_formats => 1,
   },
-  output_file => 'draft2019-09-format.txt',
+  output_file => $version.'-format.txt',
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
       { file => [

@@ -11,18 +11,21 @@ use Test::More;
 use lib 't/lib';
 use Acceptance;
 
+my $version = 'draft2019-09';
+
 acceptance_tests(
   acceptance => {
-    specification => 'draft2019-09',
-    test_dir => 't/additional-tests',
+    specification => $version,
     include_optional => 0,
+    test_dir => 't/additional-tests-'.$version,
   },
   evaluator => {
+    specification_version => $version,
     validate_formats => 1,
   },
-  output_file => 'additional-tests.txt',
+  output_file => $version.'-additional-tests.txt',
 );
 
 done_testing;
 __END__
-see t/results/additional-tests.txt for test results
+see t/results/draft2019-09-additional-tests.txt for test results
