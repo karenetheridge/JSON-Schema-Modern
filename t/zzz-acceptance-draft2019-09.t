@@ -55,49 +55,6 @@ acceptance_tests(
   },
 );
 
-# date        Test::JSON::Schema::Acceptance version
-#                    JSON::Schema::Draft201909 version
-#                           result count of running *all* tests (with no TODOs)
-# ----        -----  ----   --------------------------------------
-# 2020-05-02  0.991  0.001  Looks like you failed 272 tests of 739.
-# 2020-05-05  0.991  0.001  Looks like you failed 211 tests of 739.
-# 2020-05-05  0.992  0.001  Looks like you failed 225 tests of 775.
-# 2020-05-06  0.992  0.001  Looks like you failed 193 tests of 775.
-# 2020-05-06  0.992  0.001  Looks like you failed 190 tests of 775.
-# 2020-05-06  0.992  0.001  Looks like you failed 181 tests of 775.
-# 2020-05-07  0.992  0.001  Looks like you failed 177 tests of 775.
-# 2020-05-07  0.992  0.001  Looks like you failed 163 tests of 775.
-# 2020-05-07  0.992  0.001  Looks like you failed 161 tests of 775.
-# 2020-05-07  0.992  0.001  Looks like you failed 150 tests of 775.
-# 2020-05-08  0.993  0.001  Looks like you failed 150 tests of 776.
-# 2020-05-08  0.993  0.001  Looks like you failed 117 tests of 776.
-# 2020-05-08  0.993  0.001  Looks like you failed 107 tests of 776.
-# 2020-05-08  0.993  0.001  Looks like you failed 116 tests of 776.
-# 2020-05-08  0.993  0.001  Looks like you failed 110 tests of 776.
-# 2020-05-08  0.993  0.001  Looks like you failed 97 tests of 776.
-# 2020-05-11  0.993  0.001  Looks like you failed 126 tests of 776.
-# 2020-05-11  0.993  0.001  Looks like you failed 98 tests of 776.
-# 2020-05-12  0.994  0.001  Looks like you failed 171 tests of 959.
-# 2020-05-13  0.995  0.001  Looks like you failed 171 tests of 959.
-# 2020-05-14  0.996  0.001  Looks like you failed 171 tests of 992.
-# 2020-05-19  0.997  0.001  Looks like you failed 171 tests of 994.
-# 2020-05-22  0.997  0.002  Looks like you failed 163 tests of 994.
-# 2020-06-01  0.997  0.004  Looks like you failed 159 tests of 994.
-# 2020-06-08  0.999  0.005  Looks like you failed 176 tests of 1055.
-# 2020-06-09  0.999  0.006  Looks like you failed 165 tests of 1055.
-# 2020-06-10  0.999  0.006  Looks like you failed 104 tests of 1055.
-# 2020-07-07  0.999  0.011  Looks like you failed 31 tests of 1055.
-# 2020-08-13  1.000  0.013  Looks like you failed 44 tests of 1210.
-# 2020-08-14  1.000  0.013  Looks like you failed 42 tests of 1210.
-# 2020-10-16  1.001  0.014  Looks like you failed 42 tests of 1221.
-# 2020-11-24  1.002  0.017  Looks like you failed 46 tests of 1233.
-# 2020-12-04  1.003  0.018  Looks like you failed 40 tests of 1265.
-# 2021-03-17  1.004  0.024  Looks like you failed 17 tests of 1026. <-- manually edited to remove optional/format
-# 2021-03-23  1.005  0.024  Looks like you failed 17 tests of 1045.
-# 2021-04-08  1.006  0.025  Looks like you failed 17 tests of 1055.
-# 2021-04-14  1.007  0.026  Looks like you failed 17 tests of 1068.
-
-
 END {
 diag <<DIAG
 

@@ -54,17 +54,6 @@ acceptance_tests(
   },
 );
 
-# date        Test::JSON::Schema::Acceptance version
-#                    JSON::Schema::Draft201909 version
-#                           result count of running *all* tests (with no TODOs)
-# ----        -----  -----  --------------------------------------
-# 2020-12-04  1.003  0.018  Looks like you failed 40 tests of 1265.
-# 2021-03-17  1.004  0.024  Looks like you failed 23 tests of 242. <-- manually edited to only include optional/format
-# 2021-03-23  1.005  0.024  Looks like you failed 23 tests of 245.
-# 2021-04-08  1.006  0.025  Looks like you failed 23 tests of 247.
-# 2021-04-14  1.007  0.026  Looks like you failed 23 tests of 247.
-
-
 END {
 diag <<DIAG
 
