@@ -36,7 +36,6 @@ acceptance_tests(
     $ENV{NO_TODO} ? () : ( todo_tests => [
       { file => [
           'optional/bignum.json',                     # TODO: see issue #10
-          'optional/content.json',                    # removed in TJSA 1.003
           'optional/ecmascript-regex.json',           # TODO: see issue #27
           'optional/float-overflow.json',             # see slack logs re multipleOf algo
         ] },
