@@ -260,7 +260,7 @@ sub assert_uri_reference {
       or $ref =~ /[^[:ascii:]]/
       or $ref =~ /#/
         and $ref !~ m{#$}                          # empty fragment
-        and $ref !~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
+        and $ref !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
         and $ref !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
 
   return 1;
@@ -279,7 +279,7 @@ sub assert_uri {
       or not $uri->is_abs
       or $string =~ /#/
         and $string !~ m{#$}                          # empty fragment
-        and $string !~ m{#[A-Za-z][-A-Za-z0-9.:_]*$}  # plain-name fragment
+        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
         and $string !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
 
   return 1;
