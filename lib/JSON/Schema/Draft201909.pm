@@ -219,24 +219,10 @@ sub evaluate {
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
   my $state = {
-    depth => 0,
     data_path => '',
     traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
-    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
-    document => 'SEE BELOW',            # the ::Document object containing this schema
-    document_path => 'SEE BELOW',       # the *initial* path within the document of this schema
     schema_path => '',                  # the rest of the path, since the last traversed $ref
-    errors => [],
-    annotations => [],
-    seen => {},
-    # for now, this is hardcoded, but in the future the dialect will be determined by the
-    # traverse() pass on the schema and examination of the referenced metaschema.
-    vocabularies => [
-      (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
-        qw(Core Applicator Validation Format Content MetaData)),
-      $self,  # for discontinued keywords defined in the base schema
-    ],
-    evaluator => $self,
+    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
   };
 
   my $valid;
@@ -249,7 +235,7 @@ sub evaluate {
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-      $document = $self->add_schema($state->{canonical_schema_uri}, $schema_reference);
+      $document = $self->add_schema($base_uri, $schema_reference);
       ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
       $document_path = '';
     }
@@ -258,15 +244,28 @@ sub evaluate {
       if not defined $schema;
 
     $state = +{
+      %$state,
+      depth => 0,
+      canonical_schema_uri => $canonical_uri, # the canonical path of the last traversed $ref
+      document => $document,                  # the ::Document object containing this schema
+      document_path => $document_path,        # the *initial* path within the document of this schema
+      errors => [],
+      annotations => [],
+      seen => {},
+      # for now, this is hardcoded, but in the future the dialect will be determined by the
+      # traverse() pass on the schema and examination of the referenced metaschema.
+      vocabularies => [
+        (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
+          qw(Core Applicator Validation Format Content MetaData)),
+        $self,  # for discontinued keywords defined in the base schema
+      ],
+      evaluator => $self,
       %{$document->evaluation_configs},
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
       } qw(short_circuit collect_annotations validate_formats annotate_unknown_keywords)),
-      %$state,
     };
-
-    @$state{qw(canonical_schema_uri document document_path)} = ($canonical_uri, $document, $document_path);
 
     $valid = $self->_eval($data, $schema, $state);
     warn 'result is false but there are no errors' if not $valid and not @{$state->{errors}};
