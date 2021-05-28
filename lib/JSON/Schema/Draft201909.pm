@@ -401,7 +401,7 @@ sub _eval {
   }
 
   # check for previously-supported but now removed keywords
-  foreach my $keyword (keys %removed_keywords) {
+  foreach my $keyword (sort keys %removed_keywords) {
     next if not exists $schema->{$keyword};
     my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
       .canonical_schema_uri($state).'")';
