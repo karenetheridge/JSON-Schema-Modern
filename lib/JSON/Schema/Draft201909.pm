@@ -33,6 +33,8 @@ use JSON::Schema::Draft201909::Document;
 use JSON::Schema::Draft201909::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
 use namespace::clean;
 
+our @CARP_NOT = qw(JSON::Schema::Draft201909::Document);
+
 has output_format => (
   is => 'ro',
   isa => Enum(JSON::Schema::Draft201909::Result->OUTPUT_FORMATS),
@@ -187,7 +189,6 @@ sub traverse {
     vocabularies => [
       (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
         qw(Core Applicator Validation Format Content MetaData)),
-      $self,  # for discontinued keywords defined in the base schema
     ],
     identifiers => [],
     configs => {},
@@ -257,7 +258,6 @@ sub evaluate {
       vocabularies => [
         (map use_module('JSON::Schema::Draft201909::Vocabulary::'.$_)->new,
           qw(Core Applicator Validation Format Content MetaData)),
-        $self,  # for discontinued keywords defined in the base schema
       ],
       evaluator => $self,
       %{$document->evaluation_configs},
@@ -336,6 +336,12 @@ sub _traverse {
   }
 }
 
+# keyword => undef, or arrayref of alternatives
+my %removed_keywords = (
+  definitions => [ '$defs' ],
+  dependencies => [ qw(dependentSchemas dependentRequired) ],
+);
+
 sub _eval {
   croak '_eval called in void context' if not defined wantarray;
   croak 'insufficient arguments' if @_ < 4;
@@ -394,6 +400,20 @@ sub _eval {
     }
   }
 
+  # check for previously-supported but now removed keywords
+  foreach my $keyword (keys %removed_keywords) {
+    next if not exists $schema->{$keyword};
+    my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
+      .canonical_schema_uri($state).'")';
+    if ($removed_keywords{$keyword}) {
+      my @list = map '"'.$_.'"', @{$removed_keywords{$keyword}};
+      @list = ((map $_.',', @list[0..$#list-1]), $list[-1]) if @list > 2;
+      splice(@list, -1, 0, 'or') if @list > 1;
+      $message .= ': this should be rewritten as '.join(' ', @list);
+    }
+    carp $message;
+  }
+
   $state->{annotations} = $orig_annotations;
 
   if ($valid) {
@@ -402,23 +422,6 @@ sub _eval {
   }
 
   return $valid;
-}
-
-sub keywords { qw(definitions dependencies) }
-
-sub _eval_keyword_definitions {
-  my ($self, $data, $schema, $state) = @_;
-  carp 'no-longer-supported "definitions" keyword present (at '
-    .canonical_schema_uri($state).'): this should be rewritten as "$defs"';
-  return 1;
-}
-
-sub _eval_keyword_dependencies {
-  my ($self, $data, $schema, $state) = @_;
-  carp 'no-longer-supported "dependencies" keyword present (at'
-    .canonical_schema_uri($state)
-    .'): this should be rewritten as "dependentSchemas" or "dependentRequired"';
-  return 1;
 }
 
 has _resource_index => (
