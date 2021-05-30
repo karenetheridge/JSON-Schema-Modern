@@ -29,5 +29,43 @@
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "'' not permitted as $id",
+        "schema": {
+            "$id": "",
+            "type": "string"
+        },
+        "tests": [
+            {
+                "description": "schema would pass without $id",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "schema would fail even without $id",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "'#' not permitted as $id",
+        "schema": {
+            "$id": "#",
+            "type": "string"
+        },
+        "tests": [
+            {
+                "description": "schema would pass without $id",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "schema would fail even without $id",
+                "data": 1,
+                "valid": false
+            }
+        ]
     }
 ]

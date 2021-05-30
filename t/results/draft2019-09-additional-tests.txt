@@ -12,7 +12,7 @@ format-ipv4.json                      3          0     0
 format-relative-json-pointer.json     7          0     0
 format-time.json                     11          0     0
 future-keywords-draft2019-09.json    10          0     0
-id.json                               2          0     0
+id.json                               6          0     0
 keyword-independence.json           688          0     0
 loose-types-const-enum.json           8          0     0
 not-an-anchor.json                    2          0     0
@@ -25,4 +25,4 @@ short-circuit.json                   20          0     0
 unicode.json                          4          0     0
 vocabulary.json                       1          0     0
 --------------------------------------------------------
-TOTAL                               817          0     0
+TOTAL                               821          0     0

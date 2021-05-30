@@ -34,6 +34,7 @@ sub _traverse_keyword_id {
   return if not assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$id'});
+  return E($state, '$id value should not equal "%s"', $uri) if $uri eq '' or $uri eq '#';
   return E($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
     if length $uri->fragment;
 
