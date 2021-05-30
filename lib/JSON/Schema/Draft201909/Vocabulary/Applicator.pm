@@ -116,7 +116,7 @@ sub _eval_keyword_oneOf {
   }
 }
 
-sub _traverse_keyword_not { shift->traverse_schema(@_) }
+sub _traverse_keyword_not { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_not {
   my ($self, $data, $schema, $state) = @_;
@@ -129,9 +129,9 @@ sub _eval_keyword_not {
   return E($state, 'subschema is valid');
 }
 
-sub _traverse_keyword_if { shift->traverse_schema(@_) }
-sub _traverse_keyword_then { shift->traverse_schema(@_) }
-sub _traverse_keyword_else { shift->traverse_schema(@_) }
+sub _traverse_keyword_if { shift->traverse_subschema(@_) }
+sub _traverse_keyword_then { shift->traverse_subschema(@_) }
+sub _traverse_keyword_else { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_if {
   my ($self, $data, $schema, $state) = @_;
@@ -185,7 +185,7 @@ sub _traverse_keyword_items {
   my ($self, $schema, $state) = @_;
 
   return $self->traverse_array_schemas($schema, $state) if is_plain_arrayref($schema->{items});
-  $self->traverse_schema($schema, $state);
+  $self->traverse_subschema($schema, $state);
 }
 
 sub _eval_keyword_items {
@@ -197,7 +197,7 @@ sub _eval_keyword_items {
   goto \&_eval_keyword__items_schema;
 }
 
-sub _traverse_keyword_additionalItems { shift->traverse_schema(@_) }
+sub _traverse_keyword_additionalItems { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_additionalItems {
   my ($self, $data, $schema, $state) = @_;
@@ -286,7 +286,7 @@ sub _eval_keyword__items_schema {
 sub _traverse_keyword_unevaluatedItems {
   my ($self, $schema, $state) = @_;
 
-  $self->traverse_schema($schema, $state);
+  $self->traverse_subschema($schema, $state);
 
   # remember that annotations need to be collected in order to evaluate this keyword
   $state->{configs}{collect_annotations} = 1;
@@ -346,7 +346,7 @@ sub _eval_keyword_unevaluatedItems {
   return A($state, true);
 }
 
-sub _traverse_keyword_contains { shift->traverse_schema(@_) }
+sub _traverse_keyword_contains { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_contains {
   my ($self, $data, $schema, $state) = @_;
@@ -478,7 +478,7 @@ sub _eval_keyword_patternProperties {
   return A($state, [ uniqstr @valid_properties ]);
 }
 
-sub _traverse_keyword_additionalProperties { shift->traverse_schema(@_) }
+sub _traverse_keyword_additionalProperties { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_additionalProperties {
   my ($self, $data, $schema, $state) = @_;
@@ -526,7 +526,7 @@ sub _eval_keyword_additionalProperties {
 sub _traverse_keyword_unevaluatedProperties {
   my ($self, $schema, $state) = @_;
 
-  $self->traverse_schema($schema, $state);
+  $self->traverse_subschema($schema, $state);
 
   # remember that annotations need to be collected in order to evaluate this keyword
   $state->{configs}{collect_annotations} = 1;
@@ -585,7 +585,7 @@ sub _eval_keyword_unevaluatedProperties {
   return A($state, \@valid_properties);
 }
 
-sub _traverse_keyword_propertyNames { shift->traverse_schema(@_) }
+sub _traverse_keyword_propertyNames { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_propertyNames {
   my ($self, $data, $schema, $state) = @_;

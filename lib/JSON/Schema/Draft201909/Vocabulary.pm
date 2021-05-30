@@ -22,7 +22,7 @@ sub traverse {
   $state->{evaluator}->_traverse($schema, $state);
 }
 
-sub traverse_schema {
+sub traverse_subschema {
   my ($self, $schema, $state) = @_;
 
   $state->{evaluator}->_traverse($schema->{$state->{keyword}},
@@ -94,7 +94,7 @@ The list of keywords defined by the vocabulary. Must be implemented by the compo
 
 Traverses a subschema.
 
-=head2 traverse_schema
+=head2 traverse_subschema
 
 Recursively traverses the schema at the current keyword.
 
