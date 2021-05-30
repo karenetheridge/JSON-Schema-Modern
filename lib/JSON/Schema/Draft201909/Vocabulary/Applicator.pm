@@ -431,9 +431,7 @@ sub _traverse_keyword_patternProperties {
 
   foreach my $property (sort keys %{$schema->{patternProperties}}) {
     return if not assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
-
-    $self->traverse($schema->{patternProperties}{$property},
-      +{ %$state, schema_path => jsonp($state->{schema_path}, 'patternProperties', $property) });
+    $self->traverse_property_schema($schema, $state, $property);
   }
 }
 

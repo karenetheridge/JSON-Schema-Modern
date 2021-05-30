@@ -52,6 +52,15 @@ sub traverse_object_schemas {
   }
 }
 
+sub traverse_property_schema {
+  my ($self, $schema, $state, $property) = @_;
+
+  return if not assert_keyword_type($state, $schema, 'object');
+
+  $state->{evaluator}->_traverse($schema->{$state->{keyword}}{$property},
+    +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
+}
+
 sub eval {
   my ($self, $data, $schema, $state) = @_;
   $state->{evaluator}->_eval($data, $schema, $state);
@@ -105,6 +114,10 @@ Recursively traverses the list of subschemas at the current keyword.
 =head2 traverse_object_schemas
 
 Recursively traverses the (subschema) values of the object at the current keyword.
+
+=head2 traverse_property_schema
+
+Recursively traverses the subschema under one property of the object at the current keyword.
 
 =head2 eval
 
