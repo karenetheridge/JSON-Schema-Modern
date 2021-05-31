@@ -50,6 +50,7 @@ has resource_index => (
     _add_resources => 'set',
     _get_resource => 'get',
     _remove_resource => 'delete',
+    _canonical_resources => 'values',
   },
   init_arg => undef,
   lazy => 1,

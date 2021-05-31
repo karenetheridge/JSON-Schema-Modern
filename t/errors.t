@@ -712,6 +712,44 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
     },
     'errors have correct absolute keyword location via $ref',
   );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'http://localhost:1234/hello',
+        '$defs' => {
+          foo => {
+            '$id' => 'http://localhost:1234/a/b.json',
+            '$defs' => {
+              bar => {
+                '$anchor' => 'my_anchor',
+                '$defs' => {
+                  baz => {
+                    '$anchor' => 'another_anchor',
+                    not => true
+                  },
+                },
+              },
+            },
+          },
+        },
+        '$ref' => 'http://localhost:1234/hello#/$defs/foo/$defs/bar/$defs/baz',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/not',
+          absoluteKeywordLocation => 'http://localhost:1234/a/b.json#/$defs/bar/$defs/baz/not',
+          error => 'subschema is valid',
+        },
+      ],
+    },
+    'absolute keyword location is correct, even when not used in the $ref',
+  );
 };
 
 subtest 'unresolvable $ref to a local resource' => sub {

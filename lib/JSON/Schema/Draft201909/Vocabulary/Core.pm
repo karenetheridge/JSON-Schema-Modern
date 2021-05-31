@@ -148,7 +148,7 @@ sub _eval_keyword_ref {
       %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
+      canonical_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
       schema_path => '',
@@ -180,7 +180,7 @@ sub _eval_keyword_recursiveRef {
       %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
-      canonical_schema_uri => $canonical_uri, # note: maybe not canonical yet until $id is processed
+      canonical_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
       schema_path => '',

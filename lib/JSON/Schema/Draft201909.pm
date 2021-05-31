@@ -541,12 +541,20 @@ sub _fetch_schema_from_uri {
     my $base = $uri->clone->fragment(undef);
     if (my $resource = $self->_get_or_load_resource($base)) {
       $subschema = $resource->{document}->get($document_path = $resource->{path}.($fragment//''));
-      undef $fragment if not length $fragment;
-      $canonical_uri = $resource->{canonical_uri}->clone->fragment($fragment);
       $document = $resource->{document};
+      my $closest_resource = first { !length($_->[1]{path})       # document root
+          || length($document_path)
+            && path($_->[1]{path})->subsumes($document_path) }    # path is above present location
+        sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
+        grep { not length Mojo::URL->new($_->[0])->fragment }     # omit anchors
+        $document->resource_pairs;
+
+      $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
+        ->fragment(substr($document_path, length($closest_resource->[1]{path})));
+      $canonical_uri->fragment(undef) if not length($canonical_uri->fragment);
     }
   }
-  else {
+  else {  # we are following a URI with a plain-name fragment
     if (my $resource = $self->_get_resource($uri)) {
       $subschema = $resource->{document}->get($document_path = $resource->{path});
       $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI

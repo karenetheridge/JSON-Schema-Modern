@@ -6,6 +6,9 @@ Revision history for JSON-Schema-Draft201909
             applied after all other keywords in the applicator vocabulary
             (true/false results are not affected, but the order of annotations
             and errors will change)
+          - calculate the canonical uri correctly after navigating a $ref:
+            using the closest resource identifier to the destination, not the
+            one that was used in the $ref
 
 0.027     2021-05-15 18:13:21Z
           - fixed error strings used for failing "dependentRequired"

@@ -44,7 +44,7 @@
                     "maximum": 10
                 },
                 "smallint": {
-                    "$comment": "canonical uri: /ref2/#/$defs/smallint; another valid uri for this location: /ref2/#bigint",
+                    "$comment": "canonical uri: /ref2; other valid uris for this location: /ref2/#bigint, /refs2/base.json#/$defs/smallint",
                     "$id": "/ref2/",
                     "$anchor": "bigint",
                     "maximum": 2
@@ -142,6 +142,44 @@
             {
                 "description": "$ref to non-schema location, invalid result",
                 "data": { "foo": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "base URI change - change folder in subschema with path from root",
+        "comment": "based on test suite draft7/refRemote.json 'base URI change - change folder in subschema'",
+        "schema": {
+            "$id": "http://localhost:1234/scope_change_defs.json",
+            "type" : "object",
+            "properties": {
+                "list": { "$ref": "#/$defs/baz/$defs/bar" }
+            },
+            "$defs": {
+                "folderInteger": {
+                    "$id": "baseUriChangeFolderInSubschema/folderInteger.json",
+                    "type": "integer"
+                },
+                "baz": {
+                    "$id": "baseUriChangeFolderInSubschema/",
+                    "$defs": {
+                        "bar": {
+                            "type": "array",
+                            "items": { "$ref": "folderInteger.json" }
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": {"list": [1]},
+                "valid": true
+            },
+            {
+                "description": "string is invalid",
+                "data": {"list": ["a"]},
                 "valid": false
             }
         ]
