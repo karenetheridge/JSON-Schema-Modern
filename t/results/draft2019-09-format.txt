@@ -1,29 +1,30 @@
-Results using Test::JSON::Schema::Acceptance 1.008
-with commit bf383b4cf2a0b83957b232d3ba5a92222f632a08 (2.0.0-357-gbf383b4)
+Results using Test::JSON::Schema::Acceptance 1.009
+with commit 8a3a542bfe6b671a51f4e39cdc0dbbf543e8903d (2.0.0-362-g8a3a542)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+specification version: draft2019-09
 using custom test directory: <base test directory>/optional/format
 optional tests included: yes
 
-filename                    pass  todo-fail  fail
--------------------------------------------------
-date-time.json                11          0     0
-date.json                      5          0     0
-duration.json                 17          0     0
-email.json                     9          0     0
-hostname.json                 12          0     0
-idn-email.json                 4          0     0
-idn-hostname.json             29         16     0
-ipv4.json                      8          0     0
-ipv6.json                     29          0     0
-iri-reference.json             5          2     0
-iri.json                       8          1     0
-json-pointer.json             32          0     0
-regex.json                     2          0     0
-relative-json-pointer.json     9          0     0
-time.json                     18          0     0
-uri-reference.json             7          0     0
-uri-template.json              3          1     0
-uri.json                      19          1     0
-uuid.json                     12          0     0
--------------------------------------------------
-TOTAL                        239         21     0
+filename                                  pass  todo-fail  fail
+---------------------------------------------------------------
+date-time.json                              11          0     0
+date.json                                    5          0     0
+duration.json                               17          0     0
+email.json                                   9          0     0
+hostname.json                               12          0     0
+idn-email.json                               4          0     0
+idn-hostname.json                           29         16     0
+ipv4.json                                    8          0     0
+ipv6.json                                   29          0     0
+iri-reference.json                           5          2     0
+iri.json                                     8          1     0
+json-pointer.json                           32          0     0
+regex.json                                   2          0     0
+relative-json-pointer.json                   9          0     0
+time.json                                   18          0     0
+uri-reference.json                           7          0     0
+uri-template.json                            3          1     0
+uri.json                                    19          1     0
+uuid.json                                   12          0     0
+---------------------------------------------------------------
+TOTAL                                      239         21     0

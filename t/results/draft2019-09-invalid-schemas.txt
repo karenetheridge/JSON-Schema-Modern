@@ -1,10 +1,11 @@
-Results using Test::JSON::Schema::Acceptance 1.008
+Results using Test::JSON::Schema::Acceptance 1.009
+specification version: draft2019-09
 using custom test directory: t/invalid-schemas
 optional tests included: no
 
-filename            pass  todo-fail  fail
------------------------------------------
-invalid-input.json     2          0     0
-ref.json               6          0     0
------------------------------------------
-TOTAL                  8          0     0
+filename                                  pass  todo-fail  fail
+---------------------------------------------------------------
+invalid-input.json                           2          0     0
+ref.json                                     6          0     0
+---------------------------------------------------------------
+TOTAL                                        8          0     0
