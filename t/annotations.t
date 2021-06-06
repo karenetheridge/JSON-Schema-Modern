@@ -19,7 +19,7 @@ my $js = JSON::Schema::Draft201909->new(collect_annotations => 1, short_circuit 
 my $initial_state = {
   short_circuit => 0,
   collect_annotations => 1,
-  canonical_schema_uri => Mojo::URL->new,
+  initial_schema_uri => Mojo::URL->new,
   data_path => '',
   schema_path => '',
   traversed_schema_path => '',
@@ -54,7 +54,7 @@ subtest 'allOf' => sub {
     $state,
     my $new_state = {
       %$state,
-      canonical_schema_uri => str(''),
+      initial_schema_uri => str(''),
       annotations => [ 'a previous annotation' ], # annotation from /allOf/1 is not saved
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf/0', error => 'subschema is false' }),
@@ -146,7 +146,7 @@ subtest 'oneOf' => sub {
     $state,
     my $new_state = {
       %$state,
-      canonical_schema_uri => str(''),
+      initial_schema_uri => str(''),
       annotations => [ 'a previous annotation' ], # annotations from /oneOf/1, /oneOf/2 are not saved
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/oneOf', error => 'multiple subschemas are valid: 1, 2' }),
@@ -206,7 +206,7 @@ subtest 'not' => sub {
     $state,
     my $new_state = {
       %$state,
-      canonical_schema_uri => str(''),
+      initial_schema_uri => str(''),
       annotations => [ 'a previous annotation' ], # annotation from /not is not saved
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' }),

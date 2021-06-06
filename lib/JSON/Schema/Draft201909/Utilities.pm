@@ -170,7 +170,7 @@ sub local_annotations {
 sub canonical_schema_uri {
   my ($state, @extra_path) = @_;
 
-  my $uri = $state->{canonical_schema_uri}->clone;
+  my $uri = $state->{initial_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
   $uri->fragment(undef) if not length($uri->fragment);
   $uri;

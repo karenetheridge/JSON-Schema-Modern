@@ -174,14 +174,14 @@ sub traverse {
   croak 'insufficient arguments' if @_ < 2;
   my ($self, $schema_reference, $config_override) = @_;
 
-  my $base_uri = Mojo::URL->new($config_override->{canonical_schema_uri} // '');
+  my $base_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
 
   my $state = {
     depth => 0,
     data_path => '',                    # this never changes since we don't have an instance yet
-    traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
-    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
-    schema_path => '',                  # the rest of the path, since the last traversed $ref
+    traversed_schema_path => '',        # the accumulated traversal path up to the last $ref traversal
+    initial_schema_uri => $base_uri,    # the canonical URI as of the start or the last traversed $ref
+    schema_path => '',                  # the rest of the path, since the start or the last traversed $ref
     errors => [],
     # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
     # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
@@ -221,9 +221,9 @@ sub evaluate {
 
   my $state = {
     data_path => '',
-    traversed_schema_path => '',        # the accumulated path up to the last $ref traversal
-    schema_path => '',                  # the rest of the path, since the last traversed $ref
-    canonical_schema_uri => $base_uri,  # the canonical path of the last traversed $ref
+    traversed_schema_path => '',        # the accumulated traversal path up to the last $ref traversal
+    initial_schema_uri => $base_uri,    # the canonical URI as of the start or the last traversed $ref
+    schema_path => '',                  # the rest of the path, since the start or the last traversed $ref
   };
 
   my $valid;
@@ -247,7 +247,7 @@ sub evaluate {
     $state = +{
       %$state,
       depth => 0,
-      canonical_schema_uri => $canonical_uri, # the canonical path of the last traversed $ref
+      initial_schema_uri => $canonical_uri,   # the canonical URI as of the start or the last traversed $ref
       document => $document,                  # the ::Document object containing this schema
       document_path => $document_path,        # the *initial* path within the document of this schema
       errors => [],
@@ -703,7 +703,7 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
 =head2 traverse
 
   $result = $js->traverse($schema_data);
-  $result = $js->traverse($schema_data, { canonical_schema_uri => 'http://example.com' });
+  $result = $js->traverse($schema_data, { initial_schema_uri => 'http://example.com' });
 
 Traverses the provided schema data without evaluating it against any instance data. Returns the
 internal state object accumulated during the traversal, including any identifiers found therein, and

@@ -39,15 +39,14 @@ sub _traverse_keyword_id {
     if length $uri->fragment;
 
   $uri->fragment(undef);
-  $state->{canonical_schema_uri} = $uri->is_abs ? $uri
-    : $uri->to_abs($state->{canonical_schema_uri});
+  $state->{initial_schema_uri} = $uri->is_abs ? $uri : $uri->to_abs($state->{initial_schema_uri});
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{schema_path} = '';
 
   push @{$state->{identifiers}},
-    $state->{canonical_schema_uri} => {
+    $state->{initial_schema_uri} => {
       path => $state->{traversed_schema_path},
-      canonical_uri => $state->{canonical_schema_uri}->clone,
+      canonical_uri => $state->{initial_schema_uri}->clone,
     };
 }
 
@@ -55,7 +54,7 @@ sub _eval_keyword_id {
   my ($self, $data, $schema, $state) = @_;
 
   if (my $canonical_uri = $state->{document}->path_to_canonical_uri($state->{document_path}.$state->{schema_path})) {
-    $state->{canonical_schema_uri} = $canonical_uri->clone;
+    $state->{initial_schema_uri} = $canonical_uri->clone;
     $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
     $state->{document_path} = $state->{document_path}.$state->{schema_path};
     $state->{schema_path} = '';
@@ -104,7 +103,7 @@ sub _traverse_keyword_anchor {
 }
 
 # we already indexed the $anchor uri, so there is nothing more to do at evaluation time.
-# we explicitly do NOT set $state->{canonical_schema_uri}.
+# we explicitly do NOT set $state->{initial_schema_uri}.
 
 sub _traverse_keyword_recursiveAnchor {
   my ($self, $schema, $state) = @_;
@@ -139,7 +138,7 @@ sub _traverse_keyword_ref {
 sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
-  my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{canonical_schema_uri});
+  my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{initial_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
 
@@ -148,7 +147,7 @@ sub _eval_keyword_ref {
       %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      canonical_schema_uri => $canonical_uri,
+      initial_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
       schema_path => '',
@@ -164,13 +163,13 @@ sub _traverse_keyword_recursiveRef {
 sub _eval_keyword_recursiveRef {
   my ($self, $data, $schema, $state) = @_;
 
-  my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{canonical_schema_uri});
+  my $target_uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{initial_schema_uri});
   my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($target_uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $target_uri) if not defined $subschema;
 
   if (is_type('boolean', $subschema->{'$recursiveAnchor'}) and $subschema->{'$recursiveAnchor'}) {
     my $uri = Mojo::URL->new($schema->{'$recursiveRef'})
-      ->to_abs($state->{recursive_anchor_uri} // $state->{canonical_schema_uri});
+      ->to_abs($state->{recursive_anchor_uri} // $state->{initial_schema_uri});
     ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
     abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
   }
@@ -180,7 +179,7 @@ sub _eval_keyword_recursiveRef {
       %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
-      canonical_schema_uri => $canonical_uri,
+      initial_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
       schema_path => '',
