@@ -18,10 +18,10 @@ keyword-independence.json                  812          0     0
 loose-types-const-enum.json                  8          0     0
 recursive-dynamic.json                       2          0     0
 recursiveRef.json                           27          0     0
-ref-and-id.json                              4          0     0
+ref-and-id.json                              6          0     0
 ref.json                                    12          0     0
 short-circuit.json                          20          0     0
 unicode.json                                 4          0     0
 vocabulary.json                              1          0     0
 ---------------------------------------------------------------
-TOTAL                                      943          0     0
+TOTAL                                      945          0     0

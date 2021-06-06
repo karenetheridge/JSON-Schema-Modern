@@ -32,7 +32,7 @@
         ]
     },
     {
-        "description": "$id must be evaluated before $ref to get the proper $ref destination",
+        "description": "$id must be evaluated before $ref to get the proper $ref destination (with uris)",
         "schema": {
             "$id": "/ref-and-id2/base.json",
             "$ref": "int.json",
@@ -58,6 +58,37 @@
             {
                 "description": "data is invalid against first definition",
                 "data": 50,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$id must be evaluated before $ref to get the proper $ref destination (with json pointers)",
+        "schema": {
+            "$id": "https://localhost:1234/base/",
+            "allOf": [
+                {
+                    "$id": "allOf0/",
+                    "$ref": "#/oneOf/0",
+                    "oneOf": [
+                        { "type": "number" }
+                    ]
+                }
+            ],
+            "oneOf": [
+                { "type": "string" },
+                { "type": "number" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "data is valid against innermost type check",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against innermost type check",
+                "data": "hello",
                 "valid": false
             }
         ]
