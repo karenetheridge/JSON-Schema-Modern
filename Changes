@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Draft201909
 
+{{$NEXT}}
+
 0.028     2021-06-08 02:48:07Z
           - fix validation regex for the $anchor keyword
           - unevaluatedItems and unevaluatedProperties keywords are now
