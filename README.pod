@@ -10,7 +10,7 @@ JSON::Schema::Draft201909 - Validate data against a schema
 
 =head1 VERSION
 
-version 0.027
+version 0.028
 
 =head1 SYNOPSIS
 
@@ -157,7 +157,7 @@ The result is a L<JSON::Schema::Draft201909::Result> object, which can also be u
 =head2 traverse
 
   $result = $js->traverse($schema_data);
-  $result = $js->traverse($schema_data, { canonical_schema_uri => 'http://example.com' });
+  $result = $js->traverse($schema_data, { initial_schema_uri => 'http://example.com' });
 
 Traverses the provided schema data without evaluating it against any instance data. Returns the
 internal state object accumulated during the traversal, including any identifiers found therein, and
@@ -408,7 +408,7 @@ L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: 
 
 Bugs may be submitted through L<https://github.com/karenetheridge/JSON-Schema-Draft201909/issues>.
 
-I am also usually active on irc, as 'ether' at C<irc.perl.org> and C<irc.freenode.org>.
+I am also usually active on irc, as 'ether' at C<irc.perl.org> and C<irc.libera.chat>.
 
 =head1 AUTHOR
 
