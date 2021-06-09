@@ -29,7 +29,7 @@ acceptance_tests(
     skip_dir => 'optional/format',
   },
   evaluator => {
-    specification_version => 'draft2019-09',
+    specification_version => $version,
     validate_formats => 0,
   },
   output_file => $version.'.txt',
