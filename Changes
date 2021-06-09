@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.512     2021-06-09 02:29:23Z
           - distribution has been renamed from JSON-Schema-Draft201909 to
             JSON-Schema-Modern. JSON::Schema::Draft201909 lives on as a
             compatibility wrapper.

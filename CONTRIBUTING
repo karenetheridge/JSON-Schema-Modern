@@ -26,11 +26,11 @@ have.
 
 You may need to satisfy some dependencies.  The easiest way to satisfy
 dependencies is to install the last release -- this is available at
-https://metacpan.org/release/JSON-Schema-Draft201909
+https://metacpan.org/release/JSON-Schema-Modern
 
 If you use cpanminus, you can do it without downloading the tarball first:
 
-  $ cpanm --reinstall --installdeps --with-recommends JSON::Schema::Draft201909
+  $ cpanm --reinstall --installdeps --with-recommends JSON::Schema::Modern
 
 Dist::Zilla is a very powerful authoring tool, but requires a number of
 author-specific plugins.  If you would like to use it for contributing,
@@ -58,7 +58,7 @@ or
 
 You can also do this via cpanm directly:
 
-  $ cpanm --reinstall --installdeps --with-develop --with-recommends JSON::Schema::Draft201909
+  $ cpanm --reinstall --installdeps --with-develop --with-recommends JSON::Schema::Modern
 
 Once installed, here are some dzil commands you might try:
 
@@ -73,7 +73,7 @@ You can learn more about Dist::Zilla at http://dzil.org/.
 
 The code for this distribution is hosted at GitHub. The repository is:
 
-https://github.com/karenetheridge/JSON-Schema-Draft201909
+https://github.com/karenetheridge/JSON-Schema-Modern
 
 You can submit code changes by forking the repository, pushing your code
 changes to your clone, and then submitting a pull request. Please include a
@@ -83,14 +83,14 @@ Detailed instructions for doing that is available here:
 https://help.github.com/articles/creating-a-pull-request
 
 All pull requests for this distribution will be automatically tested on Linux
-by Travis at: https://travis-ci.com/karenetheridge/JSON-Schema-Draft201909
+by Travis at: https://travis-ci.com/karenetheridge/JSON-Schema-Modern
 Results will be visible in the pull request on GitHub. Follow the appropriate
 links for details when tests fail. Changes will not be mergeable until all
 tests pass.
 
 If you have found a bug, but do not have an accompanying patch to fix it, you
 can submit an issue report here:
-https://github.com/karenetheridge/JSON-Schema-Draft201909/issues
+https://github.com/karenetheridge/JSON-Schema-Modern/issues
 
 This is a good place to send your questions about the usage of this distribution.
 

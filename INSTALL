@@ -1,12 +1,12 @@
-This is the Perl distribution JSON-Schema-Draft201909.
+This is the Perl distribution JSON-Schema-Modern.
 
-Installing JSON-Schema-Draft201909 is straightforward.
+Installing JSON-Schema-Modern is straightforward.
 
 ## Installation with cpanm
 
 If you have cpanm, you only need one line:
 
-    % cpanm JSON::Schema::Draft201909
+    % cpanm JSON::Schema::Modern
 
 If it does not have permission to install modules to the current perl, cpanm
 will automatically set up and install to a local::lib in your home directory.
@@ -17,13 +17,13 @@ details on enabling it in your environment.
 
 Alternatively, if your CPAN shell is set up, you should just be able to do:
 
-    % cpan JSON::Schema::Draft201909
+    % cpan JSON::Schema::Modern
 
 ## Manual installation
 
 As a last resort, you can manually install it. If you have not already
 downloaded the release tarball, you can find the download link on the module's
-MetaCPAN page: https://metacpan.org/pod/JSON::Schema::Draft201909
+MetaCPAN page: https://metacpan.org/pod/JSON::Schema::Modern
 
 Untar the tarball, install configure prerequisites (see below), then build it:
 
@@ -71,10 +71,10 @@ They can all be found in the "PHASE_requires" key of MYMETA.yml or the
 
 ## Documentation
 
-JSON-Schema-Draft201909 documentation is available as POD.
+JSON-Schema-Modern documentation is available as POD.
 You can run `perldoc` from a shell to read the documentation:
 
-    % perldoc JSON::Schema::Draft201909
+    % perldoc JSON::Schema::Modern
 
 For more information on installing Perl modules via CPAN, please see:
 https://www.cpan.org/modules/INSTALL.html
