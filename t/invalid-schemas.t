@@ -19,7 +19,6 @@ acceptance_tests(
     test_schemas => 0,
   },
   evaluator => {
-    specification_version => 'draft2019-09',
     validate_formats => 1,
   },
   output_file => 'draft2019-09-invalid-schemas.txt',
