@@ -47,6 +47,10 @@ sub acceptance_tests {
   my $add_resource = sub {
     my ($uri, $schema) = @_;
     try {
+      # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
+      local $SIG{__WARN__} = sub {
+        warn @_ if $_[0] !~ /^no-longer-supported "definitions" keyword present/;
+      };
       $js->add_schema($uri => $schema);
       $js_short_circuit->add_schema($uri => $schema);
     }

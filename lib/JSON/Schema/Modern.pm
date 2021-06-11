@@ -311,6 +311,12 @@ sub get {
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
+# keyword => undef, or arrayref of alternatives
+my %removed_keywords = (
+  definitions => [ '$defs' ],
+  dependencies => [ qw(dependentSchemas dependentRequired) ],
+);
+
 sub _traverse {
   croak 'insufficient arguments' if @_ < 3;
   my ($self, $schema, $state) = @_;
@@ -339,13 +345,21 @@ sub _traverse {
       }
     }
   }
-}
 
-# keyword => undef, or arrayref of alternatives
-my %removed_keywords = (
-  definitions => [ '$defs' ],
-  dependencies => [ qw(dependentSchemas dependentRequired) ],
-);
+  # check for previously-supported but now removed keywords
+  foreach my $keyword (sort keys %removed_keywords) {
+    next if not exists $schema->{$keyword};
+    my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
+      .canonical_schema_uri($state).'")';
+    if ($removed_keywords{$keyword}) {
+      my @list = map '"'.$_.'"', @{$removed_keywords{$keyword}};
+      @list = ((map $_.',', @list[0..$#list-1]), $list[-1]) if @list > 2;
+      splice(@list, -1, 0, 'or') if @list > 1;
+      $message .= ': this should be rewritten as '.join(' ', @list);
+    }
+    carp $message;
+  }
+}
 
 sub _eval {
   croak '_eval called in void context' if not defined wantarray;
@@ -403,20 +417,6 @@ sub _eval {
 
       push @new_annotations, @{$state->{annotations}}[$#new_annotations+1 .. $#{$state->{annotations}}];
     }
-  }
-
-  # check for previously-supported but now removed keywords
-  foreach my $keyword (sort keys %removed_keywords) {
-    next if not exists $schema->{$keyword};
-    my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
-      .canonical_schema_uri($state).'")';
-    if ($removed_keywords{$keyword}) {
-      my @list = map '"'.$_.'"', @{$removed_keywords{$keyword}};
-      @list = ((map $_.',', @list[0..$#list-1]), $list[-1]) if @list > 2;
-      splice(@list, -1, 0, 'or') if @list > 1;
-      $message .= ': this should be rewritten as '.join(' ', @list);
-    }
-    carp $message;
   }
 
   $state->{annotations} = $orig_annotations;
