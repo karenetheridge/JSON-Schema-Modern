@@ -1,0 +1,64 @@
+Results using Test::JSON::Schema::Acceptance 1.012
+with commit fd0aa9f8e2497d9048e17f071abb8fa409f5cb52 (2.0.0-397-gfd0aa9f)
+from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
+specification version: draft2020-12
+optional tests included: yes
+skipping directory: optional/format
+
+filename                                  pass  todo-fail  fail
+---------------------------------------------------------------
+additionalProperties.json                   15          0     0
+allOf.json                                  30          0     0
+anchor.json                                 10          0     0
+anyOf.json                                  18          0     0
+boolean_schema.json                         18          0     0
+const.json                                  50          0     0
+contains.json                               20          0     0
+content.json                                18          0     0
+default.json                                 7          0     0
+defs.json                                    2          0     0
+dependentRequired.json                      20          0     0
+dependentSchemas.json                       13          0     0
+dynamicRef.json                             21          0     0
+enum.json                                   33          0     0
+exclusiveMaximum.json                        4          0     0
+exclusiveMinimum.json                        4          0     0
+format.json                                133          0     0
+id.json                                     16          0     0
+if-then-else.json                           26          0     0
+infinite-loop-detection.json                 2          0     0
+items.json                                  26          0     0
+maxContains.json                            10          0     0
+maxItems.json                                4          0     0
+maxLength.json                               5          0     0
+maxProperties.json                           8          0     0
+maximum.json                                 8          0     0
+minContains.json                            23          0     0
+minItems.json                                4          0     0
+minLength.json                               5          0     0
+minProperties.json                           6          0     0
+minimum.json                                11          0     0
+multipleOf.json                              9          0     0
+not.json                                    12          0     0
+oneOf.json                                  27          0     0
+pattern.json                                 9          0     0
+patternProperties.json                      22          0     0
+prefixItems.json                            10          0     0
+properties.json                             20          0     0
+propertyNames.json                          10          0     0
+ref.json                                    41          0     0
+refRemote.json                              17          0     0
+required.json                                9          0     0
+type.json                                   80          0     0
+unevaluatedItems.json                       48          0     0
+unevaluatedProperties.json                  67          0     0
+uniqueItems.json                            64          0     0
+unknownKeyword.json                          3          0     0
+optional/bignum.json                         2          7     0
+optional/ecmascript-regex.json              31          9     0
+optional/float-overflow.json                 0          1     0
+optional/non-bmp-regex.json                 12          0     0
+optional/refOfUnknownKeyword.json            4          0     0
+optional/unicode.json                       18          0     0
+---------------------------------------------------------------
+TOTAL                                     1085         17     0

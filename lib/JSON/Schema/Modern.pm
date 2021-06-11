@@ -35,11 +35,11 @@ use namespace::clean;
 
 our @CARP_NOT = qw(JSON::Schema::Modern::Document);
 
-use constant SPECIFICATION_VERSION_DEFAULT => 'draft2019-09';
+use constant SPECIFICATION_VERSION_DEFAULT => 'draft2020-12';
 
 has specification_version => (
   is => 'ro',
-  isa => Enum([qw(draft7 draft2019-09)]),
+  isa => Enum([qw(draft7 draft2019-09 draft2020-12)]),
 );
 
 has output_format => (
@@ -64,7 +64,7 @@ has max_traversal_depth => (
 has validate_formats => (
   is => 'ro',
   isa => Bool,
-  default => 0, # as specified by https://json-schema.org/draft/2019-09/schema#/$vocabulary
+  default => 0, # as specified by https://json-schema.org/draft/<version>/schema#/$vocabulary
 );
 
 has collect_annotations => (
@@ -96,6 +96,17 @@ has _format_validations => (
   lazy => 1,
   default => sub { {} },
 );
+
+around BUILDARGS => sub {
+  my ($orig, $class, @args) = @_;
+
+  my $args = $class->$orig(@args);
+  croak 'output_format: strict_basic can only be used with specification_version: draft2019-09'
+    if ($args->{output_format}//'') eq 'strict_basic'
+      and ($args->{specification_version}//'') ne 'draft2019-09';
+
+  return $args;
+};
 
 sub add_schema {
   croak 'insufficient arguments' if @_ < 2;
@@ -189,6 +200,7 @@ sub traverse {
   my ($self, $schema_reference, $config_override) = @_;
 
   my $base_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
+  my $spec_version = $self->specification_version//SPECIFICATION_VERSION_DEFAULT;
 
   my $state = {
     depth => 0,
@@ -197,13 +209,16 @@ sub traverse {
     initial_schema_uri => $base_uri,    # the canonical URI as of the start, or last $id
     schema_path => '',                  # the rest of the path, since the last $id
     errors => [],
-    spec_version => $self->specification_version//SPECIFICATION_VERSION_DEFAULT, # can change, iff nothing explicitly requested
+    spec_version => $spec_version,      # can change, iff nothing explicitly requested
     # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
     # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
     vocabularies => [
       (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
-        qw(Core Applicator Validation Format Content MetaData)),
+        qw(Core Applicator Validation),
+        $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
+        qw(Content MetaData),
+        $spec_version eq 'draft2020-12' ? 'Unevaluated' : ()),
     ],
     identifiers => [],
     configs => {},
@@ -265,6 +280,7 @@ sub evaluate {
       initial_schema_uri => $canonical_uri, # the canonical URI as of the start or last $id, or the last traversed $ref
       document => $document,                # the ::Document object containing this schema
       document_path => $document_path,      # the path within the document of this schema, since the last $id or $ref traversal
+      dynamic_scope => [ $canonical_uri ],
       errors => [],
       annotations => [],
       seen => {},
@@ -273,14 +289,17 @@ sub evaluate {
       # traverse() pass on the schema and examination of the referenced metaschema.
       vocabularies => [
         (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
-          qw(Core Applicator Validation Format Content MetaData)),
+          qw(Core Applicator Validation),
+          $config_override->{validate_formats} // $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
+          qw(Content MetaData),
+          $document->specification_version eq 'draft2020-12' ? 'Unevaluated' : ()),
       ],
       evaluator => $self,
       %{$document->evaluation_configs},
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(short_circuit collect_annotations validate_formats annotate_unknown_keywords scalarref_booleans)),
+      } qw(short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans)),
     };
 
     $valid = $self->_eval_subschema($data, $schema, $state);
@@ -331,6 +350,14 @@ my %removed_keywords = (
     id => [ '$id' ],
     definitions => [ '$defs' ],
     dependencies => [ qw(dependentSchemas dependentRequired) ],
+  },
+  'draft2020-12' => {
+    id => [ '$id' ],
+    definitions => [ '$defs' ],
+    dependencies => [ qw(dependentSchemas dependentRequired) ],
+    '$recursiveAnchor' => [ '$dynamicAnchor' ],
+    '$recursiveRef' => [ '$dynamicRef' ],
+    additionalItems => [ 'items' ],
   },
 );
 
@@ -395,6 +422,7 @@ sub _eval_subschema {
 
   # callers created a new $state for us, so we do not propagate upwards changes to depth, traversed
   # paths; but annotations, errors are arrayrefs so their contents will be shared
+  $state->{dynamic_scope} = [ @{$state->{dynamic_scope}//[]} ];
   delete @{$state}{'keyword', grep /^_/, keys %$state};
 
   abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
@@ -511,6 +539,16 @@ around _add_resources => sub {
 };
 
 use constant CACHED_METASCHEMAS => {
+  'https://json-schema.org/draft/2020-12/meta/applicator'     => 'draft2020-12/meta/applicator.json',
+  'https://json-schema.org/draft/2020-12/meta/content'        => 'draft2020-12/meta/content.json',
+  'https://json-schema.org/draft/2020-12/meta/core'           => 'draft2020-12/meta/core.json',
+  'https://json-schema.org/draft/2020-12/meta/format-annotation' => 'draft2020-12/meta/format-annotation.json',
+  'https://json-schema.org/draft/2020-12/meta/format-assertion'  => 'draft2020-12/meta/format-assertion.json',
+  'https://json-schema.org/draft/2020-12/meta/meta-data'      => 'draft2020-12/meta/meta-data.json',
+  'https://json-schema.org/draft/2020-12/meta/unevaluated'    => 'draft2020-12/meta/unevaluated.json',
+  'https://json-schema.org/draft/2020-12/meta/validation'     => 'draft2020-12/meta/validation.json',
+  'https://json-schema.org/draft/2020-12/schema'              => 'draft2020-12/schema.json',
+
   'https://json-schema.org/draft/2019-09/hyper-schema'        => 'draft2019-09/hyper-schema.json',
   'https://json-schema.org/draft/2019-09/links'               => 'draft2019-09/links.json',
   'https://json-schema.org/draft/2019-09/meta/applicator'     => 'draft2019-09/meta/applicator.json',
@@ -631,7 +669,7 @@ __END__
 
 This module aims to be a fully-compliant L<JSON Schema|https://json-schema.org/> evaluator and
 validator, targeting the currently-latest
-L<Draft 2019-09|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>
+L<Draft 2020-12|https://json-schema.org/specification-links.html#2020-12>
 version of the specification.
 
 =head1 CONFIGURATION OPTIONS
@@ -640,12 +678,14 @@ version of the specification.
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
 this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest (supported) version (draft2019-09). When left unset, the use of C<$schema> keywords in
+the latest version (draft2020-12). When left unset, the use of C<$schema> keywords in
 the schema is permitted, to switch between draft versions.
 
 May be one of:
 
 =for :list
+* L<C<draft2020-12>|https://json-schema.org/specification-links.html#2020-12>,
+  corresponding to metaschema C<https://json-schema.org/draft/2020-12/schema>.
 * L<C<draft2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
 * L<C<draft7>|https://json-schema.org/specification-links.html#draft-7>,
@@ -654,6 +694,7 @@ May be one of:
 =head2 output_format
 
 One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
+C<strict_basic> can only be used with C<specification_version = draft2019-09>.
 Passed to L<JSON::Schema::Modern::Result/output_format>.
 
 =head2 short_circuit
@@ -706,6 +747,8 @@ as the scalar references C<\0> or C<\1> (which are serialized as booleans by JSO
 Defaults to false.
 
 =head1 METHODS
+
+=for Pod::Coverage BUILDARGS
 
 =head2 evaluate_json_string
 
@@ -867,17 +910,11 @@ To date, missing features (some of which are optional, but still quite useful) i
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
-* additional output formats beyond C<flag>, C<basic>, C<strict_basic>, and C<terse>
-  (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
+* additional output formats beyond C<flag>, C<basic>, and C<terse>
+  (L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.12>)
 * examination of the C<$schema> keyword for deviation from the standard draft metaschemas, including
   changes to vocabulary behaviour
 * changing the draft specification version semantics after construction time
-
-Additionally, some small errors in the specification (which have been fixed in the next draft
-specification version) are fixed here rather than implementing the precise but unintended behaviour,
-most notably in the use of json pointers rather than fragment-only URIs in C<instanceLocation> and
-C<keywordLocation> in annotations and errors. (Use the C<strict_basic>
-L<JSON::Schema::Modern/output_format> to revert this change.)
 
 =head1 SECURITY CONSIDERATIONS
 
@@ -896,6 +933,7 @@ SOURCES.>
 * L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://tools.ietf.org/html/rfc3986>
 * L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
 * L<JSON::Schema::Tiny>: a more minimal implementation of the specification, with fewer dependencies
+* L<https://json-schema.org/draft/2020-12/release-notes.html>
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
 # L<https://json-schema.org/draft-07/json-schema-release-notes.html>
 * L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation

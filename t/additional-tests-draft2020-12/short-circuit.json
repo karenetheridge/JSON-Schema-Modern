@@ -1,0 +1,198 @@
+[
+    {
+        "description": "items (schema form) does not improperly short-circuit",
+        "schema": {
+            "items": { "multipleOf": 2 }
+        },
+        "tests": [
+            {
+                "description": "single item is valid",
+                "data": [ 2 ],
+                "valid": true
+            },
+            {
+                "description": "second item is invalid",
+                "data": [ 2, 1 ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "prefixItems does not improperly short-circuit",
+        "schema": {
+            "prefixItems": [
+                { "multipleOf": 2 },
+                { "multipleOf": 2 }
+            ]
+        },
+        "tests": [
+            {
+                "description": "single item is valid",
+                "data": [ 2 ],
+                "valid": true
+            },
+            {
+                "description": "second item is invalid",
+                "data": [ 2, 1 ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "items does not improperly short-circuit",
+        "schema": {
+            "prefixItems": [ true ],
+            "items": { "multipleOf": 2 }
+        },
+        "tests": [
+            {
+                "description": "single additional item is valid",
+                "data": [ 1, 2 ],
+                "valid": true
+            },
+            {
+                "description": "second additional item is invalid",
+                "data": [ 1, 2, 1 ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems does not improperly short-circuit",
+        "schema": {
+            "unevaluatedItems": { "multipleOf": 2 }
+        },
+        "tests": [
+            {
+                "description": "single item is valid",
+                "data": [ 2 ],
+                "valid": true
+            },
+            {
+                "description": "second item is invalid",
+                "data": [ 2, 1 ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "properties does not improperly short-circuit",
+        "schema": {
+            "properties": {
+                "alpha": { "multipleOf": 2 },
+                "beta": { "multipleOf": 2 }
+            }
+        },
+        "tests": [
+            {
+                "description": "single property is valid",
+                "data": { "alpha": 2 },
+                "valid": true
+            },
+            {
+                "description": "second property is invalid",
+                "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "properties does not improperly short-circuit (boolean schemas)",
+        "schema": {
+            "properties": {
+                "alpha": true,
+                "beta": false
+            }
+        },
+        "tests": [
+            {
+                "description": "single property is valid",
+                "data": { "alpha": 2 },
+                "valid": true
+            },
+            {
+                "description": "second property is invalid",
+                "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "patternProperties does not improperly short-circuit",
+        "schema": {
+            "patternProperties": {
+                "^a": { "multipleOf": 2 },
+                "^b": { "multipleOf": 2 }
+            }
+        },
+        "tests": [
+            {
+                "description": "single property is valid",
+                "data": { "alpha": 2 },
+                "valid": true
+            },
+            {
+                "description": "second property is invalid",
+                "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "patternProperties does not improperly short-circuit (boolean schemas)",
+        "schema": {
+            "patternProperties": {
+                "^a": true,
+                "^b": false
+            }
+        },
+        "tests": [
+            {
+                "description": "single property is valid",
+                "data": { "alpha": 2 },
+                "valid": true
+            },
+            {
+                "description": "second property is invalid",
+                "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "additionalProperties does not improperly short-circuit",
+        "schema": {
+            "additionalProperties": { "multipleOf": 2 }
+        },
+        "tests": [
+            {
+                "description": "single property is valid",
+                "data": { "alpha": 2 },
+                "valid": true
+            },
+            {
+                "description": "second property is invalid",
+                "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties does not improperly short-circuit",
+        "schema": {
+            "unevaluatedProperties": { "multipleOf": 2 }
+        },
+        "tests": [
+            {
+                "description": "single property is valid",
+                "data": { "alpha": 2 },
+                "valid": true
+            },
+            {
+                "description": "second property is invalid",
+                "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    }
+]

@@ -1,0 +1,44 @@
+[
+    {
+        "description": "dynamic $dynamicRef destination (not predictable at schema compile time)",
+        "schema": {
+            "$id": "main.json",
+            "$defs": {
+                "inner": {
+                    "$id": "inner.json",
+                    "$dynamicAnchor": "hello",
+                    "title": "inner",
+                    "additionalProperties": {
+                        "$dynamicRef": "#hello"
+                    }
+                }
+            },
+            "if": { "propertyNames": { "pattern": "^[a-m]" } },
+            "then": {
+                "title": "any type of node",
+                "$id": "anyLeafNode.json",
+                "$dynamicAnchor": "hello",
+                "$ref": "main.json#/$defs/inner"
+            },
+            "else": {
+                "title": "integer node",
+                "$id": "integerNode.json",
+                "$dynamicAnchor": "hello",
+                "type": [ "object", "integer" ],
+                "$ref": "main.json#/$defs/inner"
+            }
+        },
+        "tests": [
+            {
+                "description": "numeric node",
+                "data": { "alpha": 1.1 },
+                "valid": true
+            },
+            {
+                "description": "integer node",
+                "data": { "november": 1.1 },
+                "valid": false
+            }
+        ]
+    }
+]

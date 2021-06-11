@@ -1,0 +1,27 @@
+Results using Test::JSON::Schema::Acceptance 1.012
+specification version: draft2020-12
+using custom test directory: t/additional-tests-draft2020-12
+optional tests included: no
+
+filename                                  pass  todo-fail  fail
+---------------------------------------------------------------
+anchor.json                                  2          0     0
+badRef.json                                  3          0     0
+dynamicRef.json                              5          0     0
+faux-buggy-schemas.json                      2          0     0
+format-duration.json                         9          0     0
+format-ipv4.json                             3          0     0
+format-relative-json-pointer.json            7          0     0
+format-time.json                            11          0     0
+id.json                                      6          0     0
+keyword-independence.json                  884          0     0
+loose-types-const-enum.json                  8          0     0
+recursive-dynamic.json                       2          0     0
+ref-and-id.json                              6          0     0
+ref.json                                    12          0     0
+short-circuit.json                          20          0     0
+unicode.json                                 9          0     0
+unknownKeyword.json                          4          0     0
+vocabulary.json                              1          0     0
+---------------------------------------------------------------
+TOTAL                                      994          0     0

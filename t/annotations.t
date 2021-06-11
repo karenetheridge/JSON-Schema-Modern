@@ -267,7 +267,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       [ 1 ],
       {
         '$id' => 'unevaluatedItems.json',
-        items => [ true ],
+        prefixItems => [ true ],
         unevaluatedItems => false,
       },
     )->TO_JSON,
@@ -341,7 +341,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     $js->evaluate(
       [ 1 ],
       {
-        items => [ true ],
+        prefixItems => [ true ],
         unevaluatedItems => false,
       },
     )->TO_JSON,
@@ -350,7 +350,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       annotations => [
         {
           instanceLocation => '',
-          keywordLocation => '/items',
+          keywordLocation => '/prefixItems',
           annotation => true,
         },
       ],
@@ -391,7 +391,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       [ 1 ],
       {
         '$id' => 'unevaluatedItems.json',
-        items => [ true ],
+        prefixItems => [ true ],
         unevaluatedItems => false,
       },
     )->TO_JSON,
@@ -435,7 +435,8 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     '... still works when unevaluated keywords are in a separate document',
   );
 
-  my $doc_items = $js->add_schema('items.json', { items => [ true ] });
+  my $doc_items = $js->add_schema('prefixItems.json', { prefixItems => [ true ] });
+
   my $doc_properties = $js->add_schema('properties.json', { properties => { foo => true } });
 
   cmp_deeply(
@@ -459,7 +460,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
       {
         properties => {
           item => {
-            '$ref' => 'items.json',
+            '$ref' => 'prefixItems.json',
             unevaluatedItems => false,
           },
           property => {
@@ -484,7 +485,7 @@ subtest 'annotate_unknown_keywords' => sub {
   my $schema = {
     properties => {
       item => {
-        items => [ true, true ],
+        prefixItems => [ true, true ],
         unevaluatedItems => false,
         bloop => 5,
       },
@@ -518,7 +519,7 @@ subtest 'annotate_unknown_keywords' => sub {
       annotations => [
         {
           instanceLocation => '/item',
-          keywordLocation => '/properties/item/items',
+          keywordLocation => '/properties/item/prefixItems',
           annotation => true,
         },
         {
@@ -557,9 +558,10 @@ subtest 'annotate_unknown_keywords' => sub {
   );
 };
 
-subtest 'items + additionalItems' => sub {
+subtest 'draft2019-09: items + additionalItems' => sub {
   cmp_deeply(
-    $js->evaluate(
+    JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
+        ->evaluate(
       [ 1, 2, 3 ],
       {
         items => { maximum => 5 },
@@ -584,8 +586,8 @@ subtest 'items + additionalItems' => sub {
     $js->evaluate(
       [],
       {
-        items => [ { maximum => 5 } ],
-        additionalItems => { maximum => 0 },
+        prefixItems => [ { maximum => 5 } ],
+        items => { maximum => 0 },
       }
     )->TO_JSON,
     {
@@ -593,7 +595,7 @@ subtest 'items + additionalItems' => sub {
       annotations => [
         {
           instanceLocation => '',
-          keywordLocation => '/items',
+          keywordLocation => '/prefixItems',
           annotation => true,
         },
         # no error nor annotation from additionalItems

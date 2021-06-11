@@ -2,7 +2,7 @@
     {
         "description": "validation of relative-json-pointer strings",
         "schema": {"format": "relative-json-pointer"},
-        "comment": "see https://datatracker.ietf.org/doc/html/draft-handrews-relative-json-pointer-01#section-3",
+        "comment": "see https://json-schema.org/draft/2020-12/relative-json-pointer.html#rfc.section.3",
         "tests": [
             {
                 "description": "non-negative-integer with empty json-pointer",

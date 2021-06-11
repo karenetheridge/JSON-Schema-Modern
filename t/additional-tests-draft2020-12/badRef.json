@@ -1,0 +1,63 @@
+[
+    {
+        "description": "good references in schemas",
+        "schema": {
+            "if": false,
+            "then": {
+                "allOf": [
+                    { "$ref": "foo/bar.json" },
+                    { "$ref": "foo/bar.json#" },
+                    { "$ref": "foo/bar.json#anchor" },
+                    { "$ref": "foo/bar.json#/" },
+                    { "$ref": "foo/bar.json#/foo" },
+                    { "$ref": "foo/bar.json#/~1/foo" },
+                    { "$dynamicRef": "foo/bar.json" },
+                    { "$dynamicRef": "foo/bar.json#" },
+                    { "$dynamicRef": "foo/bar.json#anchor" },
+                    { "$dynamicRef": "foo/bar.json#/" },
+                    { "$dynamicRef": "foo/bar.json#/foo" },
+                    { "$dynamicRef": "foo/bar.json#/~1/foo" }
+                ]
+            }
+        },
+        "tests": [
+            {
+                "description": "this data is never used",
+                "data": "ignore",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "bad $ref in schema: not a valid anchor fragment",
+        "schema": {
+            "if": false,
+            "then": {
+                "$ref": "foo/bar.json#!!not-an-anchor"
+            }
+        },
+        "tests": [
+            {
+                "description": "this data is never used",
+                "data": "ignore",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "bad $ref in schema: not a valid json pointer fragment",
+        "schema": {
+            "if": false,
+            "then": {
+                "$ref": "foo/bar.json#/~foo"
+            }
+        },
+        "tests": [
+            {
+                "description": "this data is never used",
+                "data": "ignore",
+                "valid": false
+            }
+        ]
+    }
+]

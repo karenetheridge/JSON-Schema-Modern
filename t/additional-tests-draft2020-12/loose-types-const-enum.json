@@ -1,0 +1,56 @@
+[
+    {
+        "description": "type can be inferred from const and enum values",
+        "comment": "in some languages, 6 and '6' are equal in both stringwise and numeric comparisons, but the JSON type model is more strict",
+        "schema": {
+            "properties": {
+                "const_string": { "const": "6" },
+                "const_number": { "const": 6 },
+                "enum_string": { "enum": [ "6" ] },
+                "enum_number": { "enum": [ 6 ] }
+            }
+        },
+        "tests": [
+            {
+                "description": "const numeric value does not match string",
+                "data": { "const_string": 6 },
+                "valid": false
+            },
+            {
+                "description": "const numeric value does match number",
+                "data": { "const_number": 6 },
+                "valid": true
+            },
+            {
+                "description": "const string value matches string",
+                "data": { "const_string": "6" },
+                "valid": true
+            },
+            {
+                "description": "const string value does not match number",
+                "data": { "const_number": "6" },
+                "valid": false
+            },
+            {
+                "description": "enum numeric value does not match string",
+                "data": { "enum_string": 6 },
+                "valid": false
+            },
+            {
+                "description": "enum numeric value does match number",
+                "data": { "enum_number": 6 },
+                "valid": true
+            },
+            {
+                "description": "enum string value matches string",
+                "data": { "enum_string": "6" },
+                "valid": true
+            },
+            {
+                "description": "enum string value does not match number",
+                "data": { "enum_number": "6" },
+                "valid": false
+            }
+        ]
+    }
+]

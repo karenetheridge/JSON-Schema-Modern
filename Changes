@@ -6,6 +6,7 @@ Revision history for JSON-Schema-Modern
           - better handling of blessed data types and other references
           - new config option scalarref_booleans, which will treat \0, \1 in
             data as json booleans
+          - support for the most recent specification version, draft2020-12
 
 0.514     2021-07-22 05:17:08Z
           - add_schema() now dies with the errors themselves, rather than an

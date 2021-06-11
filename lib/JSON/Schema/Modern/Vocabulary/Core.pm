@@ -21,6 +21,7 @@ sub vocabulary {
   my ($self, $spec_version) = @_;
   return
       $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/core'
+    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/core'
     : undef;
 }
 
@@ -30,14 +31,17 @@ sub keywords {
     qw($id $schema),
     $spec_version ne 'draft7' ? '$anchor' : (),
     $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
+    $spec_version eq 'draft2020-12' ? '$dynamicAnchor' : (),
     '$ref',
     $spec_version eq 'draft2019-09' ? '$recursiveRef' : (),
+    $spec_version eq 'draft2020-12' ? '$dynamicRef' : (),
     $spec_version eq 'draft7' ? 'definitions' : qw($vocabulary $comment $defs),
   );
 }
 
 # supported metaschema URIs. is a subset of JSON::Schema::Modern::CACHED_METASCHEMAS
 my %version_uris = (
+  'https://json-schema.org/draft/2020-12/schema'  => 'draft2020-12',
   'https://json-schema.org/draft/2019-09/schema'  => 'draft2019-09',
   'http://json-schema.org/draft-07/schema#'       => 'draft7',
 );
@@ -92,6 +96,8 @@ sub _eval_keyword_id {
     $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
     $state->{document_path} = $state->{document_path}.$state->{schema_path};
     $state->{schema_path} = '';
+    push @{$state->{dynamic_scope}}, $canonical_uri;
+
     return 1;
   }
 
@@ -117,7 +123,8 @@ sub _traverse_keyword_schema {
   # condition involved in supporting different core keyword semantics before we can parse the
   # keywords that tell us what those semantics are.
   # To support different dialects, we will record the local dialect in the document object for
-  # swapping out during evaluation and following $refs..
+  # swapping out during evaluation and following $refs. We must also store a value to be populated
+  # into $state->{validate_formats}, if one of the format vocabularies is included.
   return E($state, '"$schema" indicates a different version than that requested by \'specification_version\'')
     if $state->{evaluator}->specification_version
       and $spec_version ne $state->{evaluator}->specification_version;
@@ -148,7 +155,10 @@ sub _traverse_keyword_anchor {
 
   return E($state, '%s value "%s" does not match required syntax',
       $state->{keyword}, ($state->{keyword} eq '$id' ? '#' : '').$schema->{$state->{keyword}})
-    if $schema->{$state->{keyword}} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/;
+    if $state->{spec_version} =~ /^draft(7|2019-09)$/
+        and $schema->{$state->{keyword}} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
+      or $state->{spec_version} eq 'draft2020-12'
+        and $schema->{$state->{keyword}} !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 
   my $canonical_uri = canonical_schema_uri($state);
 
@@ -185,6 +195,11 @@ sub _eval_keyword_recursiveAnchor {
   $state->{recursive_anchor_uri} = canonical_schema_uri($state);
   return 1;
 }
+
+sub _traverse_keyword_dynamicAnchor { goto \&_traverse_keyword_anchor }
+
+# we already indexed the $dynamicAnchor uri, so there is nothing more to do at evaluation time.
+# we explicitly do NOT set $state->{initial_schema_uri}.
 
 sub _traverse_keyword_ref {
   my ($self, $schema, $state) = @_;
@@ -234,6 +249,46 @@ sub _eval_keyword_recursiveRef {
       %{$document->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
+      initial_schema_uri => $canonical_uri,
+      document => $document,
+      document_path => $document_path,
+      spec_version => $document->specification_version,
+      schema_path => '',
+    });
+}
+
+sub _traverse_keyword_dynamicRef { goto \&_traverse_keyword_ref }
+
+sub _eval_keyword_dynamicRef {
+  my ($self, $data, $schema, $state) = @_;
+
+  my $uri = Mojo::URL->new($schema->{'$dynamicRef'})->to_abs($state->{initial_schema_uri});
+  my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
+  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+
+  # If the initially resolved starting point URI includes a fragment that was created by the
+  # "$dynamicAnchor" keyword, ...
+  if (length $uri->fragment and exists $subschema->{'$dynamicAnchor'}
+      and $uri->fragment eq (my $anchor = $subschema->{'$dynamicAnchor'})) {
+    # ...the initial URI MUST be replaced by the URI (including the fragment) for the outermost
+    # schema resource in the dynamic scope that defines an identically named fragment with
+    # "$dynamicAnchor".
+    foreach my $base_scope (@{$state->{dynamic_scope}}) {
+      $uri = Mojo::URL->new($base_scope)->fragment($anchor);
+      my ($dynamic_anchor_subschema) = $state->{evaluator}->_fetch_schema_from_uri($uri);
+      if ((($dynamic_anchor_subschema//{})->{'$dynamicAnchor'}//'') eq $anchor) {
+        ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
+        abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+        last;
+      }
+    }
+  }
+
+  return $self->eval($data, $subschema,
+    +{
+      %{$document->evaluation_configs},
+      %$state,
+      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$dynamicRef',
       initial_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
@@ -293,12 +348,17 @@ __END__
 
 =for stopwords metaschema
 
-Implementation of the JSON Schema Draft 2019-09 "Core" vocabulary, indicated in metaschemas
-with the URI C<https://json-schema.org/draft/2019-09/vocab/core> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-8>.
+Implementation of the JSON Schema Draft 2020-12 "Core" vocabulary, indicated in metaschemas
+with the URI C<https://json-schema.org/draft/2020-12/vocab/core> and formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8>.
 
-Support is also provided for the equivalent Draft 7 keywords that correspond to this vocabulary and
-are formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-01>.
+Support is also provided for
+
+=for :list
+* the equivalent Draft 2019-09 keywords, indicated in metaschemas
+  with the URI C<https://json-schema.org/draft/2019-09/vocab/core> and formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-8>.
+* the equivalent Draft 7 keywords that correspond to this vocabulary and are formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-01>.
 
 =cut

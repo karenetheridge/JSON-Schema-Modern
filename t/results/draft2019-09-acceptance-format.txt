@@ -16,15 +16,15 @@ idn-email.json                               4          0     0
 idn-hostname.json                           29         16     0
 ipv4.json                                    8          0     0
 ipv6.json                                   29          0     0
-iri-reference.json                           5          2     0
+iri-reference.json                           2          5     0
 iri.json                                     8          1     0
 json-pointer.json                           32          0     0
 regex.json                                   2          0     0
 relative-json-pointer.json                   9          0     0
 time.json                                   18          0     0
 uri-reference.json                           7          0     0
-uri-template.json                            3          1     0
+uri-template.json                            1          3     0
 uri.json                                    19          1     0
 uuid.json                                   12          0     0
 ---------------------------------------------------------------
-TOTAL                                      266         21     0
+TOTAL                                      261         26     0

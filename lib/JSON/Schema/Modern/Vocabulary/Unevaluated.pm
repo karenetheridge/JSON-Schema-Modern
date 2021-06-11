@@ -22,6 +22,7 @@ sub vocabulary {
   my ($self, $spec_version) = @_;
   return
       $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/applicator'
+    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/unevaluated'
     : undef;
 }
 
@@ -53,23 +54,32 @@ sub _eval_keyword_unevaluatedItems {
   return 1 if not is_type('array', $data);
 
   my @annotations = local_annotations($state);
-  my @items_annotations = grep $_->keyword eq 'items', @annotations;
-  my @additionalItems_annotations = grep $_->keyword eq 'additionalItems', @annotations;
-  my @unevaluatedItems_annotations = grep $_->keyword eq 'unevaluatedItems', @annotations;
 
-  # items, additionalItems or unevaluatedItems already produced a 'true' annotation at this location
+  # a relevant keyword already produced a 'true' annotation at this location
+  my @boolean_annotation_keywords =
+    $state->{spec_version} eq 'draft2019-09' ? qw(items additionalItems unevaluatedItems)
+      : qw(prefixItems items contains unevaluatedItems);
+  my %bools; @bools{@boolean_annotation_keywords} = (1)x@boolean_annotation_keywords;
   return 1
-    if any { is_type('boolean', $_->annotation) && $_->annotation }
-      @items_annotations, @additionalItems_annotations, @unevaluatedItems_annotations;
+    if any { $bools{$_->keyword} && is_type('boolean', $_->annotation) && $_->annotation }
+      @annotations;
 
-  # otherwise, _eval at every instance item greater than the max of all numeric 'items' annotations
-  my $last_index = max(-1, grep is_type('integer', $_), map $_->annotation, @items_annotations);
+  # otherwise, evaluate at every instance item greater than the max of all 'prefixItems'/numeric
+  # 'items' annotations that isn't in a 'contains' annotation
+  my $max_index_annotation_keyword = $state->{spec_version} eq 'draft2019-09' ? 'items' : 'prefixItems';
+  my $last_index = max(-1, grep is_type('integer', $_),
+    map +($_->keyword eq $max_index_annotation_keyword ? $_->annotation : ()), @annotations);
+
   return 1 if $last_index == $#{$data};
+
+  my @contains_annotation_indexes = $state->{spec_version} eq 'draft2019-09' ? ()
+    : map +($_->keyword eq 'contains' ? @{$_->annotation} : ()), @annotations;
 
   my $valid = 1;
   my @orig_annotations = @{$state->{annotations}};
   my @new_annotations;
   foreach my $idx ($last_index+1 .. $#{$data}) {
+    next if any { $idx == $_ } @contains_annotation_indexes;
     if (is_type('boolean', $schema->{unevaluatedItems})) {
       next if $schema->{unevaluatedItems};
       $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx },
@@ -170,7 +180,11 @@ __END__
 
 =for stopwords metaschema
 
-Implementation of the C<unevaluatedItems> and C<unevaluatedProperties> keywords in the
+Implementation of the JSON Schema Draft 2020-12 "Unevaluated" vocabulary, indicated in metaschemas
+with the URI C<https://json-schema.org/draft/2020-12/vocab/unevaluated> and formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-11>.
+
+Support is also provided for the equivalent Draft 2019-09 keywords in the
 JSON Schema Draft 2019-09 "Applicator" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/applicator> and formally specified in
 L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-9>.

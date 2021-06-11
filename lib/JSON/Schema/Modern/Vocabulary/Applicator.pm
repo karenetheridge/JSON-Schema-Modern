@@ -26,6 +26,7 @@ sub vocabulary {
   my ($self, $spec_version) = @_;
   return
       $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/applicator'
+    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/applicator'
     : undef;
 }
 
@@ -43,8 +44,10 @@ sub keywords {
   return (
     qw(allOf anyOf oneOf not if then else),
     $spec_version eq 'draft7' ? 'dependencies' : 'dependentSchemas',
-    qw(items additionalItems contains
-      properties patternProperties additionalProperties propertyNames),
+    $spec_version !~ qr/^draft(7|2019-09)$/ ? 'prefixItems' : (),
+    'items',
+    $spec_version =~ qr/^draft(7|2019-09)$/ ? 'additionalItems' : (),
+    qw(contains properties patternProperties additionalProperties propertyNames),
     $spec_version eq 'draft2019-09' ? $self->unevaluated_vocabulary->keywords($spec_version) : (),
   );
 }
@@ -268,10 +271,20 @@ sub _eval_keyword_dependencies {
   return 1;
 }
 
+sub _traverse_keyword_prefixItems { shift->traverse_array_schemas(@_) }
+
+sub _eval_keyword_prefixItems { goto \&_eval_keyword__items_array_schemas }
+
 sub _traverse_keyword_items {
   my ($self, $schema, $state) = @_;
 
-  return $self->traverse_array_schemas($schema, $state) if is_plain_arrayref($schema->{items});
+  if (is_plain_arrayref($schema->{items})) {
+    return E($state, 'array form of "items" not supported in %s', $state->{spec_version})
+      if $state->{spec_version} !~ /^draft(7|2019-09)$/;
+
+    return $self->traverse_array_schemas($schema, $state);
+  }
+
   $self->traverse_subschema($schema, $state);
 }
 
@@ -293,7 +306,7 @@ sub _eval_keyword_additionalItems {
   goto \&_eval_keyword__items_schema;
 }
 
-# array-based items
+# prefixItems (draft 2020-12), array-based items (all drafts)
 sub _eval_keyword__items_array_schemas {
   my ($self, $data, $schema, $state) = @_;
 
@@ -322,7 +335,10 @@ sub _eval_keyword__items_array_schemas {
     }
 
     $valid = 0;
-    last if $state->{short_circuit} and not exists $schema->{additionalItems};
+    last if $state->{short_circuit} and not exists $schema->{
+        $state->{keyword} eq 'prefixItems' ? 'items'
+      : $state->{keyword} eq 'items' ? 'additionalItems' : die
+    };
   }
 
   return E($state, 'not all items are valid') if not $valid;
@@ -331,7 +347,7 @@ sub _eval_keyword__items_array_schemas {
     ($state->{_last_items_index}//-1) == $#{$data} ? true : $state->{_last_items_index});
 }
 
-# schema-based items and additionalItems
+# schema-based items (all drafts), and additionalItems (up to and including draft2019-09)
 sub _eval_keyword__items_schema {
   my ($self, $data, $schema, $state) = @_;
 
@@ -346,7 +362,8 @@ sub _eval_keyword__items_schema {
     if (is_type('boolean', $schema->{$state->{keyword}})) {
       next if $schema->{$state->{keyword}};
       $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx },
-        '%sitem not permitted', $state->{keyword} eq 'additionalItems' ? 'additional ' : '');
+        '%sitem not permitted',
+        exists $schema->{prefixItems} || $state->{keyword} eq 'additionalItems' ? 'additional ' : '');
     }
     else {
       my @annotations = @orig_annotations;
@@ -380,7 +397,7 @@ sub _eval_keyword_contains {
 
   $state->{_num_contains} = 0;
   my @orig_annotations = @{$state->{annotations}};
-  my (@errors, @new_annotations);
+  my (@errors, @new_annotations, @valid);
   foreach my $idx (0 .. $#{$data}) {
     my @annotations = @orig_annotations;
     if ($self->eval($data->[$idx], $schema->{contains},
@@ -389,6 +406,7 @@ sub _eval_keyword_contains {
           schema_path => $state->{schema_path}.'/contains' })) {
       ++$state->{_num_contains};
       push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
+      push @valid, $idx;
 
       last if $state->{short_circuit}
         and (not exists $schema->{maxContains} or $state->{_num_contains} > $schema->{maxContains})
@@ -404,7 +422,8 @@ sub _eval_keyword_contains {
   }
 
   push @{$state->{annotations}}, @new_annotations;
-  return 1;
+  return $state->{spec_version} =~ /^draft(7|2019-09)$/ ? 1
+    : A($state, @valid == @$data ? true : \@valid);
 }
 
 sub _traverse_keyword_properties { shift->traverse_object_schemas(@_) }
@@ -589,14 +608,19 @@ __END__
 
 =for stopwords metaschema
 
-Implementation of the JSON Schema Draft 2019-09 "Applicator" vocabulary, indicated in metaschemas
-with the URI C<https://json-schema.org/draft/2019-09/vocab/applicator> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-9> (except for the
-C<unevaluatedItems> and C<unevaluatedProperties> keywords, which are implemented in
-L<JSON::Schema::Modern::Vocabulary::Unevaluated>).
+Implementation of the JSON Schema Draft 2020-12 "Applicator" vocabulary, indicated in metaschemas
+with the URI C<https://json-schema.org/draft/2020-12/vocab/applicator> and formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-10>.
 
-Support is also provided for the equivalent Draft 7 keywords that correspond to this vocabulary and
-are formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6>.
+Support is also provided for
+
+=for :list
+* the equivalent Draft 2019-09 keywords, indicated in metaschemas
+  with the URI C<https://json-schema.org/draft/2019-09/vocab/applicator> and formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-9> (except for the
+  C<unevaluatedItems> and C<unevaluatedProperties> keywords, which are implemented in
+  L<JSON::Schema::Modern::Vocabulary::Unevaluated>);
+* the equivalent Draft 7 keywords that correspond to this vocabulary and are formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6>.
 
 =cut

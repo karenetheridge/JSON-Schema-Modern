@@ -1,0 +1,55 @@
+[
+    {
+        "description": "validation of duration strings",
+        "schema": {"format": "duration"},
+        "comment": "see https://en.wikipedia.org/wiki/ISO_8601#Durations for examples and clarifications",
+        "tests": [
+            {
+                "description": "years and months can appear without days",
+                "data": "P1Y2M",
+                "valid": true
+            },
+            {
+                "description": "months and days can appear without years",
+                "data": "P1M2D",
+                "valid": true
+            },
+            {
+                "description": "hours and minutes can appear without seconds",
+                "data": "PT1H2M",
+                "valid": true
+            },
+            {
+                "description": "minutes and seconds can appear without hour",
+                "data": "PT1M2S",
+                "valid": true
+            },
+            {
+                "description": "elements may be omitted if their value is zero",
+                "data": "PT1H1S",
+                "valid": true
+            },
+            {
+                "description": "half a year duration, with full stop decimal point",
+                "comment": "ISO 8601 revision in year 2000 added decimals",
+                "data": "P0.5Y",
+                "valid": true
+            },
+            {
+                "description": "half a year duration, with comma decimal point",
+                "data": "P0,5Y",
+                "valid": true
+            },
+            {
+                "description": "only one unit can have a non-integer quantity",
+                "data": "P0.5Y2.1M",
+                "valid": false
+            },
+            {
+                "description": "only the smallest unit can have a non-integer quantity",
+                "data": "P0.5Y2M",
+                "valid": false
+            }
+        ]
+    }
+]

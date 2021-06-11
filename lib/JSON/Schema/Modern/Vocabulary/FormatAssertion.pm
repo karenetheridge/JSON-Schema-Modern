@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-package JSON::Schema::Modern::Vocabulary::Format;
+package JSON::Schema::Modern::Vocabulary::FormatAssertion;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Implementation of the JSON Schema Format vocabulary
+# ABSTRACT: Implementation of the JSON Schema Format-Assertion vocabulary
 
 our $VERSION = '0.515';
 
@@ -22,6 +22,7 @@ sub vocabulary {
   my ($self, $spec_version) = @_;
   return
       $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/format'
+    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/format-assertion'
     : undef;
 }
 
@@ -33,19 +34,15 @@ sub keywords {
   # for now, all built-in formats are constrained to the 'string' type
 
   my $is_datetime = sub {
-    eval { require Time::Moment; 1 } or return 1;
     eval { Time::Moment->from_string(uc($_[0])) } ? 1 : 0,
   };
   my $is_email = sub {
-    eval { require Email::Address::XS; Email::Address::XS->VERSION(1.01); 1 } or return 1;
     Email::Address::XS->parse($_[0])->is_valid;
   };
   my $is_hostname = sub {
-    eval { require Data::Validate::Domain; 1 } or return 1;
     Data::Validate::Domain::is_domain($_[0]);
   };
   my $idn_decode = sub {
-    eval { require Net::IDN::Encode; 1 } or return $_[0];
     try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch ($e) { return $_[0]; }
   };
   my $is_ipv4 = sub {
@@ -140,29 +137,48 @@ sub keywords {
 
 sub _traverse_keyword_format {
   my ($self, $schema, $state) = @_;
+
   return if not assert_keyword_type($state, $schema, 'string');
-  # TODO: if the metaschema's $vocabulary entry is true, then we must die on
-  # encountering unimplemented formats specified by the vocabulary (iri-reference, uri-template).
+
+  if ($schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template') {
+    return E($state, 'unimplemented format "%s"', $schema->{format});
+  }
+
+  try {
+    if ($schema->{format} eq 'date-time' or $schema->{format} eq 'date') {
+      +require Time::Moment;
+    }
+    elsif ($schema->{format} eq 'email' or $schema->{format} eq 'idn-email') {
+      +require Email::Address::XS; Email::Address::XS->VERSION(1.01);
+    }
+    elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
+      +require Data::Validate::Domain;
+    }
+    elsif ($schema->{format} eq 'idn-hostname') {
+      +require Net::IDN::Encode;
+    }
+  }
+  catch ($e) {
+    return E($state, 'cannot validate format "%s": %s', $schema->{format}, $e);
+  }
   return 1;
 }
 
 sub _eval_keyword_format {
   my ($self, $data, $schema, $state) = @_;
 
-  if ($state->{validate_formats}) {
-    # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
-    # and add in the type if needed
-    my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
-    my $default_spec = $self->_get_default_format_validation($schema->{format});
+  # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
+  # and add in the type if needed
+  my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
+  my $default_spec = $self->_get_default_format_validation($schema->{format});
 
-    my $spec =
-      $evaluator_spec ? ($default_spec ? +{ type => 'string', sub => $evaluator_spec } : $evaluator_spec)
-        : $default_spec ? +{ type => 'string', sub => $default_spec }
-        : undef;
+  my $spec =
+    $evaluator_spec ? ($default_spec ? +{ type => 'string', sub => $evaluator_spec } : $evaluator_spec)
+      : $default_spec ? +{ type => 'string', sub => $default_spec }
+      : undef;
 
-    return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
-      if $spec and is_type($spec->{type}, $data) and not $spec->{sub}->($data);
-  }
+  return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
+    if $spec and is_type($spec->{type}, $data) and not $spec->{sub}->($data);
 
   return A($state, $schema->{format});
 }
@@ -178,12 +194,18 @@ __END__
 
 =for stopwords metaschema
 
-Implementation of the JSON Schema Draft 2019-09 "Format" vocabulary, indicated in metaschemas
-with the URI C<https://json-schema.org/draft/2019-09/vocab/format> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-7>.
+Implementation of the JSON Schema Draft 2020-12 "Format-Assertion" vocabulary, indicated in metaschemas
+with the URI C<https://json-schema.org/draft/2020-12/vocab/format-assertion> and formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7>.
 
-Support is also provided for the equivalent Draft 7 keyword, as formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-7>.
+Support is also provided for
+
+=for :list
+* the equivalent Draft 2019-09 keyword, indicated in metaschemas
+  with the URI C<https://json-schema.org/draft/2019-09/vocab/format> and formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-7>.
+* the equivalent Draft 7 keyword, as formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-7>.
 
 Overrides to particular format implementations, or additions of new ones, can be done through
 L<JSON::Schema::Modern/format_validations>.

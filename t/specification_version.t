@@ -251,6 +251,11 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
       'dependencies is not recognized in >= draft2019-09',
     );
   };
+  cmp_deeply(
+    \@warnings,
+    [ re(qr/^no-longer-supported "dependencies" keyword present/) ],
+    'warned when using no-longer-supported keyword',
+  );
 
   cmp_deeply(
     $js->evaluate(
@@ -351,6 +356,237 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
     )->TO_JSON,
     { valid => true },
     'dependentSchemas is not recognized in <= draft7',
+  );
+};
+
+subtest 'prefixItems, items and additionalItems' => sub {
+  my $js = JSON::Schema::Modern->new;
+  cmp_deeply(
+    $js->evaluate(
+      [ 1, 2 ],
+      {
+        prefixItems => [ { maximum => 0 } ],
+        items => { maximum => 1 },
+      }
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/0',
+          keywordLocation => '/prefixItems/0/maximum',
+          error => 'value is larger than 0',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/prefixItems',
+          error => 'not all items are valid',
+        },
+        {
+          instanceLocation => '/1',
+          keywordLocation => '/items/maximum',
+          error => 'value is larger than 1',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'prefixitems+items works when specification_version >= draft2020-12',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      [ 1 ],
+      {
+        items => [ { maximum => 0 } ],
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'array form of "items" not supported in draft2020-12',
+        },
+      ],
+    },
+    'array form of items not supported when specification_version >= draft2020-12',
+  );
+
+  my @warnings = warnings {
+    cmp_deeply(
+      $js->evaluate(
+        [ 1 ],
+        { additionalItems => false },
+      )->TO_JSON,
+      { valid => true },
+      'additionalitems not recognized when specification_version >= draft2020-12',
+    );
+  };
+  cmp_deeply(
+    \@warnings,
+    [ re(qr/^no-longer-supported "additionalItems" keyword present/) ],
+    'warned when using no-longer-supported keyword',
+  );
+
+  cmp_deeply(
+    JSON::Schema::Modern->new(specification_version => 'draft2019-09')->evaluate(
+      [ 1 ],
+      { prefixItems => [ { maximum => 0 } ] }
+    )->TO_JSON,
+    { valid => true },
+    'prefixitems not supported when specification_version specifies other than draft2020-12',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      [ 1, 2, 3 ],
+      {
+        prefixItems => [ { maximum => 0 } ],
+        items => [ { maximum => 1 } ],
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          error => "array form of \"items\" not supported in draft2020-12",
+          instanceLocation => '',
+          keywordLocation => '/items',
+        },
+      ],
+    },
+    'array-based items in >= draft2020-12',
+  );
+
+  @warnings = warnings {
+    cmp_deeply(
+      $js->evaluate(
+        [ 1, 2, 3 ],
+        {
+          prefixItems => [ { maximum => 0 } ],
+          additionalItems => { maximum => 1 },
+        },
+      )->TO_JSON,
+      {
+        valid => false,
+        errors => [
+          {
+            instanceLocation => '/0',
+            keywordLocation => '/prefixItems/0/maximum',
+            error => 'value is larger than 0',
+          },
+          {
+            instanceLocation => '',
+            keywordLocation => '/prefixItems',
+            error => 'not all items are valid',
+          },
+        ],
+      },
+      'prefixItems + additionalItems',
+    );
+  };
+  cmp_deeply(
+    \@warnings,
+    [ re(qr/^no-longer-supported "additionalItems" keyword present/) ],
+    'warned when using no-longer-supported keyword',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      [ 1, 2, 3 ],
+      {
+        prefixItems => [ { maximum => 0 } ],
+        items => { maximum => 1 },
+      }
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/0',
+          keywordLocation => '/prefixItems/0/maximum',
+          error => 'value is larger than 0',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/prefixItems',
+          error => 'not all items are valid',
+        },
+        {
+          instanceLocation => '/1',
+          keywordLocation => '/items/maximum',
+          error => 'value is larger than 1',
+        },
+        {
+          instanceLocation => '/2',
+          keywordLocation => '/items/maximum',
+          error => 'value is larger than 1',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'prefixItems + schema-based items',
+  );
+
+  @warnings = warnings {
+    cmp_deeply(
+      $js->evaluate(
+        [ 1, 2, 3 ],
+        {
+          items => { maximum => 0 },
+          additionalItems => { maximum => 1 },
+        }
+      )->TO_JSON,
+      {
+        valid => false,
+        errors => [
+          (map +{
+            instanceLocation => '/'.$_,
+            keywordLocation => '/items/maximum',
+            error => 'value is larger than 0',
+          }, (0..2)),
+          {
+            instanceLocation => '',
+            keywordLocation => '/items',
+            error => 'subschema is not valid against all items',
+          },
+        ],
+      },
+      'schema-based items + additionalItems, failure case',
+    );
+  };
+  cmp_deeply(
+    \@warnings,
+    [ re(qr/^no-longer-supported "additionalItems" keyword present/) ],
+    'warned when using no-longer-supported keyword',
+  );
+
+  @warnings = warnings {
+    cmp_deeply(
+      $js->evaluate(
+        [ 1, 2, 3 ],
+        {
+          items => { maximum => 5 },
+          additionalItems => { maximum => 0 },
+        }
+      )->TO_JSON,
+      { valid => true },
+      'schema-based items + additionalItems, passing case',
+    );
+  };
+  cmp_deeply(
+    \@warnings,
+    [ re(qr/^no-longer-supported "additionalItems" keyword present/) ],
+    'warned when using no-longer-supported keyword',
   );
 };
 

@@ -1,0 +1,90 @@
+[
+    {
+        "description": "after leaving a dynamic scope, it should not be used by a $dynamicRef",
+        "schema": {
+            "$id": "main",
+            "if": {
+                "$id": "first_scope",
+                "$defs": {
+                    "thingy": {
+                        "$comment": "this is first_scope#thingy",
+                        "$dynamicAnchor": "thingy",
+                        "type": "number"
+                    }
+                }
+            },
+            "then": {
+                "$id": "second_scope",
+                "$ref": "start",
+                "$defs": {
+                    "thingy": {
+                        "$comment": "this is second_scope#thingy, the final destination of the $dynamicRef",
+                        "$dynamicAnchor": "thingy",
+                        "type": "null"
+                    }
+                }
+            },
+            "$defs": {
+                "start": {
+                    "$comment": "this is the landing spot from $ref",
+                    "$id": "start",
+                    "$dynamicRef": "inner_scope#thingy"
+                },
+                "thingy": {
+                    "$comment": "this is the first stop by the $dynamicRef",
+                    "$id": "inner_scope",
+                    "$dynamicAnchor": "thingy",
+                    "type": "string"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "string matches /$defs/thingy, but the $dynamicRef does not stop here",
+                "data": "a string",
+                "valid": false
+            },
+            {
+                "description": "first_scope is not in dynamic scope for the $dynamicRef",
+                "data": 42,
+                "valid": false
+            },
+            {
+                "description": "value validates against /then/$defs/thingy, the final stop for the $dynamicRef",
+                "data": null,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "schema in dynamic scope must have a $dynamicAnchor that matches the fragment",
+        "schema": {
+            "$defs": {
+              "enhanced": {
+                "$comment": "a matching $anchor is not sufficient: it must be a $dynamicAnchor",
+                "$anchor": "thingy",
+                "$dynamicAnchor": "something_else",
+                "minimum": 10
+              },
+              "orig": {
+                "$id": "orig",
+                "$dynamicAnchor": "thingy",
+                "minimum": 2
+              }
+            },
+            "$dynamicRef": "orig#thingy"
+        },
+        "tests": [
+            {
+                "description": "value would fail under either subschema",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "$anchor does not match $dynamicAnchor; original subschema is used",
+                "data": 5,
+                "valid": true
+            }
+        ]
+    }
+]

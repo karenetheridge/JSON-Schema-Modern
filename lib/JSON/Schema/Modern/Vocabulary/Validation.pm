@@ -23,6 +23,7 @@ sub vocabulary {
   my ($self, $spec_version) = @_;
   return
       $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/validation'
+    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/validation'
     : undef;
 }
 
@@ -370,12 +371,17 @@ __END__
 
 =for stopwords metaschema
 
-Implementation of the JSON Schema Draft 2019-09 "Validation" vocabulary, indicated in metaschemas
-with the URI C<https://json-schema.org/draft/2019-09/vocab/validation> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-6>.
+Implementation of the JSON Schema Draft 2020-12 "Validation" vocabulary, indicated in metaschemas
+with the URI C<https://json-schema.org/draft/2020-12/vocab/validation> and formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-6>.
 
-Support is also provided for the equivalent Draft 7 keywords that correspond to this vocabulary and
-are formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6>.
+Support is also provided for
+
+=for :list
+* the equivalent Draft 2019-09 keywords, indicated in metaschemas
+  with the URI C<https://json-schema.org/draft/2019-09/vocab/validation> and formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-6>.
+* the equivalent Draft 7 keywords that correspond to this vocabulary and are formally specified in
+  L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6>.
 
 =cut

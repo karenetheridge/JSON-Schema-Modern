@@ -32,8 +32,8 @@ my $result = $js->evaluate(
       alpha => false,
       beta => { multipleOf => 2 },
       gamma => {
-        items => [ false ],
-        additionalItems => false,
+        prefixItems => [ false ],
+        items => false,
         unevaluatedItems => false,
       },
       theta => { items => false },
@@ -124,23 +124,23 @@ cmp_deeply(
       },
       {
         instanceLocation => '/gamma/0',
-        keywordLocation => '/properties/gamma/items/0',
+        keywordLocation => '/properties/gamma/prefixItems/0',
         error => 'item not permitted',
       },
       {
         instanceLocation => '/gamma',
-        keywordLocation => '/properties/gamma/items',
+        keywordLocation => '/properties/gamma/prefixItems',
         error => 'not all items are valid',
       },
       {
         instanceLocation => '/gamma/1',
-        keywordLocation => '/properties/gamma/additionalItems',
+        keywordLocation => '/properties/gamma/items',
         error => 'additional item not permitted',
       },
       {
         instanceLocation => '/gamma',
-        keywordLocation => '/properties/gamma/additionalItems',
-        error => 'subschema is not valid against all additional items',
+        keywordLocation => '/properties/gamma/items',
+        error => 'subschema is not valid against all items',
       },
       (map +{
         instanceLocation => '/gamma/'.$_,
@@ -197,6 +197,11 @@ cmp_deeply(
         keywordLocation => '/propertyNames',
         error => 'not all property names are valid',
       },
+      {
+        instanceLocation => '',
+        keywordLocation => '/required',
+        error => 'missing property: bar',
+      },
       (map +{
         instanceLocation => '/'.$_,
         keywordLocation => '/unevaluatedProperties',
@@ -206,11 +211,6 @@ cmp_deeply(
         instanceLocation => '',
         keywordLocation => '/unevaluatedProperties',
         error => 'not all additional properties are valid',
-      },
-      {
-        instanceLocation => '',
-        keywordLocation => '/required',
-        error => 'missing property: bar',
       },
     ],
   },
@@ -284,16 +284,16 @@ cmp_deeply(
       },
       {
         instanceLocation => '/gamma/0',
-        keywordLocation => '/properties/gamma/items/0',
+        keywordLocation => '/properties/gamma/prefixItems/0',
         error => 'item not permitted',
       },
-      # - "summary" error from /properties/gamma/items is omitted
+      # - "summary" error from /properties/gamma/prefixItems is omitted
       {
         instanceLocation => '/gamma/1',
-        keywordLocation => '/properties/gamma/additionalItems',
+        keywordLocation => '/properties/gamma/items',
         error => 'additional item not permitted',
       },
-      # - "summary" error from /properties/gamma/additionalItems is omitted
+      # - "summary" error from /properties/gamma/items is omitted
       # - /properties/gamma/unevaluatedItems errors at /gamma/0, /gamma/1 are omitted because
       # we do have a schema covering them at /properties/gamma/items -- those subschemas just
       # evaluated to false
@@ -374,7 +374,7 @@ subtest 'strict_basic' => sub {
   # see "JSON pointer escaping" in t/errors.t
 
   cmp_deeply(
-    JSON::Schema::Modern->new(output_format => 'strict_basic')->evaluate(
+    JSON::Schema::Modern->new(specification_version => 'draft2019-09', output_format => 'strict_basic')->evaluate(
       { '{}' => { 'my~tilde/slash-property' => 1 } },
       {
         '$id' => 'foo.json',

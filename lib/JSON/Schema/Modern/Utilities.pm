@@ -109,7 +109,7 @@ sub get_type {
 }
 
 # compares two arbitrary data payloads for equality, as per
-# https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.4.2.3
+# https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.2
 # if provided with a state hashref, any differences are recorded within
 sub is_equal {
   my ($x, $y, $state) = @_;
