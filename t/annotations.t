@@ -24,7 +24,7 @@ my $initial_state = {
   schema_path => '',
   traversed_schema_path => '',
   vocabularies => [
-    (map use_module($_)->new(evaluator => $js),
+    (map use_module($_)->new,
       map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator MetaData)),
   ],
   evaluator => $js,
