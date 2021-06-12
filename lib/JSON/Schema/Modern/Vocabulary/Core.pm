@@ -23,6 +23,11 @@ sub keywords {
   qw($id $schema $anchor $recursiveAnchor $ref $recursiveRef $vocabulary $comment $defs);
 }
 
+# supported metaschema URIs. is a subset of JSON::Schema::Modern::CACHED_METASCHEMAS
+my %version_uris = (
+  'https://json-schema.org/draft/2019-09/schema'  => 'draft2019-09',
+);
+
 # adds the following keys to $state during traversal:
 # - identifiers: an arrayref of tuples:
 #   $uri => { path => $path_to_identifier, canonical_uri => Mojo::URL (absolute when possible) }
@@ -74,8 +79,21 @@ sub _traverse_keyword_schema {
   return E($state, '$schema can only appear at the schema resource root')
     if length($state->{schema_path});
 
-  return E($state, 'custom $schema references are not yet supported')
-    if $schema->{'$schema'} ne 'https://json-schema.org/draft/2019-09/schema';
+  my $spec_version = $version_uris{$schema->{'$schema'}};
+  return E($state, 'custom $schema URIs are not yet supported (must be one of: %s',
+      join(', ', map '"'.$_.'"', sort keys %version_uris))
+    if not $spec_version;
+
+  # The spec version cannot change as we traverse through a schema document, due to the race
+  # condition involved in supporting different core keyword semantics before we can parse the
+  # keywords that tell us what those semantics are.
+  # To support different dialects, we will record the local dialect in the document object for
+  # swapping out during evaluation and following $refs..
+  return E($state, '"$schema" indicates a different version than that requested by \'specification_version\'')
+    if $state->{evaluator}->specification_version
+      and $spec_version ne $state->{evaluator}->specification_version;
+
+  $state->{spec_version} = $spec_version;
 }
 
 # we do nothing with $schema yet at evaluation time. In the future, at traversal time we will fetch
@@ -150,6 +168,7 @@ sub _eval_keyword_ref {
       initial_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
+      spec_version => $document->specification_version,
       schema_path => '',
     });
 }
@@ -182,6 +201,7 @@ sub _eval_keyword_recursiveRef {
       initial_schema_uri => $canonical_uri,
       document => $document,
       document_path => $document_path,
+      spec_version => $document->specification_version,
       schema_path => '',
     });
 }

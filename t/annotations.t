@@ -23,6 +23,7 @@ my $initial_state = {
   data_path => '',
   schema_path => '',
   traversed_schema_path => '',
+  spec_version => 'draft2019-09',
   vocabularies => [
     (map use_module($_)->new,
       map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator MetaData)),

@@ -35,6 +35,8 @@ use namespace::clean;
 
 our @CARP_NOT = qw(JSON::Schema::Modern::Document);
 
+use constant SPECIFICATION_VERSION_DEFAULT => 'draft2019-09';
+
 has specification_version => (
   is => 'ro',
   isa => Enum(['draft2019-09']),
@@ -188,6 +190,7 @@ sub traverse {
     initial_schema_uri => $base_uri,    # the canonical URI as of the start or the last traversed $ref
     schema_path => '',                  # the rest of the path, since the start or the last traversed $ref
     errors => [],
+    spec_version => $self->specification_version//SPECIFICATION_VERSION_DEFAULT, # can change, iff nothing explicitly requested
     # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
     # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
@@ -258,6 +261,7 @@ sub evaluate {
       errors => [],
       annotations => [],
       seen => {},
+      spec_version => $document->specification_version,
       # for now, this is hardcoded, but in the future the dialect will be determined by the
       # traverse() pass on the schema and examination of the referenced metaschema.
       vocabularies => [
@@ -834,8 +838,9 @@ To date, missing features (some of which are optional, but still quite useful) i
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
 * additional output formats beyond C<flag>, C<basic>, C<strict_basic>, and C<terse>
   (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
-* examination of the C<$schema> keyword for deviation from the standard metaschema, including
+* examination of the C<$schema> keyword for deviation from the standard draft metaschemas, including
   changes to vocabulary behaviour
+* changing the draft specification version semantics after construction time
 
 Additionally, some small errors in the specification (which have been fixed in the next draft
 specification version) are fixed here rather than implementing the precise but unintended behaviour,
