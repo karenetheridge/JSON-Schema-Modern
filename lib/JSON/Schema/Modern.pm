@@ -205,7 +205,7 @@ sub traverse {
   };
 
   try {
-    $self->_traverse($schema_reference, $state);
+    $self->_traverse_subschema($schema_reference, $state);
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Error')) {
@@ -276,7 +276,7 @@ sub evaluate {
       } qw(short_circuit collect_annotations validate_formats annotate_unknown_keywords)),
     };
 
-    $valid = $self->_eval($data, $schema, $state);
+    $valid = $self->_eval_subschema($data, $schema, $state);
     warn 'result is false but there are no errors' if not $valid and not @{$state->{errors}};
   }
   catch ($e) {
@@ -324,7 +324,7 @@ my %removed_keywords = (
   },
 );
 
-sub _traverse {
+sub _traverse_subschema {
   croak 'insufficient arguments' if @_ < 3;
   my ($self, $schema, $state) = @_;
 
@@ -368,8 +368,8 @@ sub _traverse {
   }
 }
 
-sub _eval {
-  croak '_eval called in void context' if not defined wantarray;
+sub _eval_subschema {
+  croak '_eval_subschema called in void context' if not defined wantarray;
   croak 'insufficient arguments' if @_ < 4;
   my ($self, $data, $schema, $state) = @_;
 

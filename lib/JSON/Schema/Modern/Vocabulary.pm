@@ -19,13 +19,13 @@ requires qw(vocabulary keywords);
 
 sub traverse {
   my ($self, $schema, $state) = @_;
-  $state->{evaluator}->_traverse($schema, $state);
+  $state->{evaluator}->_traverse_subschema($schema, $state);
 }
 
 sub traverse_subschema {
   my ($self, $schema, $state) = @_;
 
-  $state->{evaluator}->_traverse($schema->{$state->{keyword}},
+  $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}},
     +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword} });
 }
 
@@ -36,7 +36,7 @@ sub traverse_array_schemas {
   return E($state, '%s array is empty', $state->{keyword}) if not @{$schema->{$state->{keyword}}};
 
   foreach my $idx (0 .. $#{$schema->{$state->{keyword}}}) {
-    $state->{evaluator}->_traverse($schema->{$state->{keyword}}[$idx],
+    $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}[$idx],
       +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx });
   }
 }
@@ -47,7 +47,7 @@ sub traverse_object_schemas {
   return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{$state->{keyword}}}) {
-    $state->{evaluator}->_traverse($schema->{$state->{keyword}}{$property},
+    $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}{$property},
       +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
   }
 }
@@ -57,13 +57,13 @@ sub traverse_property_schema {
 
   return if not assert_keyword_type($state, $schema, 'object');
 
-  $state->{evaluator}->_traverse($schema->{$state->{keyword}}{$property},
+  $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}{$property},
     +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
 }
 
 sub eval {
   my ($self, $data, $schema, $state) = @_;
-  $state->{evaluator}->_eval($data, $schema, $state);
+  $state->{evaluator}->_eval_subschema($data, $schema, $state);
 }
 
 1;
