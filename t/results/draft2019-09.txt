@@ -1,5 +1,5 @@
-Results using Test::JSON::Schema::Acceptance 1.009
-with commit 8a3a542bfe6b671a51f4e39cdc0dbbf543e8903d (2.0.0-362-g8a3a542)
+Results using Test::JSON::Schema::Acceptance 1.010
+with commit 0aefbb3d80e0caa22f3782677cf09c61b2205aa7 (2.0.0-377-g0aefbb3)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2019-09
 optional tests included: yes
@@ -14,7 +14,7 @@ anchor.json                                 10          0     0
 anyOf.json                                  18          0     0
 boolean_schema.json                         18          0     0
 const.json                                  50          0     0
-contains.json                               18          0     0
+contains.json                               20          0     0
 content.json                                18          0     0
 default.json                                 7          0     0
 defs.json                                    2          0     0
@@ -44,8 +44,8 @@ oneOf.json                                  27          0     0
 pattern.json                                 9          0     0
 patternProperties.json                      22          0     0
 properties.json                             20          0     0
-propertyNames.json                          10          0     0
-recursiveRef.json                           32          0     0
+propertyNames.json                          13          0     0
+recursiveRef.json                           34          0     0
 ref.json                                    41          0     0
 refRemote.json                              17          0     0
 required.json                                9          0     0
@@ -60,4 +60,4 @@ optional/float-overflow.json                 0          1     0
 optional/non-bmp-regex.json                 12          0     0
 optional/refOfUnknownKeyword.json            4          0     0
 ---------------------------------------------------------------
-TOTAL                                     1060         17     0
+TOTAL                                     1067         17     0
