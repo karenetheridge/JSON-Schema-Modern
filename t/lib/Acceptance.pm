@@ -12,7 +12,7 @@ use Safe::Isa;
 use Feature::Compat::Try;
 use Path::Tiny;
 
-use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning';
+use if $ENV{AUTHOR_TESTING}, 'Test::Warnings' => ':fail_on_warning'; # hooks into done_testing unless overridden
 use Test::JSON::Schema::Acceptance 1.008;
 use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
