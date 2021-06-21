@@ -1,0 +1,37 @@
+[
+    {
+        "description": "keywords not valid in the current specification version are ignored",
+        "schema": {
+            "id": "#not_a_valid_anchor",
+            "dependencies": {
+                "alpha": false,
+                "beta": [ "zeta" ]
+            },
+            "items": [
+                true
+            ],
+            "prefixItems": [
+                true,
+                false
+            ]
+        },
+        "tests": [
+            {
+                "description": "ignored keywords for objects",
+                "data": {
+                    "alpha": 1,
+                    "beta": 2,
+                    "gamma": 3
+                },
+                "valid": true
+            },
+            {
+                "description": "ignored keywords for arrays",
+                "data": [
+                    1, 2, 3
+                ],
+                "valid": true
+            }
+        ]
+    }
+]
