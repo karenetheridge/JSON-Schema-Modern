@@ -315,10 +315,13 @@ sub get {
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
-# keyword => undef, or arrayref of alternatives
+# current spec version => { keyword => undef, or arrayref of alternatives }
 my %removed_keywords = (
-  definitions => [ '$defs' ],
-  dependencies => [ qw(dependentSchemas dependentRequired) ],
+  'draft2019-09' => {
+    id => [ '$id' ],
+    definitions => [ '$defs' ],
+    dependencies => [ qw(dependentSchemas dependentRequired) ],
+  },
 );
 
 sub _traverse {
@@ -351,12 +354,12 @@ sub _traverse {
   }
 
   # check for previously-supported but now removed keywords
-  foreach my $keyword (sort keys %removed_keywords) {
+  foreach my $keyword (sort keys %{$removed_keywords{$state->{spec_version}}}) {
     next if not exists $schema->{$keyword};
     my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
       .canonical_schema_uri($state).'")';
-    if ($removed_keywords{$keyword}) {
-      my @list = map '"'.$_.'"', @{$removed_keywords{$keyword}};
+    if (my $alternates = $removed_keywords{$state->{spec_version}}->{$keyword}) {
+      my @list = map '"'.$_.'"', @$alternates;
       @list = ((map $_.',', @list[0..$#list-1]), $list[-1]) if @list > 2;
       splice(@list, -1, 0, 'or') if @list > 1;
       $message .= ': this should be rewritten as '.join(' ', @list);
