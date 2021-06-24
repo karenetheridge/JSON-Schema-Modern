@@ -120,6 +120,9 @@ sub _traverse_keyword_schema {
     if $state->{evaluator}->specification_version
       and $spec_version ne $state->{evaluator}->specification_version;
 
+  return E($state, 'draft specification version cannot change within a single schema document')
+    if $spec_version ne $state->{spec_version} and length($state->{traversed_schema_path});
+
   # we special-case this because the check in _eval for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
@@ -132,7 +135,8 @@ sub _traverse_keyword_schema {
 # schema, then storing that dialect instance in $state.
 # If no $schema is provided at the top level, we will use the default dialect defined by the
 # specification metaschema (all six vocabularies).
-# At evaluation time we simply swap out the dialect instance in $state.
+# At evaluation time we simply swap out the dialect instance in $state (but it still can't change
+# specification versions).
 
 sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;
