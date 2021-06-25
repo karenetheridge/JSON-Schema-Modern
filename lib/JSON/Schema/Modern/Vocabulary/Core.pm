@@ -46,6 +46,7 @@ sub _traverse_keyword_id {
   $uri->fragment(undef);
   $state->{initial_schema_uri} = $uri->is_abs ? $uri : $uri->to_abs($state->{initial_schema_uri});
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
+  # we don't set or update document_path because it is identical to traversed_schema_path
   $state->{schema_path} = '';
 
   push @{$state->{identifiers}},
@@ -76,6 +77,7 @@ sub _traverse_keyword_schema {
   return if not assert_keyword_type($state, $schema, 'string');
   assert_uri($state, $schema);
 
+  # note: we need not be at the document root, but simply adjacent to an $id
   return E($state, '$schema can only appear at the schema resource root')
     if length($state->{schema_path});
 

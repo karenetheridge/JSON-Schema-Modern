@@ -186,9 +186,9 @@ sub traverse {
   my $state = {
     depth => 0,
     data_path => '',                    # this never changes since we don't have an instance yet
-    traversed_schema_path => '',        # the accumulated traversal path up to the last $ref traversal
-    initial_schema_uri => $base_uri,    # the canonical URI as of the start or the last traversed $ref
-    schema_path => '',                  # the rest of the path, since the start or the last traversed $ref
+    traversed_schema_path => '',        # the accumulated traversal path as of the start, or last $id
+    initial_schema_uri => $base_uri,    # the canonical URI as of the start, or last $id
+    schema_path => '',                  # the rest of the path, since the last $id
     errors => [],
     spec_version => $self->specification_version//SPECIFICATION_VERSION_DEFAULT, # can change, iff nothing explicitly requested
     # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
@@ -229,9 +229,9 @@ sub evaluate {
 
   my $state = {
     data_path => '',
-    traversed_schema_path => '',        # the accumulated traversal path up to the last $ref traversal
-    initial_schema_uri => $base_uri,    # the canonical URI as of the start or the last traversed $ref
-    schema_path => '',                  # the rest of the path, since the start or the last traversed $ref
+    traversed_schema_path => '',        # the accumulated traversal path as of the start, or last $id, or up to the last traversed $ref
+    initial_schema_uri => $base_uri,    # the canonical URI as of the start or last $id, or the last traversed $ref
+    schema_path => '',                  # the rest of the path, since the last $id or the last traversed $ref
   };
 
   my $valid;
@@ -255,9 +255,9 @@ sub evaluate {
     $state = +{
       %$state,
       depth => 0,
-      initial_schema_uri => $canonical_uri,   # the canonical URI as of the start or the last traversed $ref
-      document => $document,                  # the ::Document object containing this schema
-      document_path => $document_path,        # the *initial* path within the document of this schema
+      initial_schema_uri => $canonical_uri, # the canonical URI as of the start or last $id, or the last traversed $ref
+      document => $document,                # the ::Document object containing this schema
+      document_path => $document_path,      # the path within the document of this schema, since the last $id or $ref traversal
       errors => [],
       annotations => [],
       seen => {},
