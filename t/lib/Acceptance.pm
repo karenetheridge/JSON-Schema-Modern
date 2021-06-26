@@ -18,10 +18,12 @@ use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::Schema::Modern;
 
-foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
-  note $env.': '.($ENV{$env} // '');
+BEGIN {
+  foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
+    note $env.': '.($ENV{$env} // '');
+  }
+  note '';
 }
-note '';
 
 sub acceptance_tests {
   my (%options) = @_;
