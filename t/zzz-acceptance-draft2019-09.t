@@ -32,7 +32,7 @@ acceptance_tests(
     specification_version => $version,
     validate_formats => 0,
   },
-  output_file => $version.'.txt',
+  output_file => $version.'-acceptance.txt',
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
       { file => [
@@ -69,4 +69,4 @@ DIAG
 
 done_testing;
 __END__
-see t/results/draft2019-09.txt for test results
+see t/results/draft2019-09-acceptance.txt for test results

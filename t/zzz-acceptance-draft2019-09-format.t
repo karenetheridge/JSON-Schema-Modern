@@ -31,7 +31,7 @@ acceptance_tests(
     specification_version => $version,
     validate_formats => 1,
   },
-  output_file => $version.'-format.txt',
+  output_file => $version.'-acceptance-format.txt',
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
       { file => [
