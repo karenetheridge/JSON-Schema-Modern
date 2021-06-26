@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.512
+version 0.513
 
 =head1 SYNOPSIS
 
@@ -35,18 +35,22 @@ version of the specification.
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
 this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest (supported) version.
+the latest (supported) version (draft2010-09). When left unset, the use of C<$schema> keywords in
+the schema is permitted, to switch between draft versions.
 
 May be one of:
 
 =over 4
 
+=item *
 
+L<C<draft2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>, corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
+
+=item *
+
+L<C<draft7>|https://json-schema.org/specification-links.html#draft-7>, corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
 
 =back
-
-* L<C<draft2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
-  corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
 
 =head2 output_format
 
@@ -97,8 +101,6 @@ in order for this to have any effect.
 Defaults to false (for now).
 
 =head1 METHODS
-
-=for Pod::Coverage keywords
 
 =head2 evaluate_json_string
 
@@ -368,7 +370,11 @@ additional output formats beyond C<flag>, C<basic>, C<strict_basic>, and C<terse
 
 =item *
 
-examination of the C<$schema> keyword for deviation from the standard metaschema, including changes to vocabulary behaviour
+examination of the C<$schema> keyword for deviation from the standard draft metaschemas, including changes to vocabulary behaviour
+
+=item *
+
+changing the draft specification version semantics after construction time
 
 =back
 
