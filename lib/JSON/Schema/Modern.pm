@@ -627,7 +627,7 @@ version of the specification.
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
 this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest (supported) version (draft2010-09). When left unset, the use of C<$schema> keywords in
+the latest (supported) version (draft2019-09). When left unset, the use of C<$schema> keywords in
 the schema is permitted, to switch between draft versions.
 
 May be one of:
@@ -881,6 +881,7 @@ SOURCES.>
 * L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
 * L<JSON::Schema::Tiny>: a more minimal implementation of the specification, with fewer dependencies
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
+# L<https://json-schema.org/draft-07/json-schema-release-notes.html>
 * L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
 
 =cut

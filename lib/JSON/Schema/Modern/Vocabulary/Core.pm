@@ -291,6 +291,10 @@ __END__
 
 Implementation of the JSON Schema Draft 2019-09 "Core" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/core> and formally specified in
-L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8>.
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-8>.
+
+Support is also provided for the equivalent Draft 7 keywords that correspond to this vocabulary and
+are formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-01>.
 
 =cut

@@ -179,7 +179,10 @@ __END__
 
 Implementation of the JSON Schema Draft 2019-09 "Format" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/format> and formally specified in
-L<https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7>.
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-7>.
+
+Support is also provided for the equivalent Draft 7 keyword, as formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-7>.
 
 Overrides to particular format implementations, or additions of new ones, can be done through
 L<JSON::Schema::Modern/format_validations>.

@@ -84,6 +84,10 @@ __END__
 
 Implementation of the JSON Schema Draft 2019-09 "Meta-Data" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/meta-data> and formally specified in
-L<https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.9>.
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-9>.
+
+Support is also provided for the equivalent Draft 7 keywords that correspond to this vocabulary and
+are formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-10>.
 
 =cut

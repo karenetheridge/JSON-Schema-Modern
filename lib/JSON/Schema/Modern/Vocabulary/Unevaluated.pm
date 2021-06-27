@@ -169,6 +169,6 @@ __END__
 Implementation of the C<unevaluatedItems> and C<unevaluatedProperties> keywords in the
 JSON Schema Draft 2019-09 "Applicator" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/applicator> and formally specified in
-L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9>.
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-9>.
 
 =cut

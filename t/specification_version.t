@@ -276,7 +276,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
         },
       ],
     },
-    'dependentRequired is supported in >= draft2010-09',
+    'dependentRequired is supported in >= draft2019-09',
   );
 
   cmp_deeply(
@@ -303,7 +303,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
         },
       ],
     },
-    'dependentSchemas is supported in >= draft2010-09',
+    'dependentSchemas is supported in >= draft2019-09',
   );
 
   $js = JSON::Schema::Modern->new(specification_version => 'draft7');

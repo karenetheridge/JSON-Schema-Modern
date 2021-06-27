@@ -589,8 +589,12 @@ __END__
 
 Implementation of the JSON Schema Draft 2019-09 "Applicator" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2019-09/vocab/applicator> and formally specified in
-L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9> (except for the
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-9> (except for the
 C<unevaluatedItems> and C<unevaluatedProperties> keywords, which are implemented in
 L<JSON::Schema::Modern::Vocabulary::Unevaluated>).
+
+Support is also provided for the equivalent Draft 7 keywords that correspond to this vocabulary and
+are formally specified in
+L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6>.
 
 =cut
