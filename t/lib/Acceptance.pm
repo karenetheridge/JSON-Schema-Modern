@@ -52,7 +52,7 @@ sub acceptance_tests {
       # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
       local $SIG{__WARN__} = sub {
         warn @_ if $_[0] !~ /^no-longer-supported "definitions" keyword present/;
-      };
+      } if $options{acceptance}{specification} ne 'draft7';
       $js->add_schema($uri => $schema);
       $js_short_circuit->add_schema($uri => $schema);
     }
