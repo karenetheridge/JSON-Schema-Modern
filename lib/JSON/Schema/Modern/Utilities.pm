@@ -226,7 +226,8 @@ sub A {
 
 # creates an error object, but also aborts evaluation immediately
 # only this error is returned, because other errors on the stack might not actually be "real"
-# errors (consider if we were in the middle of evaluating a "not" or "if")
+# errors (consider if we were in the middle of evaluating a "not" or "if").
+# Therefore this is only appropriate during the evaluation phase, not the traverse phase.
 sub abort {
   my ($state, $error_string, @args) = @_;
   E($state, $error_string, @args);

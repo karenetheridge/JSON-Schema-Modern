@@ -43,7 +43,7 @@ sub _traverse_keyword_type {
   my ($self, $schema, $state) = @_;
 
   if (is_plain_arrayref($schema->{type})) {
-    abort($state, 'type array is empty') if not @{$schema->{type}};
+    return E($state, 'type array is empty') if not @{$schema->{type}};
     foreach my $type (@{$schema->{type}}) {
       return E($state, 'unrecognized type "%s"', $type//'<null>')
         if not any { ($type//'') eq $_ } qw(null boolean object array string number integer);
