@@ -690,16 +690,15 @@ Defaults to false (for now).
 
 =head2 evaluate_json_string
 
-  $result = $js->evaluate_json_string($data_as_json_string, $schema_data);
-  $result = $js->evaluate_json_string($data_as_json_string, $schema_data, { collect_annotations => 1});
+  $result = $js->evaluate_json_string($data_as_json_string, $schema);
+  $result = $js->evaluate_json_string($data_as_json_string, $schema, { collect_annotations => 1});
 
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of a JSON-encoded string (in accordance with
 L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
-The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
-L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
+The schema must be in one of these forms:
 
 =for :list
 * a Perl data structure, such as what is returned from a JSON decode operation,
@@ -714,16 +713,15 @@ The result is a L<JSON::Schema::Modern::Result> object, which can also be used a
 
 =head2 evaluate
 
-  $result = $js->evaluate($instance_data, $schema_data);
-  $result = $js->evaluate($instance_data, $schema_data, { short_circuit => 0 });
+  $result = $js->evaluate($instance_data, $schema);
+  $result = $js->evaluate($instance_data, $schema, { short_circuit => 0 });
 
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
 allows: null, boolean, string, number, object, array. (See L</TYPES> below.)
 
-The schema must represent a JSON Schema that respects the Draft 2019-09 meta-schema at
-L<https://json-schema.org/draft/2019-09/schema>, in one of these forms:
+The schema must be in one of these forms:
 
 =for :list
 * a Perl data structure, such as what is returned from a JSON decode operation,
@@ -739,10 +737,10 @@ The result is a L<JSON::Schema::Modern::Result> object, which can also be used a
 
 =head2 traverse
 
-  $result = $js->traverse($schema_data);
-  $result = $js->traverse($schema_data, { initial_schema_uri => 'http://example.com' });
+  $result = $js->traverse($schema);
+  $result = $js->traverse($schema, { initial_schema_uri => 'http://example.com' });
 
-Traverses the provided schema data without evaluating it against any instance data. Returns the
+Traverses the provided schema without evaluating it against any instance data. Returns the
 internal state object accumulated during the traversal, including any identifiers found therein, and
 any errors found during parsing. For internal purposes only.
 
