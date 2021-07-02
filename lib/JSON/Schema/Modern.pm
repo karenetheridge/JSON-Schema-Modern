@@ -115,11 +115,13 @@ sub add_schema {
       _evaluator => $self,  # used only for traversal during document construction
     );
 
-  die JSON::Schema::Modern::Result->new(
-    output_format => $self->output_format,
-    valid => 0,
-    errors => [ $document->errors ],
-  ) if $document->has_errors;
+  die((caller())[0] ne ref($self)
+    ? join('; ', map $_->keyword_location.': '.$_->error, $document->errors)
+    : die JSON::Schema::Modern::Result->new(
+      output_format => $self->output_format,
+      valid => 0,
+      errors => [ $document->errors ],
+    )) if $document->has_errors;
 
   if (not grep $_->{document} == $document, $self->_resource_values) {
     my $schema_content = $document->_serialized_schema
@@ -777,8 +779,7 @@ before calling L</evaluate>, other than the standard metaschemas which are loade
 as needed.
 
 Returns C<undef> if the resource could not be found;
-if there were errors in the document, will die with a L<JSON::Schema::Modern::Result> object
-containing the errors;
+if there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
 
 =head2 get
