@@ -351,7 +351,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/items',
-          annotation => 0,
+          annotation => true,
         },
       ],
     },
@@ -519,7 +519,7 @@ subtest 'annotate_unknown_keywords' => sub {
         {
           instanceLocation => '/item',
           keywordLocation => '/properties/item/items',
-          annotation => 0,
+          annotation => true,
         },
         {
           instanceLocation => '/item',
@@ -563,6 +563,28 @@ subtest 'items + additionalItems' => sub {
       [ 1, 2, 3 ],
       {
         items => { maximum => 5 },
+        additionalItems => { maximum => 0 },
+      }
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          annotation => true,
+        },
+        # no error nor annotation from additionalItems
+      ],
+    },
+    'schema-based items + additionalItems',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      [],
+      {
+        items => [ { maximum => 5 } ],
         additionalItems => { maximum => 0 },
       }
     )->TO_JSON,

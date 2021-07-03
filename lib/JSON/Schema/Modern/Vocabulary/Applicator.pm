@@ -328,7 +328,8 @@ sub _eval_keyword__items_array_schemas {
 
   return E($state, 'not all items are valid') if not $valid;
   push @{$state->{annotations}}, @new_annotations;
-  return A($state, $state->{_last_items_index});
+  return A($state,
+    ($state->{_last_items_index}//-1) == $#{$data} ? true : $state->{_last_items_index});
 }
 
 # schema-based items and additionalItems
