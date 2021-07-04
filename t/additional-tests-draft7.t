@@ -37,7 +37,7 @@ cmp_deeply(
   $test_sub->(
     # these are all in unknownKeyword.json
     map +(
-      ( re(qr/^no-longer-supported "$_" keyword present/) ) x 4,
+      ( re(qr/^no-longer-supported "$_" keyword present/) ) x (4 * ($ENV{NO_SHORT_CIRCUIT} ? 1 : 2)),
     ), qw(id),
   ),
   'got unsupported keyword warnings'.($ENV{AUTHOR_TESTING} ? '; no unexpected warnings' : ''),

@@ -1,37 +1,70 @@
 [
     {
-        "description": "keywords not valid in the current specification version are ignored",
+        "description": "past and future keywords are ignored",
         "schema": {
-            "id": "#not_a_valid_anchor",
+            "id": "#bad_syntax!for anchor~",
             "dependentSchemas": {
                 "alpha": false
             },
             "dependentRequired": {
                 "beta": [ "zeta" ]
             },
-            "items": [
-                true
-            ],
             "prefixItems": [
                 true,
                 false
-            ]
+            ],
+            "type": "number"
         },
         "tests": [
             {
-                "description": "ignored keywords for objects",
-                "data": {
-                    "alpha": 1,
-                    "beta": 2,
-                    "gamma": 3
-                },
+                "description": "passing",
+                "data": 1,
                 "valid": true
             },
             {
-                "description": "ignored keywords for arrays",
-                "data": [
-                    1, 2, 3
-                ],
+                "description": "failing (string)",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "failing (object)",
+                "data": { "alpha": 1, "beta": 2 },
+                "valid": false
+            },
+            {
+                "description": "failing (array)",
+                "data": [ 1, 2 ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$recursiveRef without $recursiveAnchor works like $ref",
+        "schema": {
+            "properties": {
+                "foo": {"$recursiveRef": "#"}
+            },
+            "additionalProperties": false
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": {"foo": false},
+                "valid": true
+            },
+            {
+                "description": "recursive match",
+                "data": {"foo": {"foo": false}},
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": {"bar": false},
+                "valid": false
+            },
+            {
+                "description": "recursive mismatch (but $dynamicRef is ignored)",
+                "data": {"foo": {"bar": false}},
                 "valid": true
             }
         ]
