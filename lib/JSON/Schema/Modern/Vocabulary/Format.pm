@@ -187,6 +187,9 @@ L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01
 Overrides to particular format implementations, or additions of new ones, can be done through
 L<JSON::Schema::Modern/format_validations>.
 
+Formats C<iri-reference> and C<uri-template> are not yet implemented.
+Use of these formats will always evaluate to C<true>.
+
 =head1 SEE ALSO
 
 =for :list
