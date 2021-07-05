@@ -138,7 +138,7 @@ subtest '$id with an empty fragment' => sub {
   );
 };
 
-subtest '$recursiveRef without nesting' => sub {
+subtest '$recursiveRef without nesting behaves like $ref' => sub {
   cmp_deeply(
     $js->evaluate(
       { foo => { bar => 'hello', baz => 1 } },
@@ -228,7 +228,7 @@ subtest '$recursiveRef without nesting' => sub {
   );
 };
 
-subtest '$recursiveRef without $recursiveAnchor' => sub {
+subtest '$recursiveRef without $recursiveAnchor behaves like $ref' => sub {
   cmp_deeply(
     $js->evaluate(
       { foo => { bar => 1 } },
@@ -371,8 +371,8 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
         '$id' => 'https://allowints.com',
         '$recursiveAnchor' => true,
         anyOf => [
-          { '$recursiveRef' => '#' }, # the base: all leaf nodes must be booleans
-          { type => 'integer' },            # or, integers are okay too
+          { '$recursiveRef' => '#' },   # we want to recurse to the base: all leaf nodes must be booleans
+          { type => 'integer' },        # or, integers are okay too
         ],
       },
       base => {
