@@ -381,9 +381,8 @@ sub _eval_subschema {
   croak 'insufficient arguments' if @_ < 4;
   my ($self, $data, $schema, $state) = @_;
 
-  # do not propagate upwards changes to depth, traversed paths,
-  # but additions to annotations, errors are by reference and will be retained
-  $state = { %$state };
+  # callers created a new $state for us, so we do not propagate upwards changes to depth, traversed
+  # paths; but annotations, errors are arrayrefs so their contents will be shared
   delete @{$state}{'keyword', grep /^_/, keys %$state};
 
   abort($state, 'EXCEPTION: maximum evaluation depth exceeded')

@@ -104,7 +104,7 @@ The list of keywords defined by the vocabulary. Must be implemented by the compo
 
 =head2 traverse
 
-Traverses a subschema.
+Traverses a subschema. Callers are expected to establish a new C<$state> scope.
 
 =head2 traverse_subschema
 
@@ -124,6 +124,6 @@ Recursively traverses the subschema under one property of the object at the curr
 
 =head2 eval
 
-Evaluates a subschema.
+Evaluates a subschema. Callers are expected to establish a new C<$state> scope.
 
 =cut

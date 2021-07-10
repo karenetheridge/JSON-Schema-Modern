@@ -967,14 +967,14 @@ subtest 'bad regex in schema' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '',
+          keywordLocation => '/properties',
           # in 5.28 and earlier: Can't find Unicode property definition "IsFoo"
           # in 5.30 and later:   Unknown user-defined property name \p{main::IsFoo}
           error => re(qr/^EXCEPTION: .*property.*IsFoo/),
         },
       ],
     },
-    'bad "pattern" regex is properly noted in error, but locations are lost because this is an exceptional error',
+    'bad "pattern" regex is properly noted in error',
   );
 
   no warnings 'once';
