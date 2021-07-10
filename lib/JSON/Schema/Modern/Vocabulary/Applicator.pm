@@ -45,7 +45,7 @@ sub keywords {
     $spec_version eq 'draft7' ? 'dependencies' : 'dependentSchemas',
     qw(items additionalItems contains
       properties patternProperties additionalProperties propertyNames),
-    $spec_version ne 'draft7' ? $self->unevaluated_vocabulary->keywords($spec_version) : (),
+    $spec_version eq 'draft2019-09' ? $self->unevaluated_vocabulary->keywords($spec_version) : (),
   );
 }
 

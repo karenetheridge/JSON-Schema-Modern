@@ -31,8 +31,8 @@ sub keywords {
     $spec_version ne 'draft7' ? '$anchor' : (),
     $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
     '$ref',
-    $spec_version ne 'draft7' ? qw($recursiveRef $vocabulary $comment) : (),
-    $spec_version eq 'draft7' ? 'definitions' : '$defs',
+    $spec_version eq 'draft2019-09' ? '$recursiveRef' : (),
+    $spec_version eq 'draft7' ? 'definitions' : qw($vocabulary $comment $defs),
   );
 }
 
