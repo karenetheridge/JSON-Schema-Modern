@@ -209,11 +209,7 @@ sub _eval_keyword_ref {
     });
 }
 
-sub _traverse_keyword_recursiveRef {
-  my ($self, $schema, $state) = @_;
-  return if not assert_keyword_type($state, $schema, 'string');
-  return if not assert_uri_reference($state, $schema);
-}
+sub _traverse_keyword_recursiveRef { goto \&_traverse_keyword_ref }
 
 sub _eval_keyword_recursiveRef {
   my ($self, $data, $schema, $state) = @_;
