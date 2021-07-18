@@ -20,6 +20,13 @@ BEGIN {
     if not -d '.git' and not grep $ENV{$_}, @variables;
 }
 
+if (-d '.git' or $ENV{AUTHOR_TESTING} or $ENV{EXTENDED_TESTING}) {
+  eval { +require Time::Moment; 1 } or fail $@;
+  eval { +require Email::Address::XS; Email::Address::XS->VERSION(1.01); 1 } or fail $@;
+  eval { +require Data::Validate::Domain; 1 } or fail $@;
+  eval { +require Net::IDN::Encode; 1 } or fail $@;
+}
+
 my $version = 'draft7';
 
 acceptance_tests(
