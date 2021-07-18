@@ -76,4 +76,4 @@ DIAG
 
 done_testing;
 __END__
-see t/results/draft2019-09-format.txt for test results
+see t/results/draft2019-09-acceptance-format.txt for test results
