@@ -213,9 +213,6 @@ sub _traverse_keyword_dependencies {
     if (is_type('array', $schema->{dependencies}{$property})) {
       # as in dependentRequired
 
-      E($state, 'dependencies array at %s is empty', $property)
-        if $state->{spec_version} eq 'draft4' and not @{$schema->{dependencies}{$property}};
-
       foreach my $index (0..$#{$schema->{dependencies}{$property}}) {
         E({ %$state, _schema_path_suffix => $property }, 'element #%d is not a string', $index)
           if not is_type('string', $schema->{dependencies}{$property}[$index]);
