@@ -36,6 +36,7 @@ sub keywords {
 sub _traverse_keyword_contentEncoding {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'string');
+  return 1;
 }
 
 sub _eval_keyword_contentEncoding {

@@ -209,23 +209,25 @@ sub _traverse_keyword_dependencies {
 
   return if not assert_keyword_type($state, $schema, 'object');
 
+  my $valid = 1;
   foreach my $property (sort keys %{$schema->{dependencies}}) {
     if (is_type('array', $schema->{dependencies}{$property})) {
       # as in dependentRequired
 
       foreach my $index (0..$#{$schema->{dependencies}{$property}}) {
-        E({ %$state, _schema_path_suffix => $property }, 'element #%d is not a string', $index)
+        $valid = E({ %$state, _schema_path_suffix => $property }, 'element #%d is not a string', $index)
           if not is_type('string', $schema->{dependencies}{$property}[$index]);
       }
 
-      E({ %$state, _schema_path_suffix => $property }, 'elements are not unique')
+      $valid = E({ %$state, _schema_path_suffix => $property }, 'elements are not unique')
         if not is_elements_unique($schema->{dependencies}{$property});
     }
     else {
       # as in dependentSchemas
-      $self->traverse_property_schema($schema, $state, $property);
+      $valid = 0 if not $self->traverse_property_schema($schema, $state, $property);
     }
   }
+  return $valid;
 }
 
 sub _eval_keyword_dependencies {
@@ -453,10 +455,12 @@ sub _traverse_keyword_patternProperties {
 
   return if not assert_keyword_type($state, $schema, 'object');
 
+  my $valid = 1;
   foreach my $property (sort keys %{$schema->{patternProperties}}) {
-    assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
-    $self->traverse_property_schema($schema, $state, $property);
+    $valid = 0 if not assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
+    $valid = 0 if not $self->traverse_property_schema($schema, $state, $property);
   }
+  return $valid;
 }
 
 sub _eval_keyword_patternProperties {

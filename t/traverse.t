@@ -29,6 +29,7 @@ subtest 'traversal with callbacks' => sub {
         },
       },
     },
+    if => 1,  # bad subschema
     allOf => [
       {},
       { '$ref' => '#/$defs/foo' },
@@ -37,28 +38,40 @@ subtest 'traversal with callbacks' => sub {
   };
 
   my %refs;
-  my $ref_callback = sub {
-    my ($schema, $state) = @_;
-    my $canonical_uri = canonical_schema_uri($state);
-    my $ref_uri = Mojo::URL->new($schema->{'$ref'});
-    $ref_uri = $ref_uri->to_abs($canonical_uri) if not $ref_uri->is_abs;
-
-    $refs{$state->{traversed_schema_path}.$state->{schema_path}} = $ref_uri->to_string;
-  };
+  my $if_callback_called;
   my $js = JSON::Schema::Modern->new;
-  my $state = $js->traverse($schema, { callbacks => { '$ref' => $ref_callback }});
+  my $state = $js->traverse($schema, { callbacks => {
+      '$ref' => sub {
+        my ($schema, $state) = @_;
+        my $canonical_uri = canonical_schema_uri($state);
+        my $ref_uri = Mojo::URL->new($schema->{'$ref'});
+        $ref_uri = $ref_uri->to_abs($canonical_uri) if not $ref_uri->is_abs;
+        $refs{$state->{traversed_schema_path}.$state->{schema_path}} = $ref_uri->to_string;
+      },
+      if => sub { $if_callback_called = 1; },
+    }});
 
   cmp_deeply(
-    $state->{errors},
-    [],
-    'no errors encountered during traversal',
+    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/if',
+        absoluteKeywordLocation => 'https://foo.com#/if',
+        error => 'invalid schema type: number',
+      },
+    ],
+    'errors encountered during traversal are returned',
   );
+
+  ok(!$if_callback_called, 'callback for erroneous keyword was not called');
 
   cmp_deeply(
     \%refs,
     {
       '/$defs/foo/additionalProperties' => 'https://foo.com/recursive_subschema',
       '/$defs/bar/properties/description' => 'https://foo.com#/$defs/foo',
+      # no entry for 'if' -- callbacks are not called for keywords with errors
       '/allOf/1' => 'https://foo.com#/$defs/foo',
       '/allOf/2' => 'https://foo.com#/$defs/bar',
     },

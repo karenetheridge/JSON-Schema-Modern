@@ -289,11 +289,11 @@ sub evaluate {
       push @{$state->{errors}}, $e;
     }
     else {
-      E($state, 'EXCEPTION: '.$e);
+      $valid = E($state, 'EXCEPTION: '.$e);
     }
-
-    $valid = 0;
   }
+
+  die 'evaluate validity inconstent with error count' if $valid xor !@{$state->{errors}};
 
   return JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,
@@ -339,10 +339,11 @@ sub _traverse_subschema {
     if $state->{depth}++ > $self->max_traversal_depth;
 
   my $schema_type = get_type($schema);
-  return if $schema_type eq 'boolean';
+  return 1 if $schema_type eq 'boolean';
 
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
+  my $valid = 1;
   foreach my $vocabulary (@{$state->{vocabularies}}) {
     foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
       next if not exists $schema->{$keyword};
@@ -352,7 +353,12 @@ sub _traverse_subschema {
 
       $state->{keyword} = $keyword;
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
-      $vocabulary->$method($schema, $state);
+
+      if (not $vocabulary->$method($schema, $state)) {
+        die 'traverse returned false but we have no errors' if not @{$state->{errors}};
+        $valid = 0;
+        next;
+      }
 
       if (my $sub = $state->{callbacks}{$keyword}) {
         $sub->($schema, $state);
@@ -373,6 +379,8 @@ sub _traverse_subschema {
     }
     carp $message;
   }
+
+  return $valid;
 }
 
 sub _eval_subschema {

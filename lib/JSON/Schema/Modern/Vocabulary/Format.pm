@@ -143,6 +143,7 @@ sub _traverse_keyword_format {
   return if not assert_keyword_type($state, $schema, 'string');
   # TODO: if the metaschema's $vocabulary entry is true, then we must die on
   # encountering unimplemented formats specified by the vocabulary (iri-reference, uri-template).
+  return 1;
 }
 
 sub _eval_keyword_format {

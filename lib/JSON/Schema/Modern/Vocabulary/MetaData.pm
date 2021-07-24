@@ -36,6 +36,7 @@ sub keywords {
 sub _traverse_keyword_title {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'string');
+  return 1;
 }
 
 sub _eval_keyword_title {
@@ -47,13 +48,14 @@ sub _traverse_keyword_description { goto \&_traverse_keyword_title }
 
 sub _eval_keyword_description { goto \&_eval_keyword_title }
 
-sub _traverse_keyword_default { }
+sub _traverse_keyword_default { 1 }
 
 sub _eval_keyword_default { goto \&_eval_keyword_title }
 
 sub _traverse_keyword_deprecated {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'boolean');
+  return 1;
 }
 
 sub _eval_keyword_deprecated { goto \&_eval_keyword_title }
@@ -69,6 +71,7 @@ sub _eval_keyword_writeOnly { goto \&_eval_keyword_title }
 sub _traverse_keyword_examples {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'array');
+  return 1;
 }
 
 sub _eval_keyword_examples { goto \&_eval_keyword_title }

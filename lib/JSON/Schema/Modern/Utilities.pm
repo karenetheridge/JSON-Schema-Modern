@@ -178,6 +178,7 @@ sub canonical_schema_uri {
 
 # shorthand for creating error objects
 sub E {
+  croak 'E called in void context' if not defined wantarray;
   my ($state, $error_string, @args) = @_;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
@@ -230,17 +231,19 @@ sub A {
 # Therefore this is only appropriate during the evaluation phase, not the traverse phase.
 sub abort {
   my ($state, $error_string, @args) = @_;
-  E($state, $error_string, @args);
+  ()= E($state, $error_string, @args);
   die pop @{$state->{errors}};
 }
 
 sub assert_keyword_type {
+  croak 'assert_keyword_type called in void context' if not defined wantarray;
   my ($state, $schema, $type) = @_;
   return 1 if is_type($type, $schema->{$state->{keyword}});
   E($state, '%s value is not a%s %s', $state->{keyword}, ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
 }
 
 sub assert_pattern {
+  croak 'assert_pattern called in void context' if not defined wantarray;
   my ($state, $pattern) = @_;
   try {
     local $SIG{__WARN__} = sub { die @_ };
@@ -251,6 +254,7 @@ sub assert_pattern {
 }
 
 sub assert_uri_reference {
+  croak 'assert_uri_reference called in void context' if not defined wantarray;
   my ($state, $schema) = @_;
 
   my $ref = $schema->{$state->{keyword}};
@@ -268,6 +272,7 @@ sub assert_uri_reference {
 }
 
 sub assert_uri {
+  croak 'assert_uri called in void context' if not defined wantarray;
   my ($state, $schema, $override) = @_;
 
   my $string = $override // $schema->{$state->{keyword}};

@@ -79,6 +79,7 @@ sub _traverse_keyword_id {
       path => $state->{traversed_schema_path},
       canonical_uri => $state->{initial_schema_uri}->clone,
     };
+  return 1;
 }
 
 sub _eval_keyword_id {
@@ -99,8 +100,7 @@ sub _eval_keyword_id {
 sub _traverse_keyword_schema {
   my ($self, $schema, $state) = @_;
 
-  return if not assert_keyword_type($state, $schema, 'string');
-  return if not assert_uri($state, $schema);
+  return if not assert_keyword_type($state, $schema, 'string') or not assert_uri($state, $schema);
 
   # note: we need not be at the document root, but simply adjacent to an $id
   return E($state, '$schema can only appear at the schema resource root')
@@ -128,6 +128,7 @@ sub _traverse_keyword_schema {
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
   $state->{spec_version} = $spec_version;
+  return 1;
 }
 
 # In the future, at traversal time we will fetch the schema at the value of this keyword and examine
@@ -154,6 +155,7 @@ sub _traverse_keyword_anchor {
       path => $state->{traversed_schema_path}.$state->{schema_path},
       canonical_uri => $canonical_uri,
     };
+  return 1;
 }
 
 # we already indexed the $anchor uri, so there is nothing more to do at evaluation time.
@@ -168,6 +170,7 @@ sub _traverse_keyword_recursiveAnchor {
   # of $recursiveRef, and the fragment would be disregarded in the base
   return E($state, '"$recursiveAnchor" keyword used without "$id"')
     if length($state->{schema_path});
+  return 1;
 }
 
 sub _eval_keyword_recursiveAnchor {
@@ -183,8 +186,9 @@ sub _eval_keyword_recursiveAnchor {
 
 sub _traverse_keyword_ref {
   my ($self, $schema, $state) = @_;
-  return if not assert_keyword_type($state, $schema, 'string');
-  return if not assert_uri_reference($state, $schema);
+  return if not assert_keyword_type($state, $schema, 'string')
+    or not assert_uri_reference($state, $schema);
+  return 1;
 }
 
 sub _eval_keyword_ref {
@@ -240,11 +244,12 @@ sub _traverse_keyword_vocabulary {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'object');
 
+  my $valid = 1;
   foreach my $property (sort keys %{$schema->{'$vocabulary'}}) {
-    E($state, '$vocabulary/%s value is not a boolean', $property)
+    $valid = E($state, '$vocabulary/%s value is not a boolean', $property)
       if not is_type('boolean', $schema->{'$vocabulary'}{$property});
 
-    assert_uri($state, $schema, $property);
+    $valid = 0 if not assert_uri($state, $schema, $property);
   }
 
   return E($state, '$vocabulary can only appear at the schema resource root')
@@ -252,6 +257,8 @@ sub _traverse_keyword_vocabulary {
 
   return E($state, '$vocabulary can only appear at the document root')
     if length($state->{traversed_schema_path}.$state->{schema_path});
+
+  return $valid;
 }
 
 # we do nothing with $vocabulary yet at evaluation time. When we know we are in a metaschema,
@@ -262,6 +269,7 @@ sub _traverse_keyword_comment {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'string');
+  return 1;
 }
 
 # we do nothing with $comment at evaluation time, including not collecting its value for annotations.

@@ -33,10 +33,12 @@ sub keywords {
 sub _traverse_keyword_unevaluatedItems {
   my ($self, $schema, $state) = @_;
 
-  $self->traverse_subschema($schema, $state);
+  my $valid = $self->traverse_subschema($schema, $state);
 
   # remember that annotations need to be collected in order to evaluate this keyword
   $state->{configs}{collect_annotations} = 1;
+
+  return $valid;
 }
 
 sub _eval_keyword_unevaluatedItems {
@@ -96,10 +98,12 @@ sub _eval_keyword_unevaluatedItems {
 sub _traverse_keyword_unevaluatedProperties {
   my ($self, $schema, $state) = @_;
 
-  $self->traverse_subschema($schema, $state);
+  my $valid = $self->traverse_subschema($schema, $state);
 
   # remember that annotations need to be collected in order to evaluate this keyword
   $state->{configs}{collect_annotations} = 1;
+
+  return $valid;
 }
 
 sub _eval_keyword_unevaluatedProperties {
