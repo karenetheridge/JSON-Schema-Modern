@@ -298,6 +298,25 @@ subtest '$anchor not conforming to syntax' => sub {
   );
 };
 
+subtest '$schema not conforming to syntax' => sub {
+  cmp_deeply(
+    JSON::Schema::Modern::Document->new(
+      schema => { '$schema' => 'foo' },
+    ),
+    listmethods(
+      resource_index => [],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"foo" is not a valid URI',
+        }),
+      ],
+    ),
+    'invalid $schema is detected',
+  );
+};
+
 subtest '$anchor and $id below an $id that is not at the document root' => sub {
   cmp_deeply(
     JSON::Schema::Modern::Document->new(

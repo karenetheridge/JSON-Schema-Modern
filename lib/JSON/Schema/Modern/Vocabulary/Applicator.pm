@@ -454,7 +454,7 @@ sub _traverse_keyword_patternProperties {
   return if not assert_keyword_type($state, $schema, 'object');
 
   foreach my $property (sort keys %{$schema->{patternProperties}}) {
-    return if not assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
+    assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
     $self->traverse_property_schema($schema, $state, $property);
   }
 }

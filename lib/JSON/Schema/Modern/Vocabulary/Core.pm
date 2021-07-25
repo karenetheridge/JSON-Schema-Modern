@@ -100,7 +100,7 @@ sub _traverse_keyword_schema {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'string');
-  assert_uri($state, $schema);
+  return if not assert_uri($state, $schema);
 
   # note: we need not be at the document root, but simply adjacent to an $id
   return E($state, '$schema can only appear at the schema resource root')
@@ -163,8 +163,6 @@ sub _traverse_keyword_recursiveAnchor {
   my ($self, $schema, $state) = @_;
 
   return if not assert_keyword_type($state, $schema, 'boolean');
-
-  return if not $schema->{'$recursiveAnchor'};
 
   # this is required because the location is used as the base URI for future resolution
   # of $recursiveRef, and the fragment would be disregarded in the base
