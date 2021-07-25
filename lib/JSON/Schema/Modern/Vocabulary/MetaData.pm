@@ -47,6 +47,8 @@ sub _traverse_keyword_description { goto \&_traverse_keyword_title }
 
 sub _eval_keyword_description { goto \&_eval_keyword_title }
 
+sub _traverse_keyword_default { }
+
 sub _eval_keyword_default { goto \&_eval_keyword_title }
 
 sub _traverse_keyword_deprecated {

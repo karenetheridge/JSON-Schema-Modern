@@ -352,8 +352,7 @@ sub _traverse_subschema {
 
       $state->{keyword} = $keyword;
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
-
-      $vocabulary->$method($schema, $state) if $vocabulary->can($method);
+      $vocabulary->$method($schema, $state);
 
       if (my $sub = $state->{callbacks}{$keyword}) {
         $sub->($schema, $state);

@@ -89,6 +89,8 @@ sub _eval_keyword_enum {
       : ' (differences start '.join(', ', map 'from item #'.$_.' at "'.$s[$_]->{path}.'"', 0..$#s).')'));
 }
 
+sub _traverse_keyword_const { }
+
 sub _eval_keyword_const {
   my ($self, $data, $schema, $state) = @_;
 
