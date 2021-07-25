@@ -53,7 +53,6 @@ sub _traverse_keyword_id {
   return if not assert_keyword_type($state, $schema, 'string');
 
   my $uri = Mojo::URL->new($schema->{'$id'});
-  return E($state, '$id value should not equal "%s"', $uri) if $uri eq '' or $uri eq '#';
 
   if ($state->{spec_version} eq 'draft7') {
     if (length($uri->fragment)) {
@@ -69,6 +68,8 @@ sub _traverse_keyword_id {
   }
 
   $uri->fragment(undef);
+  return E($state, '$id cannot be empty') if not length $uri;
+
   $state->{initial_schema_uri} = $uri->is_abs ? $uri : $uri->to_abs($state->{initial_schema_uri});
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   # we don't set or update document_path because it is identical to traversed_schema_path
