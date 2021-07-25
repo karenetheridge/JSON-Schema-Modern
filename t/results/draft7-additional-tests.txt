@@ -11,7 +11,7 @@ format-duration.json                         9          0     0
 format-ipv4.json                             3          0     0
 format-relative-json-pointer.json            7          0     0
 format-time.json                            11          0     0
-id.json                                      8          0     0
+id.json                                      9          0     0
 keyword-independence.json                  636          0     0
 loose-types-const-enum.json                  8          0     0
 not-an-anchor.json                           2          0     0
@@ -23,4 +23,4 @@ unicode.json                                 9          0     0
 unknownKeyword.json                          8          0     0
 vocabulary.json                              1          0     0
 ---------------------------------------------------------------
-TOTAL                                      737          0     0
+TOTAL                                      738          0     0

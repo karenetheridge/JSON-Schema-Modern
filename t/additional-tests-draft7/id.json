@@ -98,5 +98,18 @@
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "bad anchor syntax",
+        "schema": {
+            "$id": "#!!hello~"
+        },
+        "tests": [
+            {
+                "description": "draft7 $id passes through to $anchor",
+                "data": "foo",
+                "valid": false
+            }
+        ]
     }
 ]
