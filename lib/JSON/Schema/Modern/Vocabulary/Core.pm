@@ -50,7 +50,8 @@ my %version_uris = (
 sub _traverse_keyword_id {
   my ($self, $schema, $state) = @_;
 
-  return if not assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string')
+    or not assert_uri_reference($state, $schema);
 
   my $uri = Mojo::URL->new($schema->{'$id'});
 
