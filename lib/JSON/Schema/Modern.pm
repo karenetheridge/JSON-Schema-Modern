@@ -115,7 +115,7 @@ sub add_schema {
       _evaluator => $self,  # used only for traversal during document construction
     );
 
-  die((caller())[0] ne ref($self)
+  die(!(caller())[0]->isa(ref($self))
     ? join('; ', map $_->keyword_location.': '.$_->error, $document->errors)
     : die JSON::Schema::Modern::Result->new(
       output_format => $self->output_format,
