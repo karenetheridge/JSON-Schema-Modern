@@ -83,53 +83,34 @@ subtest 'type: integer' => sub {
     foreach ('1', '2.0', 3.1, '4.2');
 };
 
-subtest 'type: everything else' => sub {
-  foreach my $type (qw(null object array boolean string number integer)) {
-    ok(!is_type($type, $_), 'value is a '.(ref).', not a '.$type)
-      foreach (
-        \1,
-        \\2,
-        sub { 1 },
-        \*stdout,
-        \substr('a', '1'),
-        \v1.2.3,
-        qr/foo/,
-        *STDIN{IO},
-        bless({}, 'Foo'),
-      );
-  }
-};
+ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception');
 
 my $file = __FILE__;
 my $line;
 like(
-  exception { $line = __LINE__; is_type('foo', 'wharbarbl') },
-  qr/^unknown type "foo" at $file line $line/,
-  'non-existent type results in exception',
-);
-
-like(
   exception { $line = __LINE__; get_type(dualvar(5, "five")) },
-  qr/^ambiguous type for "five"/,
+  qr/^ambiguous type for "five" at $file line $line/,
   'ambiguous type results in exception',
 );
 
-subtest 'get_type for references' => sub {
-  like(
-    exception { $line = __LINE__; get_type($_->[0]) },
-    qr/^unsupported reference type $_->[1]/,
-    $_->[1].' reference type results in exception',
-  ) foreach (
-    [ \1, 'SCALAR' ],
-    [ \\2, 'REF' ],
-    [ sub { 1 }, 'CODE' ],
-    [ \*stdout, 'GLOB' ],
-    [ \substr('a', '1'), 'LVALUE' ],
-    [ \v1.2.3, 'VSTRING' ],
+subtest 'is_type and get_type for references' => sub {
+  foreach my $test (
+    [ \1, 'reference to SCALAR' ],
+    [ \\2, 'reference to REF' ],
+    [ sub { 1 }, 'reference to CODE' ],
+    [ \*stdout, 'reference to GLOB' ],
+    [ \substr('a', '1'), 'reference to LVALUE' ],
+    [ \v1.2.3, 'reference to VSTRING' ],
     [ qr/foo/, 'Regexp' ],
     [ *STDIN{IO}, 'IO::File' ],
     [ bless({}, 'Foo'), 'Foo' ],
-  );
+  ) {
+    is(get_type($test->[0]), $test->[1], $test->[1].' type is reported without exception');
+    ok(is_type($test->[1], $test->[0]), 'value is a '.$test->[1]);
+    foreach my $type (qw(null object array boolean string number integer)) {
+      ok(!is_type($type, $test->[0]), 'value is not a '.$type);
+    }
+  }
 };
 
 done_testing;

@@ -15,6 +15,7 @@ use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
+use Scalar::Util 'blessed';
 use Storable 'dclone';
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
@@ -80,7 +81,11 @@ sub is_type {
     }
   }
 
-  croak sprintf('unknown type "%s"', $type);
+  if ($type =~ /^reference to (.+)$/) {
+    return !blessed($value) && ref($value) eq $1;
+  }
+
+  return ref($value) eq $type;
 }
 
 # only the core six types are reported (integers are numbers)
@@ -93,7 +98,7 @@ sub get_type {
   return 'array' if is_plain_arrayref($value);
   return 'boolean' if is_bool($value);
 
-  croak sprintf('unsupported reference type %s', ref $value) if is_ref($value);
+  return (blessed($value) ? '' : 'reference to ').ref($value) if is_ref($value);
 
   my $flags = B::svref_2object(\$value)->FLAGS;
   return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
