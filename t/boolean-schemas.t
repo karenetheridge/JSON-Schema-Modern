@@ -20,6 +20,10 @@ my @tests = (
   { schema => false, valid => false },
   { schema => true, valid => true },
   { schema => {}, valid => true },
+  { schema => 0, valid => false },
+  { schema => 1, valid => false },
+  { schema => \0, valid => false },
+  { schema => \1, valid => false },
 );
 
 foreach my $test (@tests) {
@@ -28,6 +32,15 @@ foreach my $test (@tests) {
     exception {
       my $result = $js->evaluate($data, $test->{schema});
       ok(!($result xor $test->{valid}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{valid}));
+
+      cmp_deeply(
+        $result->TO_JSON,
+        {
+          valid => $test->{valid},
+          $test->{valid} ? () : (errors => supersetof()),
+        },
+        'invalid result structure looks correct',
+      );
     },
     undef,
     'no exceptions in evaluate',
@@ -47,6 +60,21 @@ cmp_deeply(
     ],
   },
   'invalid schema type results in error',
+);
+
+cmp_deeply(
+  $js->evaluate('hello', \0)->TO_JSON,
+  {
+    valid => false,
+    errors => [
+      {
+        instanceLocation => '',
+        keywordLocation => '',
+        error => 'invalid schema type: reference to SCALAR',
+      },
+    ],
+  },
+  'scalarref for schema results in error',
 );
 
 done_testing;
