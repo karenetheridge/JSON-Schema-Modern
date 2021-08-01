@@ -116,6 +116,12 @@ sub is_equal {
   $state->{path} //= '';
 
   my @types = map get_type($_), $x, $y;
+
+  if ($state->{scalarref_booleans}) {
+    ($x, $types[0]) = (0+!!$$x, 'boolean') if $types[0] eq 'reference to SCALAR';
+    ($y, $types[1]) = (0+!!$$y, 'boolean') if $types[1] eq 'reference to SCALAR';
+  }
+
   return 0 if $types[0] ne $types[1];
   return 1 if $types[0] eq 'null';
   return $x eq $y if $types[0] eq 'string';
@@ -150,7 +156,7 @@ sub is_elements_unique {
   my ($array, $equal_indices) = @_;
   foreach my $idx0 (0 .. $#{$array}-1) {
     foreach my $idx1 ($idx0+1 .. $#{$array}) {
-      if (is_equal($array->[$idx0], $array->[$idx1])) {
+      if (is_equal($array->[$idx0], $array->[$idx1], { scalarref_booleans => 1 })) {
         push @$equal_indices, $idx0, $idx1 if defined $equal_indices;
         return 0;
       }

@@ -77,6 +77,11 @@ has annotate_unknown_keywords => (
   isa => Bool,
 );
 
+has scalarref_booleans => (
+  is => 'ro',
+  isa => Bool,
+);
+
 has _format_validations => (
   is => 'bare',
   isa => Dict[
@@ -275,7 +280,7 @@ sub evaluate {
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(short_circuit collect_annotations validate_formats annotate_unknown_keywords)),
+      } qw(short_circuit collect_annotations validate_formats annotate_unknown_keywords scalarref_booleans)),
     };
 
     $valid = $self->_eval_subschema($data, $schema, $state);
@@ -693,6 +698,12 @@ When true, keywords that are not recognized by any vocabulary are collected as a
 the value of the annotation is the value of the keyword). L</collect_annotations> must also be true
 in order for this to have any effect.
 Defaults to false (for now).
+
+=head2 scalarref_booleans
+
+When true, any type that is expected to be a boolean B<in the instance data> may also be expressed
+as the scalar references C<\0> or C<\1> (which are serialized as booleans by JSON backends).
+Defaults to false.
 
 =head1 METHODS
 

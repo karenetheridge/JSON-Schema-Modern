@@ -62,6 +62,8 @@ cmp_deeply(
   'invalid schema type results in error',
 );
 
+$js = JSON::Schema::Modern->new(scalarref_booleans => 1);
+
 cmp_deeply(
   $js->evaluate('hello', \0)->TO_JSON,
   {
@@ -74,7 +76,7 @@ cmp_deeply(
       },
     ],
   },
-  'scalarref for schema results in error',
+  'scalarref for schema results in error, even when scalarref_booleans is true',
 );
 
 done_testing;

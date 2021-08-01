@@ -62,13 +62,16 @@ sub _eval_keyword_type {
   my ($self, $data, $schema, $state) = @_;
 
   if (is_plain_arrayref($schema->{type})) {
+    # return 1 if any { is_type($_, $data) } @{$schema->{type}};
     foreach my $type (@{$schema->{type}}) {
-      return 1 if is_type($type, $data);
+      return 1 if is_type($type, $data)
+        or ($type eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data));
     }
     return E($state, 'wrong type (expected one of %s)', join(', ', @{$schema->{type}}));
   }
   else {
-    return 1 if is_type($schema->{type}, $data);
+    return 1 if is_type($schema->{type}, $data)
+      or ($schema->{type} eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data));
     return E($state, 'wrong type (expected %s)', $schema->{type});
   }
 }
@@ -84,7 +87,8 @@ sub _eval_keyword_enum {
   my ($self, $data, $schema, $state) = @_;
 
   my @s; my $idx = 0;
-  return 1 if any { is_equal($data, $_, $s[$idx++] = {}) } @{$schema->{enum}};
+  my %s = ( scalarref_booleans => $state->{scalarref_booleans} );
+  return 1 if any { is_equal($data, $_, $s[$idx++] = {%s}) } @{$schema->{enum}};
 
   return E($state, 'value does not match'
     .(!(grep $_->{path}, @s) ? ''
@@ -96,7 +100,8 @@ sub _traverse_keyword_const { 1 }
 sub _eval_keyword_const {
   my ($self, $data, $schema, $state) = @_;
 
-  return 1 if is_equal($data, $schema->{const}, my $s = {});
+  my %s = ( scalarref_booleans => $state->{scalarref_booleans} );
+  return 1 if is_equal($data, $schema->{const}, my $s = { scalarref_booleans => $state->{scalarref_booleans} });
   return E($state, 'value does not match'
     .($s->{path} ? ' (differences start at "'.$s->{path}.'")' : ''));
 }

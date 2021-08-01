@@ -4,6 +4,8 @@ Revision history for JSON-Schema-Modern
           - no longer calling a keyword's callback during traverse() if that
             keyword has an error
           - better handling of blessed data types and other references
+          - new config option scalarref_booleans, which will treat \0, \1 in
+            data as json booleans
 
 0.514     2021-07-22 05:17:08Z
           - add_schema() now dies with the errors themselves, rather than an

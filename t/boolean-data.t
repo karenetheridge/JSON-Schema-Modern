@@ -121,4 +121,74 @@ subtest 'strict booleans (default)' => sub {
   );
 };
 
+subtest 'scalarref_booleans = 1' => sub {
+  my $js = JSON::Schema::Modern->new(scalarref_booleans => 1);
+  cmp_deeply(
+    $js->evaluate($_, $test_schema)->TO_JSON,
+    { valid => true },
+    'in data, '.serialize($_).' is a boolean',
+  )
+  foreach (
+    false,
+    true,
+    \0,
+    \1,
+  );
+
+  cmp_deeply(
+    $js->evaluate($_, $test_schema)->TO_JSON,
+    $failure_result,
+    'correct error generated from type for '.serialize($_),
+  )
+  foreach (
+    undef,
+    0,
+    1,
+    '0',
+    '1',
+    'false',
+    'true',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      [
+        undef,
+        0,
+        1,
+        '0',
+        '1',
+        'false',
+        'true',
+        \0,
+        \1,
+      ],
+      { uniqueItems => true },
+    )->TO_JSON,
+    { valid => true },
+    'items are all considered unique when types differ, even when perl treats them similarly',
+  );
+
+  cmp_deeply(
+    $js->evaluate($_, { uniqueItems => true })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/uniqueItems',
+          error => 'items at indices 0 and 1 are not unique',
+        },
+      ],
+    },
+    'scalarrefs compare as identical to their counterpart booleans',
+  )
+  foreach (
+    [ \0, false ],
+    [ false, \0 ],
+    [ \1, true ],
+    [ true, \1 ],
+  );
+};
+
 done_testing;
