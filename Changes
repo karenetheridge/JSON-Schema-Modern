@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.515     2021-08-03 04:07:02Z
           - no longer calling a keyword's callback during traverse() if that
             keyword has an error
           - better handling of blessed data types and other references

@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.514
+version 0.515
 
 =head1 SYNOPSIS
 
@@ -26,7 +26,7 @@ version 0.514
 
 This module aims to be a fully-compliant L<JSON Schema|https://json-schema.org/> evaluator and
 validator, targeting the currently-latest
-L<Draft 2019-09|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>
+L<Draft 2020-12|https://json-schema.org/specification-links.html#2020-12>
 version of the specification.
 
 =head1 CONFIGURATION OPTIONS
@@ -35,12 +35,16 @@ version of the specification.
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
 this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest (supported) version (draft2019-09). When left unset, the use of C<$schema> keywords in
+the latest version (draft2020-12). When left unset, the use of C<$schema> keywords in
 the schema is permitted, to switch between draft versions.
 
 May be one of:
 
 =over 4
+
+=item *
+
+L<C<draft2020-12>|https://json-schema.org/specification-links.html#2020-12>, corresponding to metaschema C<https://json-schema.org/draft/2020-12/schema>.
 
 =item *
 
@@ -55,6 +59,7 @@ L<C<draft7>|https://json-schema.org/specification-links.html#draft-7>, correspon
 =head2 output_format
 
 One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
+C<strict_basic> can only be used with C<specification_version = draft2019-09>.
 Passed to L<JSON::Schema::Modern::Result/output_format>.
 
 =head2 short_circuit
@@ -100,7 +105,15 @@ the value of the annotation is the value of the keyword). L</collect_annotations
 in order for this to have any effect.
 Defaults to false (for now).
 
+=head2 scalarref_booleans
+
+When true, any type that is expected to be a boolean B<in the instance data> may also be expressed
+as the scalar references C<\0> or C<\1> (which are serialized as booleans by JSON backends).
+Defaults to false.
+
 =head1 METHODS
+
+=for Pod::Coverage BUILDARGS
 
 =head2 evaluate_json_string
 
@@ -363,7 +376,7 @@ loading schema documents from a local web application (e.g. L<Mojolicious>)
 
 =item *
 
-additional output formats beyond C<flag>, C<basic>, C<strict_basic>, and C<terse> (L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>)
+additional output formats beyond C<flag>, C<basic>, and C<terse> (L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.12>)
 
 =item *
 
@@ -374,12 +387,6 @@ examination of the C<$schema> keyword for deviation from the standard draft meta
 changing the draft specification version semantics after construction time
 
 =back
-
-Additionally, some small errors in the specification (which have been fixed in the next draft
-specification version) are fixed here rather than implementing the precise but unintended behaviour,
-most notably in the use of json pointers rather than fragment-only URIs in C<instanceLocation> and
-C<keywordLocation> in annotations and errors. (Use the C<strict_basic>
-L<JSON::Schema::Modern/output_format> to revert this change.)
 
 =head1 SECURITY CONSIDERATIONS
 
@@ -413,6 +420,10 @@ L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
 =item *
 
 L<JSON::Schema::Tiny>: a more minimal implementation of the specification, with fewer dependencies
+
+=item *
+
+L<https://json-schema.org/draft/2020-12/release-notes.html>
 
 =item *
 
