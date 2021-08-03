@@ -80,11 +80,12 @@ sub acceptance_tests {
       # to count that as a failure (an exception would be caught and perhaps TODO'd).
       # (This might change if tests are added that are expected to produce exceptions.)
       foreach my $r ($result, ($ENV{NO_SHORT_CIRCUIT} ? () : $result_short)) {
-        map warn('evaluation generated an exception: '.$encoder->encode($_)),
-          grep +($_->{error} =~ /^EXCEPTION/
-              && $_->{error} !~ /but short_circuit is enabled/            # unevaluated*
-              && $_->{error} !~ /(max|min)imum value is not a number$/),  # optional/bignum.json
-            @{$r->TO_JSON->{errors}};
+        warn('evaluation generated an exception: '.$encoder->encode($_))
+          foreach
+            grep +($_->{error} =~ /^EXCEPTION/
+                && $_->{error} !~ /but short_circuit is enabled/            # unevaluated*
+                && $_->{error} !~ /(max|min)imum value is not a number$/),  # optional/bignum.json
+              @{$r->TO_JSON->{errors}};
       }
 
       $result;
