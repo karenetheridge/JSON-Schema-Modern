@@ -149,7 +149,7 @@ sub _traverse_keyword_format {
       +require Time::Moment;
     }
     elsif ($schema->{format} eq 'email' or $schema->{format} eq 'idn-email') {
-      +require Email::Address::XS; Email::Address::XS->VERSION(1.01);
+      +require Email::Address::XS; Email::Address::XS->VERSION(1.04);
     }
     elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
       +require Data::Validate::Domain;
