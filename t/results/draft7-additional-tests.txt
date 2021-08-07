@@ -21,6 +21,6 @@ ref-and-id.json                              2          0     0
 ref.json                                    10          0     0
 short-circuit.json                          16          0     0
 unknownKeyword.json                          8          0     0
-vocabulary.json                              1          0     0
+vocabulary.json                              3          0     0
 ---------------------------------------------------------------
-TOTAL                                      733          0     0
+TOTAL                                      735          0     0

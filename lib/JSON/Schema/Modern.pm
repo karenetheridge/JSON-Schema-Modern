@@ -14,7 +14,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
-use List::Util 1.55 qw(pairs first uniqint);
+use List::Util 1.55 qw(pairs first uniqint pairmap);
 use Ref::Util 0.100 qw(is_ref is_hashref);
 use Mojo::URL;
 use Safe::Isa;
@@ -25,7 +25,7 @@ use Module::Runtime 'use_module';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName);
+use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName Tuple);
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
@@ -510,10 +510,10 @@ has _resource_index => (
   isa => HashRef[my $resource_type = Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,
-      specification_version => Enum(SPECIFICATION_VERSIONS_SUPPORTED),
+      specification_version => my $spec_version_type = Enum(SPECIFICATION_VERSIONS_SUPPORTED),
       document => InstanceOf['JSON::Schema::Modern::Document'],
       # the vocabularies used when evaluating instance data against schema
-      vocabularies => ArrayRef[ClassName->where(sub { $_->DOES('JSON::Schema::Modern::Vocabulary') })],
+      vocabularies => ArrayRef[my $vocabulary_class_type = ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       slurpy HashRef[Undef],  # no other fields allowed
     ]],
   handles_via => 'Hash',
@@ -563,6 +563,29 @@ around _add_resources => sub {
     $self->$orig($key, $value);
   }
 };
+
+# $vocabulary uri (not its $id!) => [ spec_version, class ]
+has _vocabulary_classes => (
+  is => 'bare',
+  isa => HashRef[
+    Tuple[
+      $spec_version_type,
+      $vocabulary_class_type,
+    ]
+  ],
+  handles_via => 'Hash',
+  handles => {
+    _get_vocabulary_class => 'get',
+  },
+  lazy => 1,
+  default => sub {
+    +{
+      map { my $class = $_; pairmap { $a => [ $b, $class ] } $class->vocabulary }
+        map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
+          qw(Core Applicator Validation FormatAssertion FormatAnnotation Content MetaData Unevaluated)
+    }
+  },
+);
 
 sub _vocabularies_by_spec_version {
   my ($self, $spec_version) = @_;

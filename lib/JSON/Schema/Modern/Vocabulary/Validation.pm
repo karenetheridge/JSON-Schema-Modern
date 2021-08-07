@@ -20,12 +20,11 @@ use namespace::clean;
 with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary {
-  my ($self, $spec_version) = @_;
-  return
-      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/validation'
-    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/validation'
-    : undef;
+  'https://json-schema.org/draft/2019-09/vocab/validation' => 'draft2019-09',
+  'https://json-schema.org/draft/2020-12/vocab/validation' => 'draft2020-12';
 }
+
+sub evaluation_order { 2 }
 
 sub keywords {
   my ($self, $spec_version) = @_;
@@ -365,7 +364,7 @@ __END__
 
 =pod
 
-=for Pod::Coverage vocabulary keywords
+=for Pod::Coverage vocabulary evaluation_order keywords
 
 =head1 DESCRIPTION
 

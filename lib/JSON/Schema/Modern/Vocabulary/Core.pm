@@ -18,12 +18,11 @@ use namespace::clean;
 with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary {
-  my ($self, $spec_version) = @_;
-  return
-      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/core'
-    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/core'
-    : undef;
+  'https://json-schema.org/draft/2019-09/vocab/core' => 'draft2019-09',
+  'https://json-schema.org/draft/2020-12/vocab/core' => 'draft2020-12';
 }
+
+sub evaluation_order { 0 }
 
 sub keywords {
   my ($self, $spec_version) = @_;
@@ -308,19 +307,44 @@ sub _traverse_keyword_vocabulary {
   my ($self, $schema, $state) = @_;
   return if not assert_keyword_type($state, $schema, 'object');
 
-  my $valid = 1;
-  foreach my $property (sort keys %{$schema->{'$vocabulary'}}) {
-    $valid = 0 if not assert_keyword_type({ %$state, _schema_path_suffix => $property }, $schema, 'boolean');
-    $valid = 0 if not assert_uri($state, $schema, $property);
-  }
-
   return E($state, '$vocabulary can only appear at the schema resource root')
     if length($state->{schema_path});
 
   return E($state, '$vocabulary can only appear at the document root')
     if length($state->{traversed_schema_path}.$state->{schema_path});
 
-  return $valid;
+  my $valid = 1;
+  my @vocabulary_classes;
+  foreach my $uri (sort keys %{$schema->{'$vocabulary'}}) {
+    $valid = 0, next if not assert_keyword_type({ %$state, _schema_path_suffix => $uri }, $schema, 'boolean');
+    $valid = 0, next if not assert_uri({ %$state, _schema_path_suffix => $uri }, $schema, $uri);
+
+    my $class_info = $state->{evaluator}->_get_vocabulary_class($uri);
+    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
+      if $schema->{'$vocabulary'}{$uri} and not $class_info;
+
+    next if not $class_info;  # vocabulary is not known, but marked as false in the metaschema
+
+    my ($spec_version, $class) = @$class_info;
+    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" uses %s, but the metaschema itself uses %s',
+        $uri, $spec_version, $state->{spec_version}), next
+      if $spec_version ne $state->{spec_version};
+
+    push @vocabulary_classes, $class;
+  }
+
+  $valid = E($state, 'metaschemas must have an $id')
+    if not length $state->{initial_schema_uri};
+
+  return if not $valid;
+
+  @vocabulary_classes = sort { $a->evaluation_order <=> $b->evaluation_order } @vocabulary_classes;
+
+  # we cannot return an error here, because the vocabulary schemas themselves don't list Core
+  return 1 if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
+
+  $state->{metaschema_vocabulary_classes} = \@vocabulary_classes;
+  return 1;
 }
 
 # we do nothing with $vocabulary yet at evaluation time. When we know we are in a metaschema,
@@ -347,7 +371,7 @@ __END__
 
 =pod
 
-=for Pod::Coverage vocabulary keywords
+=for Pod::Coverage vocabulary evaluation_order keywords
 
 =head1 DESCRIPTION
 

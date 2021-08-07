@@ -19,12 +19,10 @@ use namespace::clean;
 with 'JSON::Schema::Modern::Vocabulary';
 
 sub vocabulary {
-  my ($self, $spec_version) = @_;
-  return
-      $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/applicator'
-    : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/unevaluated'
-    : die 'Unevaluated not implemented in '.$spec_version;
+  'https://json-schema.org/draft/2020-12/vocab/unevaluated' => 'draft2020-12';
 }
+
+sub evaluation_order { 7 }
 
 # This vocabulary should be evaluated after the Applicator vocabulary.
 sub keywords {
@@ -176,7 +174,7 @@ __END__
 
 =pod
 
-=for Pod::Coverage vocabulary keywords
+=for Pod::Coverage vocabulary evaluation_order keywords
 
 =head1 DESCRIPTION
 

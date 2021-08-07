@@ -1,14 +1,49 @@
 [
     {
-        "description": "valid $vocabulary",
+        "description": "valid $vocabulary: everything is valid",
         "schema": {
+            "$id": "https://mymetaschema",
             "$vocabulary": {
+                "https://json-schema.org/draft/2019-09/vocab/core": true,
                 "https://foo.com": false
             }
         },
         "tests": [
             {
-                "description": "an valid $vocabulary value",
+                "description": "a valid $vocabulary value",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "wrong specification version: but this is draft7",
+        "schema": {
+            "$id": "https://mymetaschema2",
+            "$vocabulary": {
+                "https://json-schema.org/draft/2020-12/vocab/core": true
+            }
+        },
+        "tests": [
+            {
+                "description": "invalid $vocabulary value: wrong specification version",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "but this is draft7",
+        "schema": {
+            "$id": "https://mymetaschema3",
+            "$vocabulary": {
+                "https://json-schema.org/draft/2020-12/vocab/core": true,
+                "https://foo.com": true
+            }
+        },
+        "tests": [
+            {
+                "description": "invalid $vocabulary value: unknown URI",
                 "data": 1,
                 "valid": true
             }

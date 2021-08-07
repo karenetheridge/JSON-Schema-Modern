@@ -856,25 +856,58 @@ subtest '$vocabulary' => sub {
   cmp_deeply(
     JSON::Schema::Modern->new->evaluate(
       1,
-      { '$vocabulary' => { 'https://foo' => 1 } },
+      {
+        '$vocabulary' => {
+          'https://json-schema.org/draft/2020-12/vocab/core' => true,
+          '#/notauri' => false,
+          'https://foo' => 1,
+          'https://json-schema.org/draft/2019-09/vocab/validation' => true,
+          'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
+          'https://unknown' => true,
+          'https://unknown2' => false,
+        },
+      },
     )->TO_JSON,
     {
       valid => false,
       errors => [
         {
           instanceLocation => '',
+          keywordLocation => '/$vocabulary/#~1notauri',
+          error => '"#/notauri" is not a valid URI',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/$vocabulary/https:~1~1foo',
           error => '$vocabulary value is not a boolean',
         },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$vocabulary/https:~1~1json-schema.org~1draft~12019-09~1vocab~1validation',
+          error => '"https://json-schema.org/draft/2019-09/vocab/validation" uses draft2019-09, but the metaschema itself uses draft2020-12',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$vocabulary/https:~1~1unknown',
+          error => '"https://unknown" is not a known vocabulary',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$vocabulary',
+          error => 'metaschemas must have an $id',
+        },
       ],
     },
-    '$vocabulary syntax check',
+    '$vocabulary syntax checks',
   );
 
   cmp_deeply(
     JSON::Schema::Modern->new->evaluate(
       1,
-      { items => { '$vocabulary' => { 'https://foo' => true } } },
+      {
+        '$id' => 'http://mymetaschema',
+        items => { '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/applicator' => true } },
+      },
     )->TO_JSON,
     {
       valid => false,
@@ -882,6 +915,7 @@ subtest '$vocabulary' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/items/$vocabulary',
+          absoluteKeywordLocation => 'http://mymetaschema#/items/$vocabulary',
           error => '$vocabulary can only appear at the schema resource root',
         },
       ],
@@ -892,7 +926,12 @@ subtest '$vocabulary' => sub {
   cmp_deeply(
     JSON::Schema::Modern->new->evaluate(
       1,
-      { items => { '$id' => 'foobar', '$vocabulary' => { 'https://foo' => true } } },
+      {
+        items => {
+          '$id' => 'foobar',
+          '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/core' => true },
+        },
+      },
     )->TO_JSON,
     {
       valid => false,
@@ -906,6 +945,47 @@ subtest '$vocabulary' => sub {
       ],
     },
     '$vocabulary location check - document root',
+  );
+
+
+  my $js = JSON::Schema::Modern->new;
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'http://mymetaschema',
+        '$vocabulary' => {
+          'https://json-schema.org/draft/2020-12/vocab/core' => true,
+          'https://json-schema.org/draft/2020-12/vocab/applicator' => false,
+        },
+      },
+    )->TO_JSON,
+    { valid => true },
+    'successfully evaluated a metaschema that specifies vocabularies',
+  );
+
+  cmp_deeply(
+    $js->{_resource_index}{'http://mymetaschema'},
+    {
+      canonical_uri => str('http://mymetaschema'),
+      path => '',
+      specification_version => 'draft2020-12',
+      document => ignore,
+      vocabularies => [
+        map 'JSON::Schema::Modern::Vocabulary::'.$_,
+          qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated),
+      ],
+    },
+    'metaschemas are not saved on the resource',
+  );
+
+  cmp_deeply(
+    $js->{_resource_index}{'http://mymetaschema'}{document}{metaschema_vocabulary_classes},
+    [
+      'JSON::Schema::Modern::Vocabulary::Core',
+      'JSON::Schema::Modern::Vocabulary::Applicator',
+    ],
+    '... but rather on the document itself',
   );
 };
 

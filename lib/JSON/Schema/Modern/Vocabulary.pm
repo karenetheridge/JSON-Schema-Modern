@@ -20,6 +20,8 @@ our @CARP_NOT = qw(JSON::Schema::Modern);
 
 requires qw(vocabulary keywords);
 
+sub evaluation_order { 999 }  # override, if needed
+
 sub traverse {
   my ($self, $schema, $state) = @_;
   $state->{evaluator}->_traverse_subschema($schema, $state);
@@ -99,11 +101,15 @@ User-defined custom vocabularies are not supported at this time.
 
 =head2 vocabulary
 
-The canonical URI describing the vocabulary, as described in
+The canonical URI(s) describing the vocabulary for each draft specification version, as described in
 L<JSON Schema Core Meta-specification, section 8.1.2|https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1.2>.
-Must be implemented by the composing class. May require the C<specification_version> from the
-L<JSON::Schema::Modern> object (or the C<spec_version> field from the C<$state> object) as an
-argument.
+Must be implemented by the composing class.
+
+=head2 evaluation_order
+
+A positive integer, used as a sort key for determining the evaluation order of this vocabulary. If
+not overridden in a custom vocabulary class, its evaluation order will be after all built-in
+vocabularies. You probably don't need to define this.
 
 =head2 keywords
 
