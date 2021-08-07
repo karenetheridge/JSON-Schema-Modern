@@ -303,9 +303,7 @@ sub _traverse_keyword_vocabulary {
 
   my $valid = 1;
   foreach my $property (sort keys %{$schema->{'$vocabulary'}}) {
-    $valid = E($state, '$vocabulary/%s value is not a boolean', $property)
-      if not is_type('boolean', $schema->{'$vocabulary'}{$property});
-
+    $valid = 0 if not assert_keyword_type({ %$state, _schema_path_suffix => $property }, $schema, 'boolean');
     $valid = 0 if not assert_uri($state, $schema, $property);
   }
 

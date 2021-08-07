@@ -235,8 +235,8 @@ subtest '$vocabulary' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$vocabulary',
-          error => '$vocabulary/https://foo value is not a boolean',
+          keywordLocation => '/$vocabulary/https:~1~1foo',
+          error => '$vocabulary value is not a boolean',
         },
       ],
     },
