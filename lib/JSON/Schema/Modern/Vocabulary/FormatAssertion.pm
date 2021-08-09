@@ -137,12 +137,15 @@ sub keywords {
 
 sub _traverse_keyword_format {
   my ($self, $schema, $state) = @_;
-
   return if not assert_keyword_type($state, $schema, 'string');
+  return 1;
+}
 
-  if ($schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template') {
-    return E($state, 'unimplemented format "%s"', $schema->{format});
-  }
+sub _eval_keyword_format {
+  my ($self, $data, $schema, $state) = @_;
+
+  return E($state, 'unimplemented format "%s"', $schema->{format})
+    if $schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template';
 
   try {
     if ($schema->{format} eq 'date-time' or $schema->{format} eq 'date') {
@@ -161,11 +164,6 @@ sub _traverse_keyword_format {
   catch ($e) {
     return E($state, 'cannot validate format "%s": %s', $schema->{format}, $e);
   }
-  return 1;
-}
-
-sub _eval_keyword_format {
-  my ($self, $data, $schema, $state) = @_;
 
   # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
   # and add in the type if needed

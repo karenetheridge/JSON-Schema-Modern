@@ -215,9 +215,7 @@ sub traverse {
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
     vocabularies => [
       (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
-        qw(Core Applicator Validation),
-        $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
-        qw(Content MetaData),
+        qw(Core Applicator Validation FormatAnnotation Content MetaData),
         $spec_version eq 'draft2020-12' ? 'Unevaluated' : ()),
     ],
     identifiers => [],

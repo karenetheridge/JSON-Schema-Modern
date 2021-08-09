@@ -222,4 +222,60 @@ subtest 'different formats after document creation' => sub {
   );
 };
 
+subtest 'toggle validate_formats after adding schema' => sub {
+  my $js = JSON::Schema::Modern->new;
+  my $document = $js->add_schema(my $uri = 'http://localhost:1234/date-time', { format => 'date-time' });
+
+  cmp_deeply(
+    $js->evaluate('hello', $uri)->TO_JSON,
+    { valid => true },
+    'assertion behaviour is off initially',
+  );
+
+  cmp_deeply(
+    $js->evaluate('hello', $uri, { validate_formats => 1 })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          absoluteKeywordLocation => 'http://localhost:1234/date-time#/format',
+          error => 'not a date-time',
+        },
+      ],
+    },
+    'assertion behaviour can be enabled later with an already-loaded schema',
+  );
+
+  cmp_deeply(
+    $js->evaluate('2001-01-01T00:00:00Z', $uri, { validate_formats => 1 })->TO_JSON,
+    { valid => true },
+    'valid assertion behaviour does not die',
+  );
+
+  my $js2 = JSON::Schema::Modern->new(validate_formats => 1);
+  cmp_deeply(
+    $js2->evaluate('hello', $document)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          absoluteKeywordLocation => 'http://localhost:1234/date-time#/format',
+          error => 'not a date-time',
+        },
+      ],
+    },
+    'a schema document can be used with another evaluator with assertion behaviour',
+  );
+
+  cmp_deeply(
+    $js2->evaluate('2001-01-01T00:00:00Z', $uri)->TO_JSON,
+    { valid => true },
+    'valid assertion behaviour does not die',
+  );
+};
+
 done_testing;
