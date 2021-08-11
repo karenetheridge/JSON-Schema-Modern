@@ -224,7 +224,7 @@ sub traverse {
     # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
     # keyword in the schema and the '$vocabulary' keyword in the metaschema.
     vocabularies => [
-      (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
+      (map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
         qw(Core Applicator Validation FormatAnnotation Content MetaData),
         $spec_version eq 'draft2020-12' ? 'Unevaluated' : ()),
     ],
@@ -303,7 +303,7 @@ sub evaluate {
       # for now, this is hardcoded, but in the future the dialect will be determined by the
       # traverse() pass on the schema and examination of the referenced metaschema.
       vocabularies => [
-        (map use_module('JSON::Schema::Modern::Vocabulary::'.$_)->new,
+        (map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
           qw(Core Applicator Validation),
           $config_override->{validate_formats} // $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
           qw(Content MetaData),
