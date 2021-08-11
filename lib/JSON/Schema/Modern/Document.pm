@@ -18,7 +18,7 @@ use Safe::Isa;
 use Moo;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
-use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef Enum);
+use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName);
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer', 'Moo::Object';
@@ -45,6 +45,8 @@ has resource_index => (
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,  # always a JSON pointer, relative to the document root
       specification_version => Str,
+      # the vocabularies used when evaluating instance data against schema
+      vocabularies => ArrayRef[ClassName->where(sub { $_->DOES('JSON::Schema::Modern::Vocabulary') })],
     ]],
   handles_via => 'Hash',
   handles => {
@@ -161,6 +163,7 @@ sub BUILD {
       path => '',
       canonical_uri => $self->canonical_uri,
       specification_version => $state->{spec_version},
+      vocabularies => $state->{vocabularies},
     })
     if (not "$original_uri" and $original_uri eq $self->canonical_uri)
       or "$original_uri";

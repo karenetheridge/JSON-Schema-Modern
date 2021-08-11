@@ -40,6 +40,7 @@ sub keywords {
 }
 
 # supported metaschema URIs. is a subset of JSON::Schema::Modern::CACHED_METASCHEMAS
+# and an inversion of JSON::Schema::Modern::METASCHEMA_URIS
 my %version_uris = (
   'https://json-schema.org/draft/2020-12/schema'  => 'draft2020-12',
   'https://json-schema.org/draft/2019-09/schema'  => 'draft2019-09',
@@ -85,6 +86,7 @@ sub _traverse_keyword_id {
       path => $state->{traversed_schema_path},
       canonical_uri => $state->{initial_schema_uri}->clone,
       specification_version => $state->{spec_version}, # note! $schema keyword can change this
+      vocabularies => $state->{vocabularies}, # reference, not copy
     };
   return 1;
 }
@@ -101,6 +103,7 @@ sub _eval_keyword_id {
   $state->{document_path} = $state->{document_path}.$state->{schema_path};
   $state->{schema_path} = '';
   $state->{spec_version} = $schema_info->{specification_version};
+  $state->{vocabularies} = $schema_info->{vocabularies};
   push @{$state->{dynamic_scope}}, $state->{initial_schema_uri};
 
   return 1;
@@ -140,10 +143,15 @@ sub _traverse_keyword_schema {
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
-  $state->{identifiers}[-1]{specification_version} = $spec_version
-    if $state->{spec_version} ne $spec_version and @{$state->{identifiers}};
-
   $state->{spec_version} = $spec_version;
+  $state->{vocabularies} = [ $state->{evaluator}->_vocabularies_by_spec_version($spec_version) ];
+
+  # remember, if we don't have a sibling $id, we must be at the document root with no identifiers
+  if (@{$state->{identifiers}}) {
+    $state->{identifiers}[-1]{specification_version} = $spec_version;
+    $state->{identifiers}[-1]{vocabularies} = $state->{vocabularies};
+  }
+
   return 1;
 }
 
@@ -174,6 +182,7 @@ sub _traverse_keyword_anchor {
       path => $state->{traversed_schema_path}.$state->{schema_path},
       canonical_uri => $canonical_uri,
       specification_version => $state->{spec_version},
+      vocabularies => $state->{vocabularies}, # reference, not copy
     };
   return 1;
 }
@@ -233,6 +242,7 @@ sub _eval_keyword_ref {
       document_path => $schema_info->{document_path},
       spec_version => $schema_info->{specification_version},
       schema_path => '',
+      vocabularies => $schema_info->{vocabularies}, # reference, not copy
     });
 }
 
@@ -262,6 +272,7 @@ sub _eval_keyword_recursiveRef {
       document_path => $schema_info->{document_path},
       spec_version => $schema_info->{specification_version},
       schema_path => '',
+      vocabularies => $schema_info->{vocabularies}, # reference, not copy
     });
 }
 
@@ -302,6 +313,7 @@ sub _eval_keyword_dynamicRef {
       document_path => $schema_info->{document_path},
       spec_version => $schema_info->{specification_version},
       schema_path => '',
+      vocabularies => $schema_info->{vocabularies}, # reference, not copy
     });
 }
 

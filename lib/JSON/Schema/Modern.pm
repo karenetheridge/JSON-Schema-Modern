@@ -15,7 +15,7 @@ use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint);
-use Ref::Util 0.100 qw(is_ref);
+use Ref::Util 0.100 qw(is_ref is_hashref);
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
@@ -163,10 +163,12 @@ sub add_schema {
   }
 
   if ("$uri") {
+    my $resource = $document->_get_resource($document->canonical_uri);
     $self->_add_resources($uri => {
         path => '',
         canonical_uri => $document->canonical_uri,
-        specification_version => $document->_get_resource($document->canonical_uri)->{specification_version},
+        specification_version => $resource->{specification_version},
+        vocabularies => $resource->{vocabularies},  # reference, not copy
         document => $document,
       });
   }
@@ -220,14 +222,7 @@ sub traverse {
     schema_path => '',                  # the rest of the path, since the last $id
     errors => [],
     spec_version => $spec_version,      # can change, iff nothing explicitly requested
-    # for now, this is hardcoded, but in the future we will wrap this in a dialect that starts off
-    # just with the Core vocabulary and then determine the actual vocabularies from the '$schema'
-    # keyword in the schema and the '$vocabulary' keyword in the metaschema.
-    vocabularies => [
-      (map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
-        qw(Core Applicator Validation FormatAnnotation Content MetaData),
-        $spec_version eq 'draft2020-12' ? 'Unevaluated' : ()),
-    ],
+    vocabularies => [ use_module('JSON::Schema::Modern::Vocabulary::Core') ], # will be filled in later
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
@@ -235,7 +230,16 @@ sub traverse {
   };
 
   try {
-    $self->_traverse_subschema($schema_reference, $state);
+    $self->_traverse_subschema(
+      is_hashref($schema_reference) && !(exists $schema_reference->{'$schema'})
+        ? +{
+          # ensure that specification version and vocabularies are properly determined
+          '$schema' => $self->METASCHEMA_URIS->{$spec_version},
+          %$schema_reference,
+        }
+        : $schema_reference,
+      $state,
+    );
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Error')) {
@@ -282,7 +286,7 @@ sub evaluate {
         schema => $document->schema,
         document => $document,
         document_path => '',
-        (map +($_ => $base_resource->{$_}), qw(canonical_uri specification_version)),
+        (map +($_ => $base_resource->{$_}), qw(canonical_uri specification_version vocabularies)),
       };
     }
 
@@ -300,21 +304,13 @@ sub evaluate {
       annotations => [],
       seen => {},
       spec_version => $schema_info->{specification_version},
-      # for now, this is hardcoded, but in the future the dialect will be determined by the
-      # traverse() pass on the schema and examination of the referenced metaschema.
-      vocabularies => [
-        (map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
-          qw(Core Applicator Validation),
-          $config_override->{validate_formats} // $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
-          qw(Content MetaData),
-          $schema_info->{specification_version} eq 'draft2020-12' ? 'Unevaluated' : ()),
-      ],
+      vocabularies => $schema_info->{vocabularies},
       evaluator => $self,
       %{$schema_info->{document}->evaluation_configs},
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans)),
+      } qw(validate_formats short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans)),
     };
 
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
@@ -392,7 +388,8 @@ sub _traverse_subschema {
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $valid = 1;
-  foreach my $vocabulary (@{$state->{vocabularies}}) {
+  for (my $idx = 0; $idx <= $#{$state->{vocabularies}}; ++$idx) {
+    my $vocabulary = $state->{vocabularies}[$idx];
     foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
       next if not exists $schema->{$keyword};
 
@@ -465,8 +462,14 @@ sub _eval_subschema {
   $state->{annotations} = [];
   my @new_annotations;
 
+  my @vocabularies = @{$state->{vocabularies}}; # override locally only (copy, not reference)
+  if ($state->{validate_formats}) {
+    s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/ foreach @vocabularies;
+    require JSON::Schema::Modern::Vocabulary::FormatAssertion;
+  }
+
   ALL_KEYWORDS:
-  foreach my $vocabulary (@{$state->{vocabularies}}) {
+  foreach my $vocabulary (@vocabularies) {
     foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
       next if not exists $schema->{$keyword};
 
@@ -554,6 +557,20 @@ around _add_resources => sub {
 
     $self->$orig($key, $value);
   }
+};
+
+sub _vocabularies_by_spec_version {
+  my ($self, $spec_version) = @_;
+  return map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
+    qw(Core Applicator Validation FormatAnnotation Content MetaData),
+    $spec_version eq 'draft2020-12' ? 'Unevaluated' : ();
+}
+
+# used for determining a default '$schema' keyword where there is none
+use constant METASCHEMA_URIS => {
+  'draft2020-12' => 'https://json-schema.org/draft/2020-12/schema',
+  'draft2019-09' => 'https://json-schema.org/draft/2019-09/schema',
+  'draft7' => 'http://json-schema.org/draft-07/schema#',
 };
 
 use constant CACHED_METASCHEMAS => {
@@ -653,6 +670,7 @@ sub _fetch_from_uri {
         document => $document,
         document_path => $document_path,
         specification_version => $resource->{specification_version},
+        vocabularies => $resource->{vocabularies},  # reference, not copy
       };
     }
   }
@@ -666,6 +684,7 @@ sub _fetch_from_uri {
         document => $resource->{document},
         document_path => $resource->{path},
         specification_version => $resource->{specification_version},
+        vocabularies => $resource->{vocabularies},  # reference, not copy
       };
     }
   }

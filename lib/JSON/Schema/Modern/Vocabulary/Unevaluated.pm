@@ -23,11 +23,13 @@ sub vocabulary {
   return
       $spec_version eq 'draft2019-09' ? 'https://json-schema.org/draft/2019-09/vocab/applicator'
     : $spec_version eq 'draft2020-12' ? 'https://json-schema.org/draft/2020-12/vocab/unevaluated'
-    : undef;
+    : die 'Unevaluated not implemented in '.$spec_version;
 }
 
 # This vocabulary should be evaluated after the Applicator vocabulary.
 sub keywords {
+  my ($self, $spec_version) = @_;
+  die 'Unevaluated not implemented in '.$spec_version if $spec_version =~ /^draft[467]$/;
   qw(unevaluatedItems unevaluatedProperties);
 }
 

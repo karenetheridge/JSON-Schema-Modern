@@ -102,6 +102,7 @@ subtest 'defaults without a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft2020-12',
+      vocabularies => ignore, # for boolean schemas, vocabularies do not matter
     }),
     'boolean schema: defaults to draft2020-12 without a $schema keyword',
   );
@@ -132,6 +133,8 @@ subtest 'defaults without a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft2020-12',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
     }),
     'object schema: defaults to draft2020-12 without a $schema keyword',
   );
@@ -186,6 +189,8 @@ subtest 'defaults without a $schema keyword' => sub {
     $js->{_resource_index}{'https://id-no-schema1'},
     superhashof({
       specification_version => 'draft2020-12',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
     }),
     'named resource defaults to draft2020-12 without a $schema keyword',
   );
@@ -202,6 +207,7 @@ subtest 'defaults without a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => ignore, # for boolean schemas, vocabularies do not matter
     }),
     'boolean schema: specification_version overridden',
   );
@@ -227,6 +233,8 @@ subtest 'defaults without a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
     }),
     'object schema: overridden to draft7',
   );
@@ -259,13 +267,14 @@ subtest 'defaults without a $schema keyword' => sub {
     $js->{_resource_index}{'https://id-no-schema3'},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
     }),
     'object schema: overridden to draft7 and other keywords are ignored',
   );
 };
 
 subtest 'behaviour with a $schema keyword' => sub {
-  TODO: { local $TODO = 'vocabularies are not yet swapped out once traverse starts';
   cmp_deeply(
     $js->evaluate(
       { foo => 1 },
@@ -277,7 +286,6 @@ subtest 'behaviour with a $schema keyword' => sub {
     { valid => true },
     'object schema: no $id, has $schema, unrecognized+invalid keywords are ignored during traversal',
   );
-  }
 
   cmp_deeply(
     $js->evaluate(
@@ -294,12 +302,12 @@ subtest 'behaviour with a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
     }),
     'semantics can be changed to another draft version',
   );
 
-
-  TODO: { local $TODO = 'vocabularies are not yet swapped out once traverse starts';
 
   cmp_deeply(
     $js->evaluate(
@@ -313,7 +321,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     { valid => true },
     '$id and $schema, unrecognized+invalid keywords are ignored during traversal',
   );
-  }
+
   cmp_deeply(
     $js->evaluate(
       { foo => 1 },
@@ -330,6 +338,8 @@ subtest 'behaviour with a $schema keyword' => sub {
     $js->{_resource_index}{'https://id-and-schema2'},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
     }),
     'named resource can be changed to another draft version and other keywords are ignored',
   );
@@ -365,6 +375,8 @@ subtest 'behaviour with a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
     }),
     'unnamed resource can be changed to another draft version',
   );
@@ -399,6 +411,8 @@ subtest 'behaviour with a $schema keyword' => sub {
     $js->{_resource_index}{''},
     superhashof({
       specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
     }),
     'unnamed resource can be changed to another draft version',
   );
@@ -565,6 +579,24 @@ subtest 'changing schema semantics across documents' => sub {
     },
     'switching between specification versions is acceptable when crossing document boundaries',
   );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft2019-09.com'},
+    superhashof({
+      specification_version => 'draft2019-09',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    'resources for top level schema',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft7.com'},
+    superhashof({
+      specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    'resources for subschema',
+  );
 
 
   $expected = [ re(qr!^\Qno-longer-supported "dependencies" keyword present (at location "https://iam.draft2020-12-2.com")!) ];
@@ -655,6 +687,24 @@ subtest 'changing schema semantics across documents' => sub {
     },
     'switching between specification versions is acceptable when crossing document boundaries',
   );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft7-2.com'},
+    superhashof({
+      specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    'resources for top level schema',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft2020-12-2.com'},
+    superhashof({
+      specification_version => 'draft2020-12',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
+    }),
+    'resources for subschema',
+  );
 };
 
 subtest 'changing schema semantics within documents' => sub {
@@ -708,6 +758,12 @@ subtest 'changing schema semantics within documents' => sub {
         },
         {
           instanceLocation => '',
+          keywordLocation => '/allOf',
+          absoluteKeywordLocation => 'https://iam.draft2019-09-3.com#/allOf',
+          error => 'subschema 0 is not valid',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/dependentSchemas/foo',
           absoluteKeywordLocation => 'https://iam.draft2019-09-3.com#/dependentSchemas/foo',
           error => 'subschema is false',
@@ -733,6 +789,24 @@ subtest 'changing schema semantics within documents' => sub {
       ],
     },
     'switching between specification versions is acceptable within a document, draft2019-09 -> draft7',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft2019-09-3.com'},
+    superhashof({
+      specification_version => 'draft2019-09',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    'resources for top level schema',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft7-3.com'},
+    superhashof({
+      specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    'resources for subschema',
   );
 
   cmp_deeply(
@@ -815,6 +889,24 @@ subtest 'changing schema semantics within documents' => sub {
       ],
     },
     'switching between specification versions is acceptable within a document, draft7 -> draf2020-12',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft7-4.com'},
+    superhashof({
+      specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    'resources for top level schema',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://iam.draft2020-12-4.com'},
+    superhashof({
+      specification_version => 'draft2020-12',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
+    }),
+    'resources for subschema',
   );
 };
 

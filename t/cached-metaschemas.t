@@ -31,6 +31,7 @@ subtest 'load cached metaschema' => sub {
       canonical_uri => str(METASCHEMA),
       path => '',
       specification_version => 'draft2019-09',
+      vocabularies => [ $js->_vocabularies_by_spec_version('draft2019-09') ],
       document => all(
         isa('JSON::Schema::Modern::Document'),
         methods(
