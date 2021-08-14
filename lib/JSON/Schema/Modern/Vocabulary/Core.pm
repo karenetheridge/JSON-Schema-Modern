@@ -214,18 +214,18 @@ sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{initial_schema_uri});
-  my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+  my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
+  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
 
-  return $self->eval($data, $subschema,
+  return $self->eval($data, $schema_info->{schema},
     +{
-      %{$document->evaluation_configs},
+      %{$schema_info->{document}->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      initial_schema_uri => $canonical_uri,
-      document => $document,
-      document_path => $document_path,
-      spec_version => $document->specification_version,
+      initial_schema_uri => $schema_info->{canonical_uri},
+      document => $schema_info->{document},
+      document_path => $schema_info->{document_path},
+      spec_version => $schema_info->{document}->specification_version,
       schema_path => '',
     });
 }
@@ -236,25 +236,25 @@ sub _eval_keyword_recursiveRef {
   my ($self, $data, $schema, $state) = @_;
 
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{initial_schema_uri});
-  my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+  my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
+  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
 
-  if (is_type('boolean', $subschema->{'$recursiveAnchor'}) and $subschema->{'$recursiveAnchor'}) {
+  if (is_type('boolean', $schema_info->{schema}{'$recursiveAnchor'}) and $schema_info->{schema}{'$recursiveAnchor'}) {
     $uri = Mojo::URL->new($schema->{'$recursiveRef'})
       ->to_abs($state->{recursive_anchor_uri} // $state->{initial_schema_uri});
-    ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-    abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+    $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
+    abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
   }
 
-  return $self->eval($data, $subschema,
+  return $self->eval($data, $schema_info->{schema},
     +{
-      %{$document->evaluation_configs},
+      %{$schema_info->{document}->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
-      initial_schema_uri => $canonical_uri,
-      document => $document,
-      document_path => $document_path,
-      spec_version => $document->specification_version,
+      initial_schema_uri => $schema_info->{canonical_uri},
+      document => $schema_info->{document},
+      document_path => $schema_info->{document_path},
+      spec_version => $schema_info->{document}->specification_version,
       schema_path => '',
     });
 }
@@ -265,36 +265,36 @@ sub _eval_keyword_dynamicRef {
   my ($self, $data, $schema, $state) = @_;
 
   my $uri = Mojo::URL->new($schema->{'$dynamicRef'})->to_abs($state->{initial_schema_uri});
-  my ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+  my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
+  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
 
   # If the initially resolved starting point URI includes a fragment that was created by the
   # "$dynamicAnchor" keyword, ...
-  if (length $uri->fragment and exists $subschema->{'$dynamicAnchor'}
-      and $uri->fragment eq (my $anchor = $subschema->{'$dynamicAnchor'})) {
+  if (length $uri->fragment and exists $schema_info->{schema}{'$dynamicAnchor'}
+      and $uri->fragment eq (my $anchor = $schema_info->{schema}{'$dynamicAnchor'})) {
     # ...the initial URI MUST be replaced by the URI (including the fragment) for the outermost
     # schema resource in the dynamic scope that defines an identically named fragment with
     # "$dynamicAnchor".
     foreach my $base_scope (@{$state->{dynamic_scope}}) {
       $uri = Mojo::URL->new($base_scope)->fragment($anchor);
-      my ($dynamic_anchor_subschema) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-      if ((($dynamic_anchor_subschema//{})->{'$dynamicAnchor'}//'') eq $anchor) {
-        ($subschema, $canonical_uri, $document, $document_path) = $state->{evaluator}->_fetch_schema_from_uri($uri);
-        abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not defined $subschema;
+      my $dynamic_anchor_subschema_info = $state->{evaluator}->_fetch_from_uri($uri);
+      if (($dynamic_anchor_subschema_info->{schema}->{'$dynamicAnchor'}//'') eq $anchor) {
+        $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
+        abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
         last;
       }
     }
   }
 
-  return $self->eval($data, $subschema,
+  return $self->eval($data, $schema_info->{schema},
     +{
-      %{$document->evaluation_configs},
+      %{$schema_info->{document}->evaluation_configs},
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$dynamicRef',
-      initial_schema_uri => $canonical_uri,
-      document => $document,
-      document_path => $document_path,
-      spec_version => $document->specification_version,
+      initial_schema_uri => $schema_info->{canonical_uri},
+      document => $schema_info->{document},
+      document_path => $schema_info->{document_path},
+      spec_version => $schema_info->{document}->specification_version,
       schema_path => '',
     });
 }

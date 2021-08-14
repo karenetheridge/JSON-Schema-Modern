@@ -123,9 +123,9 @@ sub add_schema {
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
 
   if (not @_) {
-    my ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($uri);
-    return if not defined $schema or not defined wantarray;
-    return $document;
+    my $schema_info = $self->_fetch_from_uri($uri);
+    return if not $schema_info or not defined wantarray;
+    return $schema_info->{document};
   }
 
   my $document = $_[0]->$_isa('JSON::Schema::Modern::Document') ? shift
@@ -260,33 +260,36 @@ sub evaluate {
 
   my $valid;
   try {
-    my ($schema, $canonical_uri, $document, $document_path);
+    my $schema_info;
 
     if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
       # TODO: resolve $uri against base_uri
-      ($schema, $canonical_uri, $document, $document_path) = $self->_fetch_schema_from_uri($schema_reference);
+      $schema_info = $self->_fetch_from_uri($schema_reference);
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-      $document = $self->add_schema($base_uri, $schema_reference);
-      ($schema, $canonical_uri) = map $document->$_, qw(schema canonical_uri);
-      $document_path = '';
+      my $document = $self->add_schema($base_uri, $schema_reference);
+      $schema_info = {
+        (map +($_ => $document->$_), qw(schema canonical_uri)),
+        document => $document,
+        document_path => '',
+      };
     }
 
     abort($state, 'EXCEPTION: unable to find resource %s', $schema_reference)
-      if not defined $schema;
+      if not $schema_info;
 
     $state = +{
       %$state,
       depth => 0,
-      initial_schema_uri => $canonical_uri, # the canonical URI as of the start or last $id, or the last traversed $ref
-      document => $document,                # the ::Document object containing this schema
-      document_path => $document_path,      # the path within the document of this schema, since the last $id or $ref traversal
-      dynamic_scope => [ $canonical_uri ],
+      initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start or last $id, or the last traversed $ref
+      document => $schema_info->{document},   # the ::Document object containing this schema
+      document_path => $schema_info->{document_path}, # the path within the document of this schema, since the last $id or $ref traversal
+      dynamic_scope => [ $schema_info->{canonical_uri} ],
       errors => [],
       annotations => [],
       seen => {},
-      spec_version => $document->specification_version,
+      spec_version => $schema_info->{document}->specification_version,
       # for now, this is hardcoded, but in the future the dialect will be determined by the
       # traverse() pass on the schema and examination of the referenced metaschema.
       vocabularies => [
@@ -294,17 +297,17 @@ sub evaluate {
           qw(Core Applicator Validation),
           $config_override->{validate_formats} // $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
           qw(Content MetaData),
-          $document->specification_version eq 'draft2020-12' ? 'Unevaluated' : ()),
+          $schema_info->{document}->specification_version eq 'draft2020-12' ? 'Unevaluated' : ()),
       ],
       evaluator => $self,
-      %{$document->evaluation_configs},
+      %{$schema_info->{document}->evaluation_configs},
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
       } qw(short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans)),
     };
 
-    $valid = $self->_eval_subschema($data, $schema, $state);
+    $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
     warn 'result is false but there are no errors' if not $valid and not @{$state->{errors}};
   }
   catch ($e) {
@@ -336,9 +339,10 @@ sub get {
   croak 'insufficient arguments' if @_ < 2;
   my ($self, $uri) = @_;
 
-  my ($subschema, $canonical_uri) = $self->_fetch_schema_from_uri($uri);
-  $subschema = dclone($subschema) if is_ref($subschema);
-  return !defined $subschema ? () : wantarray ? ($subschema, $canonical_uri) : $subschema;
+  my $schema_info = $self->_fetch_from_uri($uri);
+  return if not $schema_info;
+  my $subschema = is_ref($schema_info->{schema}) ? dclone($schema_info->{schema}) : $schema_info->{schema};
+  return wantarray ? ($subschema, $schema_info->{canonical_uri}) : $subschema;
 }
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
@@ -603,22 +607,24 @@ sub _get_or_load_resource {
   return;
 };
 
-# returns a schema (which may not be at a document root), the canonical uri for that schema,
-# the JSON::Schema::Modern::Document object that holds that schema, and the path relative
-# to the document root for this schema.
+# returns information necessary to use a schema found at a particular URI:
+# - a schema (which may not be at a document root)
+# - the canonical uri for that schema,
+# - the JSON::Schema::Modern::Document object that holds that schema
+# - the path relative to the document root for this schema
 # creates a Document and adds it to the resource index, if not already present.
-sub _fetch_schema_from_uri {
+sub _fetch_from_uri {
   my ($self, $uri) = @_;
 
   $uri = Mojo::URL->new($uri) if not is_ref($uri);
   my $fragment = $uri->fragment;
 
-  my ($subschema, $canonical_uri, $document, $document_path);
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $base = $uri->clone->fragment(undef);
     if (my $resource = $self->_get_or_load_resource($base)) {
-      $subschema = $resource->{document}->get($document_path = $resource->{path}.($fragment//''));
-      $document = $resource->{document};
+      my $subschema = $resource->{document}->get(my $document_path = $resource->{path}.($fragment//''));
+      return if not defined $subschema;
+      my $document = $resource->{document};
       my $closest_resource = first { !length($_->[1]{path})       # document root
           || length($document_path)
             && path($_->[1]{path})->subsumes($document_path) }    # path is above present location
@@ -626,20 +632,29 @@ sub _fetch_schema_from_uri {
         grep { not length Mojo::URL->new($_->[0])->fragment }     # omit anchors
         $document->resource_pairs;
 
-      $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
+      my $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
         ->fragment(substr($document_path, length($closest_resource->[1]{path})));
       $canonical_uri->fragment(undef) if not length($canonical_uri->fragment);
+      return {
+        schema => $subschema,
+        canonical_uri => $canonical_uri,
+        document => $document,
+        document_path => $document_path,
+      };
     }
   }
   else {  # we are following a URI with a plain-name fragment
     if (my $resource = $self->_get_resource($uri)) {
-      $subschema = $resource->{document}->get($document_path = $resource->{path});
-      $canonical_uri = $resource->{canonical_uri}->clone; # this is *not* the anchor-containing URI
-      $document = $resource->{document};
+      my $subschema = $resource->{document}->get($resource->{path});
+      return if not defined $subschema;
+      return {
+        schema => $subschema,
+        canonical_uri => $resource->{canonical_uri}->clone, # this is *not* the anchor-containing URI
+        document => $resource->{document},
+        document_path => $resource->{path},
+      };
     }
   }
-
-  return defined $subschema ? ($subschema, $canonical_uri, $document, $document_path) : ();
 }
 
 has _json_decoder => (
