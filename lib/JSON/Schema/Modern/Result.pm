@@ -145,7 +145,7 @@ sub TO_JSON {
   $self->format($self->output_format);
 }
 
-# turns the json pointers in instance_location, keyword_location  into a URI fragments,
+# turns the JSON pointers in instance_location, keyword_location  into a URI fragments,
 # for strict draft-201909 adherence
 sub _map_uris {
   my $data = shift;
@@ -209,12 +209,12 @@ One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. D
 =for :list
 * C<flag> returns just the result of the evaluation: either C<{"valid": true}> or C<{"valid": false}>.
 * C<basic> adds the list of C<errors> or C<annotations> to the boolean evaluation result.
-C<instance_location> and C<keyword_location> are always included, as json pointers, describing the
+C<instance_location> and C<keyword_location> are always included, as JSON pointers, describing the
 path to the evaluation location; C<absolute_keyword_location> is added (as a resolved URI) whenever
 it is known and different from C<keyword_location>.
 * C<strict_basic> is like C<basic> but follows the draft-2019-09 specification precisely, including
 replicating an error fixed in the next draft, in that C<instance_location> and C<keyword_location>
-values are provided as fragment-only URI references rather than json pointers.
+values are provided as fragment-only URI references rather than JSON pointers.
 * C<terse> is not described in any specification; it is like C<basic>, but omits some redundant
 errors (for example the one for the C<allOf> keyword that is added when any of the subschemas under
 C<allOf> failed evaluation).

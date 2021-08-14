@@ -46,7 +46,7 @@ has resource_index => (
   is => 'bare',
   isa => HashRef[Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
-      path => Str,  # always a json pointer, relative to the document root
+      path => Str,  # always a JSON pointer, relative to the document root
     ]],
   handles_via => 'Hash',
   handles => {
@@ -216,7 +216,7 @@ document. Is normally determined automatically at construction time.
 
 =head2 resource_index
 
-An index of URIs to subschemas (json path to reach the location, and the canonical URI of that
+An index of URIs to subschemas (JSON pointer to reach the location, and the canonical URI of that
 location) for all identifiable subschemas found in the document. An entry for URI C<''> is added
 only when no other suitable identifier can be found for the root schema.
 
@@ -228,7 +228,7 @@ C<resource_pairs> which returns a list of tuples as arrayrefs.
 
 =head2 canonical_uri_index
 
-An index of json paths (from the document root) to canonical URIs. This is the inversion of
+An index of JSON pointers (from the document root) to canonical URIs. This is the inversion of
 L</resource_index> and is constructed as that is built up.
 
 =head2 errors
@@ -253,7 +253,7 @@ override anything you have already explicitly set.
 
 =for stopwords fragmentless
 
-Given a JSON path within this document, returns the canonical URI corresponding to that location.
+Given a JSON pointer (a path) within this document, returns the canonical URI corresponding to that location.
 Only fragmentless URIs can be looked up in this manner, so it is only suitable for finding the
 canonical URI corresponding to a subschema known to have an C<$id> keyword.
 
@@ -270,5 +270,11 @@ See L<Mojo::JSON::Pointer/get>.
 =head2 TO_JSON
 
 Returns a data structure suitable for serialization. See L</schema>.
+
+=head1 SEE ALSO
+
+=for :list
+* L<JSON::Schema::Modern>
+* L<Mojo::JSON::Pointer>
 
 =cut

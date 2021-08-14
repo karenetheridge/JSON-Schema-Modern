@@ -41,7 +41,7 @@ has keyword => (
 sub TO_JSON {
   my $self = shift;
   return +{
-    # note that locations are json pointers, not uri fragments!
+    # note that locations are JSON pointers, not uri fragments!
     instanceLocation => $self->instance_location,
     keywordLocation => $self->keyword_location,
     !defined($self->absolute_keyword_location) ? ()
@@ -110,7 +110,7 @@ The actual error string.
 Returns a data structure suitable for serialization. Corresponds to one output unit as specified in
 L<https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.2> and
 L<https://json-schema.org/draft/2019-09/output/schema>, except that C<instanceLocation> and
-C<keywordLocation> are json pointers, B<not> URI fragments. (See the
+C<keywordLocation> are JSON pointers, B<not> URI fragments. (See the
 C<strict_basic> L<JSON::Schema::Modern/output_format>
 if the distinction is important to you.)
 
