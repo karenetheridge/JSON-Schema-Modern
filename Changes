@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.516     2021-08-14 19:53:16Z
           - fix email format tests on older prereqs
           - avoid errors when enabling validate_formats before evaluating but
             after loading a schema
