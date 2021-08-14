@@ -906,5 +906,87 @@ subtest 'standard metaschemas' => sub {
   );
 };
 
+subtest 'custom metaschemas, without custom vocabularies' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  my $metaschema_document = $js->add_schema(my $metaschema = {
+    '$id' => 'http://localhost:1234/my-meta-schema',
+    '$schema' => 'https://json-schema.org/draft/2019-09/schema',
+    type => 'object',
+    '$recursiveAnchor' => true,
+    allOf => [ { '$ref' => 'https://json-schema.org/draft/2019-09/schema' } ],
+  });
+
+  is($metaschema_document->specification_version, 'draft2019-09',
+    'specification version detected from standard metaschema URI');
+
+  cmp_deeply(
+    $js->evaluate(false, 'http://localhost:1234/my-meta-schema')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/type',
+          absoluteKeywordLocation => 'http://localhost:1234/my-meta-schema#/type',
+          error => 'wrong type (expected object)',
+        },
+      ],
+    },
+    'custom metaschema restricts schemas to objects',
+  );
+
+  # the evaluation of $recursiveAnchor in the schema proves that the proper specification version
+  # was detected via the $schema keyword
+  cmp_deeply(
+    $js->evaluate(
+      { allOf => [ false ] },
+      'http://localhost:1234/my-meta-schema',
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/allOf/0',
+          keywordLocation => '/allOf/0/$ref/allOf/1/$ref/properties/allOf/$ref/items/$recursiveRef/type',
+          absoluteKeywordLocation => 'http://localhost:1234/my-meta-schema#/type',
+          error => 'wrong type (expected object)',
+        },
+        {
+          instanceLocation => '/allOf',
+          keywordLocation => '/allOf/0/$ref/allOf/1/$ref/properties/allOf/$ref/items',
+          absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/meta/applicator#/$defs/schemaArray/items',
+          error => 'subschema is not valid against all items',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/$ref/allOf/1/$ref/properties',
+          absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/meta/applicator#/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/$ref/allOf',
+          absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/schema#/allOf',
+          error => 'subschema 1 is not valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          absoluteKeywordLocation => 'http://localhost:1234/my-meta-schema#/allOf',
+          error => 'subschema 0 is not valid',
+        },
+      ],
+    },
+    'custom metaschema recurses to standard metaschema',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ allOf => [ {} ] }, 'http://localhost:1234/my-meta-schema')->TO_JSON,
+    { valid => true },
+    'objects are acceptable schemas to this metaschema',
+  );
+};
+
 had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;
