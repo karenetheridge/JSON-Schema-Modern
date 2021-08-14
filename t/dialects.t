@@ -875,5 +875,36 @@ subtest '$vocabulary' => sub {
   );
 };
 
+subtest 'standard metaschemas' => sub {
+  my $js = JSON::Schema::Modern->new;
+  my ($draft202012_metaschema) = $js->get('https://json-schema.org/draft/2020-12/schema');
+
+  cmp_deeply(
+    $js->evaluate($draft202012_metaschema, 'https://json-schema.org/draft/2020-12/schema')->TO_JSON,
+    { valid => true },
+    'main metaschema evaluated against its own URI',
+  );
+
+  cmp_deeply(
+    $js->evaluate($draft202012_metaschema, $draft202012_metaschema)->TO_JSON,
+    { valid => true },
+    'main metaschema evaluated against its own content',
+  );
+
+  my ($draft202012_core_metaschema) = $js->get('https://json-schema.org/draft/2020-12/meta/core');
+
+  cmp_deeply(
+    $js->evaluate($draft202012_core_metaschema, 'https://json-schema.org/draft/2020-12/schema')->TO_JSON,
+    { valid => true },
+    'core metaschema evaluated against the main metaschema URI',
+  );
+
+  cmp_deeply(
+    $js->evaluate($draft202012_core_metaschema, $draft202012_core_metaschema)->TO_JSON,
+    { valid => true },
+    'core metaschema evaluated against its own content',
+  );
+};
+
 had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;
