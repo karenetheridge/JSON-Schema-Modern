@@ -84,6 +84,7 @@ sub _traverse_keyword_id {
     $state->{initial_schema_uri} => {
       path => $state->{traversed_schema_path},
       canonical_uri => $state->{initial_schema_uri}->clone,
+      specification_version => $state->{spec_version}, # note! $schema keyword can change this
     };
   return 1;
 }
@@ -99,6 +100,7 @@ sub _eval_keyword_id {
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{document_path} = $state->{document_path}.$state->{schema_path};
   $state->{schema_path} = '';
+  $state->{spec_version} = $schema_info->{specification_version};
   push @{$state->{dynamic_scope}}, $state->{initial_schema_uri};
 
   return 1;
@@ -138,6 +140,9 @@ sub _traverse_keyword_schema {
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
+  $state->{identifiers}[-1]{specification_version} = $spec_version
+    if $state->{spec_version} ne $spec_version and @{$state->{identifiers}};
+
   $state->{spec_version} = $spec_version;
   return 1;
 }
@@ -168,6 +173,7 @@ sub _traverse_keyword_anchor {
     Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}}) => {
       path => $state->{traversed_schema_path}.$state->{schema_path},
       canonical_uri => $canonical_uri,
+      specification_version => $state->{spec_version},
     };
   return 1;
 }
@@ -225,7 +231,7 @@ sub _eval_keyword_ref {
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},
       document_path => $schema_info->{document_path},
-      spec_version => $schema_info->{document}->specification_version,
+      spec_version => $schema_info->{specification_version},
       schema_path => '',
     });
 }
@@ -254,7 +260,7 @@ sub _eval_keyword_recursiveRef {
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},
       document_path => $schema_info->{document_path},
-      spec_version => $schema_info->{document}->specification_version,
+      spec_version => $schema_info->{specification_version},
       schema_path => '',
     });
 }
@@ -294,7 +300,7 @@ sub _eval_keyword_dynamicRef {
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},
       document_path => $schema_info->{document_path},
-      spec_version => $schema_info->{document}->specification_version,
+      spec_version => $schema_info->{specification_version},
       schema_path => '',
     });
 }

@@ -99,10 +99,10 @@ subtest 'defaults without a $schema keyword' => sub {
     'boolean schema: no $id, no $schema',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft2020-12',
-    })),
+    }),
     'boolean schema: defaults to draft2020-12 without a $schema keyword',
   );
 
@@ -129,10 +129,10 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: no $id, no $schema',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft2020-12',
-    })),
+    }),
     'object schema: defaults to draft2020-12 without a $schema keyword',
   );
 
@@ -183,10 +183,10 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: $id, no $schema',
   );
   cmp_deeply(
-    $js->{_resource_index}{'https://id-no-schema1'}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{'https://id-no-schema1'},
+    superhashof({
       specification_version => 'draft2020-12',
-    })),
+    }),
     'named resource defaults to draft2020-12 without a $schema keyword',
   );
 
@@ -199,10 +199,10 @@ subtest 'defaults without a $schema keyword' => sub {
     'boolean schema: no $id, no $schema',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'boolean schema: specification_version overridden',
   );
 
@@ -224,10 +224,10 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: no $id, no $schema, specification version overridden, other keywords are ignored during evaluation',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'object schema: overridden to draft7',
   );
 
@@ -256,10 +256,10 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: $id, no $schema',
   );
   cmp_deeply(
-    $js->{_resource_index}{'https://id-no-schema3'}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{'https://id-no-schema3'},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'object schema: overridden to draft7 and other keywords are ignored',
   );
 };
@@ -291,10 +291,10 @@ subtest 'behaviour with a $schema keyword' => sub {
     'object schema: no $id, has $schema, unrecognized keywords are ignored during evaluation',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'semantics can be changed to another draft version',
   );
 
@@ -327,10 +327,10 @@ subtest 'behaviour with a $schema keyword' => sub {
     '$id and $schema',
   );
   cmp_deeply(
-    $js->{_resource_index}{'https://id-and-schema2'}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{'https://id-and-schema2'},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'named resource can be changed to another draft version and other keywords are ignored',
   );
 
@@ -362,10 +362,10 @@ subtest 'behaviour with a $schema keyword' => sub {
     'no $id, specification version overridden twice, other keywords are ignored during evaluation',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'unnamed resource can be changed to another draft version',
   );
 
@@ -396,10 +396,10 @@ subtest 'behaviour with a $schema keyword' => sub {
     'no $id, specification version overridden twice, other keywords are ignored during evaluation',
   );
   cmp_deeply(
-    $js->{_resource_index}{''}{document},
-    noclass(superhashof({
+    $js->{_resource_index}{''},
+    superhashof({
       specification_version => 'draft7',
-    })),
+    }),
     'unnamed resource can be changed to another draft version',
   );
 };
@@ -917,7 +917,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
     allOf => [ { '$ref' => 'https://json-schema.org/draft/2019-09/schema' } ],
   });
 
-  is($metaschema_document->specification_version, 'draft2019-09',
+  is($metaschema_document->_get_resource($metaschema->{'$id'})->{specification_version}, 'draft2019-09',
     'specification version detected from standard metaschema URI');
 
   cmp_deeply(

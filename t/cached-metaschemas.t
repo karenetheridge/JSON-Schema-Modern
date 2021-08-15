@@ -30,6 +30,7 @@ subtest 'load cached metaschema' => sub {
     my $resource = +{
       canonical_uri => str(METASCHEMA),
       path => '',
+      specification_version => 'draft2019-09',
       document => all(
         isa('JSON::Schema::Modern::Document'),
         methods(

@@ -37,11 +37,6 @@ has canonical_uri => (
   clearer => '_clear_canonical_uri',
 );
 
-has specification_version => (
-  is => 'rwp',
-  isa => Enum([qw(draft7 draft2019-09 draft2020-12)]),
-);
-
 # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 has resource_index => (
@@ -49,6 +44,7 @@ has resource_index => (
   isa => HashRef[my $resource_type = Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,  # always a JSON pointer, relative to the document root
+      specification_version => Str,
     ]],
   handles_via => 'Hash',
   handles => {
@@ -110,7 +106,8 @@ around _add_resources => sub {
     if (my $existing = $self->_get_resource($key)) {
       croak 'uri "'.$key.'" conflicts with an existing schema resource'
         if $existing->{path} ne $value->{path}
-          or $existing->{canonical_uri} ne $value->{canonical_uri};
+          or $existing->{canonical_uri} ne $value->{canonical_uri}
+          or $existing->{specification_version} ne $value->{specification_version};
     }
 
     # this will never happen, if we parsed $id correctly
@@ -154,17 +151,17 @@ sub BUILD {
   # if the schema identified a canonical uri for itself, it overrides the initial value
   $self->_set_canonical_uri($state->{initial_schema_uri});
 
-  # TODO: in the future, this will be a dialect object, which describes the vocabularies in effect
-  # as well as draft specification version
-  $self->_set_specification_version($state->{spec_version});
-
   if (@{$state->{errors}}) {
     $self->_set_errors($state->{errors});
     return;
   }
 
   # make sure the root schema is always indexed against *something*.
-  $self->_add_resources($original_uri => { path => '', canonical_uri => $self->canonical_uri })
+  $self->_add_resources($original_uri => {
+      path => '',
+      canonical_uri => $self->canonical_uri,
+      specification_version => $state->{spec_version},
+    })
     if (not "$original_uri" and $original_uri eq $self->canonical_uri)
       or "$original_uri";
 

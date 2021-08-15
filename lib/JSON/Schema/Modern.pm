@@ -40,10 +40,11 @@ our @CARP_NOT = qw(
 );
 
 use constant SPECIFICATION_VERSION_DEFAULT => 'draft2020-12';
+use constant SPECIFICATION_VERSIONS_SUPPORTED => [qw(draft7 draft2019-09 draft2020-12)];
 
 has specification_version => (
   is => 'ro',
-  isa => Enum([qw(draft7 draft2019-09 draft2020-12)]),
+  isa => Enum(SPECIFICATION_VERSIONS_SUPPORTED),
 );
 
 has output_format => (
@@ -162,7 +163,12 @@ sub add_schema {
   }
 
   if ("$uri") {
-    $self->_add_resources($uri => { path => '', canonical_uri => $document->canonical_uri, document => $document });
+    $self->_add_resources($uri => {
+        path => '',
+        canonical_uri => $document->canonical_uri,
+        specification_version => $document->_get_resource($document->canonical_uri)->{specification_version},
+        document => $document,
+      });
   }
 
   return $document;
@@ -269,10 +275,14 @@ sub evaluate {
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
       my $document = $self->add_schema($base_uri, $schema_reference);
+      my $base_resource = $document->_get_resource($document->canonical_uri)
+        || croak "couldn't get resource from '$base_uri'";
+
       $schema_info = {
-        (map +($_ => $document->$_), qw(schema canonical_uri)),
+        schema => $document->schema,
         document => $document,
         document_path => '',
+        (map +($_ => $base_resource->{$_}), qw(canonical_uri specification_version)),
       };
     }
 
@@ -289,7 +299,7 @@ sub evaluate {
       errors => [],
       annotations => [],
       seen => {},
-      spec_version => $schema_info->{document}->specification_version,
+      spec_version => $schema_info->{specification_version},
       # for now, this is hardcoded, but in the future the dialect will be determined by the
       # traverse() pass on the schema and examination of the referenced metaschema.
       vocabularies => [
@@ -297,7 +307,7 @@ sub evaluate {
           qw(Core Applicator Validation),
           $config_override->{validate_formats} // $self->validate_formats ? 'FormatAssertion' : 'FormatAnnotation',
           qw(Content MetaData),
-          $schema_info->{document}->specification_version eq 'draft2020-12' ? 'Unevaluated' : ()),
+          $schema_info->{specification_version} eq 'draft2020-12' ? 'Unevaluated' : ()),
       ],
       evaluator => $self,
       %{$schema_info->{document}->evaluation_configs},
@@ -497,6 +507,7 @@ has _resource_index => (
   isa => HashRef[Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,
+      specification_version => Enum(SPECIFICATION_VERSIONS_SUPPORTED),
       document => InstanceOf['JSON::Schema::Modern::Document'],
     ]],
   handles_via => 'Hash',
@@ -525,6 +536,7 @@ around _add_resources => sub {
       if ($key ne '') {
         next if $existing->{path} eq $value->{path}
           and $existing->{canonical_uri} eq $value->{canonical_uri}
+          and $existing->{specification_version} eq $value->{specification_version}
           and $existing->{document} == $value->{document};
         croak 'uri "'.$key.'" conflicts with an existing schema resource';
       }
@@ -640,6 +652,7 @@ sub _fetch_from_uri {
         canonical_uri => $canonical_uri,
         document => $document,
         document_path => $document_path,
+        specification_version => $resource->{specification_version},
       };
     }
   }
@@ -652,6 +665,7 @@ sub _fetch_from_uri {
         canonical_uri => $resource->{canonical_uri}->clone, # this is *not* the anchor-containing URI
         document => $resource->{document},
         document_path => $resource->{path},
+        specification_version => $resource->{specification_version},
       };
     }
   }
