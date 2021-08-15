@@ -10,6 +10,7 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::Fatal;
+use Test::Needs;
 use JSON::Schema::Modern;
 
 use lib 't/lib';
@@ -223,6 +224,8 @@ subtest 'different formats after document creation' => sub {
 };
 
 subtest 'toggle validate_formats after adding schema' => sub {
+  test_needs 'Time::Moment';
+
   my $js = JSON::Schema::Modern->new;
   my $document = $js->add_schema(my $uri = 'http://localhost:1234/date-time', { format => 'date-time' });
 
