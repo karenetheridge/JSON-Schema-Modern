@@ -149,16 +149,16 @@ sub _eval_keyword_format {
 
   try {
     if ($schema->{format} eq 'date-time' or $schema->{format} eq 'date') {
-      +require Time::Moment;
+      require Time::Moment;
     }
     elsif ($schema->{format} eq 'email' or $schema->{format} eq 'idn-email') {
-      +require Email::Address::XS; Email::Address::XS->VERSION(1.04);
+      require Email::Address::XS; Email::Address::XS->VERSION(1.04);
     }
     elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
-      +require Data::Validate::Domain;
+      require Data::Validate::Domain;
     }
     elsif ($schema->{format} eq 'idn-hostname') {
-      +require Net::IDN::Encode;
+      require Net::IDN::Encode;
     }
   }
   catch ($e) {
