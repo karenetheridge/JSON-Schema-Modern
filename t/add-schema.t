@@ -168,6 +168,24 @@ subtest 'evaluate a uri' => sub {
     },
     'evaluate against the a fragment of the metaschema that does not exist',
   );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      METASCHEMA.'#does_not_exist',
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => 'EXCEPTION: unable to find resource '.METASCHEMA.'#does_not_exist',
+        },
+      ],
+    },
+    'evaluate against the a plain-name fragment of the metaschema that does not exist',
+  );
 };
 
 subtest 'add a uri resource' => sub {
