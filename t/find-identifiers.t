@@ -4,6 +4,7 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
+use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More 0.96;
@@ -277,11 +278,17 @@ subtest 'invalid $id and $anchor' => sub {
       {
         '$id' => 'foo.json',
         '$defs' => {
-          bad_id => {
+          a_bad_id => {
             '$id' => 'foo.json#/foo/bar',
           },
-          bad_anchor => {
-            '$anchor' => 'my$foo',
+          anchor_a => {
+            '$anchor' => 'a_my$foo',
+          },
+          anchor_b => {
+            '$anchor' => 'b_hello123৪২',
+          },
+          anchor_c => {
+            '$anchor' => 'c_helloðworld',
           },
         },
       },
@@ -291,16 +298,16 @@ subtest 'invalid $id and $anchor' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$defs/bad_anchor/$anchor',
-          absoluteKeywordLocation => 'foo.json#/$defs/bad_anchor/$anchor',
-          error => '$anchor value "my$foo" does not match required syntax',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/$defs/bad_id/$id',
-          absoluteKeywordLocation => 'foo.json#/$defs/bad_id/$id',
+          keywordLocation => '/$defs/a_bad_id/$id',
+          absoluteKeywordLocation => 'foo.json#/$defs/a_bad_id/$id',
           error => '$id value "foo.json#/foo/bar" cannot have a non-empty fragment',
         },
+        map +{
+          instanceLocation => '',
+          keywordLocation => '/$defs/anchor_'.substr($_,0,1).'/$anchor',
+          absoluteKeywordLocation => 'foo.json#/$defs/anchor_'.substr($_,0,1).'/$anchor',
+          error => '$anchor value "'.$_.'" does not match required syntax',
+        }, qw(a_my$foo b_hello123৪২ c_helloðworld),
       ],
     },
     'bad $id and $anchor are detected, even if bad definitions are not traversed',
