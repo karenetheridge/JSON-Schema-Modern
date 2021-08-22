@@ -38,7 +38,7 @@ acceptance_tests(
       { file => 'optional/bignum.json' },     # TODO: see issue #10
       # various edge cases that are difficult to accomodate
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 regex $ does not match trailing newline', test_description => 'matches in Python, but should not in jsonschema' }, # typo - fixed in test suite commit 878b0ad5
-      { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # TODO, see test suite PR#505
+      { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # won't fix - cannot match both \d and \s correctly
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'zero-width whitespace matches' }, # bad test: \ufeff is not a space character
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' }, # ""
       { file => 'optional/float-overflow.json' },             # see slack logs re multipleOf algo

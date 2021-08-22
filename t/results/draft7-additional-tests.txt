@@ -20,8 +20,7 @@ not-an-id.json                               2          0     0
 ref-and-id.json                              2          0     0
 ref.json                                    10          0     0
 short-circuit.json                          16          0     0
-unicode.json                                 9          0     0
 unknownKeyword.json                          8          0     0
 vocabulary.json                              1          0     0
 ---------------------------------------------------------------
-TOTAL                                      742          0     0
+TOTAL                                      733          0     0
