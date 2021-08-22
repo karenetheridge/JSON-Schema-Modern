@@ -1,13 +1,13 @@
 [
     {
-        "description": "leading zeroes should be rejected, as they are treated as octal values",
-        "comment": "see https://sick.codes/universal-netmask-npm-package-used-by-270000-projects-vulnerable-to-octal-input-data-server-side-request-forgery-remote-file-inclusion-local-file-inclusion-and-more-cve-2021-28918/",
+        "description": "validation of ipv4 strings",
         "schema": {
             "format": "ipv4"
         },
         "tests": [
             {
-                "description": "leading zeroes should be rejected",
+                "description": "leading zeroes should be rejected, as they are treated as octal values",
+                "comment": "see https://sick.codes/universal-netmask-npm-package-used-by-270000-projects-vulnerable-to-octal-input-data-server-side-request-forgery-remote-file-inclusion-local-file-inclusion-and-more-cve-2021-28918/",
                 "data": "087.10.0.1",
                 "valid": false
             },
