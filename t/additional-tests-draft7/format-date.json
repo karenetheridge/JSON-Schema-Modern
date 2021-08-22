@@ -1,0 +1,16 @@
+[
+    {
+        "description": "non-ascii digits should be rejected",
+        "schema": {
+            "format": "date"
+        },
+        "tests": [
+            {
+                "description": "BENGALI DIGIT TWO is not valid in dates",
+                "data": "২001-01-01",
+                "valid": false
+            }
+        ]
+    }
+]
+

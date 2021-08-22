@@ -9,10 +9,11 @@ anchor.json                                  2          0     0
 badRef.json                                  3          0     0
 dynamicRef.json                              5          0     0
 faux-buggy-schemas.json                      2          0     0
+format-date.json                             1          0     0
 format-duration.json                         9          0     0
-format-ipv4.json                             3          0     0
+format-ipv4.json                             4          0     0
 format-relative-json-pointer.json            7          0     0
-format-time.json                            11          0     0
+format-time.json                            13          0     0
 id.json                                      6          0     0
 keyword-independence.json                  884          0     0
 loose-types-const-enum.json                  8          0     0
@@ -24,4 +25,4 @@ unicode.json                                 9          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                              1          0     0
 ---------------------------------------------------------------
-TOTAL                                      994          0     0
+TOTAL                                      998          0     0

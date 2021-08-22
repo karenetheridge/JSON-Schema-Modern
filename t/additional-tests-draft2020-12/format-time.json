@@ -58,6 +58,16 @@
                 "description": "invalid leap second, negative time-offset (wrong minute)",
                 "data": "23:59:60-00:30",
                 "valid": false
+            },
+            {
+                "description": "no time offset",
+                "data": "12:00:00",
+                "valid": false
+            },
+            {
+                "description": "non-ascii digits should be rejected",
+                "data": "1২:00:00Z",
+                "valid": false
             }
         ]
     }

@@ -67,9 +67,9 @@ sub keywords {
 
   my $formats = +{
     'date-time' => $is_datetime,
-    date => sub { $_[0] =~ /^\d{4}-(\d\d)-(\d\d)$/ && $is_datetime->($_[0].'T00:00:00Z') },
+    date => sub { $_[0] =~ /^\d{4}-(\d\d)-(\d\d)$/a && $is_datetime->($_[0].'T00:00:00Z') },
     time => sub {
-      return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))$/
+      return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))$/a
         or $1 > 23
         or $2 > 59
         or $3 > 60
