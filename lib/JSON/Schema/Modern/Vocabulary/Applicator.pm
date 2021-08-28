@@ -218,7 +218,7 @@ sub _traverse_keyword_dependencies {
       # as in dependentRequired
 
       foreach my $index (0..$#{$schema->{dependencies}{$property}}) {
-        $valid = E({ %$state, _schema_path_suffix => $property }, 'element #%d is not a string', $index)
+        $valid = E({ %$state, _schema_path_suffix => [ $property, $index ] }, 'element #%d is not a string', $index)
           if not is_type('string', $schema->{dependencies}{$property}[$index]);
       }
 

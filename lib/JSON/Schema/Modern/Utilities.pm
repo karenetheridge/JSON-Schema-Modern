@@ -14,7 +14,7 @@ use strictures 2;
 use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
-use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
+use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_arrayref);
 use Scalar::Util 'blessed';
 use Storable 'dclone';
 use Feature::Compat::Try;
@@ -167,7 +167,7 @@ sub is_elements_unique {
 
 # shorthand for creating and appending json pointers
 sub jsonp {
-  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, grep defined, @_);
+  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_arrayref($_) ? @$_ : $_), grep defined, @_);
 }
 
 # get all annotations produced for the current instance data location (that are visible to this
@@ -181,6 +181,7 @@ sub local_annotations {
 sub canonical_schema_uri {
   my ($state, @extra_path) = @_;
 
+  splice(@extra_path, -1, 1, @{$extra_path[-1]}) if @extra_path and is_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
   $uri->fragment(undef) if not length($uri->fragment);
