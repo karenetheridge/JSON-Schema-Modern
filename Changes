@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.517     2021-08-28 04:34:17Z
           - restore some optional modules used for format validation to the
             prereq list that were mistakenly dropped in version 0.515
