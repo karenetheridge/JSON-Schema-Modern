@@ -41,6 +41,10 @@ acceptance_tests(
       { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # won't fix - cannot match both \d and \s correctly
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'zero-width whitespace matches' }, # bad test: \ufeff is not a space character
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' }, # ""
+      "$]" < 5.017001 ? ( # in Unicode 6.2, vertical tab was added to \s
+        { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'Line tabulation matches' },
+        { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'Line tabulation does not match' },
+      ) : (),
       { file => 'optional/float-overflow.json' },             # see slack logs re multipleOf algo
       $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
         { file => 'const.json',
