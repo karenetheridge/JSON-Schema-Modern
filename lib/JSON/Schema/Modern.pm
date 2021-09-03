@@ -916,8 +916,8 @@ To date, missing features (some of which are optional, but still quite useful) i
 
 =head1 SECURITY CONSIDERATIONS
 
-The C<pattern> and C<patternProperties> keywords, and the C<regex> format validator,
-evaluate regular expressions from the schema.
+The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema,
+and the C<regex> format validator evaluates regular expressions from the data.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
 potentially pathological constructs that may pose a security risk, either via denial of service
 or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM UNTRUSTED
