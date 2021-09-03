@@ -866,7 +866,7 @@ For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 =head2 Format Validation
 
-By default, formats are treated only as annotations, not assertions. When L</validate_format> is
+By default, formats are treated only as annotations, not assertions. When L</validate_formats> is
 true, strings are also checked against the format as specified in the schema. At present the
 following formats are supported (use of any other formats than these will always evaluate as true):
 
