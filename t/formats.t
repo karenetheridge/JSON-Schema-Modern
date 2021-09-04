@@ -141,11 +141,16 @@ subtest 'override a format sub' => sub {
 
   cmp_deeply(
     $js->evaluate(
-      { uuid => '2eb8aa08-aa98-11ea-b4aa-73b441d16380', mult_5 => 3 },
+      [
+        { uuid => '2eb8aa08-aa98-11ea-b4aa-73b441d16380', mult_5 => 3 },
+        { uuid => 3, mult_5 => 'abc' },
+      ],
       {
-        properties => {
-          uuid => { format => 'uuid' },
-          mult_5 => { format => 'mult_5' },
+        items => {
+          properties => {
+            uuid => { format => 'uuid' },
+            mult_5 => { format => 'mult_5' },
+          },
         },
       },
     )->TO_JSON,
@@ -153,23 +158,28 @@ subtest 'override a format sub' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '/mult_5',
-          keywordLocation => '/properties/mult_5/format',
+          instanceLocation => '/0/mult_5',
+          keywordLocation => '/items/properties/mult_5/format',
           error => 'not a mult_5',
         },
         {
-          instanceLocation => '/uuid',
-          keywordLocation => '/properties/uuid/format',
+          instanceLocation => '/0/uuid',
+          keywordLocation => '/items/properties/uuid/format',
           error => 'not a uuid',
         },
         {
-          instanceLocation => '',
-          keywordLocation => '/properties',
+          instanceLocation => '/0',
+          keywordLocation => '/items/properties',
           error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
         },
       ],
     },
-    'swapping out format implementation turns success into failure',
+    'swapping out format implementation turns success into failure; wrong types are still valid',
   );
 };
 
