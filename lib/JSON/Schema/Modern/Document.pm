@@ -42,6 +42,8 @@ has specification_version => (
   isa => Enum([qw(draft7 draft2019-09 draft2020-12)]),
 );
 
+# "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
+# https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 has resource_index => (
   is => 'bare',
   isa => HashRef[Dict[

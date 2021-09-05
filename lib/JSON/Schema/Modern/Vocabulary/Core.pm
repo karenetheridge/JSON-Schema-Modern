@@ -110,7 +110,10 @@ sub _traverse_keyword_schema {
 
   return if not assert_keyword_type($state, $schema, 'string') or not assert_uri($state, $schema);
 
-  # note: we need not be at the document root, but simply adjacent to an $id
+  # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
+  # "A resource's root schema is its top-level schema object."
+  # note: we need not be at the document root, but simply adjacent to an $id (or be the at the
+  # document root)
   return E($state, '$schema can only appear at the schema resource root')
     if length($state->{schema_path});
 
