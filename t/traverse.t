@@ -79,4 +79,29 @@ subtest 'traversal with callbacks' => sub {
   );
 };
 
+subtest 'vocabularies used during traversal' => sub {
+  my $js = JSON::Schema::Modern->new;
+  my $state = $js->traverse(
+    {
+      '$defs' => {
+        foo => {
+          properties => 'not an object',
+        },
+      },
+    },
+  );
+
+  cmp_deeply(
+    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/$defs/foo/properties',
+        error => 'properties value is not an object',
+      },
+    ],
+    'error within $defs is found, showing both Core and Applicator vocabularies are used',
+  );
+};
+
 done_testing;
