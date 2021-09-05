@@ -770,7 +770,7 @@ The schema must be in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans> and/or
 L</validate_formats> settings for just this evaluation call.
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
@@ -793,7 +793,7 @@ The schema must be in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords> and/or
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans> and/or
 L</validate_formats> settings for just this
 evaluation call.
 
