@@ -132,7 +132,7 @@ sub _traverse_keyword_schema {
   return E($state, 'draft specification version cannot change within a single schema document')
     if $spec_version ne $state->{spec_version} and length($state->{traversed_schema_path});
 
-  # we special-case this because the check in _eval for older drafts + $ref has already happened
+  # we special-case this because the check in _eval_subschema for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
