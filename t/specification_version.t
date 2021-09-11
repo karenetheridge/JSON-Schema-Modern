@@ -40,26 +40,6 @@ subtest '$schema' => sub {
     },
     '$schema, when set, must contain a recognizable URI',
   );
-
-  cmp_deeply(
-    JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(
-      true,
-      {
-        '$schema' => 'https://json-schema.org/draft/2019-09/schema',
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/$schema',
-          error => '"$schema" indicates a different version than that requested by \'specification_version\'',
-        },
-      ],
-    },
-    'specification_version cannot be inconsistent with $schema keyword value',
-  );
 };
 
 subtest '$ref and older specification versions' => sub {

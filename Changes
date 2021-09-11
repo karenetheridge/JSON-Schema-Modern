@@ -3,6 +3,9 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - skip some regex tests when Unicode library is too old for those
             character classes being tested
+          - specification versions can now change, via the $schema keyword,
+            within schema resources in a single document or via $ref to another
+            resource
 
 0.517     2021-08-28 04:34:17Z
           - restore some optional modules used for format validation to the

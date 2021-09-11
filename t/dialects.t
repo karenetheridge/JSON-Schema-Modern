@@ -345,7 +345,6 @@ subtest 'behaviour with a $schema keyword' => sub {
   );
 
 
-  local $TODO = 'specification version cannot yet be changed from the global override';
   my $js = JSON::Schema::Modern->new(short_circuit => 0, specification_version => 'draft2019-09');
 
   cmp_deeply(
@@ -436,67 +435,9 @@ subtest 'setting or changing schema semantics in a single document' => sub {
     { valid => true },
     '$schema can appear adjacent to any $id',
   );
-
-  cmp_deeply(
-    $js->evaluate(
-      1,
-      {
-        '$id' => 'https://bloop.com',
-        '$schema' => 'https://json-schema.org/draft/2019-09/schema',
-        allOf => [
-          true,
-          {
-            '$id' => 'https://zardos.com',
-            '$schema' => 'http://json-schema.org/draft-07/schema#',
-          },
-        ],
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/1/$schema',
-          absoluteKeywordLocation => 'https://zardos.com#/$schema',
-          error => 'draft specification version cannot change within a single schema document',
-        },
-      ],
-    },
-    'TODO: once a specification version has been set, it cannot change later on in the document',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      1,
-      {
-        '$id' => 'https://bloop.com',
-        allOf => [
-          true,
-          {
-            '$id' => 'https://zardos.com',
-            '$schema' => 'http://json-schema.org/draft-07/schema#',
-          },
-        ],
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/1/$schema',
-          absoluteKeywordLocation => 'https://zardos.com#/$schema',
-          error => 'draft specification version cannot change within a single schema document',
-        },
-      ],
-    },
-    'TODO: root schema specification version defaults to draft 2019-09, and it is too late to change it in a subschema',
-  );
 };
 
 subtest 'changing schema semantics across documents' => sub {
-  local $TODO = 'vocabularies are not yet swapped out in the middle of evaluation';
   my $expected = [ re(qr!^\Qno-longer-supported "dependencies" keyword present (at location "https://iam.draft2019-09.com")!) ];
   $expected = superbagof(@$expected) if not $ENV{AUTHOR_TESTING};
   cmp_deeply(
@@ -708,7 +649,6 @@ subtest 'changing schema semantics across documents' => sub {
 };
 
 subtest 'changing schema semantics within documents' => sub {
-  local $TODO = 'not currently allowing for $schema keyword lower down in a document';
   cmp_deeply(
     $js->evaluate(
       { foo => 'hi' },

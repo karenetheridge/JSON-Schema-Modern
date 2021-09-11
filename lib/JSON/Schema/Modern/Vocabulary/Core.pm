@@ -126,19 +126,6 @@ sub _traverse_keyword_schema {
       join(', ', map '"'.$_.'"', sort keys %version_uris))
     if not $spec_version;
 
-  # The spec version cannot change as we traverse through a schema document, due to the race
-  # condition involved in supporting different core keyword semantics before we can parse the
-  # keywords that tell us what those semantics are.
-  # To support different dialects, we will record the local dialect in the document object for
-  # swapping out during evaluation and following $refs. We must also store a value to be populated
-  # into $state->{validate_formats}, if one of the format vocabularies is included.
-  return E($state, '"$schema" indicates a different version than that requested by \'specification_version\'')
-    if $state->{evaluator}->specification_version
-      and $spec_version ne $state->{evaluator}->specification_version;
-
-  return E($state, 'draft specification version cannot change within a single schema document')
-    if $spec_version ne $state->{spec_version} and length($state->{traversed_schema_path});
-
   # we special-case this because the check in _eval_subschema for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
