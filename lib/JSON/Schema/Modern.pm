@@ -15,7 +15,7 @@ use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint);
-use Ref::Util 0.100 qw(is_ref is_plain_hashref is_plain_coderef);
+use Ref::Util 0.100 qw(is_ref);
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
