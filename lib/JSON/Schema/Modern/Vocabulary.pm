@@ -12,8 +12,11 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
 use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type);
+use Carp ();
 use Moo::Role;
 use namespace::clean;
+
+our @CARP_NOT = qw(JSON::Schema::Modern);
 
 requires qw(vocabulary keywords);
 

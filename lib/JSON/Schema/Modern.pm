@@ -33,7 +33,11 @@ use JSON::Schema::Modern::Document;
 use JSON::Schema::Modern::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
 use namespace::clean;
 
-our @CARP_NOT = qw(JSON::Schema::Modern::Document);
+our @CARP_NOT = qw(
+  JSON::Schema::Modern::Document
+  JSON::Schema::Modern::Vocabulary
+  JSON::Schema::Modern::Vocabulary::Applicator
+);
 
 use constant SPECIFICATION_VERSION_DEFAULT => 'draft2020-12';
 
@@ -131,9 +135,9 @@ sub add_schema {
       _evaluator => $self,  # used only for traversal during document construction
     );
 
-  die(!(caller())[0]->isa(__PACKAGE__)
+  croak(!(caller())[0]->isa(__PACKAGE__)
     ? join('; ', map $_->keyword_location.': '.$_->error, $document->errors)
-    : die JSON::Schema::Modern::Result->new(
+    : JSON::Schema::Modern::Result->new(
       output_format => $self->output_format,
       valid => 0,
       errors => [ $document->errors ],
