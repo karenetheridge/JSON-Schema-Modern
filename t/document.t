@@ -488,10 +488,8 @@ subtest 'resource collisions' => sub {
         '$id' => 'https://bar.com',
         '$anchor' => 'hello',
       },
-    )->{canonical_uri_index},
-    {
-      '' => str('https://bar.com'),
-    },
+    )->path_to_resource(''),
+    superhashof({ canonical_uri => str('https://bar.com') }),
     'the correct canonical uri is indexed in the inverted index',
   );
 };

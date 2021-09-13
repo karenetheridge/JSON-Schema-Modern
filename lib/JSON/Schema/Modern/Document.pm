@@ -46,7 +46,7 @@ has specification_version => (
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 has resource_index => (
   is => 'bare',
-  isa => HashRef[Dict[
+  isa => HashRef[my $resource_type = Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,  # always a JSON pointer, relative to the document root
     ]],
@@ -64,17 +64,16 @@ has resource_index => (
   default => sub { {} },
 );
 
-has canonical_uri_index => (
+has _path_to_resource => (
   is => 'bare',
-  isa => HashRef[InstanceOf['Mojo::URL']],
+  isa => HashRef[$resource_type],
   handles_via => 'Hash',
   handles => {
-    path_to_canonical_uri => 'get',
-    _add_canonical_uri => 'set',
+    path_to_resource => 'get',
   },
   init_arg => undef,
   lazy => 1,
-  default => sub { {} },
+  default => sub { +{ map +($_->{path} => $_), shift->_canonical_resources } },
 );
 
 # for internal use only
@@ -119,7 +118,6 @@ around _add_resources => sub {
       if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
 
     $self->$orig($key, $value);
-    $self->_add_canonical_uri($value->{path}, $value->{canonical_uri});
   }
 };
 
