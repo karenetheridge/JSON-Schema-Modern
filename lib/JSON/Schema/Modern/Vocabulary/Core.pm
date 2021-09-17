@@ -91,18 +91,17 @@ sub _traverse_keyword_id {
 sub _eval_keyword_id {
   my ($self, $data, $schema, $state) = @_;
 
-  if (my $canonical_uri = $state->{document}->path_to_canonical_uri($state->{document_path}.$state->{schema_path})) {
-    $state->{initial_schema_uri} = $canonical_uri->clone;
-    $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-    $state->{document_path} = $state->{document_path}.$state->{schema_path};
-    $state->{schema_path} = '';
-    push @{$state->{dynamic_scope}}, $canonical_uri;
-
-    return 1;
-  }
-
+  my $canonical_uri = $state->{document}->path_to_canonical_uri($state->{document_path}.$state->{schema_path});
   # this should never happen, if the pre-evaluation traversal was performed correctly
-  abort($state, 'failed to resolve %s to canonical uri', $state->{keyword});
+  abort($state, 'failed to resolve %s to canonical uri', $state->{keyword}) if not $canonical_uri;
+
+  $state->{initial_schema_uri} = $canonical_uri->clone;
+  $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
+  $state->{document_path} = $state->{document_path}.$state->{schema_path};
+  $state->{schema_path} = '';
+  push @{$state->{dynamic_scope}}, $canonical_uri;
+
+  return 1;
 }
 
 sub _traverse_keyword_schema {
