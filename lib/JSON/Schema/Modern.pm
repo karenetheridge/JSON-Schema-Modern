@@ -25,7 +25,7 @@ use Module::Runtime 'use_module';
 use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy);
+use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName);
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
@@ -507,11 +507,14 @@ sub _eval_subschema {
 
 has _resource_index => (
   is => 'bare',
-  isa => HashRef[Dict[
+  isa => HashRef[my $resource_type = Dict[
       canonical_uri => InstanceOf['Mojo::URL'],
       path => Str,
       specification_version => Enum(SPECIFICATION_VERSIONS_SUPPORTED),
       document => InstanceOf['JSON::Schema::Modern::Document'],
+      # the vocabularies used when evaluating instance data against schema
+      vocabularies => ArrayRef[ClassName->where(sub { $_->DOES('JSON::Schema::Modern::Vocabulary') })],
+      slurpy HashRef[Undef],  # no other fields allowed
     ]],
   handles_via => 'Hash',
   handles => {
@@ -529,6 +532,8 @@ has _resource_index => (
 
 around _add_resources => sub {
   my ($orig, $self) = (shift, shift);
+
+  $resource_type->($_[1]) if @_;  # check type of hash value against Dict
 
   my @resources;
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
