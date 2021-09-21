@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix tests that were relying on an optional prereq
 
 0.518     2021-09-18 22:00:42Z
           - skip some regex tests when Unicode library is too old for those

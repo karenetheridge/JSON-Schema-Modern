@@ -448,7 +448,7 @@ subtest 'changing schema semantics across documents' => sub {
         '$ref' => 'https://iam.draft7.com',
         dependencies => { foo => false },
         dependentSchemas => { foo => false },
-        additionalProperties => { format => 'date' },
+        additionalProperties => { format => 'ipv6' },
       })
     } ],
     $expected,
@@ -459,7 +459,7 @@ subtest 'changing schema semantics across documents' => sub {
     '$schema' => 'http://json-schema.org/draft-07/schema#',
     dependencies => { foo => false },
     dependentSchemas => { foo => false },
-    additionalProperties => { format => 'time' },
+    additionalProperties => { format => 'ipv4' },
     unevaluatedProperties => false, # this should be ignored
   });
 
@@ -484,7 +484,7 @@ subtest 'changing schema semantics across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/$ref/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7.com#/additionalProperties/format',
-          error => 'not a time',
+          error => 'not an ipv4',
         },
         {
           instanceLocation => '',
@@ -508,7 +508,7 @@ subtest 'changing schema semantics across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2019-09.com#/additionalProperties/format',
-          error => 'not a date',
+          error => 'not an ipv6',
         },
         {
           instanceLocation => '',
@@ -548,7 +548,7 @@ subtest 'changing schema semantics across documents' => sub {
     allOf => [ { '$ref' => 'https://iam.draft2020-12-2.com' } ],
     dependencies => { foo => false },
     dependentSchemas => { foo => false },
-    additionalProperties => { format => 'time' },
+    additionalProperties => { format => 'ipv4' },
     unevaluatedProperties => false, # this should be ignored
   });
   cmp_deeply(
@@ -558,7 +558,7 @@ subtest 'changing schema semantics across documents' => sub {
         '$schema' => 'https://json-schema.org/draft/2020-12/schema',
         dependencies => { foo => false },
         dependentSchemas => { foo => false },
-        additionalProperties => { format => 'date' },
+        additionalProperties => { format => 'ipv6' },
       })
     } ],
     $expected,
@@ -586,7 +586,7 @@ subtest 'changing schema semantics across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/$ref/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2020-12-2.com#/additionalProperties/format',
-          error => 'not a date',
+          error => 'not an ipv6',
         },
         {
           instanceLocation => '',
@@ -616,7 +616,7 @@ subtest 'changing schema semantics across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7-2.com#/additionalProperties/format',
-          error => 'not a time',
+          error => 'not an ipv4',
         },
         {
           instanceLocation => '',
@@ -661,12 +661,12 @@ subtest 'changing schema semantics within documents' => sub {
             '$schema' => 'http://json-schema.org/draft-07/schema#',
             dependencies => { foo => false },
             dependentSchemas => { foo => false }, # this should be ignored
-            additionalProperties => { format => 'time' },
+            additionalProperties => { format => 'ipv4' },
             unevaluatedProperties => false,       # this should be ignored
           },
         ],
         dependentSchemas => { foo => false },
-        additionalProperties => { format => 'date' },
+        additionalProperties => { format => 'ipv6' },
       },
     )->TO_JSON,
     {
@@ -688,7 +688,7 @@ subtest 'changing schema semantics within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7-3.com#/additionalProperties/format',
-          error => 'not a time',
+          error => 'not an ipv4',
         },
         {
           instanceLocation => '',
@@ -718,7 +718,7 @@ subtest 'changing schema semantics within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2019-09-3.com#/additionalProperties/format',
-          error => 'not a date',
+          error => 'not an ipv6',
         },
         {
           instanceLocation => '',
@@ -760,12 +760,12 @@ subtest 'changing schema semantics within documents' => sub {
             '$id' => 'https://iam.draft2020-12-4.com',
             '$schema' => 'https://json-schema.org/draft/2020-12/schema',
             dependentSchemas => { foo => false },
-            additionalProperties => { format => 'time' },
+            additionalProperties => { format => 'ipv4' },
           },
         ],
         dependencies => { foo => false },
         dependentSchemas => { foo => false }, # this should be ignored
-        additionalProperties => { format => 'date' },
+        additionalProperties => { format => 'ipv6' },
         unevaluatedProperties => false,       # this should be ignored
       },
     )->TO_JSON,
@@ -788,7 +788,7 @@ subtest 'changing schema semantics within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2020-12-4.com#/additionalProperties/format',
-          error => 'not a time',
+          error => 'not an ipv4',
         },
         {
           instanceLocation => '',
@@ -818,7 +818,7 @@ subtest 'changing schema semantics within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7-4.com#/additionalProperties/format',
-          error => 'not a date',
+          error => 'not an ipv6',
         },
         {
           instanceLocation => '',
