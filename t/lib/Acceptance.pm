@@ -34,7 +34,8 @@ sub acceptance_tests {
     verbose => 1,
     test_schemas => -d '.git' || $ENV{AUTHOR_TESTING},
     %{$options{acceptance}},
-    $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR}) : (),
+    $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR})
+      : $ENV{TEST_PREFIXDIR} ? (test_dir => path($ENV{TEST_PREFIXDIR}, 'tests', $options{acceptance}{specification})) : (),
   );
   $accepter = $accepter->new(%$accepter,
       test_dir => $accepter->test_dir->child($options{acceptance}{test_subdir}))
