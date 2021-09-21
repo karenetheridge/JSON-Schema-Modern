@@ -4,7 +4,7 @@ package JSON::Schema::Modern::Utilities;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Internal utilities for JSON::Schema::Modern
 
-our $VERSION = '0.519';
+our $VERSION = '0.520';
 
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
