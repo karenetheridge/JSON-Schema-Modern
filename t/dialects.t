@@ -9,6 +9,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use Test::Warnings qw(warnings :no_end_test had_no_warnings);
 use Test::Deep;
+use Test::Fatal;
 use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
@@ -1211,6 +1212,118 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       ],
     },
     'determined vocabularies to use for this schema',
+  );
+};
+
+subtest 'custom vocabulary classes with add_vocabulary()' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  like(
+    exception { $js->add_vocabulary('MyVocabulary::Does::Not::Exist') },
+    qr!an't locate MyVocabulary/Does/Not/Exist.pm in \@INC!,
+    'vocabulary class must exist',
+  );
+
+  like(
+    exception { $js->add_vocabulary('MyVocabulary::MissingRole') },
+    qr/Value "MyVocabulary::MissingRole" did not pass type constraint/,
+    'vocabulary class must implement the role',
+  );
+
+  like(
+    exception { $js->add_vocabulary('MyVocabulary::MissingSub') },
+    qr/Can't apply JSON::Schema::Modern::Vocabulary to MyVocabulary::MissingSub - missing vocabulary, keywords/,
+    'vocabulary class must implement some subs',
+  );
+
+  cmp_deeply(
+    [ warnings {
+      like(
+        exception { $js->add_vocabulary('MyVocabulary::BadVocabularySub1') },
+        qr/Undef did not pass type constraint/,
+        'vocabulary() sub in the vocabulary class must return uri => specification_version pairs',
+      )
+    } ],
+    [ re(qr/Odd number of elements in pairs/) ],
+    'parse error from bad vocab sub',
+  );
+
+  like(
+    exception { $js->add_vocabulary('MyVocabulary::BadVocabularySub2') },
+    qr!Value "https://some/uri#/invalid/uri" did not pass type constraint!,
+    'vocabulary() sub in the vocabulary class must contain valid absolute, fragmentless URIs',
+  );
+
+  like(
+    exception { $js->add_vocabulary('MyVocabulary::BadVocabularySub3') },
+    qr/Value "wrongdraft" did not pass type constraint/,
+    'vocabulary() sub in the vocabulary class must reference a known specification version',
+  );
+
+
+  is(
+    exception { $js->add_vocabulary('MyVocabulary::BadEvaluationOrder') },
+    undef,
+    'added a vocabulary sub',
+  );
+
+  cmp_deeply(
+    $js->{_vocabulary_classes},
+    superhashof({ 'https://vocabulary/with/bad/evaluation/order' => [ 'draft2020-12', 'MyVocabulary::BadEvaluationOrder' ] }),
+    'vocabulary was successfully added',
+  );
+
+  like(
+    exception {
+      $js->add_schema({
+        '$id' => 'https://my/first/metaschema',
+        '$vocabulary' => {
+          'https://json-schema.org/draft/2020-12/vocab/core' => true,
+          'https://json-schema.org/draft/2020-12/vocab/validation' => true,
+          'https://vocabulary/with/bad/evaluation/order' => true,
+        },
+      })
+    },
+    qr!/\$vocabulary: JSON::Schema::Modern::Vocabulary::Validation and MyVocabulary::BadEvaluationOrder have a conflicting evaluation_order!,
+    'custom vocabulary class has a conflicting evaluation_order',
+  );
+
+
+  is(
+    exception { $js->add_vocabulary('MyVocabulary::StringComparison') },
+    undef,
+    'added another vocabulary sub',
+  );
+
+  $js->add_schema({
+    '$id' => 'https://my/first/working/metaschema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://vocabulary/string/comparison' => true,
+    },
+  });
+
+  cmp_deeply(
+    $js->evaluate(
+      'bloop',
+      {
+        '$id' => 'https://my/first/schema/with/custom/metaschema',
+        '$schema' => 'https://my/first/working/metaschema',
+        stringLessThan => 'alpha',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/stringLessThan',
+          absoluteKeywordLocation => 'https://my/first/schema/with/custom/metaschema#/stringLessThan',
+          error => 'value is not stringwise less than alpha',
+        },
+      ],
+    },
+    'custom vocabulary class used by a custom metaschema used by a schema',
   );
 };
 

@@ -2,6 +2,8 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - support arbitrary metaschemas in the "$schema" keyword
+          - support custom vocabulary classes, for use in metaschemas that use
+            the "$vocabulary" keyword
 
 0.519     2021-09-21 03:56:13Z
           - fix tests that were relying on an optional prereq

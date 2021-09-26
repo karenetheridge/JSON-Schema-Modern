@@ -333,9 +333,13 @@ sub _traverse_keyword_vocabulary {
   $valid = E($state, 'metaschemas must have an $id')
     if not length $state->{initial_schema_uri};
 
-  return if not $valid;
+  @vocabulary_classes = sort {
+    $a->evaluation_order <=> $b->evaluation_order
+    || ($a->evaluation_order == 999 ? 0
+      : ($valid = E($state, '%s and %s have a conflicting evaluation_order', sort $a, $b)))
+  } @vocabulary_classes;
 
-  @vocabulary_classes = sort { $a->evaluation_order <=> $b->evaluation_order } @vocabulary_classes;
+  return if not $valid;
 
   # we cannot return an error here, because the vocabulary schemas themselves don't list Core
   return 1 if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';

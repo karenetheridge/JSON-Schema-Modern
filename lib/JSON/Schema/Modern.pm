@@ -341,6 +341,8 @@ sub evaluate {
   );
 }
 
+# sub add_vocabulary { ... } # defined lower down...
+
 sub get {
   croak 'insufficient arguments' if @_ < 2;
   my ($self, $uri) = @_;
@@ -576,6 +578,7 @@ has _vocabulary_classes => (
   handles_via => 'Hash',
   handles => {
     _get_vocabulary_class => 'get',
+    _set_vocabulary_class => 'set',
   },
   lazy => 1,
   default => sub {
@@ -586,6 +589,20 @@ has _vocabulary_classes => (
     }
   },
 );
+
+sub add_vocabulary {
+  my ($self, $classname) = @_;
+
+  $vocabulary_class_type->(use_module($classname));
+
+  # uri => version, uri => version
+  foreach my $pair (pairs $classname->vocabulary) {
+    my ($uri_string, $spec_version) = @$pair;
+    Str->where(q{my $uri = Mojo::URL->new($_); $uri->is_abs && !defined $uri->fragment})->($uri_string);
+    $spec_version_type->($spec_version);
+    $self->_set_vocabulary_class($uri_string => [ $spec_version, $classname ])
+  }
+}
 
 # $schema uri => [ spec_version, [ vocab classes ] ].
 has _metaschema_vocabulary_classes => (
@@ -940,6 +957,18 @@ as needed.
 Returns C<undef> if the resource could not be found;
 if there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
+
+=head2 add_vocabulary
+
+  $js->add_vocabulary('My::Custom::Vocabulary::Class');
+
+Makes a custom vocabulary class available to metaschemas that make use of this vocabulary.
+as described in the specification at
+L<"Meta-Schemas and Vocabularies"|https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1>.
+
+The class must compose the L<JSON::Schema::Modern::Vocabulary> role and implement the
+L<vocabulary|JSON::Schema::Modern::Vocabulary/vocabulary> and
+L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods.
 
 =head2 get
 
