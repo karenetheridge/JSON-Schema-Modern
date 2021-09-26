@@ -1102,5 +1102,117 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
   );
 };
 
+subtest 'custom metaschemas, with custom vocabularies' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://unknown/metaschema' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => 'EXCEPTION: unable to find resource https://unknown/metaschema',
+        },
+      ],
+    },
+    'custom metaschemas are okay, but the document must be known',
+  );
+
+  $js->add_schema({ '$id' => 'https://not/a/metaschema' }); # no $vocabulary keyword
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://not/a/metaschema' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => 'https://not/a/metaschema is not a recognized metaschema',
+        },
+      ],
+    },
+    'metaschemas must contain a (valid) $vocabulary keyword',
+  );
+
+  #- metaschema_vocabulary_classes is missing Core first
+  $js->add_schema({
+    '$id' => 'https://metaschema/missing/vocabs',
+    '$vocabulary' => {},
+  });
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://metaschema/missing/vocabs' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => 'https://metaschema/missing/vocabs is not a recognized metaschema',
+        },
+      ],
+    },
+    'metaschemas must contain vocabularies',
+  );
+
+  $js->add_schema({
+    '$id' => 'https://metaschema/missing/core',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
+    },
+  });
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://metaschema/missing/core' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => 'https://metaschema/missing/core is not a recognized metaschema',
+        },
+      ],
+    },
+    'metaschemas must contain the Core vocabulary',
+  );
+
+
+  $js->add_schema({
+    '$id' => 'https://my/first/metaschema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      # note: no validation!
+    },
+  });
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => my $id = 'https://my/first/schema/with/custom/metaschema',
+        '$schema' => 'https://my/first/metaschema',
+        minimum => 10,
+      },
+    )->TO_JSON,
+    { valid => true },
+    'validation succeeds because "minimum" never gets run',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{$id},
+    {
+      canonical_uri => str($id),
+      path => '',
+      specification_version => 'draft2020-12',
+      document => ignore,
+      vocabularies => [
+        map 'JSON::Schema::Modern::Vocabulary::'.$_,
+          qw(Core Applicator),
+      ],
+    },
+    'determined vocabularies to use for this schema',
+  );
+};
+
 had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;

@@ -22,26 +22,6 @@ use Helper;
   );
 }
 
-subtest '$schema' => sub {
-  cmp_deeply(
-    JSON::Schema::Modern->new->evaluate(
-      true,
-      { '$schema' => 'http://wrong/url' },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/$schema',
-          error => re(qr/^custom \$schema URIs are not yet supported \(must be one of: /),
-        },
-      ],
-    },
-    '$schema, when set, must contain a recognizable URI',
-  );
-};
-
 subtest '$ref and older specification versions' => sub {
   cmp_deeply(
     JSON::Schema::Modern->new->evaluate(

@@ -9,12 +9,16 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use JSON::Schema::Modern;
+use List::Util 'unpairs';
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 
 use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
 
 use lib 't/lib';
 use Helper;
+
+# spec version -> vocab classes
+my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabulary_classes);
 
 subtest 'load cached metaschema' => sub {
   my $js = JSON::Schema::Modern->new;
@@ -31,7 +35,7 @@ subtest 'load cached metaschema' => sub {
       canonical_uri => str(METASCHEMA),
       path => '',
       specification_version => 'draft2019-09',
-      vocabularies => [ $js->_vocabularies_by_spec_version('draft2019-09') ],
+      vocabularies => $vocabularies{'draft2019-09'},
       document => all(
         isa('JSON::Schema::Modern::Document'),
         methods(

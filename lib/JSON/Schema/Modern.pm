@@ -587,12 +587,33 @@ has _vocabulary_classes => (
   },
 );
 
-sub _vocabularies_by_spec_version {
-  my ($self, $spec_version) = @_;
-  return map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
-    qw(Core Applicator Validation FormatAnnotation Content MetaData),
-    $spec_version eq 'draft2020-12' ? 'Unevaluated' : ();
-}
+# $schema uri => [ spec_version, [ vocab classes ] ].
+has _metaschema_vocabulary_classes => (
+  is => 'bare',
+  isa => HashRef[
+    Tuple[
+      $spec_version_type,
+      ArrayRef[$vocabulary_class_type],
+    ]
+  ],
+  handles_via => 'Hash',
+  handles => {
+    _get_metaschema_vocabulary_classes => 'get',
+    _set_metaschema_vocabulary_classes => 'set',
+    __all_metaschema_vocabulary_classes => 'values',
+  },
+  lazy => 1,
+  default => sub {
+    my @modules = map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
+      qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated);
+    +{
+      'https://json-schema.org/draft/2020-12/schema' => [ 'draft2020-12', [ @modules ] ],
+      do { pop @modules; () },
+      'https://json-schema.org/draft/2019-09/schema' => [ 'draft2019-09', \@modules ],
+      'http://json-schema.org/draft-07/schema#' => [ 'draft7', \@modules ],
+    },
+  },
+);
 
 # used for determining a default '$schema' keyword where there is none
 use constant METASCHEMA_URIS => {
@@ -990,8 +1011,6 @@ To date, missing features (some of which are optional, but still quite useful) i
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
 * additional output formats beyond C<flag>, C<basic>, and C<terse>
   (L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.12>)
-* examination of the C<$schema> keyword for deviation from the standard draft metaschemas, including
-  changes to vocabulary behaviour
 
 =head1 SECURITY CONSIDERATIONS
 

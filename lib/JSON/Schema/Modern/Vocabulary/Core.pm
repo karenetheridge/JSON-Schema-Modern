@@ -38,14 +38,6 @@ sub keywords {
   );
 }
 
-# supported metaschema URIs. is a subset of JSON::Schema::Modern::CACHED_METASCHEMAS
-# and an inversion of JSON::Schema::Modern::METASCHEMA_URIS
-my %version_uris = (
-  'https://json-schema.org/draft/2020-12/schema'  => 'draft2020-12',
-  'https://json-schema.org/draft/2019-09/schema'  => 'draft2019-09',
-  'http://json-schema.org/draft-07/schema#'       => 'draft7',
-);
-
 # adds the following keys to $state during traversal:
 # - identifiers: an arrayref of tuples:
 #   $uri => { path => $path_to_identifier, canonical_uri => Mojo::URL (absolute when possible) }
@@ -120,34 +112,39 @@ sub _traverse_keyword_schema {
   return E($state, '$schema can only appear at the schema resource root')
     if length($state->{schema_path});
 
-  my $spec_version = $version_uris{$schema->{'$schema'}};
-  return E($state, 'custom $schema URIs are not yet supported (must be one of: %s',
-      join(', ', map '"'.$_.'"', sort keys %version_uris))
-    if not $spec_version;
+  my ($spec_version, $vocabularies);
+
+  if (my $metaschema_info = $state->{evaluator}->_get_metaschema_vocabulary_classes($schema->{'$schema'})) {
+    ($spec_version, $vocabularies) = @$metaschema_info;
+  }
+  else {
+    my $schema_info = $state->{evaluator}->_fetch_from_uri($schema->{'$schema'});
+    abort($state, 'EXCEPTION: unable to find resource %s', $schema->{'$schema'}) if not $schema_info;
+    $spec_version = $schema_info->{specification_version};
+    $vocabularies = $schema_info->{document}->metaschema_vocabulary_classes
+      or return E($state, '%s is not a recognized metaschema', $schema->{'$schema'});
+
+    # error if vocab list doesn't have Core first
+    return E($state, 'first vocabulary must be Core')
+      if ($vocabularies->[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
+
+    $state->{evaluator}->_set_metaschema_vocabulary_classes($schema->{'$schema'}, [ $spec_version, $vocabularies ]);
+  }
 
   # we special-case this because the check in _eval_subschema for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
-  $state->{spec_version} = $spec_version;
-  $state->{vocabularies} = [ $state->{evaluator}->_vocabularies_by_spec_version($spec_version) ];
+  @{$state}{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
 
   # remember, if we don't have a sibling $id, we must be at the document root with no identifiers
   if (@{$state->{identifiers}}) {
-    $state->{identifiers}[-1]{specification_version} = $spec_version;
+    $state->{identifiers}[-1]{specification_version} = $state->{spec_version};
     $state->{identifiers}[-1]{vocabularies} = $state->{vocabularies};
   }
 
   return 1;
 }
-
-# In the future, at traversal time we will fetch the schema at the value of this keyword and examine
-# its $vocabulary keyword to determine which dialect shall be in effect when considering this
-# schema, then storing that dialect instance in $state.
-# If no $schema is provided at the top level, we will use the default dialect defined by the
-# specification metaschema (all six vocabularies).
-# At evaluation time we simply swap out the dialect instance in $state (but it still can't change
-# specification versions).
 
 sub _traverse_keyword_anchor {
   my ($self, $schema, $state) = @_;

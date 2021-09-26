@@ -291,4 +291,70 @@ subtest 'toggle validate_formats after adding schema' => sub {
   );
 };
 
+subtest 'custom metaschemas' => sub {
+  my $js = JSON::Schema::Modern->new;
+  $js->add_schema({
+    '$id' => 'https://metaschema/format-assertion/false',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/format-assertion' => false,
+    },
+  });
+  $js->add_schema({
+    '$id' => 'https://metaschema/format-assertion/true',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/format-assertion' => true,
+    },
+  });
+
+  cmp_deeply(
+    $js->evaluate(
+      'not-an-ip',
+      {
+        '$id' => 'https://schema/ipv4/false',
+        '$schema' => 'https://metaschema/format-assertion/false',
+        type => 'string',
+        format => 'ipv4',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          absoluteKeywordLocation => 'https://schema/ipv4/false#/format',
+          error => 'not an ipv4',
+        },
+      ],
+    },
+    'custom metaschema using format-assertion=true validates formats',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      'not-an-ip',
+      {
+        '$id' => 'https://schema/ipv4/true',
+        '$schema' => 'https://metaschema/format-assertion/true',
+        type => 'string',
+        format => 'ipv4',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          absoluteKeywordLocation => 'https://schema/ipv4/true#/format',
+          error => 'not an ipv4',
+        },
+      ],
+    },
+    'custom metaschema using format-assertion=true validates formats',
+  );
+};
+
 done_testing;
