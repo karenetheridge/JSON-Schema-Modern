@@ -850,6 +850,8 @@ subtest 'changing schema semantics within documents' => sub {
   );
 };
 
+undef $js;
+
 subtest '$vocabulary' => sub {
   cmp_deeply(
     JSON::Schema::Modern->new->evaluate(
