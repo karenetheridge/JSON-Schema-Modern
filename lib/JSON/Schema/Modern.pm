@@ -969,7 +969,6 @@ To date, missing features (some of which are optional, but still quite useful) i
   (L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.12>)
 * examination of the C<$schema> keyword for deviation from the standard draft metaschemas, including
   changes to vocabulary behaviour
-* changing the draft specification version semantics after construction time
 
 =head1 SECURITY CONSIDERATIONS
 
