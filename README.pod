@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.519
+version 0.520
 
 =head1 SYNOPSIS
 
@@ -229,6 +229,18 @@ Returns C<undef> if the resource could not be found;
 if there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
 
+=head2 add_vocabulary
+
+  $js->add_vocabulary('My::Custom::Vocabulary::Class');
+
+Makes a custom vocabulary class available to metaschemas that make use of this vocabulary.
+as described in the specification at
+L<"Meta-Schemas and Vocabularies"|https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1>.
+
+The class must compose the L<JSON::Schema::Modern::Vocabulary> role and implement the
+L<vocabulary|JSON::Schema::Modern::Vocabulary/vocabulary> and
+L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods.
+
 =head2 get
 
   my $schema = $js->get($uri);
@@ -377,14 +389,6 @@ loading schema documents from a local web application (e.g. L<Mojolicious>)
 =item *
 
 additional output formats beyond C<flag>, C<basic>, and C<terse> (L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.12>)
-
-=item *
-
-examination of the C<$schema> keyword for deviation from the standard draft metaschemas, including changes to vocabulary behaviour
-
-=item *
-
-changing the draft specification version semantics after construction time
 
 =back
 

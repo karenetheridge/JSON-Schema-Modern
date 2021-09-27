@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.520     2021-09-27 05:56:11Z
           - support arbitrary metaschemas in the "$schema" keyword
           - support custom vocabulary classes, for use in metaschemas that use
             the "$vocabulary" keyword
