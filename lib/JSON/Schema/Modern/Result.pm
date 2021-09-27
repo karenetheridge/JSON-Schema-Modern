@@ -105,8 +105,8 @@ sub format {
             and ($keyword ne 'dependentRequired' or $error ne 'not all dependencies are satisfied')
         );
 
-        if ($keep and $keyword and $keyword =~ /^unevaluated(?:Items|Properties)$/
-            and $error !~ /"$keyword" keyword present, but/) {
+      if ($keep and $keyword and $keyword =~ /^unevaluated(?:Items|Properties)$/) {
+        if ($error !~ /"$keyword" keyword present, but/) {
           my $parent_keyword_location = join('/', head(-1, split('/', $_->keyword_location)));
           my $parent_instance_location = join('/', head(-1, split('/', $_->instance_location)));
 
@@ -117,6 +117,7 @@ sub format {
             and not grep m/^$parent_keyword_location/, keys %keyword_locations
           );
         }
+      }
 
       ++$instance_locations{$_->instance_location} if $keep;
       ++$keyword_locations{$_->keyword_location} if $keep;
