@@ -204,7 +204,7 @@ subtest 'add a uri resource' => sub {
       isa('JSON::Schema::Modern::Document'),
       listmethods(
         resource_index => [
-          METASCHEMA() => {
+          (METASCHEMA) => {
             path => '',
             canonical_uri => str(METASCHEMA),
             specification_version => 'draft2019-09',
