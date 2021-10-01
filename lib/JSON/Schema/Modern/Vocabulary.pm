@@ -91,8 +91,6 @@ __END__
 This package is the role which all all vocabulary classes for L<JSON::Schema::Modern>
 must compose, describing the basic structure expected of a vocabulary class.
 
-User-defined custom vocabularies are not supported at this time.
-
 =head1 ATTRIBUTES
 
 =head1 METHODS
