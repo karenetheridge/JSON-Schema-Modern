@@ -101,13 +101,6 @@ has evaluation_configs => (
   default => sub { {} },
 );
 
-# if this document is used as a metaschema, these are the vocabularies used in the metaschema
-has metaschema_vocabulary_classes => (
-  is => 'ro',
-  isa => ArrayRef[$vocabulary_class_type],
-  writer => '_set_metaschema_vocabulary_classes',
-);
-
 around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
@@ -183,9 +176,6 @@ sub BUILD {
 
   # overlay the resulting configs with those that were provided by the caller
   $self->_set_evaluation_configs(+{ %{$state->{configs}}, %{$self->evaluation_configs} });
-
-  $self->_set_metaschema_vocabulary_classes($state->{metaschema_vocabulary_classes})
-    if $state->{metaschema_vocabulary_classes};
 }
 
 1;
@@ -258,14 +248,6 @@ evaluation of this document. See the third parameter of L<JSON::Schema::Modern/e
 This should never need to be set explicitly. This is sometimes populated automatically after
 creating a document object, depending on the keywords found in the schema, but they will never
 override anything you have already explicitly set.
-
-=head2 metaschema_vocabulary_classes
-
-=for stopwords metaschema
-
-A hashref of classnames that correspond to the vocabularies that should be used when this schema
-document is used as a metaschema for another schema (i.e. in that schema's C<$schema> keyword).
-Derived during construction of the document.
 
 =head1 METHODS
 

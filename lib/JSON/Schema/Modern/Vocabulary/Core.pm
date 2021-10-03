@@ -11,7 +11,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use strictures 2;
-use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference assert_uri);
+use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference assert_uri jsonp);
 use Moo;
 use namespace::clean;
 
@@ -120,16 +120,14 @@ sub _traverse_keyword_schema {
   else {
     my $schema_info = $state->{evaluator}->_fetch_from_uri($schema->{'$schema'});
     abort($state, 'EXCEPTION: unable to find resource %s', $schema->{'$schema'}) if not $schema_info;
-    $spec_version = $schema_info->{specification_version};
-    $vocabularies = $schema_info->{document}->metaschema_vocabulary_classes
-      or return E($state, '%s is not a recognized metaschema', $schema->{'$schema'});
 
-    # error if vocab list doesn't have Core first
-    return E($state, 'first vocabulary must be Core')
-      if ($vocabularies->[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
-
-    $state->{evaluator}->_set_metaschema_vocabulary_classes($schema->{'$schema'}, [ $spec_version, $vocabularies ]);
+    ($spec_version, $vocabularies) = $self->__fetch_vocabulary_data({ %$state,
+        keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
+        traversed_schema_path => jsonp($state->{schema_path}, '$schema'),
+      }, $schema_info);
   }
+
+  return E($state, '"%s" is not a valid metaschema', $schema->{'$schema'}) if not @$vocabularies;
 
   # we special-case this because the check in _eval_subschema for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
@@ -315,37 +313,20 @@ sub _traverse_keyword_vocabulary {
   foreach my $uri (sort keys %{$schema->{'$vocabulary'}}) {
     $valid = 0, next if not assert_keyword_type({ %$state, _schema_path_suffix => $uri }, $schema, 'boolean');
     $valid = 0, next if not assert_uri({ %$state, _schema_path_suffix => $uri }, $schema, $uri);
-
-    my $class_info = $state->{evaluator}->_get_vocabulary_class($uri);
-    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
-      if $schema->{'$vocabulary'}{$uri} and not $class_info;
-
-    next if not $class_info;  # vocabulary is not known, but marked as false in the metaschema
-
-    my ($spec_version, $class) = @$class_info;
-    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" uses %s, but the metaschema itself uses %s',
-        $uri, $spec_version, $state->{spec_version}), next
-      if $spec_version ne $state->{spec_version};
-
-    push @vocabulary_classes, $class;
   }
 
   $valid = E($state, 'metaschemas must have an $id')
     if not length $state->{initial_schema_uri};
 
-  @vocabulary_classes = sort {
-    $a->evaluation_order <=> $b->evaluation_order
-    || ($a->evaluation_order == 999 ? 0
-      : ($valid = E($state, '%s and %s have a conflicting evaluation_order', sort $a, $b)))
-  } @vocabulary_classes;
+  # we cannot return an error here for invalid or incomplete vocabulary lists, because
+  # - the specification vocabulary schemas themselves don't list Core,
+  # - it is possible for a metaschema to $ref to another metaschema that uses an unrecognized
+  #   vocabulary uri while still validating those vocabulary keywords (e.g.
+  #   https://spec.openapis.org/oas/3.1/schema-base/2021-05-20)
+  # Instead, we will verify these constraints when we actually use the metaschema, in
+  # _traverse_keyword_schema -> __fetch_vocabulary_data
 
-  return if not $valid;
-
-  # we cannot return an error here, because the vocabulary schemas themselves don't list Core
-  return 1 if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
-
-  $state->{metaschema_vocabulary_classes} = \@vocabulary_classes;
-  return 1;
+  return $valid;
 }
 
 # we do nothing with $vocabulary yet at evaluation time. When we know we are in a metaschema,
@@ -366,6 +347,49 @@ sub _traverse_keyword_defs { shift->traverse_object_schemas(@_) }
 
 # we do nothing directly with $defs at evaluation time, including not collecting its value for
 # annotations.
+
+
+# translate vocabulary URIs into classes, caching the results (if any)
+sub __fetch_vocabulary_data {
+  my ($self, $state, $schema_info) = @_;
+
+  if (not exists $schema_info->{schema}{'$vocabulary'}) {
+    my $metaschema_uri = $state->{evaluator}->METASCHEMA_URIS->{$schema_info->{specification_version}};
+    return @{$state->{evaluator}->_get_metaschema_vocabulary_classes($metaschema_uri)};
+  }
+
+  my $valid = 1;
+  my @vocabulary_classes;
+
+  foreach my $uri (sort keys %{$schema_info->{schema}{'$vocabulary'}}) {
+    my $class_info = $state->{evaluator}->_get_vocabulary_class($uri);
+    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
+      if $schema_info->{schema}{'$vocabulary'}{$uri} and not $class_info;
+
+    next if not $class_info;  # vocabulary is not known, but marked as false in the metaschema
+
+    my ($spec_version, $class) = @$class_info;
+    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" uses %s, but the metaschema itself uses %s',
+        $uri, $spec_version, $schema_info->{specification_version}), next
+      if $spec_version ne $schema_info->{specification_version};
+
+    push @vocabulary_classes, $class;
+  }
+
+  @vocabulary_classes = sort {
+    $a->evaluation_order <=> $b->evaluation_order
+    || ($a->evaluation_order == 999 ? 0
+      : ($valid = E($state, '%s and %s have a conflicting evaluation_order', sort $a, $b)))
+  } @vocabulary_classes;
+
+  $valid = E($state, 'the first vocabulary (by evaluation_order) must be Core')
+    if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
+
+  $state->{evaluator}->_set_metaschema_vocabulary_classes($schema_info->{canonical_uri},
+    [ $schema_info->{specification_version}, \@vocabulary_classes ]) if $valid;
+
+  return ($schema_info->{specification_version}, $valid ? \@vocabulary_classes : []);
+}
 
 1;
 __END__

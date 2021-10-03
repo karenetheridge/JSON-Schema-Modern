@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix issues when referencing a schema in a metaschema:
+            whose vocabulary is not known, but its keywords can still be
+            validated, or which does not use the $vocabulary keyword at all
 
 0.520     2021-09-27 05:56:11Z
           - support arbitrary metaschemas in the "$schema" keyword

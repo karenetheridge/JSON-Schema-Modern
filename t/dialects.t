@@ -864,8 +864,8 @@ subtest '$vocabulary' => sub {
           'https://foo' => 1,
           'https://json-schema.org/draft/2019-09/vocab/validation' => true,
           'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
-          'https://unknown' => true,
-          'https://unknown2' => false,
+          'https://unknown' => true,    # ignored.. for now
+          'https://unknown2' => false,  # ""
         },
       },
     )->TO_JSON,
@@ -881,16 +881,6 @@ subtest '$vocabulary' => sub {
           instanceLocation => '',
           keywordLocation => '/$vocabulary/https:~1~1foo',
           error => '$vocabulary value is not a boolean',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/$vocabulary/https:~1~1json-schema.org~1draft~12019-09~1vocab~1validation',
-          error => '"https://json-schema.org/draft/2019-09/vocab/validation" uses draft2019-09, but the metaschema itself uses draft2020-12',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/$vocabulary/https:~1~1unknown',
-          error => '"https://unknown" is not a known vocabulary',
         },
         {
           instanceLocation => '',
@@ -980,13 +970,18 @@ subtest '$vocabulary' => sub {
     'metaschemas are not saved on the resource',
   );
 
+  ok($js->evaluate(1, { '$schema' => 'http://mymetaschema' }), '..but once we use the schema as a metaschema,');
+
   cmp_deeply(
-    $js->{_resource_index}{'http://mymetaschema'}{document}{metaschema_vocabulary_classes},
+    $js->{_metaschema_vocabulary_classes}{'http://mymetaschema'},
     [
-      'JSON::Schema::Modern::Vocabulary::Core',
-      'JSON::Schema::Modern::Vocabulary::Applicator',
+      'draft2020-12',
+      [
+        'JSON::Schema::Modern::Vocabulary::Core',
+        'JSON::Schema::Modern::Vocabulary::Applicator',
+      ],
     ],
-    '... but rather on the document itself',
+    '... the vocabulary information is now cached in the evaluator',
   );
 };
 
@@ -1101,6 +1096,27 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
     { valid => true },
     'objects are acceptable schemas to this metaschema',
   );
+
+  cmp_deeply(
+    $js->evaluate(
+      1,
+      {
+        '$id' => 'https://localhost:1234/my-schema',
+        '$schema' => 'http://localhost:1234/my-meta-schema',
+      },
+    )->TO_JSON,
+    { valid => true },
+    'metaschemas without $vocabulary can still be used in the $schema keyword',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{'https://localhost:1234/my-schema'},
+    superhashof({
+      specification_version => 'draft2019-09',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    '..and schema uses the correct spec version and vocabularies',
+  );
 };
 
 subtest 'custom metaschemas, with custom vocabularies' => sub {
@@ -1121,23 +1137,43 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
     'custom metaschemas are okay, but the document must be known',
   );
 
-  $js->add_schema({ '$id' => 'https://not/a/metaschema' }); # no $vocabulary keyword
+  $js->add_schema({
+    '$id' => 'https://metaschema/with/wrong/spec',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2019-09/vocab/validation' => true,
+      'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
+      'https://unknown' => true,
+      'https://unknown2' => false,
+    },
+  });
   cmp_deeply(
-    $js->evaluate(1, { '$schema' => 'https://not/a/metaschema' })->TO_JSON,
+    $js->evaluate(1, { '$schema' => 'https://metaschema/with/wrong/spec' })->TO_JSON,
     {
       valid => false,
       errors => [
         {
           instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary/https:~1~1json-schema.org~1draft~12019-09~1vocab~1validation',
+          absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#/$vocabulary/https:~1~1json-schema.org~1draft~12019-09~1vocab~1validation',
+          error => '"https://json-schema.org/draft/2019-09/vocab/validation" uses draft2019-09, but the metaschema itself uses draft2020-12',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary/https:~1~1unknown',
+          absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#/$vocabulary/https:~1~1unknown',
+          error => '"https://unknown" is not a known vocabulary',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/$schema',
-          error => 'https://not/a/metaschema is not a recognized metaschema',
+          error => '"https://metaschema/with/wrong/spec" is not a valid metaschema',
         },
       ],
     },
-    'metaschemas must contain a (valid) $vocabulary keyword',
+    '$vocabulary validation that must be deferred until used as a metaschema',
   );
 
-  #- metaschema_vocabulary_classes is missing Core first
   $js->add_schema({
     '$id' => 'https://metaschema/missing/vocabs',
     '$vocabulary' => {},
@@ -1149,12 +1185,18 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       errors => [
         {
           instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary',
+          absoluteKeywordLocation => 'https://metaschema/missing/vocabs#/$vocabulary',
+          error => 'the first vocabulary (by evaluation_order) must be Core',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/$schema',
-          error => 'https://metaschema/missing/vocabs is not a recognized metaschema',
+          error => '"https://metaschema/missing/vocabs" is not a valid metaschema',
         },
       ],
     },
-    'metaschemas must contain vocabularies',
+    'metaschemas using "$vocabulary" must contain vocabularies',
   );
 
   $js->add_schema({
@@ -1170,8 +1212,14 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       errors => [
         {
           instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary',
+          absoluteKeywordLocation => 'https://metaschema/missing/core#/$vocabulary',
+          error => 'the first vocabulary (by evaluation_order) must be Core',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/$schema',
-          error => 'https://metaschema/missing/core is not a recognized metaschema',
+          error => '"https://metaschema/missing/core" is not a valid metaschema',
         },
       ],
     },
@@ -1273,21 +1321,34 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     'vocabulary was successfully added',
   );
 
-  like(
-    exception {
-      $js->add_schema({
-        '$id' => 'https://my/first/metaschema',
-        '$vocabulary' => {
-          'https://json-schema.org/draft/2020-12/vocab/core' => true,
-          'https://json-schema.org/draft/2020-12/vocab/validation' => true,
-          'https://vocabulary/with/bad/evaluation/order' => true,
-        },
-      })
+  $js->add_schema({
+    '$id' => 'https://my/first/metaschema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/validation' => true,
+      'https://vocabulary/with/bad/evaluation/order' => true,
     },
-    qr!/\$vocabulary: JSON::Schema::Modern::Vocabulary::Validation and MyVocabulary::BadEvaluationOrder have a conflicting evaluation_order!,
+  });
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://my/first/metaschema' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary',
+          absoluteKeywordLocation => 'https://my/first/metaschema#/$vocabulary',
+          error => 'JSON::Schema::Modern::Vocabulary::Validation and MyVocabulary::BadEvaluationOrder have a conflicting evaluation_order',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"https://my/first/metaschema" is not a valid metaschema',
+        },
+      ],
+    },
     'custom vocabulary class has a conflicting evaluation_order',
   );
-
 
   is(
     exception { $js->add_vocabulary('MyVocabulary::StringComparison') },

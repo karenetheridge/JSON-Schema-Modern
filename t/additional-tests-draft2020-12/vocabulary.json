@@ -17,12 +17,26 @@
         ]
     },
     {
-        "description": "invalid $vocabulary: wrong specification version",
+        "description": "invalid $vocabulary (wrong specification version), but not until we evaluate with this metaschema",
         "schema": {
             "$id": "https://mymetaschema2",
             "$vocabulary": {
                 "https://json-schema.org/draft/2019-09/vocab/core": true
             }
+        },
+        "tests": [
+            {
+                "description": "invalid $vocabulary (wrong specification version): register this metaschema",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "use schema (invalid $vocabulary) as a metaschema",
+        "schema": {
+            "$id": "https://mychema2",
+            "$schema": "https://mymetaschema2"
         },
         "tests": [
             {
@@ -33,13 +47,27 @@
         ]
     },
     {
-        "description": "invalid $vocabulary: unknown URI",
+        "description": "invalid $vocabulary (unknown URI), but not until we evaluate with this metaschema",
         "schema": {
             "$id": "https://mymetaschema3",
             "$vocabulary": {
                 "https://json-schema.org/draft/2020-12/vocab/core": true,
                 "https://foo.com": true
             }
+        },
+        "tests": [
+            {
+                "description": "invalid $vocabulary (unknown URI): register this metaschema",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "use schema (unknown URI) as a metaschema",
+        "schema": {
+            "$id": "https://myschema3",
+            "$schema": "https://mymetaschema3"
         },
         "tests": [
             {
