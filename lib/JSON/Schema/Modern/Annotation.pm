@@ -4,7 +4,7 @@ package JSON::Schema::Modern::Annotation;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Contains a single annotation from a JSON Schema evaluation
 
-our $VERSION = '0.521';
+our $VERSION = '0.522';
 
 use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
