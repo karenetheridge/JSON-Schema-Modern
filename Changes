@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.521     2021-10-04 05:36:10Z
           - fix issues when referencing a schema in a metaschema:
             whose vocabulary is not known, but its keywords can still be
             validated, or which does not use the $vocabulary keyword at all
