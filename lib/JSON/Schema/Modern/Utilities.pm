@@ -38,6 +38,7 @@ our @EXPORT_OK = qw(
   abort
   assert_keyword_type
   assert_pattern
+  is_uri_reference
   assert_uri_reference
   assert_uri
   annotate_self
@@ -271,13 +272,11 @@ sub assert_pattern {
   return 1;
 }
 
-sub assert_uri_reference {
-  croak 'assert_uri_reference called in void context' if not defined wantarray;
-  my ($state, $schema) = @_;
+sub is_uri_reference {
+  croak 'is_uri_reference called in void context' if not defined wantarray;
+  my $ref = shift;
 
-  my $ref = $schema->{$state->{keyword}};
-
-  return E($state, '%s value is not a valid URI reference', $state->{keyword})
+  return 0
     # see also uri-reference format sub
     if fc(Mojo::URL->new($ref)->to_unsafe_string) ne fc($ref)
       or $ref =~ /[^[:ascii:]]/
@@ -287,6 +286,14 @@ sub assert_uri_reference {
         and $ref !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
 
   return 1;
+}
+
+sub assert_uri_reference {
+  croak 'assert_uri_reference called in void context' if not defined wantarray;
+  my ($state, $schema) = @_;
+
+  return 1 if is_uri_reference($schema->{$state->{keyword}});
+  return E($state, '%s value is not a valid URI reference', $state->{keyword});
 }
 
 sub assert_uri {
@@ -331,6 +338,6 @@ This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
 canonical_schema_uri E A abort assert_keyword_type assert_pattern assert_uri_reference assert_uri
-annotate_self
+annotate_self is_uri_reference
 
 =cut

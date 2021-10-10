@@ -2,6 +2,7 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - some refactoring of vocabulary methods, to faciliate re-use
+          - new utility function: is_uri_reference
 
 0.523     2021-10-24 05:58:27Z
           - fix tests that were relying on an optional prereq
