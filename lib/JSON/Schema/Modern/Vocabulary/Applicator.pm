@@ -282,7 +282,7 @@ sub _traverse_keyword_items {
 
   if (is_plain_arrayref($schema->{items})) {
     return E($state, 'array form of "items" not supported in %s', $state->{spec_version})
-      if $state->{spec_version} !~ /^draft(7|2019-09)$/;
+      if $state->{spec_version} !~ /^draft(?:7|2019-09)$/;
 
     return $self->traverse_array_schemas($schema, $state);
   }
@@ -424,7 +424,7 @@ sub _eval_keyword_contains {
   }
 
   push @{$state->{annotations}}, @new_annotations;
-  return $state->{spec_version} =~ /^draft(7|2019-09)$/ ? 1
+  return $state->{spec_version} =~ /^draft(?:7|2019-09)$/ ? 1
     : A($state, @valid == @$data ? true : \@valid);
 }
 

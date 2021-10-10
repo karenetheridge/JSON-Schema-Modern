@@ -152,7 +152,7 @@ sub _traverse_keyword_anchor {
 
   return E($state, '%s value "%s" does not match required syntax',
       $state->{keyword}, ($state->{keyword} eq '$id' ? '#' : '').$schema->{$state->{keyword}})
-    if $state->{spec_version} =~ /^draft(7|2019-09)$/
+    if $state->{spec_version} =~ /^draft(?:7|2019-09)$/
         and $schema->{$state->{keyword}} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
       or $state->{spec_version} eq 'draft2020-12'
         and $schema->{$state->{keyword}} !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
