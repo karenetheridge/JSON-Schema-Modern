@@ -1024,7 +1024,7 @@ A few optional prerequisites are needed for some of these (if the prerequisite i
 validation will always succeed):
 
 =for :list
-* C<date-time>, C<date>, and C<time> require L<Time::Moment>
+* C<date-time>, C<date>, and C<time> require L<Time::Moment>, L<DateTime::Format::RFC3339>
 * C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
 * C<idn-hostname> requires L<Net::IDN::Encode>

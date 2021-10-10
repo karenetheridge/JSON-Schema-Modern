@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - 'date-time' format now properly handles leap seconds
 
 0.521     2021-10-04 05:36:10Z
           - fix issues when referencing a schema in a metaschema:

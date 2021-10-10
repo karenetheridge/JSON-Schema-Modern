@@ -65,7 +65,15 @@ sub keywords {
   };
 
   my $formats = +{
-    'date-time' => $is_datetime,
+    'date-time' => sub {
+      $is_datetime->($_[0]) || (
+        $_[0] =~ m/^(?:\d{4}-\d\d-\d\dT\d\d:\d\d):(\d\d)(?:\.\d+)?(?:[Zz]|[+-]\d\d:\d\d)$/a
+          && $1 eq '60'
+          && do {
+            +require DateTime::Format::RFC3339;
+            eval { DateTime::Format::RFC3339->parse_datetime($_[0]) };
+          });
+    },
     date => sub { $_[0] =~ /^\d{4}-(\d\d)-(\d\d)$/a && $is_datetime->($_[0].'T00:00:00Z') },
     time => sub {
       return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))$/a
