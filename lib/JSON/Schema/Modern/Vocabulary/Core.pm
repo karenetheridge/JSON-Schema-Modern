@@ -313,7 +313,7 @@ sub _traverse_keyword_vocabulary {
   my @vocabulary_classes;
   foreach my $uri (sort keys %{$schema->{'$vocabulary'}}) {
     $valid = 0, next if not assert_keyword_type({ %$state, _schema_path_suffix => $uri }, $schema, 'boolean');
-    $valid = 0, next if not assert_uri({ %$state, _schema_path_suffix => $uri }, $schema, $uri);
+    $valid = 0, next if not assert_uri({ %$state, _schema_path_suffix => $uri }, undef, $uri);
   }
 
   $valid = E($state, 'metaschemas must have an $id')
