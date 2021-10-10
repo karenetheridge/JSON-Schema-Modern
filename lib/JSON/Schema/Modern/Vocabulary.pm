@@ -12,7 +12,8 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use if "$]" >= 5.022, experimental => 're_strict';
 use strictures 2;
-use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type);
+use Ref::Util 0.100 'is_arrayref';
+use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type abort);
 use Carp ();
 use Moo::Role;
 use namespace::clean;
@@ -76,6 +77,29 @@ sub eval {
   $state->{evaluator}->_eval_subschema($data, $schema, $state);
 }
 
+sub eval_subschema_at_uri {
+  my ($self, $data, $schema, $state, $uri) = @_;
+
+  my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
+  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
+
+  return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
+    +{
+      %{$schema_info->{document}->evaluation_configs},
+      %$state,
+      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}
+        .jsonp('', $state->{keyword}, exists $state->{_schema_path_suffix}
+          ? (is_arrayref($state->{_schema_path_suffix}) ? @{$state->{_schema_path_suffix}} : $state->{_schema_path_suffix})
+          : ()),
+      initial_schema_uri => $schema_info->{canonical_uri},
+      document => $schema_info->{document},
+      document_path => $schema_info->{document_path},
+      spec_version => $schema_info->{specification_version},
+      schema_path => '',
+      vocabularies => $schema_info->{vocabularies}, # reference, not copy
+    });
+}
+
 1;
 __END__
 
@@ -137,5 +161,9 @@ Recursively traverses the subschema under one property of the object at the curr
 =head2 eval
 
 Evaluates a subschema. Callers are expected to establish a new C<$state> scope.
+
+=head2 eval_subschema_at_uri
+
+Resolves a URI to a subschema, then evaluates that subschema (essentially the `$ref` keyword).
 
 =cut

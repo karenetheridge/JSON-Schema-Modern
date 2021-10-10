@@ -211,21 +211,7 @@ sub _eval_keyword_ref {
   my ($self, $data, $schema, $state) = @_;
 
   my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{initial_schema_uri});
-  my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
-  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
-
-  return $self->eval($data, $schema_info->{schema},
-    +{
-      %{$schema_info->{document}->evaluation_configs},
-      %$state,
-      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$ref',
-      initial_schema_uri => $schema_info->{canonical_uri},
-      document => $schema_info->{document},
-      document_path => $schema_info->{document_path},
-      spec_version => $schema_info->{specification_version},
-      schema_path => '',
-      vocabularies => $schema_info->{vocabularies}, # reference, not copy
-    });
+  $self->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
 sub _traverse_keyword_recursiveRef { goto \&_traverse_keyword_ref }
@@ -240,22 +226,9 @@ sub _eval_keyword_recursiveRef {
   if (is_type('boolean', $schema_info->{schema}{'$recursiveAnchor'}) and $schema_info->{schema}{'$recursiveAnchor'}) {
     $uri = Mojo::URL->new($schema->{'$recursiveRef'})
       ->to_abs($state->{recursive_anchor_uri} // $state->{initial_schema_uri});
-    $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
-    abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
   }
 
-  return $self->eval($data, $schema_info->{schema},
-    +{
-      %{$schema_info->{document}->evaluation_configs},
-      %$state,
-      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$recursiveRef',
-      initial_schema_uri => $schema_info->{canonical_uri},
-      document => $schema_info->{document},
-      document_path => $schema_info->{document_path},
-      spec_version => $schema_info->{specification_version},
-      schema_path => '',
-      vocabularies => $schema_info->{vocabularies}, # reference, not copy
-    });
+  return $self->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
 sub _traverse_keyword_dynamicRef { goto \&_traverse_keyword_ref }
@@ -275,28 +248,16 @@ sub _eval_keyword_dynamicRef {
     # schema resource in the dynamic scope that defines an identically named fragment with
     # "$dynamicAnchor".
     foreach my $base_scope (@{$state->{dynamic_scope}}) {
-      $uri = Mojo::URL->new($base_scope)->fragment($anchor);
-      my $dynamic_anchor_subschema_info = $state->{evaluator}->_fetch_from_uri($uri);
+      my $test_uri = Mojo::URL->new($base_scope)->fragment($anchor);
+      my $dynamic_anchor_subschema_info = $state->{evaluator}->_fetch_from_uri($test_uri);
       if (($dynamic_anchor_subschema_info->{schema}->{'$dynamicAnchor'}//'') eq $anchor) {
-        $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
-        abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
+        $uri = $test_uri;
         last;
       }
     }
   }
 
-  return $self->eval($data, $schema_info->{schema},
-    +{
-      %{$schema_info->{document}->evaluation_configs},
-      %$state,
-      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/$dynamicRef',
-      initial_schema_uri => $schema_info->{canonical_uri},
-      document => $schema_info->{document},
-      document_path => $schema_info->{document_path},
-      spec_version => $schema_info->{specification_version},
-      schema_path => '',
-      vocabularies => $schema_info->{vocabularies}, # reference, not copy
-    });
+  return $self->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
 sub _traverse_keyword_vocabulary {
