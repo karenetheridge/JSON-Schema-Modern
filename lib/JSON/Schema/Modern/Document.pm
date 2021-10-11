@@ -152,8 +152,7 @@ sub BUILD {
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
 
   my $original_uri = $self->canonical_uri->clone;
-  my $state = $args->{_evaluator}->traverse($self->schema,
-    { initial_schema_uri => $self->canonical_uri->clone });
+  my $state = $self->traverse($args->{_evaluator});
 
   # if the schema identified a canonical uri for itself, it overrides the initial value
   $self->_set_canonical_uri($state->{initial_schema_uri});
@@ -177,6 +176,13 @@ sub BUILD {
 
   # overlay the resulting configs with those that were provided by the caller
   $self->_set_evaluation_configs(+{ %{$state->{configs}}, %{$self->evaluation_configs} });
+}
+
+sub traverse {
+  my ($self, $evaluator) = @_;
+
+  return $evaluator->traverse($self->schema,
+    { initial_schema_uri => $self->canonical_uri->clone });
 }
 
 1;
@@ -247,7 +253,7 @@ override anything you have already explicitly set.
 
 =head1 METHODS
 
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD traverse
 
 =head2 path_to_canonical_uri
 
