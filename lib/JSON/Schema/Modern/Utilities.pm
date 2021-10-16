@@ -36,6 +36,7 @@ our @EXPORT_OK = qw(
   E
   A
   abort
+  assert_keyword_exists
   assert_keyword_type
   assert_pattern
   is_uri_reference
@@ -249,6 +250,13 @@ sub abort {
   die pop @{$state->{errors}};
 }
 
+sub assert_keyword_exists {
+  croak 'assert_keyword_exists called in void context' if not defined wantarray;
+  my ($state, $schema) = @_;
+  return E($state, '%s keyword is required', $state->{keyword}) if not exists $schema->{$state->{keyword}};
+  return 1;
+}
+
 sub assert_keyword_type {
   croak 'assert_keyword_type called in void context' if not defined wantarray;
   my ($state, $schema, $type) = @_;
@@ -337,7 +345,7 @@ __END__
 This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
-canonical_schema_uri E A abort assert_keyword_type assert_pattern assert_uri_reference assert_uri
+canonical_schema_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
 annotate_self is_uri_reference
 
 =cut
