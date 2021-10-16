@@ -12,9 +12,10 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use if "$]" >= 5.022, experimental => 're_strict';
 use strictures 2;
+use Safe::Isa;
 use Moo;
 use MooX::TypeTiny;
-use Types::Standard qw(Str Undef);
+use Types::Standard qw(Str Undef InstanceOf);
 use namespace::clean;
 
 has [qw(
@@ -29,8 +30,8 @@ has [qw(
 
 has absolute_keyword_location => (
   is => 'ro',
-  isa => Str, # always a uri (absolute uri or uri reference)
-  coerce => sub { "$_[0]" },
+  isa => InstanceOf['Mojo::URL'],
+  coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
 );
 
 has keyword => (
@@ -46,7 +47,7 @@ sub TO_JSON {
     instanceLocation => $self->instance_location,
     keywordLocation => $self->keyword_location,
     !defined($self->absolute_keyword_location) ? ()
-      : ( absoluteKeywordLocation => $self->absolute_keyword_location ),
+      : ( absoluteKeywordLocation => $self->absolute_keyword_location->to_string ),
     error => $self->error,  # TODO: allow localization
   };
 }
