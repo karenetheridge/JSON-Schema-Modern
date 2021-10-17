@@ -155,7 +155,7 @@ sub BUILD {
   my $state = $self->traverse($args->{_evaluator});
 
   # if the schema identified a canonical uri for itself, it overrides the initial value
-  $self->_set_canonical_uri($state->{initial_schema_uri});
+  $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
 
   if (@{$state->{errors}}) {
     $self->_set_errors($state->{errors});
