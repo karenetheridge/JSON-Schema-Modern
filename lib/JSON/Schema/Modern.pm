@@ -791,6 +791,8 @@ version of the specification.
 
 =head1 CONFIGURATION OPTIONS
 
+These values are all passed as arguments to the constructor.
+
 =head2 specification_version
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
