@@ -222,7 +222,7 @@ sub traverse {
     initial_schema_uri => $base_uri,    # the canonical URI as of the start, or last $id
     schema_path => '',                  # the rest of the path, since the last $id
     errors => [],
-    spec_version => $spec_version,      # can change, iff nothing explicitly requested
+    spec_version => $spec_version,
     vocabularies => [ use_module('JSON::Schema::Modern::Vocabulary::Core') ], # will be filled in later
     identifiers => [],
     configs => {},
