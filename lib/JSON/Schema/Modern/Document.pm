@@ -214,11 +214,6 @@ When passed in during construction, this represents the initial URI by which the
 be known. It is overwritten with the root schema's C<$id> property when one exists, and as such
 can be considered the canonical URI for the document as a whole.
 
-=head2 specification_version
-
-Indicates which version of the JSON Schema specification is used during evaluation of this schema
-document. Is normally determined automatically at construction time.
-
 =head2 resource_index
 
 An index of URIs to subschemas (JSON pointer to reach the location, and the canonical URI of that
