@@ -38,6 +38,12 @@ has canonical_uri => (
   clearer => '_clear_canonical_uri',
 );
 
+has metaschema_uri => (
+  is => 'rwp',
+  isa => InstanceOf['Mojo::URL'],
+  coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
+);
+
 # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 has resource_index => (
@@ -182,7 +188,11 @@ sub traverse {
   my ($self, $evaluator) = @_;
 
   return $evaluator->traverse($self->schema,
-    { initial_schema_uri => $self->canonical_uri->clone });
+    {
+      initial_schema_uri => $self->canonical_uri->clone,
+      $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri) : (),
+    }
+  );
 }
 
 1;
@@ -199,6 +209,7 @@ __END__
 
     my $document = JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://example.com/v1/schema',
+      metaschema_uri => 'https://example.com/my/custom/metaschema',
       schema => $schema,
     );
     my $foo_definition = $document->get('/$defs/foo');
@@ -219,6 +230,15 @@ The actual raw data representing the schema.
 When passed in during construction, this represents the initial URI by which the document should
 be known. It is overwritten with the root schema's C<$id> property when one exists, and as such
 can be considered the canonical URI for the document as a whole.
+
+=head2 metaschema_uri
+
+=for stopwords metaschema schemas
+
+Sets the metaschema that is used to describe the document (or more specifically, any JSON Schemas
+contained within the document), which determines the
+specification version and vocabularies used during evaluation. Does not override any
+C<$schema> keyword actually present in the schema document.
 
 =head2 resource_index
 

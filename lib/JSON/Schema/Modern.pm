@@ -16,7 +16,7 @@ use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap);
-use Ref::Util 0.100 qw(is_ref);
+use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
@@ -223,13 +223,29 @@ sub traverse {
     initial_schema_uri => $base_uri,    # the canonical URI as of the start, or last $id
     schema_path => '',                  # the rest of the path, since the last $id
     errors => [],
-    spec_version => $spec_version,
-    vocabularies => $self->_get_metaschema_vocabulary_classes($self->METASCHEMA_URIS->{$spec_version})->[1],
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
   };
+
+  try {
+    my $for_canonical_uri = Mojo::URL->new(
+      (is_plain_hashref($schema_reference) && exists $schema_reference->{'$id'}
+          ? Mojo::URL->new($schema_reference->{'$id'}) : undef)
+        // $state->{initial_schema_uri});
+    $for_canonical_uri->fragment(undef) if not length $for_canonical_uri->fragment;
+
+    # a subsequent "$schema" keyword can still change these values
+    @{$state}{qw(spec_version vocabularies)} = $self->_get_metaschema_info(
+      $config_override->{metaschema_uri} // $self->METASCHEMA_URIS->{$spec_version},
+      $for_canonical_uri,
+    );
+  }
+  catch ($e) {
+    push @{$state->{errors}}, $e->errors;
+    return $state;
+  }
 
   try {
     $self->_traverse_subschema($schema_reference, $state);
@@ -625,6 +641,39 @@ has _metaschema_vocabulary_classes => (
     },
   },
 );
+
+# retrieves metaschema info either from cache or by parsing the schema for vocabularies
+# throws a JSON::Schema::Modern::Result on error
+sub _get_metaschema_info {
+  my ($self, $metaschema_uri, $for_canonical_uri) = @_;
+
+  # check the cache
+  my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
+  return @$metaschema_info if $metaschema_info;
+
+  # otherwise, fetch the metaschema and parse its $vocabulary keyword.
+  # we do this by traversing a baby schema with just the $schema keyword.
+  my $state = $self->traverse({ '$schema' => $metaschema_uri.'' });
+  die JSON::Schema::Modern::Result->new(
+    output_format => $self->output_format,
+    valid => JSON::PP::false,
+    errors => [
+      map {
+        my $e = $_;
+        # absolute location is undef iff the location = '/$schema'
+        my $absolute_location = $e->absolute_keyword_location // $for_canonical_uri;
+        JSON::Schema::Modern::Error->new(
+          keyword => $e->keyword eq '$schema' ? '' : $e->keyword,
+          instance_location => $e->instance_location,
+          keyword_location => ($for_canonical_uri->fragment//'').($e->keyword_location =~ s{^/\$schema\b}{}r),
+          length $absolute_location ? ( absolute_keyword_location => $absolute_location ) : (),
+          error => $e->error,
+        )
+      }
+      @{$state->{errors}} ],
+  ) if @{$state->{errors}};
+  return ($state->{spec_version}, $state->{vocabularies});
+}
 
 # used for determining a default '$schema' keyword where there is none
 use constant METASCHEMA_URIS => {

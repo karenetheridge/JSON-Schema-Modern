@@ -11,6 +11,7 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::Deep::UnorderedPairs;
 use Test::Fatal;
+use Test::Memory::Cycle;
 use JSON::Schema::Modern;
 use List::Util 'unpairs';
 use lib 't/lib';
@@ -611,6 +612,56 @@ subtest 'canonical_uri identification from a document with errors' => sub {
     ),
     'error lower down in document does not result in an inner identifier being used as canonical_uri',
   );
+};
+
+subtest 'custom metaschema_uri' => sub {
+  my $js = JSON::Schema::Modern->new;
+  $js->add_schema({
+    '$id' => 'https://my/first/metaschema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      # note: no validation!
+    },
+  });
+
+  my $doc = $js->add_schema(JSON::Schema::Modern::Document->new(
+    schema => {
+      '$id' => my $id = 'https://my/first/schema/with/custom/metaschema',
+      # note: no $schema keyword!
+      allOf => [ { minimum => 'not even an integer' } ],
+    },
+    metaschema_uri => 'https://my/first/metaschema',
+    _evaluator => $js,  # needed in order to find the metaschema
+  ));
+
+  cmp_deeply(
+    $js->{_resource_index}{$id},
+    {
+      canonical_uri => str($id),
+      path => '',
+      specification_version => 'draft2020-12',
+      document => $doc,
+      vocabularies => [
+        map 'JSON::Schema::Modern::Vocabulary::'.$_,
+          qw(Core Applicator),
+      ],
+    },
+    'determined vocabularies to use for this schema',
+  );
+
+  cmp_deeply(
+    $js->evaluate(1, $id)->TO_JSON,
+    { valid => true },
+    'validation succeeds because "minimum" never gets run',
+  );
+  cmp_deeply(
+    $js->evaluate(1, Mojo::URL->new($id)->fragment('/allOf/0'))->TO_JSON,
+    { valid => true },
+    'can evaluate at a subschema as well, with the same vocabularies',
+  );
+
+  memory_cycle_ok($js, 'no leaks in the evaluator object');
 };
 
 done_testing;
