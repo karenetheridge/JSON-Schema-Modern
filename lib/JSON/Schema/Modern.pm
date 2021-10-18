@@ -16,7 +16,7 @@ use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap);
-use Ref::Util 0.100 qw(is_ref is_hashref);
+use Ref::Util 0.100 qw(is_ref);
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
@@ -224,7 +224,7 @@ sub traverse {
     schema_path => '',                  # the rest of the path, since the last $id
     errors => [],
     spec_version => $spec_version,
-    vocabularies => [ use_module('JSON::Schema::Modern::Vocabulary::Core') ], # will be filled in later
+    vocabularies => $self->_get_metaschema_vocabulary_classes($self->METASCHEMA_URIS->{$spec_version})->[1],
     identifiers => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
@@ -232,16 +232,7 @@ sub traverse {
   };
 
   try {
-    $self->_traverse_subschema(
-      is_hashref($schema_reference) && !(exists $schema_reference->{'$schema'})
-        ? +{
-          # ensure that specification version and vocabularies are properly determined
-          '$schema' => $self->METASCHEMA_URIS->{$spec_version},
-          %$schema_reference,
-        }
-        : $schema_reference,
-      $state,
-    );
+    $self->_traverse_subschema($schema_reference, $state);
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Error')) {
