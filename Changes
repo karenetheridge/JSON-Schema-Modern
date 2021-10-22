@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.522     2021-10-22 22:26:29Z
           - 'date-time' format now properly handles leap seconds
 
 0.521     2021-10-04 05:36:10Z

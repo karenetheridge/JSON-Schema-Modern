@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.521
+version 0.522
 
 =head1 SYNOPSIS
 
@@ -30,6 +30,8 @@ L<Draft 2020-12|https://json-schema.org/specification-links.html#2020-12>
 version of the specification.
 
 =head1 CONFIGURATION OPTIONS
+
+These values are all passed as arguments to the constructor.
 
 =head2 specification_version
 
@@ -350,7 +352,7 @@ validation will always succeed):
 
 =item *
 
-C<date-time>, C<date>, and C<time> require L<Time::Moment>
+C<date-time>, C<date>, and C<time> require L<Time::Moment>, L<DateTime::Format::RFC3339>
 
 =item *
 
@@ -433,7 +435,9 @@ L<https://json-schema.org/draft/2020-12/release-notes.html>
 
 L<https://json-schema.org/draft/2019-09/release-notes.html>
 
-# L<https://json-schema.org/draft-07/json-schema-release-notes.html>
+=item *
+
+L<https://json-schema.org/draft-07/json-schema-release-notes.html>
 
 =item *
 
