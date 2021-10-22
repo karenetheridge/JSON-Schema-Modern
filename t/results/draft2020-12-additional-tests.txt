@@ -1,4 +1,4 @@
-Results using Test::JSON::Schema::Acceptance 1.012
+Results using Test::JSON::Schema::Acceptance 1.013
 specification version: draft2020-12
 using custom test directory: t/additional-tests-draft2020-12
 optional tests included: no
