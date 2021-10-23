@@ -1033,9 +1033,8 @@ validation will always succeed):
 
 =head2 Specification Compliance
 
-Until version 1.000 is released, this implementation is not fully specification-compliant.
-
-To date, missing features (some of which are optional, but still quite useful) include:
+This implementation is now fully specification-compliant, but until version 1.000 is released, it is
+still deemed to be missing some optional but quite useful features, such as:
 
 =for :list
 * loading schema documents from disk
