@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix tests that were relying on an optional prereq
 
 0.522     2021-10-22 22:26:29Z
           - 'date-time' format now properly handles leap seconds
