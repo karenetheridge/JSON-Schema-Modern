@@ -205,8 +205,9 @@ sub evaluate_json_string {
 }
 
 # this is called whenever we need to walk a document for something.
-# for now it is just called when a ::Document object is created, to identify
-# $id and $anchor keywords within.
+# for now it is just called when a ::Document object is created, to verify the integrity of the
+# schema structure, to identify the metaschema (via the $schema keyword), and to extract all
+# embedded resources via $id and $anchor keywords within.
 # Returns the internal $state object accumulated during the traversal.
 sub traverse {
   croak 'insufficient arguments' if @_ < 2;
@@ -255,6 +256,7 @@ sub traverse {
   return $state;
 }
 
+# the actual runtime evaluation of the schema against input data.
 sub evaluate {
   croak 'evaluate called in void context' if not defined wantarray;
   croak 'insufficient arguments' if @_ < 3;
