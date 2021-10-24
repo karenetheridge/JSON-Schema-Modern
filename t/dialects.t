@@ -14,6 +14,7 @@ use Test::Fatal;
 use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 
 my $js = JSON::Schema::Modern->new(short_circuit => 0, validate_formats => 1);
 
