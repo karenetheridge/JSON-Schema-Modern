@@ -10,7 +10,7 @@ use 5.016;
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use experimental 're_strict';
+use if "$]" >= 5.022, 'experimental', 're_strict';
 use strictures 2;
 use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference assert_uri jsonp);
 use Moo;
