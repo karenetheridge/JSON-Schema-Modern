@@ -11,7 +11,7 @@ use 5.016;  # for fc, unicode_strings features
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, 'experimental', 're_strict';
+use if "$]" >= 5.022, experimental => 're_strict';
 use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
