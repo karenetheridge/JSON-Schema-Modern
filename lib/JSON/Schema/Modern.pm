@@ -272,7 +272,7 @@ sub evaluate {
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
   my $state = {
-    data_path => '',
+    data_path => $config_override->{data_path} // '',
     traversed_schema_path => '',        # the accumulated traversal path as of the start, or last $id, or up to the last traversed $ref
     initial_schema_uri => $base_uri,    # the canonical URI as of the start or last $id, or the last traversed $ref
     schema_path => '',                  # the rest of the path, since the last $id or the last traversed $ref
