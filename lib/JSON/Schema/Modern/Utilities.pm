@@ -192,6 +192,14 @@ sub canonical_schema_uri {
 }
 
 # shorthand for creating error objects
+# uses these keys from $state:
+# - initial_schema_uri
+# - keyword
+# - data_path
+# - traversed_schema_path
+# - schema_path
+# - _schema_path_suffix
+# - errors
 sub E {
   croak 'E called in void context' if not defined wantarray;
   my ($state, $error_string, @args) = @_;
@@ -217,6 +225,15 @@ sub E {
 }
 
 # shorthand for creating annotations
+# uses these keys from $state:
+# - initial_schema_uri
+# - keyword
+# - data_path
+# - traversed_schema_path
+# - schema_path
+# - _schema_path_suffix
+# - annotations
+# - collect_annotations
 sub A {
   my ($state, $annotation) = @_;
   return 1 if not $state->{collect_annotations};
