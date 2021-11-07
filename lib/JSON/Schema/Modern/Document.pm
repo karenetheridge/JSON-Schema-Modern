@@ -35,7 +35,6 @@ has canonical_uri => (
   lazy => 1,
   default => sub { Mojo::URL->new },
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
-  clearer => '_clear_canonical_uri',
 );
 
 has metaschema_uri => (
