@@ -1041,9 +1041,12 @@ For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
 =head2 Format Validation
 
-By default, formats are treated only as annotations, not assertions. When L</validate_formats> is
+By default (and unless you specify a custom metaschema with the C<$schema> keyword or
+L<JSON::Schema::Modern::Document/metaschema>),
+formats are treated only as annotations, not assertions. When L</validate_formats> is
 true, strings are also checked against the format as specified in the schema. At present the
-following formats are supported (use of any other formats than these will always evaluate as true):
+following formats are supported (use of any other formats than these will always evaluate as true,
+but remember you can always supply custom format handlers; see L</format_validations> above):
 
 =for :list
 * C<date-time>
