@@ -750,6 +750,8 @@ sub _get_or_load_resource {
 # - the canonical uri for that schema,
 # - the JSON::Schema::Modern::Document object that holds that schema
 # - the path relative to the document root for this schema
+# - the specification version that applies to this schema
+# - the vocabularies to use when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri {
   my ($self, $uri) = @_;
