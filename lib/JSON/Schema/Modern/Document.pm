@@ -15,6 +15,7 @@ use strictures 2;
 use Mojo::URL;
 use Carp 'croak';
 use List::Util 1.29 'pairs';
+use Ref::Util 0.100 'is_plain_hashref';
 use Safe::Isa;
 use Moo;
 use MooX::TypeTiny;
@@ -178,12 +179,29 @@ sub BUILD {
 sub traverse {
   my ($self, $evaluator) = @_;
 
-  return $evaluator->traverse($self->schema,
+  my $state = $evaluator->traverse($self->schema,
     {
       initial_schema_uri => $self->canonical_uri->clone,
       $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri) : (),
     }
   );
+
+  # we don't store the metaschema_uri in $state nor in resource_index, but we can figure it out
+  # easily enough.
+  my $metaschema_uri = (is_plain_hashref($self->schema) ? $self->schema->{'$schema'} : undef)
+    // $self->metaschema_uri // $evaluator->METASCHEMA_URIS->{$state->{spec_version}};
+
+  $self->_set_metaschema_uri($metaschema_uri) if $metaschema_uri ne ($self->metaschema_uri//'');
+
+  return $state;
+}
+
+sub validate {
+  my $self = shift;
+
+  my $js = $self->$_call_if_can('evaluator') // JSON::Schema::Modern->new;
+
+  return $js->evaluate($self->schema, $self->metaschema_uri);
 }
 
 1;
@@ -205,6 +223,8 @@ __END__
     );
     my $foo_definition = $document->get('/$defs/foo');
     my %resource_index = $document->resource_index;
+
+    my sanity_check = $document->validate;
 
 =head1 DESCRIPTION
 
@@ -287,6 +307,13 @@ See L<Mojo::JSON::Pointer/contains>.
 
 Extract value from L</"schema"> identified by the given JSON Pointer.
 See L<Mojo::JSON::Pointer/get>.
+
+=head2 validate
+
+Evaluates the document against its metaschema. See L<JSON::Schema::Modern/evaluate>.
+For regular JSON Schemas this is redundant with creating the document in the first place (which also
+includes a validation check), but for some subclasses of this class, additional things might be
+checked that are not caught by document creation.
 
 =head2 TO_JSON
 

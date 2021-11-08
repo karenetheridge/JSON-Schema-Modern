@@ -661,6 +661,12 @@ subtest 'custom metaschema_uri' => sub {
     'can evaluate at a subschema as well, with the same vocabularies',
   );
 
+  cmp_deeply(
+    $doc->validate->TO_JSON,
+    { valid => true },
+    'schema validates against its metaschema, and "minimum" is ignored',
+  );
+
   memory_cycle_ok($js, 'no leaks in the evaluator object');
 };
 
