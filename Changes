@@ -6,6 +6,7 @@ Revision history for JSON-Schema-Modern
           - new utility functions: is_uri_reference, assert_keyword_exists
           - allow specifying the metaschema_uri for a schema document
           - add "validate" method to Document object
+          - updated draft2019-09 and added draft2020-12 hyperschema schemas
 
 0.523     2021-10-24 05:58:27Z
           - fix tests that were relying on an optional prereq
