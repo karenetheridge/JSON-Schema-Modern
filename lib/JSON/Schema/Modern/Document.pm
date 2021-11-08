@@ -22,7 +22,7 @@ use MooX::HandlesVia;
 use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef slurpy);
 use namespace::clean;
 
-extends 'Mojo::JSON::Pointer', 'Moo::Object';
+extends 'Mojo::JSON::Pointer';
 
 has schema => (
   is => 'ro',
@@ -41,6 +41,12 @@ has metaschema_uri => (
   is => 'rwp',
   isa => InstanceOf['Mojo::URL'],
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
+);
+
+has evaluator => (
+  is => 'rwp',
+  isa => InstanceOf['JSON::Schema::Modern'],
+  weak_ref => 1,
 );
 
 # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
@@ -137,27 +143,13 @@ sub FOREIGNBUILDARGS { () }
 # for JSON serializers
 sub TO_JSON { goto \&schema }
 
-around BUILDARGS => sub {
-  my ($orig, $class, @args) = @_;
-
-  my $args = $class->$orig(@args);
-
-  # evaluator is only needed for traversal in BUILD; a different evaluator may be used for
-  # the actual evaluation.
-  croak '_evaluator is not a JSON::Schema::Modern'
-    if exists $args->{_evaluator} and not $args->{_evaluator}->$_isa('JSON::Schema::Modern');
-
-  $args->{_evaluator} //= JSON::Schema::Modern->new;
-  return $args;
-};
-
 sub BUILD {
   my ($self, $args) = @_;
 
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
 
   my $original_uri = $self->canonical_uri->clone;
-  my $state = $self->traverse($args->{_evaluator});
+  my $state = $self->traverse($self->evaluator // JSON::Schema::Modern->new);
 
   # if the schema identified a canonical uri for itself, it overrides the initial value
   $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
@@ -238,6 +230,10 @@ Sets the metaschema that is used to describe the document (or more specifically,
 contained within the document), which determines the
 specification version and vocabularies used during evaluation. Does not override any
 C<$schema> keyword actually present in the schema document.
+
+=head2 evaluator
+
+A L<JSON::Schema::Modern> object. Optional, unless custom metaschemas are used.
 
 =head2 resource_index
 

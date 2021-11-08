@@ -632,7 +632,7 @@ subtest 'custom metaschema_uri' => sub {
       allOf => [ { minimum => 'not even an integer' } ],
     },
     metaschema_uri => 'https://my/first/metaschema',
-    _evaluator => $js,  # needed in order to find the metaschema
+    evaluator => $js,  # needed in order to find the metaschema
   ));
 
   cmp_deeply(

@@ -134,7 +134,7 @@ sub add_schema {
     : JSON::Schema::Modern::Document->new(
       schema => shift,
       $uri ? (canonical_uri => $uri) : (),
-      _evaluator => $self,  # used only for traversal during document construction
+      evaluator => $self,  # used mainly for traversal during document construction
     );
 
   croak(!(caller())[0]->isa(__PACKAGE__)
@@ -720,7 +720,7 @@ sub _get_or_load_resource {
   if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
     my $file = path(dist_dir('JSON-Schema-Modern'), $local_filename);
     my $schema = $self->_json_decoder->decode($file->slurp_raw);
-    my $document = JSON::Schema::Modern::Document->new(schema => $schema, _evaluator => $self);
+    my $document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $self);
 
     # this should be caught by the try/catch in evaluate()
     die JSON::Schema::Modern::Result->new(
