@@ -537,6 +537,7 @@ has _resource_index => (
     _resource_keys => 'keys',
     _add_resources_unsafe => 'set',
     _resource_values => 'values',
+    _resource_exists => 'exists',
   },
   lazy => 1,
   default => sub { {} },
