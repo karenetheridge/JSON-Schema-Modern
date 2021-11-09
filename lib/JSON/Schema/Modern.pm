@@ -589,6 +589,7 @@ has _vocabulary_classes => (
   handles => {
     _get_vocabulary_class => 'get',
     _set_vocabulary_class => 'set',
+    _get_vocabulary_values => 'values',
   },
   lazy => 1,
   default => sub {
@@ -602,6 +603,8 @@ has _vocabulary_classes => (
 
 sub add_vocabulary {
   my ($self, $classname) = @_;
+
+  return if grep $_->[1] eq $classname, $self->_get_vocabulary_values;
 
   $vocabulary_class_type->(use_module($classname));
 
