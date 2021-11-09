@@ -37,5 +37,7 @@ foreach my $target (keys %files) {
   $target->parent->mkpath;
 
   my $response = HTTP::Tiny->new->get($source);
+  die "Failed to fetch $source: $response->{status} $response->{reason}" if not $response->{success};
+
   $target->spew($response->{content});
 }
