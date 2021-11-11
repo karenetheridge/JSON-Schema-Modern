@@ -71,8 +71,7 @@ subtest '$id sets canonical uri' => sub {
   my $doc2 = $js->{_resource_index}{'http://localhost:4242/my_foo'}{document};
   ok($doc1 == $doc2, 'the same document object is indexed under both URIs');
 
-  sub _find_all_values {
-      my $data = shift;
+  sub _find_all_values ($data) {
       if (ref $data eq 'ARRAY') {
           return map __SUB__->($_), @$data;
       }

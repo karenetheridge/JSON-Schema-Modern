@@ -27,23 +27,19 @@ sub vocabulary {
 
 sub evaluation_order { 4 }
 
-sub keywords {
-  my ($self, $spec_version) = @_;
+sub keywords ($self, $spec_version) {
   return (
     qw(contentEncoding contentMediaType),
     $spec_version ne 'draft7' ? 'contentSchema' : (),
   );
 }
 
-sub _traverse_keyword_contentEncoding {
-  my ($self, $schema, $state) = @_;
+sub _traverse_keyword_contentEncoding ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
 
-sub _eval_keyword_contentEncoding {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
   return A($state, $schema->{$state->{keyword}});
 }
@@ -52,17 +48,13 @@ sub _traverse_keyword_contentMediaType { goto \&_traverse_keyword_contentEncodin
 
 sub _eval_keyword_contentMediaType { goto \&_eval_keyword_contentEncoding }
 
-sub _traverse_keyword_contentSchema {
-  my ($self, $schema, $state) = @_;
-
+sub _traverse_keyword_contentSchema ($self, $schema, $state) {
   # since contentSchema should never be evaluated in the context of the containing schema, it is
   # not appropriate to gather identifiers found therein -- but we can still validate the subschema.
   $self->traverse_subschema($schema, +{ %$state, identifiers => [] });
 }
 
-sub _eval_keyword_contentSchema {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _eval_keyword_contentSchema ($self, $data, $schema, $state) {
   return 1 if not exists $schema->{contentMediaType};
   return 1 if not is_type('string', $data);
 

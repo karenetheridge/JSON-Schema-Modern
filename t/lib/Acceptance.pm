@@ -27,9 +27,7 @@ BEGIN {
   note '';
 }
 
-sub acceptance_tests {
-  my (%options) = @_;
-
+sub acceptance_tests (%options) {
   local $Test::Builder::Level = $Test::Builder::Level + 1;
   my $accepter = Test::JSON::Schema::Acceptance->new(
     include_optional => 1,
@@ -49,8 +47,7 @@ sub acceptance_tests {
   my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
   $encoder->indent_length(2) if $encoder->can('indent_length');
 
-  my $add_resource = sub {
-    my ($uri, $schema) = @_;
+  my $add_resource = sub ($uri, $schema) {
     try {
       # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
       local $SIG{__WARN__} = sub {
@@ -65,8 +62,7 @@ sub acceptance_tests {
   };
 
   $accepter->acceptance(
-    validate_data => sub {
-      my ($schema, $instance_data) = @_;
+    validate_data => sub ($schema, $instance_data) {
       my $result = $js->evaluate($instance_data, $schema);
       my $result_short = $ENV{NO_SHORT_CIRCUIT} || $js_short_circuit->evaluate($instance_data, $schema);
 

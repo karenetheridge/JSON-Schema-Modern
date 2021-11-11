@@ -45,8 +45,7 @@ subtest 'traversal with callbacks' => sub {
   my $if_callback_called;
   my $js = JSON::Schema::Modern->new;
   my $state = $js->traverse($schema, { callbacks => {
-      '$ref' => sub {
-        my ($schema, $state) = @_;
+      '$ref' => sub ($schema, $state) {
         my $canonical_uri = canonical_schema_uri($state);
         my $ref_uri = Mojo::URL->new($schema->{'$ref'});
         $ref_uri = $ref_uri->to_abs($canonical_uri) if not $ref_uri->is_abs;

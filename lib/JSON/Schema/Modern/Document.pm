@@ -145,9 +145,7 @@ sub FOREIGNBUILDARGS { () }
 # for JSON serializers
 sub TO_JSON { goto \&schema }
 
-sub BUILD {
-  my ($self, $args) = @_;
-
+sub BUILD ($self, $args) {
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
 
   my $original_uri = $self->canonical_uri->clone;
@@ -177,9 +175,7 @@ sub BUILD {
   $self->_set_evaluation_configs(+{ %{$state->{configs}}, %{$self->evaluation_configs} });
 }
 
-sub traverse {
-  my ($self, $evaluator) = @_;
-
+sub traverse ($self, $evaluator) {
   my $state = $evaluator->traverse($self->schema,
     {
       initial_schema_uri => $self->canonical_uri->clone,
@@ -197,9 +193,7 @@ sub traverse {
   return $state;
 }
 
-sub validate {
-  my $self = shift;
-
+sub validate ($self) {
   my $js = $self->$_call_if_can('evaluator') // JSON::Schema::Modern->new;
 
   return $js->evaluate($self->schema, $self->metaschema_uri);

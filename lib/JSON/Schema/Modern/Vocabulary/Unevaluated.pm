@@ -27,15 +27,12 @@ sub vocabulary {
 sub evaluation_order { 7 }
 
 # This vocabulary should be evaluated after the Applicator vocabulary.
-sub keywords {
-  my ($self, $spec_version) = @_;
+sub keywords ($self, $spec_version) {
   die 'Unevaluated not implemented in '.$spec_version if $spec_version =~ /^draft[467]$/;
   qw(unevaluatedItems unevaluatedProperties);
 }
 
-sub _traverse_keyword_unevaluatedItems {
-  my ($self, $schema, $state) = @_;
-
+sub _traverse_keyword_unevaluatedItems ($self, $schema, $state) {
   my $valid = $self->traverse_subschema($schema, $state);
 
   # remember that annotations need to be collected in order to evaluate this keyword
@@ -44,9 +41,7 @@ sub _traverse_keyword_unevaluatedItems {
   return $valid;
 }
 
-sub _eval_keyword_unevaluatedItems {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
   abort($state, 'EXCEPTION: "unevaluatedItems" keyword present, but annotation collection is disabled')
     if not $state->{collect_annotations};
 
@@ -107,9 +102,7 @@ sub _eval_keyword_unevaluatedItems {
   return A($state, true);
 }
 
-sub _traverse_keyword_unevaluatedProperties {
-  my ($self, $schema, $state) = @_;
-
+sub _traverse_keyword_unevaluatedProperties ($self, $schema, $state) {
   my $valid = $self->traverse_subschema($schema, $state);
 
   # remember that annotations need to be collected in order to evaluate this keyword
@@ -118,9 +111,7 @@ sub _traverse_keyword_unevaluatedProperties {
   return $valid;
 }
 
-sub _eval_keyword_unevaluatedProperties {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
   abort($state, 'EXCEPTION: "unevaluatedProperties" keyword present, but annotation collection is disabled')
     if not $state->{collect_annotations};
 

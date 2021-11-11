@@ -51,9 +51,7 @@ our @EXPORT_OK = qw(
 use JSON::PP ();
 use constant { true => JSON::PP::true, false => JSON::PP::false };
 
-sub is_type {
-  my ($type, $value) = @_;
-
+sub is_type ($type, $value) {
   if ($type eq 'null') {
     return !(defined $value);
   }
@@ -94,9 +92,7 @@ sub is_type {
 
 # only the core six types are reported (integers are numbers)
 # use is_type('integer') to differentiate numbers from integers.
-sub get_type {
-  my ($value) = @_;
-
+sub get_type ($value) {
   return 'null' if not defined $value;
   return 'object' if is_plain_hashref($value);
   return 'array' if is_plain_arrayref($value);
@@ -114,9 +110,8 @@ sub get_type {
 
 # compares two arbitrary data payloads for equality, as per
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.2
-# if provided with a state hashref, any differences are recorded within
-sub is_equal {
-  my ($x, $y, $state) = @_;
+# if provided with a state hashref with a 'path' key, any differences are recorded within
+sub is_equal ($x, $y, $state = undef) {
   $state->{path} //= '';
 
   my @types = map get_type($_), $x, $y;
@@ -156,8 +151,7 @@ sub is_equal {
 
 # checks array elements for uniqueness. short-circuits on first pair of matching elements
 # if second arrayref is provided, it is populated with the indices of identical items
-sub is_elements_unique {
-  my ($array, $equal_indices) = @_;
+sub is_elements_unique ($array, $equal_indices = undef) {
   foreach my $idx0 (0 .. $#{$array}-1) {
     foreach my $idx1 ($idx0+1 .. $#{$array}) {
       if (is_equal($array->[$idx0], $array->[$idx1], { scalarref_booleans => 1 })) {
@@ -176,15 +170,12 @@ sub jsonp {
 
 # get all annotations produced for the current instance data location (that are visible to this
 # schema location)
-sub local_annotations {
-  my ($state) = @_;
+sub local_annotations ($state) {
   grep $_->instance_location eq $state->{data_path}, @{$state->{annotations}};
 }
 
 # shorthand for finding the canonical uri of the present schema location
-sub canonical_schema_uri {
-  my ($state, @extra_path) = @_;
-
+sub canonical_schema_uri ($state, @extra_path) {
   splice(@extra_path, -1, 1, @{$extra_path[-1]}) if @extra_path and is_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
@@ -201,9 +192,8 @@ sub canonical_schema_uri {
 # - schema_path
 # - _schema_path_suffix
 # - errors
-sub E {
+sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
-  my ($state, $error_string, @args) = @_;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
   my $uri = canonical_schema_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
@@ -235,8 +225,7 @@ sub E {
 # - _schema_path_suffix
 # - annotations
 # - collect_annotations
-sub A {
-  my ($state, $annotation) = @_;
+sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations};
 
   my $uri = canonical_schema_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
@@ -262,22 +251,19 @@ sub A {
 # only this error is returned, because other errors on the stack might not actually be "real"
 # errors (consider if we were in the middle of evaluating a "not" or "if").
 # Therefore this is only appropriate during the evaluation phase, not the traverse phase.
-sub abort {
-  my ($state, $error_string, @args) = @_;
+sub abort ($state, $error_string, @args) {
   ()= E($state, $error_string, @args);
   die pop @{$state->{errors}};
 }
 
-sub assert_keyword_exists {
+sub assert_keyword_exists ($state, $schema) {
   croak 'assert_keyword_exists called in void context' if not defined wantarray;
-  my ($state, $schema) = @_;
   return E($state, '%s keyword is required', $state->{keyword}) if not exists $schema->{$state->{keyword}};
   return 1;
 }
 
-sub assert_keyword_type {
+sub assert_keyword_type ($state, $schema, $type) {
   croak 'assert_keyword_type called in void context' if not defined wantarray;
-  my ($state, $schema, $type) = @_;
   my $value = $schema->{$state->{keyword}};
   $value = is_plain_hashref($value) ? $value->{$state->{_schema_path_suffix}}
       : is_plain_arrayref($value) ? $value->[$state->{_schema_path_suffix}]
@@ -287,9 +273,8 @@ sub assert_keyword_type {
   E($state, '%s value is not a%s %s', $state->{keyword}, ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
 }
 
-sub assert_pattern {
+sub assert_pattern ($state, $pattern) {
   croak 'assert_pattern called in void context' if not defined wantarray;
-  my ($state, $pattern) = @_;
   try {
     local $SIG{__WARN__} = sub { die @_ };
     qr/$pattern/;
@@ -298,9 +283,8 @@ sub assert_pattern {
   return 1;
 }
 
-sub is_uri_reference {
+sub is_uri_reference ($ref) {
   croak 'is_uri_reference called in void context' if not defined wantarray;
-  my $ref = shift;
 
   return 0
     # see also uri-reference format sub
@@ -314,17 +298,15 @@ sub is_uri_reference {
   return 1;
 }
 
-sub assert_uri_reference {
+sub assert_uri_reference ($state, $schema) {
   croak 'assert_uri_reference called in void context' if not defined wantarray;
-  my ($state, $schema) = @_;
 
   return 1 if is_uri_reference($schema->{$state->{keyword}});
   return E($state, '%s value is not a valid URI reference', $state->{keyword});
 }
 
-sub assert_uri {
+sub assert_uri ($state, $schema, $override = undef) {
   croak 'assert_uri called in void context' if not defined wantarray;
-  my ($state, $schema, $override) = @_;
 
   my $string = $override // $schema->{$state->{keyword}};
   my $uri = Mojo::URL->new($string);
@@ -343,8 +325,7 @@ sub assert_uri {
 }
 
 # produces an annotation whose value is the same as that of the current keyword
-sub annotate_self {
-  my ($state, $schema) = @_;
+sub annotate_self ($state, $schema) {
   A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
     : $schema->{$state->{keyword}});
 }

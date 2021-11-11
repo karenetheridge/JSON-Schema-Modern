@@ -137,21 +137,17 @@ sub keywords {
     'uri-template' => sub { 1 },
   };
 
-  sub _get_default_format_validation {
-    my ($self, $format) = @_;
+  sub _get_default_format_validation ($self, $format) {
     return $formats->{$format};
   }
 }
 
-sub _traverse_keyword_format {
-  my ($self, $schema, $state) = @_;
+sub _traverse_keyword_format ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
 
-sub _eval_keyword_format {
-  my ($self, $data, $schema, $state) = @_;
-
+sub _eval_keyword_format ($self, $data, $schema, $state) {
   return E($state, 'unimplemented format "%s"', $schema->{format})
     if $schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template';
 

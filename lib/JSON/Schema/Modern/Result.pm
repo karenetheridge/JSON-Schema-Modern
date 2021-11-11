@@ -56,14 +56,11 @@ has output_format => (
   default => 'basic',
 );
 
-sub BUILD {
-  my $self = shift;
+sub BUILD ($self, $) {
   warn 'result is false but there are no errors' if not $self->valid and not $self->error_count;
 }
 
-sub format {
-  my ($self, $style) = @_;
-
+sub format ($self, $style) {
   if ($style eq 'flag') {
     return +{ valid => $self->valid };
   }
@@ -143,15 +140,13 @@ sub format {
 
 sub count { $_[0]->valid ? $_[0]->annotation_count : $_[0]->error_count }
 
-sub TO_JSON {
-  my $self = shift;
+sub TO_JSON ($self) {
   $self->format($self->output_format);
 }
 
 # turns the JSON pointers in instance_location, keyword_location  into a URI fragments,
 # for strict draft-201909 adherence
-sub _map_uris {
-  my $data = shift;
+sub _map_uris ($data) {
   return +{
     %$data,
     map +($_ => Mojo::URL->new->fragment($data->{$_})->to_string),

@@ -104,9 +104,7 @@ has _format_validations => (
   default => sub { {} },
 );
 
-around BUILDARGS => sub {
-  my ($orig, $class, @args) = @_;
-
+around BUILDARGS => sub ($orig, $class, @args) {
   my $args = $class->$orig(@args);
   croak 'output_format: strict_basic can only be used with specification_version: draft2019-09'
     if ($args->{output_format}//'') eq 'strict_basic'
@@ -178,10 +176,8 @@ sub add_schema {
   return $document;
 }
 
-sub evaluate_json_string {
+sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
   croak 'evaluate_json_string called in void context' if not defined wantarray;
-  croak 'insufficient arguments' if @_ < 3;
-  my ($self, $json_data, $schema, $config_override) = @_;
 
   my $data;
   try {
@@ -210,10 +206,7 @@ sub evaluate_json_string {
 # schema structure, to identify the metaschema (via the $schema keyword), and to extract all
 # embedded resources via $id and $anchor keywords within.
 # Returns the internal $state object accumulated during the traversal.
-sub traverse {
-  croak 'insufficient arguments' if @_ < 2;
-  my ($self, $schema_reference, $config_override) = @_;
-
+sub traverse ($self, $schema_reference, $config_override = {}) {
   my $base_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
   my $spec_version = $self->specification_version//SPECIFICATION_VERSION_DEFAULT;
 
@@ -265,10 +258,8 @@ sub traverse {
 }
 
 # the actual runtime evaluation of the schema against input data.
-sub evaluate {
+sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
-  croak 'insufficient arguments' if @_ < 3;
-  my ($self, $data, $schema_reference, $config_override) = @_;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
 
@@ -354,10 +345,7 @@ sub evaluate {
 
 # sub add_vocabulary { ... } # defined lower down...
 
-sub get {
-  croak 'insufficient arguments' if @_ < 2;
-  my ($self, $uri) = @_;
-
+sub get ($self, $uri) {
   my $schema_info = $self->_fetch_from_uri($uri);
   return if not $schema_info;
   my $subschema = is_ref($schema_info->{schema}) ? dclone($schema_info->{schema}) : $schema_info->{schema};
@@ -386,10 +374,7 @@ my %removed_keywords = (
   },
 );
 
-sub _traverse_subschema {
-  croak 'insufficient arguments' if @_ < 3;
-  my ($self, $schema, $state) = @_;
-
+sub _traverse_subschema ($self, $schema, $state) {
   delete $state->{keyword};
 
   return E($state, 'EXCEPTION: maximum traversal depth exceeded')
@@ -441,10 +426,8 @@ sub _traverse_subschema {
   return $valid;
 }
 
-sub _eval_subschema {
+sub _eval_subschema ($self, $data, $schema, $state) {
   croak '_eval_subschema called in void context' if not defined wantarray;
-  croak 'insufficient arguments' if @_ < 4;
-  my ($self, $data, $schema, $state) = @_;
 
   # callers created a new $state for us, so we do not propagate upwards changes to depth, traversed
   # paths; but annotations, errors are arrayrefs so their contents will be shared
@@ -603,9 +586,7 @@ has _vocabulary_classes => (
   },
 );
 
-sub add_vocabulary {
-  my ($self, $classname) = @_;
-
+sub add_vocabulary ($self, $classname) {
   return if grep $_->[1] eq $classname, $self->_get_vocabulary_values;
 
   $vocabulary_class_type->(use_module($classname));
@@ -649,9 +630,7 @@ has _metaschema_vocabulary_classes => (
 
 # retrieves metaschema info either from cache or by parsing the schema for vocabularies
 # throws a JSON::Schema::Modern::Result on error
-sub _get_metaschema_info {
-  my ($self, $metaschema_uri, $for_canonical_uri) = @_;
-
+sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
   # check the cache
   my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
   return @$metaschema_info if $metaschema_info;
@@ -721,9 +700,7 @@ use constant CACHED_METASCHEMAS => {
 };
 
 # returns the same as _get_resource
-sub _get_or_load_resource {
-  my ($self, $uri) = @_;
-
+sub _get_or_load_resource ($self, $uri) {
   my $resource = $self->_get_resource($uri);
   return $resource if $resource;
 
@@ -763,9 +740,7 @@ sub _get_or_load_resource {
 # - the specification version that applies to this schema
 # - the vocabularies to use when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
-sub _fetch_from_uri {
-  my ($self, $uri) = @_;
-
+sub _fetch_from_uri ($self, $uri) {
   $uri = Mojo::URL->new($uri) if not is_ref($uri);
   my $fragment = $uri->fragment;
 

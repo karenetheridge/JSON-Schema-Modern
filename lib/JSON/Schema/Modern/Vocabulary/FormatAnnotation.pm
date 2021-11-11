@@ -31,14 +31,12 @@ sub keywords {
   qw(format);
 }
 
-sub _traverse_keyword_format {
-  my ($self, $schema, $state) = @_;
+sub _traverse_keyword_format ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
 
-sub _eval_keyword_format {
-  my ($self, $data, $schema, $state) = @_;
+sub _eval_keyword_format ($self, $data, $schema, $state) {
   return A($state, $schema->{format});
 }
 

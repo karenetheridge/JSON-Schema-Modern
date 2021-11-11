@@ -41,8 +41,7 @@ has annotation => (
   required => 1,
 );
 
-sub TO_JSON {
-  my $self = shift;
+sub TO_JSON ($self) {
   return +{
     # note that locations are JSON pointers, not uri fragments!
     instanceLocation => $self->instance_location,

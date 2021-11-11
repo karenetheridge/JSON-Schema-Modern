@@ -25,21 +25,16 @@ requires qw(vocabulary keywords);
 
 sub evaluation_order { 999 }  # override, if needed
 
-sub traverse {
-  my ($self, $schema, $state) = @_;
+sub traverse ($self, $schema, $state) {
   $state->{evaluator}->_traverse_subschema($schema, $state);
 }
 
-sub traverse_subschema {
-  my ($self, $schema, $state) = @_;
-
+sub traverse_subschema ($self, $schema, $state) {
   $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}},
     +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword} });
 }
 
-sub traverse_array_schemas {
-  my ($self, $schema, $state) = @_;
-
+sub traverse_array_schemas ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
   return E($state, '%s array is empty', $state->{keyword}) if not @{$schema->{$state->{keyword}}};
 
@@ -51,9 +46,7 @@ sub traverse_array_schemas {
   return $valid;
 }
 
-sub traverse_object_schemas {
-  my ($self, $schema, $state) = @_;
-
+sub traverse_object_schemas ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
@@ -64,23 +57,18 @@ sub traverse_object_schemas {
   return $valid;
 }
 
-sub traverse_property_schema {
-  my ($self, $schema, $state, $property) = @_;
-
+sub traverse_property_schema ($self, $schema, $state, $property) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}{$property},
     +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
 }
 
-sub eval {
-  my ($self, $data, $schema, $state) = @_;
+sub eval ($self, $data, $schema, $state) {
   $state->{evaluator}->_eval_subschema($data, $schema, $state);
 }
 
-sub eval_subschema_at_uri {
-  my ($self, $data, $schema, $state, $uri) = @_;
-
+sub eval_subschema_at_uri ($self, $data, $schema, $state, $uri) {
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
 
