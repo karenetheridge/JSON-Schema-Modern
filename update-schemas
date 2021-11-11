@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Path::Tiny;
 use HTTP::Tiny;
+use JSON::Schema::Modern;
 
 my %files = (
   'draft2020-12/meta/applicator.json'     => 'https://json-schema.org/draft/2020-12/meta/applicator',
@@ -37,4 +38,12 @@ foreach my $target (keys %files) {
   die "Failed to fetch $source: $response->{status} $response->{reason}" if not $response->{success};
 
   $target->spew($response->{content});
+}
+
+my $js = JSON::Schema::Modern->new(validate_formats => 1);
+foreach my $uri (values %files) {
+  print "# validating $uri\n" if $ENV{DEBUG};
+
+  my $result = $js->_fetch_from_uri($uri)->{document}->validate;
+  die $js->_json_decoder->pretty->encode($result) if not $result;
 }
