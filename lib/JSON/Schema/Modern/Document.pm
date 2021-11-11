@@ -154,7 +154,7 @@ sub BUILD ($self, $args) {
   # if the schema identified a canonical uri for itself, it overrides the initial value
   $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
 
-  if (@{$state->{errors}}) {
+  if ($state->{errors}->@*) {
     $self->_set_errors($state->{errors});
     return;
   }
@@ -169,10 +169,10 @@ sub BUILD ($self, $args) {
     if (not "$original_uri" and $original_uri eq $self->canonical_uri)
       or "$original_uri";
 
-  $self->_add_resources(@{$state->{identifiers}});
+  $self->_add_resources($state->{identifiers}->@*);
 
   # overlay the resulting configs with those that were provided by the caller
-  $self->_set_evaluation_configs(+{ %{$state->{configs}}, %{$self->evaluation_configs} });
+  $self->_set_evaluation_configs(+{ $state->{configs}->%*, $self->evaluation_configs->%* });
 }
 
 sub traverse ($self, $evaluator) {

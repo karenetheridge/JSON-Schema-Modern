@@ -157,7 +157,7 @@ sub add_schema {
       $document = $existing_doc;
     }
     else {
-      $self->_add_resources(map +($_->[0] => +{ %{$_->[1]}, document => $document }),
+      $self->_add_resources(map +($_->[0] => +{ $_->[1]->%*, document => $document }),
         $document->resource_pairs);
     }
   }
@@ -231,13 +231,13 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     $for_canonical_uri->fragment(undef) if not length $for_canonical_uri->fragment;
 
     # a subsequent "$schema" keyword can still change these values
-    @{$state}{qw(spec_version vocabularies)} = $self->_get_metaschema_info(
+    $state->@{qw(spec_version vocabularies)} = $self->_get_metaschema_info(
       $config_override->{metaschema_uri} // $self->METASCHEMA_URIS->{$spec_version},
       $for_canonical_uri,
     );
   }
   catch ($e) {
-    push @{$state->{errors}}, $e->errors;
+    push $state->{errors}->@*, $e->errors;
     return $state;
   }
 
@@ -247,7 +247,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Error')) {
       # note: we should never be here, since traversal subs are no longer be fatal
-      push @{$state->{errors}}, $e;
+      push $state->{errors}->@*, $e;
     }
     else {
       E($state, 'EXCEPTION: '.$e);
@@ -308,7 +308,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       spec_version => $schema_info->{specification_version},
       vocabularies => $schema_info->{vocabularies},
       evaluator => $self,
-      %{$schema_info->{document}->evaluation_configs},
+      $schema_info->{document}->evaluation_configs->%*,
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
@@ -316,21 +316,21 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     };
 
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
-    warn 'result is false but there are no errors' if not $valid and not @{$state->{errors}};
+    warn 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Result')) {
       return $e;
     }
     elsif ($e->$_isa('JSON::Schema::Modern::Error')) {
-      push @{$state->{errors}}, $e;
+      push $state->{errors}->@*, $e;
     }
     else {
       $valid = E($state, 'EXCEPTION: '.$e);
     }
   }
 
-  die 'evaluate validity inconstent with error count' if $valid xor !@{$state->{errors}};
+  die 'evaluate validity inconstent with error count' if $valid xor !$state->{errors}->@*;
 
   return JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,
@@ -386,7 +386,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $valid = 1;
-  for (my $idx = 0; $idx <= $#{$state->{vocabularies}}; ++$idx) {
+  for (my $idx = 0; $idx <= $state->{vocabularies}->$#*; ++$idx) {
     my $vocabulary = $state->{vocabularies}[$idx];
     foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
       next if not exists $schema->{$keyword};
@@ -398,7 +398,7 @@ sub _traverse_subschema ($self, $schema, $state) {
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
 
       if (not $vocabulary->$method($schema, $state)) {
-        die 'traverse returned false but we have no errors' if not @{$state->{errors}};
+        die 'traverse returned false but we have no errors' if not $state->{errors}->@*;
         $valid = 0;
         next;
       }
@@ -410,7 +410,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   }
 
   # check for previously-supported but now removed keywords
-  foreach my $keyword (sort keys %{$removed_keywords{$state->{spec_version}}}) {
+  foreach my $keyword (sort keys $removed_keywords{$state->{spec_version}}->%*) {
     next if not exists $schema->{$keyword};
     my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
       .canonical_schema_uri($state).'")';
@@ -431,8 +431,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   # callers created a new $state for us, so we do not propagate upwards changes to depth, traversed
   # paths; but annotations, errors are arrayrefs so their contents will be shared
-  $state->{dynamic_scope} = [ @{$state->{dynamic_scope}//[]} ];
-  delete @{$state}{'keyword', grep /^_/, keys %$state};
+  $state->{dynamic_scope} = [ ($state->{dynamic_scope}//[])->@* ];
+  delete $state->@{'keyword', grep /^_/, keys %$state};
 
   abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
@@ -443,7 +443,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   my $schema_location = $state->{traversed_schema_path}.$state->{schema_path};
   abort($state, 'EXCEPTION: infinite loop detected (same location evaluated twice)')
     if grep substr($schema_location, 0, length) eq $_,
-      keys %{$state->{seen}{$state->{data_path}}{$canonical_uri}};
+      keys $state->{seen}{$state->{data_path}}{$canonical_uri}->%*;
   $state->{seen}{$state->{data_path}}{$canonical_uri}{$schema_location}++;
 
   my $schema_type = get_type($schema);
@@ -458,7 +458,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   $state->{annotations} = [];
   my @new_annotations;
 
-  my @vocabularies = @{$state->{vocabularies}}; # override locally only (copy, not reference)
+  my @vocabularies = $state->{vocabularies}->@*; # override locally only (copy, not reference)
   if ($state->{validate_formats}) {
     s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/ foreach @vocabularies;
     require JSON::Schema::Modern::Vocabulary::FormatAssertion;
@@ -478,23 +478,23 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       next if not $vocabulary->can($method);
 
       $state->{keyword} = $keyword;
-      my $error_count = @{$state->{errors}};
+      my $error_count = $state->{errors}->@*;
       if (not $vocabulary->$method($data, $schema, $state)) {
         warn 'result is false but there are no errors (keyword: '.$keyword.')'
-          if $error_count == @{$state->{errors}};
+          if $error_count == $state->{errors}->@*;
         $valid = 0;
       }
 
       last ALL_KEYWORDS if not $valid and $state->{short_circuit};
 
-      push @new_annotations, @{$state->{annotations}}[$#new_annotations+1 .. $#{$state->{annotations}}];
+      push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];
     }
   }
 
   $state->{annotations} = $orig_annotations;
 
   if ($valid) {
-    push @{$state->{annotations}}, @new_annotations;
+    push $state->{annotations}->@*, @new_annotations;
     annotate_self(+{ %$state, keyword => $_ }, $schema) foreach sort keys %unknown_keywords;
   }
 
@@ -654,8 +654,8 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
           error => $e->error,
         )
       }
-      @{$state->{errors}} ],
-  ) if @{$state->{errors}};
+      $state->{errors}->@* ],
+  ) if $state->{errors}->@*;
   return ($state->{spec_version}, $state->{vocabularies});
 }
 
@@ -718,7 +718,7 @@ sub _get_or_load_resource ($self, $uri) {
 
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
-      map +($_->[0] => +{ %{$_->[1]}, document => $document }),
+      map +($_->[0] => +{ $_->[1]->%*, document => $document }),
         $document->resource_pairs
     );
 

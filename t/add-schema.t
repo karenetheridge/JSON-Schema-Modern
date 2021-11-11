@@ -675,7 +675,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
   );
 
   is(
-    $js->add_schema('https://uri4.com', +{ %{ $document->schema } }),
+    $js->add_schema('https://uri4.com', +{ $document->schema->%* }),
     $document,
     'adding the same schema *content* again does not fail, and returns the original document object',
   );

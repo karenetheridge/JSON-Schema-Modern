@@ -139,7 +139,7 @@ sub is_equal ($x, $y, $state = undef) {
 
   if ($types[0] eq 'array') {
     return 0 if @$x != @$y;
-    foreach my $idx (0 .. $#{$x}) {
+    foreach my $idx (0 .. $x->$#*) {
       $state->{path} = $path.'/'.$idx;
       return 0 if not is_equal($x->[$idx], $y->[$idx], $state);
     }
@@ -152,8 +152,8 @@ sub is_equal ($x, $y, $state = undef) {
 # checks array elements for uniqueness. short-circuits on first pair of matching elements
 # if second arrayref is provided, it is populated with the indices of identical items
 sub is_elements_unique ($array, $equal_indices = undef) {
-  foreach my $idx0 (0 .. $#{$array}-1) {
-    foreach my $idx1 ($idx0+1 .. $#{$array}) {
+  foreach my $idx0 (0 .. $array->$#*-1) {
+    foreach my $idx1 ($idx0+1 .. $array->$#*) {
       if (is_equal($array->[$idx0], $array->[$idx1], { scalarref_booleans => 1 })) {
         push @$equal_indices, $idx0, $idx1 if defined $equal_indices;
         return 0;
@@ -171,12 +171,12 @@ sub jsonp {
 # get all annotations produced for the current instance data location (that are visible to this
 # schema location)
 sub local_annotations ($state) {
-  grep $_->instance_location eq $state->{data_path}, @{$state->{annotations}};
+  grep $_->instance_location eq $state->{data_path}, $state->{annotations}->@*;
 }
 
 # shorthand for finding the canonical uri of the present schema location
 sub canonical_schema_uri ($state, @extra_path) {
-  splice(@extra_path, -1, 1, @{$extra_path[-1]}) if @extra_path and is_arrayref($extra_path[-1]);
+  splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
   $uri->fragment(undef) if not length($uri->fragment);
@@ -204,7 +204,7 @@ sub E ($state, $error_string, @args) {
   undef $uri if $uri eq '' and $keyword_location eq ''
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
-  push @{$state->{errors}}, JSON::Schema::Modern::Error->new(
+  push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
@@ -236,7 +236,7 @@ sub A ($state, $annotation) {
   undef $uri if $uri eq '' and $keyword_location eq ''
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
-  push @{$state->{annotations}}, JSON::Schema::Modern::Annotation->new(
+  push $state->{annotations}->@*, JSON::Schema::Modern::Annotation->new(
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
@@ -253,7 +253,7 @@ sub A ($state, $annotation) {
 # Therefore this is only appropriate during the evaluation phase, not the traverse phase.
 sub abort ($state, $error_string, @args) {
   ()= E($state, $error_string, @args);
-  die pop @{$state->{errors}};
+  die pop $state->{errors}->@*;
 }
 
 sub assert_keyword_exists ($state, $schema) {

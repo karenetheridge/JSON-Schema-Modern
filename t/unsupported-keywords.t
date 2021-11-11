@@ -33,7 +33,7 @@ my @warnings = (
 );
 
 foreach my $index (0 .. $#warnings) {
-  my ($spec_version, $removed_keywords) = @{$warnings[$index]};
+  my ($spec_version, $removed_keywords) = $warnings[$index]->@*;
 
   note "\n", $spec_version;
   my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
@@ -46,7 +46,7 @@ foreach my $index (0 .. $#warnings) {
   }
 
   next if $index == $#warnings;
-  my ($next_spec_version, $removed_next_keywords) = @{$warnings[$index+1]};
+  my ($next_spec_version, $removed_next_keywords) = $warnings[$index+1]->@*;
   foreach my $keyword (@$removed_next_keywords) {
     next if grep $keyword eq $_, @$removed_keywords;
     local $SIG{__WARN__} = sub {

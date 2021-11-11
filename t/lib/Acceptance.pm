@@ -33,7 +33,7 @@ sub acceptance_tests (%options) {
     include_optional => 1,
     verbose => 1,
     test_schemas => -d '.git' || $ENV{AUTHOR_TESTING},
-    %{$options{acceptance}},
+    $options{acceptance}->%*,
     $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR})
       : $ENV{TEST_PREFIXDIR} ? (test_dir => path($ENV{TEST_PREFIXDIR}, 'tests', $options{acceptance}{specification})) : (),
   );
@@ -41,8 +41,8 @@ sub acceptance_tests (%options) {
       test_dir => $accepter->test_dir->child($options{acceptance}{test_subdir}))
     if not $ENV{TEST_DIR} and $options{acceptance}{test_subdir};
 
-  my $js = JSON::Schema::Modern->new(%{$options{evaluator}});
-  my $js_short_circuit = $ENV{NO_SHORT_CIRCUIT} || JSON::Schema::Modern->new(%{$options{evaluator}}, short_circuit => 1);
+  my $js = JSON::Schema::Modern->new($options{evaluator}->%*);
+  my $js_short_circuit = $ENV{NO_SHORT_CIRCUIT} || JSON::Schema::Modern->new($options{evaluator}->%*, short_circuit => 1);
 
   my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
   $encoder->indent_length(2) if $encoder->can('indent_length');
@@ -84,14 +84,14 @@ sub acceptance_tests (%options) {
             grep +($_->{error} =~ /^EXCEPTION/
                 && $_->{error} !~ /but short_circuit is enabled/            # unevaluated*
                 && $_->{error} !~ /(max|min)imum value is not a number$/),  # optional/bignum.json
-              @{$r->TO_JSON->{errors}};
+              $r->TO_JSON->{errors}->@*;
       }
 
       $result;
     },
     add_resource => $add_resource,
     @ARGV ? (tests => { file => \@ARGV }) : (),
-    %{$options{test} // {}},
+    ($options{test} // {})->%*,
   );
 
   memory_cycle_ok($js, 'no leaks in the main evaluator object');

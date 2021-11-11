@@ -422,10 +422,10 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
       valid => false,
       errors => [
         +{
-          %{ $errors->[0] },
+          $errors->[0]->%*,
           keywordLocation => ($errors->[0]{keywordLocation} =~ s/ref/recursiveRef/r),
         },
-        @{$errors}[1..2],
+        $errors->@[1..2],
       ],
     },
     '$recursiveRef requires a $recursiveAnchor that does not exist',

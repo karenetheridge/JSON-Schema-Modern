@@ -67,15 +67,15 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
   my $last_index = max(-1, grep is_type('integer', $_),
     map +($_->keyword eq $max_index_annotation_keyword ? $_->annotation : ()), @annotations);
 
-  return 1 if $last_index == $#{$data};
+  return 1 if $last_index == $data->$#*;
 
   my @contains_annotation_indexes = $state->{spec_version} eq 'draft2019-09' ? ()
-    : map +($_->keyword eq 'contains' ? @{$_->annotation} : ()), @annotations;
+    : map +($_->keyword eq 'contains' ? $_->annotation->@* : ()), @annotations;
 
   my $valid = 1;
-  my @orig_annotations = @{$state->{annotations}};
+  my @orig_annotations = $state->{annotations}->@*;
   my @new_annotations;
-  foreach my $idx ($last_index+1 .. $#{$data}) {
+  foreach my $idx ($last_index+1 .. $data->$#*) {
     next if any { $idx == $_ } @contains_annotation_indexes;
     if (is_type('boolean', $schema->{unevaluatedItems})) {
       next if $schema->{unevaluatedItems};
@@ -98,7 +98,7 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
   }
 
   return E($state, 'subschema is not valid against all additional items') if not $valid;
-  push @{$state->{annotations}}, @new_annotations;
+  push $state->{annotations}->@*, @new_annotations;
   return A($state, true);
 }
 
@@ -123,11 +123,11 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
   my @evaluated_properties = map {
     my $keyword = $_->keyword;
     (grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties))
-      ? @{$_->annotation} : ();
+      ? $_->annotation->@* : ();
   } local_annotations($state);
 
   my $valid = 1;
-  my @orig_annotations = @{$state->{annotations}};
+  my @orig_annotations = $state->{annotations}->@*;
   my (@valid_properties, @new_annotations);
   foreach my $property (sort keys %$data) {
     next if any { $_ eq $property } @evaluated_properties;
@@ -158,7 +158,7 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
   }
 
   return E($state, 'not all additional properties are valid') if not $valid;
-  push @{$state->{annotations}}, @new_annotations;
+  push $state->{annotations}->@*, @new_annotations;
   return A($state, \@valid_properties);
 }
 

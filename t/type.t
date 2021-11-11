@@ -38,7 +38,7 @@ my %json_data = (
 
 foreach my $type (sort keys %inflated_data) {
   subtest 'inflated data, type: '.$type => sub {
-    foreach my $value (@{ $inflated_data{$type} }) {
+    foreach my $value ($inflated_data{$type}->@*) {
       my $value_copy = $value;
       ok(is_type($type, $value), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
       is(get_type($value), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
@@ -59,7 +59,7 @@ my $decoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1);
 
 foreach my $type (sort keys %json_data) {
   subtest 'JSON-encoded data, type: '.$type => sub {
-    foreach my $value (@{ $json_data{$type} }) {
+    foreach my $value ($json_data{$type}->@*) {
       $value = $decoder->decode($value);
       my $value_copy = $value;
       ok(is_type($type, $value), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));

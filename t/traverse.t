@@ -55,7 +55,7 @@ subtest 'traversal with callbacks' => sub {
     }});
 
   cmp_deeply(
-    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
         instanceLocation => '',
@@ -95,7 +95,7 @@ subtest 'vocabularies used during traversal' => sub {
   );
 
   cmp_deeply(
-    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
         instanceLocation => '',
@@ -118,7 +118,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
   });
   my $state = $js->traverse(true, { metaschema_uri => 'https://metaschema/with/wrong/spec' });
   cmp_deeply(
-    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [ map $_->TO_JSON, $state->{errors}->@* ],
     my $errors = [
       {
         instanceLocation => '',
@@ -145,11 +145,11 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     { '$id' => 'https://my-poor-schema/foo.json' },
     { metaschema_uri => 'https://metaschema/with/wrong/spec' });
   cmp_deeply(
-    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [ map $_->TO_JSON, $state->{errors}->@* ],
     [
-      @{$errors}[0..1],
+      $errors->@[0..1],
       {
-        %{$errors->[2]},
+        $errors->[2]->%*,
         absoluteKeywordLocation => 'https://my-poor-schema/foo.json',
       },
     ],
@@ -164,18 +164,18 @@ subtest 'traverse with overridden metaschema_uri' => sub {
       initial_schema_uri => 'https://my-poor-schema/foo.json#/$my_dialect_is',
     });
   cmp_deeply(
-    [ map $_->TO_JSON, @{$state->{errors}} ],
+    [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        %{$errors->[0]},
+        $errors->[0]->%*,
         keywordLocation => '/$my_dialect_is'.$errors->[0]{keywordLocation},
       },
       {
-        %{$errors->[1]},
+        $errors->[1]->%*,
         keywordLocation => '/$my_dialect_is'.$errors->[1]{keywordLocation},
       },
       {
-        %{$errors->[2]},
+        $errors->[2]->%*,
         keywordLocation => '/$my_dialect_is'.$errors->[2]{keywordLocation},
         absoluteKeywordLocation => 'https://my-poor-schema/foo.json#/$my_dialect_is',
       },

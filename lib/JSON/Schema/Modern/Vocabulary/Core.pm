@@ -71,7 +71,7 @@ sub _traverse_keyword_id ($self, $schema, $state) {
   # we don't set or update document_path because it is identical to traversed_schema_path
   $state->{schema_path} = '';
 
-  push @{$state->{identifiers}},
+  push $state->{identifiers}->@*,
     $state->{initial_schema_uri} => {
       path => $state->{traversed_schema_path},
       canonical_uri => $state->{initial_schema_uri}->clone,
@@ -92,7 +92,7 @@ sub _eval_keyword_id ($self, $data, $schema, $state) {
   $state->{schema_path} = '';
   $state->{spec_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
-  push @{$state->{dynamic_scope}}, $state->{initial_schema_uri};
+  push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
 
   return 1;
 }
@@ -128,10 +128,10 @@ sub _traverse_keyword_schema ($self, $schema, $state) {
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
-  @{$state}{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
+  $state->@{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
 
   # remember, if we don't have a sibling $id, we must be at the document root with no identifiers
-  if (@{$state->{identifiers}}) {
+  if ($state->{identifiers}->@*) {
     $state->{identifiers}[-1]{specification_version} = $state->{spec_version};
     $state->{identifiers}[-1]{vocabularies} = $state->{vocabularies};
   }
@@ -151,7 +151,7 @@ sub _traverse_keyword_anchor ($self, $schema, $state) {
 
   my $canonical_uri = canonical_schema_uri($state);
 
-  push @{$state->{identifiers}},
+  push $state->{identifiers}->@*,
     Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}}) => {
       path => $state->{traversed_schema_path}.$state->{schema_path},
       canonical_uri => $canonical_uri,
@@ -228,7 +228,7 @@ sub _eval_keyword_dynamicRef ($self, $data, $schema, $state) {
     # ...the initial URI MUST be replaced by the URI (including the fragment) for the outermost
     # schema resource in the dynamic scope that defines an identically named fragment with
     # "$dynamicAnchor".
-    foreach my $base_scope (@{$state->{dynamic_scope}}) {
+    foreach my $base_scope ($state->{dynamic_scope}->@*) {
       my $test_uri = Mojo::URL->new($base_scope)->fragment($anchor);
       my $dynamic_anchor_subschema_info = $state->{evaluator}->_fetch_from_uri($test_uri);
       if (($dynamic_anchor_subschema_info->{schema}->{'$dynamicAnchor'}//'') eq $anchor) {
@@ -252,7 +252,7 @@ sub _traverse_keyword_vocabulary ($self, $schema, $state) {
 
   my $valid = 1;
   my @vocabulary_classes;
-  foreach my $uri (sort keys %{$schema->{'$vocabulary'}}) {
+  foreach my $uri (sort keys $schema->{'$vocabulary'}->%*) {
     $valid = 0, next if not assert_keyword_type({ %$state, _schema_path_suffix => $uri }, $schema, 'boolean');
     $valid = 0, next if not assert_uri({ %$state, _schema_path_suffix => $uri }, undef, $uri);
   }
@@ -294,13 +294,13 @@ sub __fetch_vocabulary_data ($self, $state, $schema_info) {
 
   if (not exists $schema_info->{schema}{'$vocabulary'}) {
     my $metaschema_uri = $state->{evaluator}->METASCHEMA_URIS->{$schema_info->{specification_version}};
-    return @{$state->{evaluator}->_get_metaschema_vocabulary_classes($metaschema_uri)};
+    return $state->{evaluator}->_get_metaschema_vocabulary_classes($metaschema_uri)->@*;
   }
 
   my $valid = 1;
   my @vocabulary_classes;
 
-  foreach my $uri (sort keys %{$schema_info->{schema}{'$vocabulary'}}) {
+  foreach my $uri (sort keys $schema_info->{schema}{'$vocabulary'}->%*) {
     my $class_info = $state->{evaluator}->_get_vocabulary_class($uri);
     $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
       if $schema_info->{schema}{'$vocabulary'}{$uri} and not $class_info;

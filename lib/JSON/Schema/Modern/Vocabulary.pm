@@ -36,10 +36,10 @@ sub traverse_subschema ($self, $schema, $state) {
 
 sub traverse_array_schemas ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
-  return E($state, '%s array is empty', $state->{keyword}) if not @{$schema->{$state->{keyword}}};
+  return E($state, '%s array is empty', $state->{keyword}) if not $schema->{$state->{keyword}}->@*;
 
   my $valid = 1;
-  foreach my $idx (0 .. $#{$schema->{$state->{keyword}}}) {
+  foreach my $idx (0 .. $schema->{$state->{keyword}}->$#*) {
     $valid = 0 if not $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}[$idx],
       +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx });
   }
@@ -50,7 +50,7 @@ sub traverse_object_schemas ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
-  foreach my $property (sort keys %{$schema->{$state->{keyword}}}) {
+  foreach my $property (sort keys $schema->{$state->{keyword}}->%*) {
     $valid = 0 if not $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}{$property},
       +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
   }
@@ -74,11 +74,11 @@ sub eval_subschema_at_uri ($self, $data, $schema, $state, $uri) {
 
   return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
     +{
-      %{$schema_info->{document}->evaluation_configs},
+      $schema_info->{document}->evaluation_configs->%*,
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}
         .jsonp('', $state->{keyword}, exists $state->{_schema_path_suffix}
-          ? (is_arrayref($state->{_schema_path_suffix}) ? @{$state->{_schema_path_suffix}} : $state->{_schema_path_suffix})
+          ? (is_arrayref($state->{_schema_path_suffix}) ? $state->{_schema_path_suffix}->@* : $state->{_schema_path_suffix})
           : ()),
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},

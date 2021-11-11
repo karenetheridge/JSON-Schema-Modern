@@ -42,8 +42,8 @@ sub keywords ($self, $spec_version) {
 
 sub _traverse_keyword_type ($self, $schema, $state) {
   if (is_plain_arrayref($schema->{type})) {
-    return E($state, 'type array is empty') if not @{$schema->{type}};
-    foreach my $type (@{$schema->{type}}) {
+    return E($state, 'type array is empty') if not $schema->{type}->@*;
+    foreach my $type ($schema->{type}->@*) {
       return E($state, 'unrecognized type "%s"', $type//'<null>')
         if not any { ($type//'') eq $_ } qw(null boolean object array string number integer);
     }
@@ -59,12 +59,12 @@ sub _traverse_keyword_type ($self, $schema, $state) {
 
 sub _eval_keyword_type ($self, $data, $schema, $state) {
   if (is_plain_arrayref($schema->{type})) {
-    # return 1 if any { is_type($_, $data) } @{$schema->{type}};
-    foreach my $type (@{$schema->{type}}) {
+    # return 1 if any { is_type($_, $data) } $schema->{type}->@*;
+    foreach my $type ($schema->{type}->@*) {
       return 1 if is_type($type, $data)
         or ($type eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data));
     }
-    return E($state, 'wrong type (expected one of %s)', join(', ', @{$schema->{type}}));
+    return E($state, 'wrong type (expected one of %s)', join(', ', $schema->{type}->@*));
   }
   else {
     return 1 if is_type($schema->{type}, $data)
@@ -82,7 +82,7 @@ sub _traverse_keyword_enum ($self, $schema, $state) {
 sub _eval_keyword_enum ($self, $data, $schema, $state) {
   my @s; my $idx = 0;
   my %s = ( scalarref_booleans => $state->{scalarref_booleans} );
-  return 1 if any { is_equal($data, $_, $s[$idx++] = {%s}) } @{$schema->{enum}};
+  return 1 if any { is_equal($data, $_, $s[$idx++] = {%s}) } $schema->{enum}->@*;
 
   return E($state, 'value does not match'
     .(!(grep $_->{path}, @s) ? ''
@@ -248,7 +248,7 @@ sub _eval_keyword_minProperties ($self, $data, $schema, $state) {
 sub _traverse_keyword_required ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
   return E($state, '"required" element is not a string')
-    if any { !is_type('string', $_) } @{$schema->{required}};
+    if any { !is_type('string', $_) } $schema->{required}->@*;
   return E($state, '"required" values are not unique') if not is_elements_unique($schema->{required});
   return 1;
 }
@@ -256,7 +256,7 @@ sub _traverse_keyword_required ($self, $schema, $state) {
 sub _eval_keyword_required ($self, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
-  my @missing = grep !exists $data->{$_}, @{$schema->{required}};
+  my @missing = grep !exists $data->{$_}, $schema->{required}->@*;
   return 1 if not @missing;
   return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
 }
@@ -265,11 +265,11 @@ sub _traverse_keyword_dependentRequired ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
-  foreach my $property (sort keys %{$schema->{dependentRequired}}) {
+  foreach my $property (sort keys $schema->{dependentRequired}->%*) {
     $valid = E({ %$state, _schema_path_suffix => $property }, 'value is not an array'), next
       if not is_type('array', $schema->{dependentRequired}{$property});
 
-    foreach my $index (0..$#{$schema->{dependentRequired}{$property}}) {
+    foreach my $index (0..$schema->{dependentRequired}{$property}->$#*) {
       $valid = E({ %$state, _schema_path_suffix => [ $property, $index ] }, 'element #%d is not a string', $index)
         if not is_type('string', $schema->{dependentRequired}{$property}[$index]);
     }
@@ -284,10 +284,10 @@ sub _eval_keyword_dependentRequired ($self, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
-  foreach my $property (sort keys %{$schema->{dependentRequired}}) {
+  foreach my $property (sort keys $schema->{dependentRequired}->%*) {
     next if not exists $data->{$property};
 
-    if (my @missing = grep !exists($data->{$_}), @{$schema->{dependentRequired}{$property}}) {
+    if (my @missing = grep !exists($data->{$_}), $schema->{dependentRequired}{$property}->@*) {
       $valid = E({ %$state, _schema_path_suffix => $property },
         'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
     }

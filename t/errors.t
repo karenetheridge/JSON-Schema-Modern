@@ -960,8 +960,8 @@ subtest 'bad regex in schema' => sub {
     $js->evaluate(
       { my_runtime_pattern => 'foo' },
       $schema = {
-        type => @{$schema}{type},
-        properties => +{ my_runtime_pattern => @{$schema->{properties}}{my_runtime_pattern} },
+        $schema->%{type},
+        properties => +{ $schema->{properties}->%{my_runtime_pattern} },
       },
     )->TO_JSON,
     {
