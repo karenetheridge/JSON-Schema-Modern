@@ -16,7 +16,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';
-use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref is_arrayref);
+use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use Scalar::Util 'blessed';
 use Storable 'dclone';
 use Feature::Compat::Try;
@@ -165,7 +165,7 @@ sub is_elements_unique ($array, $equal_indices = undef) {
 
 # shorthand for creating and appending json pointers
 sub jsonp {
-  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_arrayref($_) ? @$_ : $_), grep defined, @_);
+  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_plain_arrayref($_) ? @$_ : $_), grep defined, @_);
 }
 
 # get all annotations produced for the current instance data location (that are visible to this
@@ -176,7 +176,7 @@ sub local_annotations ($state) {
 
 # shorthand for finding the canonical uri of the present schema location
 sub canonical_schema_uri ($state, @extra_path) {
-  splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_arrayref($extra_path[-1]);
+  splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_plain_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
   $uri->fragment(undef) if not length($uri->fragment);

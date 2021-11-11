@@ -14,7 +14,7 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use Ref::Util 0.100 'is_arrayref';
+use Ref::Util 0.100 'is_plain_arrayref';
 use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type abort);
 use Carp ();
 use namespace::clean;
@@ -78,7 +78,7 @@ sub eval_subschema_at_uri ($self, $data, $schema, $state, $uri) {
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}
         .jsonp('', $state->{keyword}, exists $state->{_schema_path_suffix}
-          ? (is_arrayref($state->{_schema_path_suffix}) ? $state->{_schema_path_suffix}->@* : $state->{_schema_path_suffix})
+          ? (is_plain_arrayref($state->{_schema_path_suffix}) ? $state->{_schema_path_suffix}->@* : $state->{_schema_path_suffix})
           : ()),
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},
