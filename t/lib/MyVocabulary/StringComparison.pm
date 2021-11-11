@@ -1,5 +1,11 @@
 package MyVocabulary::StringComparison;
 use Moo;
+use strictures 2;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
+no if "$]" >= 5.031009, feature => 'indirect';
+no if "$]" >= 5.033001, feature => 'multidimensional';
+no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 with 'JSON::Schema::Modern::Vocabulary';
 
 use JSON::Schema::Modern::Utilities qw(assert_keyword_type is_type E);

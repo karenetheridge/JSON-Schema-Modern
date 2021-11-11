@@ -6,12 +6,13 @@ package JSON::Schema::Modern::Utilities;
 
 our $VERSION = '0.525';
 
-use 5.016;
+use 5.020;
+use strictures 2;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, experimental => 're_strict';
-use strictures 2;
 use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004001 'is_bool';

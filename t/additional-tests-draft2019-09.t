@@ -1,11 +1,12 @@
 # vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
 use strict;
 use warnings;
-use 5.016;
+use 5.020;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, experimental => 're_strict';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;

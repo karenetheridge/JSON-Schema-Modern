@@ -6,18 +6,19 @@ package JSON::Schema::Modern::Vocabulary::Applicator;
 
 our $VERSION = '0.525';
 
-use 5.016;
+use 5.020;
+use Moo;
+use strictures 2;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, experimental => 're_strict';
-use strictures 2;
 use List::Util 1.45 qw(any uniqstr);
 use Ref::Util 0.100 'is_plain_arrayref';
 use Sub::Install;
 use JSON::Schema::Modern::Utilities qw(is_type jsonp E A assert_keyword_type assert_pattern true is_elements_unique);
 use JSON::Schema::Modern::Vocabulary::Unevaluated;
-use Moo;
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';

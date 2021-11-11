@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - minimum Perl version raised to 5.20
 
 0.524     2021-11-10 04:36:49Z
           - some refactoring of vocabulary and document methods, to faciliate

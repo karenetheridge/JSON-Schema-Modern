@@ -7,12 +7,14 @@ package JSON::Schema::Modern;
 
 our $VERSION = '0.525';
 
-use 5.016;  # for fc, unicode_strings features
+use 5.020;  # for fc, unicode_strings features
+use Moo;
+use strictures 2;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, experimental => 're_strict';
-use strictures 2;
 use JSON::MaybeXS;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap);
@@ -23,7 +25,6 @@ use Path::Tiny;
 use Storable 'dclone';
 use File::ShareDir 'dist_dir';
 use Module::Runtime 'use_module';
-use Moo;
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName Tuple);

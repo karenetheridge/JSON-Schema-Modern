@@ -1,11 +1,12 @@
 # vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
 use strict;
 use warnings;
-use 5.016;
+use 5.020;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, experimental => 're_strict';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
@@ -46,10 +47,6 @@ acceptance_tests(
       { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # TODO, see test suite PR#505
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'zero-width whitespace matches' },
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' },
-      "$]" < 5.017001 ? ( # in Unicode 6.2, vertical tab was added to \s
-        { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'Line tabulation matches' },
-        { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'Line tabulation does not match' },
-      ) : (),
       { file => 'optional/float-overflow.json' },             # see slack logs re multipleOf algo
       $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
         { file => 'const.json',

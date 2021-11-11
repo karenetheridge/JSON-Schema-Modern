@@ -6,16 +6,17 @@ package JSON::Schema::Modern::Vocabulary;
 
 our $VERSION = '0.525';
 
-use 5.016;
+use 5.020;
+use Moo::Role;
+use strictures 2;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use if "$]" >= 5.022, experimental => 're_strict';
-use strictures 2;
 use Ref::Util 0.100 'is_arrayref';
 use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type abort);
 use Carp ();
-use Moo::Role;
 use namespace::clean;
 
 our @CARP_NOT = qw(JSON::Schema::Modern);
