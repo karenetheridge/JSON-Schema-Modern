@@ -19,6 +19,9 @@ use MooX::TypeTiny;
 use Types::Standard qw(Str Undef InstanceOf);
 use namespace::clean;
 
+use overload
+  '""' => sub { $_[0]->stringify };
+
 has [qw(
   instance_location
   keyword_location
@@ -50,6 +53,10 @@ sub TO_JSON ($self) {
       : ( absoluteKeywordLocation => $self->absolute_keyword_location->to_string ),
     error => $self->error,  # TODO: allow localization
   };
+}
+
+sub stringify ($self) {
+    $self->keyword_location.': '.$self->error."\n";
 }
 
 1;
@@ -106,6 +113,8 @@ schema never declared an absolute base URI (containing a scheme), this URI won't
 The actual error string.
 
 =head1 METHODS
+
+=for Pod::Coverage stringify
 
 =head2 TO_JSON
 
