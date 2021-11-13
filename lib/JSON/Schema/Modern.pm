@@ -32,7 +32,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_schema_uri E abort annotate_self);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -417,7 +417,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   foreach my $keyword (sort keys $removed_keywords{$state->{spec_version}}->%*) {
     next if not exists $schema->{$keyword};
     my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
-      .canonical_schema_uri($state).'")';
+      .canonical_uri($state).'")';
     if (my $alternates = $removed_keywords{$state->{spec_version}}->{$keyword}) {
       my @list = map '"'.$_.'"', @$alternates;
       @list = ((map $_.',', @list[0..$#list-1]), $list[-1]) if @list > 2;
@@ -443,7 +443,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   # find all schema locations in effect at this data path + canonical_uri combination
   # if any of them are absolute prefix of this schema location, we are in a loop.
-  my $canonical_uri = canonical_schema_uri($state);
+  my $canonical_uri = canonical_uri($state);
   my $schema_location = $state->{traversed_schema_path}.$state->{schema_path};
   abort($state, 'EXCEPTION: infinite loop detected (same location evaluated twice)')
     if grep substr($schema_location, 0, length) eq $_,
@@ -962,7 +962,7 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
     callbacks => {
       '$ref' => sub ($schema, $state) {
         push @refs, Mojo::URL->new($schema->{'$ref'})
-          ->to_abs(JSON::Schema::Modern::Utilities::canonical_schema_uri($state));
+          ->to_abs(JSON::Schema::Modern::Utilities::canonical_uri($state));
       }
     },
   });

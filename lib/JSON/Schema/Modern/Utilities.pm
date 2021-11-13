@@ -33,7 +33,7 @@ our @EXPORT_OK = qw(
   is_elements_unique
   jsonp
   local_annotations
-  canonical_schema_uri
+  canonical_uri
   E
   A
   abort
@@ -175,7 +175,7 @@ sub local_annotations ($state) {
 }
 
 # shorthand for finding the canonical uri of the present schema location
-sub canonical_schema_uri ($state, @extra_path) {
+sub canonical_uri ($state, @extra_path) {
   splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_plain_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   $uri->fragment(($uri->fragment//'').jsonp($state->{schema_path}, @extra_path));
@@ -196,7 +196,7 @@ sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $uri = canonical_schema_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
+  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
@@ -228,7 +228,7 @@ sub E ($state, $error_string, @args) {
 sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations};
 
-  my $uri = canonical_schema_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
+  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
@@ -344,7 +344,7 @@ __END__
 This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
-canonical_schema_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
+canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
 annotate_self is_uri_reference
 
 =cut

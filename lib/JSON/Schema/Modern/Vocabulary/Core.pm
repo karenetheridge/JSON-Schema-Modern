@@ -14,7 +14,7 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_schema_uri E assert_uri_reference assert_uri jsonp);
+use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_uri E assert_uri_reference assert_uri jsonp);
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -149,7 +149,7 @@ sub _traverse_keyword_anchor ($self, $schema, $state) {
       or $state->{spec_version} eq 'draft2020-12'
         and $schema->{$state->{keyword}} !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 
-  my $canonical_uri = canonical_schema_uri($state);
+  my $canonical_uri = canonical_uri($state);
 
   push $state->{identifiers}->@*,
     Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}}) => {
@@ -179,7 +179,7 @@ sub _eval_keyword_recursiveAnchor ($self, $data, $schema, $state) {
 
   # record the canonical location of the current position, to be used against future resolution
   # of a $recursiveRef uri -- as if it was the current location when we encounter a $ref.
-  $state->{recursive_anchor_uri} = canonical_schema_uri($state);
+  $state->{recursive_anchor_uri} = canonical_uri($state);
   return 1;
 }
 

@@ -11,7 +11,7 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use JSON::Schema::Modern;
-use JSON::Schema::Modern::Utilities 'canonical_schema_uri';
+use JSON::Schema::Modern::Utilities 'canonical_uri';
 use lib 't/lib';
 use Helper;
 
@@ -46,7 +46,7 @@ subtest 'traversal with callbacks' => sub {
   my $js = JSON::Schema::Modern->new;
   my $state = $js->traverse($schema, { callbacks => {
       '$ref' => sub ($schema, $state) {
-        my $canonical_uri = canonical_schema_uri($state);
+        my $canonical_uri = canonical_uri($state);
         my $ref_uri = Mojo::URL->new($schema->{'$ref'});
         $ref_uri = $ref_uri->to_abs($canonical_uri) if not $ref_uri->is_abs;
         $refs{$state->{traversed_schema_path}.$state->{schema_path}} = $ref_uri->to_string;
