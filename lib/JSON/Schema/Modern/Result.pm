@@ -21,11 +21,13 @@ use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
 use List::Util 1.50 'head';
+use Safe::Isa;
 use namespace::clean;
 
 use overload
   'bool'  => sub { $_[0]->valid },
   '0+'    => sub { $_[0]->count },
+  '&'     => \&combine,
   fallback => 1;
 
 has valid => (
@@ -140,6 +142,25 @@ sub format ($self, $style) {
 
 sub count { $_[0]->valid ? $_[0]->annotation_count : $_[0]->error_count }
 
+sub combine ($self, $other, $swap) {
+  die 'wrong type for & operation' if not $other->$_isa(__PACKAGE__);
+
+  return $self if $other == $self;
+
+  return ref($self)->new(
+    valid => $self->valid && $other->valid,
+    annotations => [
+      $self->annotations,
+      $other->annotations,
+    ],
+    errors => [
+      $self->errors,
+      $other->errors,
+    ],
+    output_format => $self->output_format,
+  );
+}
+
 sub TO_JSON ($self) {
   $self->format($self->output_format);
 }
@@ -174,6 +195,9 @@ __END__
   # use in string context
   say 'full results: ', $result;
 
+  # combine two results into one:
+  my $overall_result = $result1 & $result2;
+
 =head1 DESCRIPTION
 
 This object holds the complete results of evaluating a data payload against a JSON Schema using
@@ -181,8 +205,14 @@ L<JSON::Schema::Modern>.
 
 =head1 OVERLOADS
 
-The object contains a boolean overload, which evaluates to the value of L</valid>, so you can
+The object contains a I<boolean> overload, which evaluates to the value of L</valid>, so you can
 use the result of L<JSON::Schema::Modern/evaluate> in boolean context.
+
+=for stopwords iff
+
+The object also contains a I<bitwise AND> overload (C<&>), for combining two results into one (the
+result is valid iff both inputs are valid; annotations and errors from the second argument are
+appended to those of the first).
 
 =head1 ATTRIBUTES
 
@@ -236,5 +266,10 @@ Calls L</format> with the style configured in L</output_format>.
 
 Returns the number of annotations when the result is true, or the number of errors when the result
 is false.
+
+=head2 combine
+
+When provided with another result object, returns a new object with the combination of all results.
+See C<&> at L</OVERLOADS>.
 
 =cut

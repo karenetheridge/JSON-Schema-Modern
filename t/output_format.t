@@ -11,7 +11,9 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
+use Test::Fatal;
 use JSON::Schema::Modern;
+use Scalar::Util 'refaddr';
 use lib 't/lib';
 use Helper;
 
@@ -449,6 +451,94 @@ subtest 'strict_basic' => sub {
       ],
     },
     'strict_basic turns json pointers into URIs, including uri escapes',
+  );
+};
+
+subtest 'AND two result objects together' => sub {
+  my @results = map {
+    my $count = $_;
+    my $valid = $count % 2;
+    JSON::Schema::Modern::Result->new(
+      valid => $valid,
+      ($valid ? 'annotations' : 'errors') => [
+        map ${\ ('JSON::Schema::Modern::'.($valid ? 'Annotation' : 'Error'))}->new(
+          keyword => 'keyword '.$count.'-'.$_,
+          instance_location => 'instance location '.$count.'-'.$_,
+          keyword_location => 'keyword location '.$count.'-'.$_,
+          $valid ? (annotation => 'annotation '.$count.'-'.$_) : (error => 'error '.$count.'-'.$_),
+        ), 0..1
+      ],
+    )
+  } 0..3;
+
+  cmp_deeply(
+    (my $one_true = $results[0] & $results[1]),
+    methods(valid => false),
+    listmethods(
+      errors => [
+        map methods(TO_JSON => {
+          instance_location => 'instance location 0-'.$_,
+          keyword_location => 'keyword location 0-'.$_,
+          error => 'error 0-'.$_,
+        }), 0..1
+      ],
+      annotations => [
+        map methods(TO_JSON => {
+          instance_location => 'instance location 1-'.$_,
+          keyword_location => 'keyword location 1-'.$_,
+          annotation => 'annotation 1-'.$_,
+        }), 0..1
+      ],
+    ),
+    'ANDing true and false results = invalid, but errors and annotations both preserved',
+  );
+
+  cmp_deeply(
+    (my $both_true = $results[1] & $results[3]),
+    methods(valid => true),
+    listmethods(
+      annotations => [
+        map {
+          my $count = $_;
+          map methods(TO_JSON => {
+            instance_location => 'instance location '.$count.'-'.$_,
+            keyword_location => 'keyword location '.$count.'-'.$_,
+            annotation => 'annotation '.$count.'-'.$_,
+          }), 0..1
+        } 1,3
+      ],
+    ),
+    'ANDing two true results = valid',
+  );
+
+  cmp_deeply(
+    (my $both_false = $results[0] & $results[2]),
+    methods(valid => false),
+    listmethods(
+      errors => [
+        map {
+          my $count = $_;
+          map methods(TO_JSON => {
+            instance_location => 'instance location '.$count.'-'.$_,
+            keyword_location => 'keyword location '.$count.'-'.$_,
+            error => 'error '.$count.'-'.$_,
+          }), 0..1
+        } 0,2
+      ],
+    ),
+    'ANDing two false results = invalid',
+  );
+
+  like(
+    exception { $results[0] & 0 },
+    qr/wrong type for \& operation/,
+    'only Result objects can be processed',
+  );
+
+  is(
+    refaddr(my $itself = $results[0] & $results[0]),
+    refaddr($results[0]),
+    'ANDing a result with itself is a no-op',
   );
 };
 
