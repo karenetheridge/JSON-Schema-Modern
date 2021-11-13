@@ -207,15 +207,17 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
 # embedded resources via $id and $anchor keywords within.
 # Returns the internal $state object accumulated during the traversal.
 sub traverse ($self, $schema_reference, $config_override = {}) {
-  my $base_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
+  # Note: the starting position is not guaranteed to be at the root of the $document.
+  my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
+  my $initial_path = $config_override->{traversed_schema_path} // '';
   my $spec_version = $self->specification_version//SPECIFICATION_VERSION_DEFAULT;
 
   my $state = {
     depth => 0,
-    data_path => '',                    # this never changes since we don't have an instance yet
-    traversed_schema_path => '',        # the accumulated traversal path as of the start, or last $id
-    initial_schema_uri => $base_uri,    # the canonical URI as of the start, or last $id
-    schema_path => '',                  # the rest of the path, since the last $id
+    data_path => '',                        # this never changes since we don't have an instance yet
+    initial_schema_uri => $initial_uri,     # the canonical URI as of the start of this method, or last $id
+    traversed_schema_path => $initial_path, # the accumulated traversal path as of the start, or last $id
+    schema_path => '',                      # the rest of the path, since the start of this method, or last $id
     errors => [],
     identifiers => [],
     configs => {},
@@ -262,12 +264,13 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
   my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
+  my $initial_path = $config_override->{traversed_schema_path} // '';
 
   my $state = {
     data_path => $config_override->{data_path} // '',
-    traversed_schema_path => '',        # the accumulated traversal path as of the start, or last $id, or up to the last traversed $ref
-    initial_schema_uri => $base_uri,    # the canonical URI as of the start or last $id, or the last traversed $ref
-    schema_path => '',                  # the rest of the path, since the last $id or the last traversed $ref
+    traversed_schema_path => $initial_path, # the accumulated path as of the start of evaluation, or last $id or $ref
+    initial_schema_uri => $base_uri,    # the canonical URI as of the start of evaluation, or last $id or $ref
+    schema_path => '',                  # the rest of the path, since the start of evaluation, or last $id or $ref
   };
 
   my $valid;
@@ -275,8 +278,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     my $schema_info;
 
     if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
-      # TODO: resolve $uri against base_uri
+      # TODO: resolve this URI against 'base_uri'
       $schema_info = $self->_fetch_from_uri($schema_reference);
+      $state->{initial_schema_uri} = Mojo::URL->new($config_override->{initial_schema_uri} // $base_uri);
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
@@ -298,9 +302,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     $state = +{
       %$state,
       depth => 0,
-      initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start or last $id, or the last traversed $ref
+      initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start of evaluation, or last $id or $ref
       document => $schema_info->{document},   # the ::Document object containing this schema
-      document_path => $schema_info->{document_path}, # the path within the document of this schema, since the last $id or $ref traversal
+      document_path => $schema_info->{document_path}, # the path within the document of this schema, as of the start of evaluation, or last $id or $ref
       dynamic_scope => [ $schema_info->{canonical_uri} ],
       errors => [],
       annotations => [],

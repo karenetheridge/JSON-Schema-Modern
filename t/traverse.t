@@ -220,4 +220,119 @@ subtest 'traverse with overridden metaschema_uri' => sub {
   );
 };
 
+subtest 'start traversing below the document root' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  # Remember: by this point the $document object exists, but we have no idea where in the document we are.
+  # It might not even be a JSON Schema.
+  # Let's say the document actually looks like:
+  # {
+  #   $id => 'my_document.yaml',
+  #   components => {
+  #     alpha => {
+  #       $id => 'my_subdocument.yaml',
+  #       subid => {
+  #         *** SUBSCHEMA BELOW ***
+  #       },
+  #     },
+  #   },
+  # }
+  my $state = $js->traverse(
+    {
+      properties => {
+        myprop => {
+          allOf => [
+            {
+              '$id' => 'inner_document',
+              properties => {
+                foo => 'not a valid schema',
+              },
+            },
+          ],
+        },
+      },
+      type => 'not a valid type',
+    },
+    {
+      initial_schema_uri => 'dir/my_subdocument#/subid',
+      traversed_schema_path => '/components/alpha/subid',
+    },
+  );
+  cmp_deeply(
+    [ map $_->TO_JSON, $state->{errors}->@* ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/components/alpha/subid/properties/myprop/allOf/0/properties/foo',
+        absoluteKeywordLocation => 'dir/inner_document#/properties/foo',
+        error => 'invalid schema type: string',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/components/alpha/subid/type',
+        absoluteKeywordLocation => 'dir/my_subdocument#/subid/type',
+        error => 'unrecognized type "not a valid type"',
+      },
+    ],
+    'identified the overridden location of all errors during traverse',
+  );
+
+
+  cmp_deeply(
+    my $identifiers = +{
+      $js->traverse(
+        {
+          properties => {
+            alpha => {
+              '$id' => 'alpha_id',
+              properties => {
+                alpha_one => {
+                  '$id' => 'alpha_one_id',
+                },
+                alpha_two => {
+                  '$anchor' => 'alpha_two_anchor',
+                },
+              },
+            },
+            beta => {
+              '$anchor' => 'beta_anchor',
+            },
+          },
+        },
+        {
+          initial_schema_uri => 'dir/my_subdocument#/subid',
+          traversed_schema_path => '/components/alpha/subid',
+        },
+      )->{identifiers}->@*
+    },
+    {
+      'dir/alpha_id' => {
+        canonical_uri => str('dir/alpha_id'),
+        path => '/components/alpha/subid/properties/alpha',
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+      },
+      'dir/alpha_one_id' => {
+        canonical_uri => str('dir/alpha_one_id'),
+        path => '/components/alpha/subid/properties/alpha/properties/alpha_one',
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+      },
+      'dir/alpha_id#alpha_two_anchor'=> {
+        canonical_uri => str('dir/alpha_id#/properties/alpha_two'),
+        path => '/components/alpha/subid/properties/alpha/properties/alpha_two',
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+      },
+      'dir/my_subdocument#beta_anchor'=> {
+        canonical_uri => str('dir/my_subdocument#/subid/properties/beta'),
+        path => '/components/alpha/subid/properties/beta',
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+      },
+    },
+    'identifiers are correctly extracted when traversing below the document root',
+  );
+};
+
 done_testing;

@@ -1296,4 +1296,83 @@ subtest dependentRequired => sub {
   );
 };
 
+subtest 'evaluate in the middle of a document' => sub {
+  $js->add_schema({
+    '$id' => 'https://myschema',
+    properties => {
+      foo => {
+        '$id' => 'https://my-inner-schema',
+        allOf => [
+          {                       # <-- evaluation starts here
+            type => 'object',
+            properties => {
+              bar => {
+                type => 'string',
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        bar => ['not a string'],
+      },
+      'https://myschema#/properties/foo/allOf/1',
+      {
+        data_path => '/request/body',
+        traversed_schema_path => '/some/other/thing/$ref/foo/$ref',
+        initial_schema_uri => 'https://somewhere/else#/foo',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/request/body',
+          keywordLocation => '/some/other/thing/$ref/foo/$ref',
+          absoluteKeywordLocation => 'https://somewhere/else#/foo',
+          error => 'EXCEPTION: unable to find resource https://myschema#/properties/foo/allOf/1',
+        },
+      ],
+    },
+    'provided evaluation uri does not exist',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        bar => ['not a string'],
+      },
+      'https://myschema#/properties/foo/allOf/0', # <-- not the canonical URI!
+      {
+        data_path => '/request/body',
+        traversed_schema_path => '/some/other/thing/$ref/foo/$ref',
+        initial_schema_uri => 'https://somewhere/else#/foo',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/request/body/bar',
+          keywordLocation => '/some/other/thing/$ref/foo/$ref/properties/bar/type',
+          absoluteKeywordLocation => 'https://my-inner-schema#/allOf/0/properties/bar/type',
+          error => 'wrong type (expected string)',
+        },
+        {
+          instanceLocation => '/request/body',
+          keywordLocation => '/some/other/thing/$ref/foo/$ref/properties',
+          absoluteKeywordLocation => 'https://my-inner-schema#/allOf/0/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    error => 'error has correct locations from override hash',
+  );
+};
+
 done_testing;
