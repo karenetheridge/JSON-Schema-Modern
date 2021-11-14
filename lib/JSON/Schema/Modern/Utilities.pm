@@ -265,12 +265,13 @@ sub assert_keyword_exists ($state, $schema) {
 sub assert_keyword_type ($state, $schema, $type) {
   croak 'assert_keyword_type called in void context' if not defined wantarray;
   my $value = $schema->{$state->{keyword}};
-  $value = is_plain_hashref($value) ? $value->{$state->{_schema_path_suffix}}
-      : is_plain_arrayref($value) ? $value->[$state->{_schema_path_suffix}]
+  my $thing = 'value';
+  ($value, $thing) = is_plain_hashref($value) ? ($value->{$state->{_schema_path_suffix}}, 'value at "'.$state->{_schema_path_suffix}.'"')
+      : is_plain_arrayref($value) ? ($value->[$state->{_schema_path_suffix}], 'item '.$state->{_schema_path_suffix})
       : die 'unknown type'
     if exists $state->{_schema_path_suffix};
   return 1 if is_type($type, $value);
-  E($state, '%s value is not a%s %s', $state->{keyword}, ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
+  E($state, '%s %s is not a%s %s', $state->{keyword}, $thing, ($type =~ /^[aeiou]/ ? 'n' : ''), $type);
 }
 
 sub assert_pattern ($state, $pattern) {
