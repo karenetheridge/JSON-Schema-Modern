@@ -311,6 +311,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       seen => {},
       spec_version => $schema_info->{specification_version},
       vocabularies => $schema_info->{vocabularies},
+      callbacks => $config_override->{callbacks} // {},
       evaluator => $self,
       $schema_info->{document}->evaluation_configs->%*,
       (map {
@@ -487,6 +488,9 @@ sub _eval_subschema ($self, $data, $schema, $state) {
         warn 'result is false but there are no errors (keyword: '.$keyword.')'
           if $error_count == $state->{errors}->@*;
         $valid = 0;
+      }
+      elsif (my $sub = $state->{callbacks}{$keyword}) {
+        $sub->($schema, $state);
       }
 
       last ALL_KEYWORDS if not $valid and $state->{short_circuit};
@@ -938,6 +942,21 @@ Optionally, a hashref can be passed as a third parameter which allows changing t
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans> and/or
 L</validate_formats> settings for just this
 evaluation call.
+
+You can pass a series of callback subs to this method corresponding to keywords, which is useful for
+identifying various data that are not exposed by annotations.
+This feature is highly experimental and may change in the future.
+
+For example, to find the locations where all C<$ref> keywords are applied B<successfully>:
+
+  my @used_ref_at;
+  $js->evaluate($data, $schema_or_uri, {
+    callbacks => {
+      '$ref' => sub ($schema, $state) {
+        push @used_ref_at, $state->{data_path};
+      }
+    },
+  });
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 

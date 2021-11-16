@@ -6,6 +6,8 @@ Revision history for JSON-Schema-Modern
             without vocabulary support (see issue #44)
           - & overload added to JSON::Schema::Modern::Result, for combining
             results
+          - add callbacks to evaluate(), to enable finding certain positions
+            of interest in a document or schema
 
 0.524     2021-11-10 04:36:49Z
           - some refactoring of vocabulary and document methods, to faciliate
