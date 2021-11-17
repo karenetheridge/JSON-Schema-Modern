@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.524
+version 0.525
 
 =head1 SYNOPSIS
 
@@ -184,6 +184,21 @@ L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</sc
 L</validate_formats> settings for just this
 evaluation call.
 
+You can pass a series of callback subs to this method corresponding to keywords, which is useful for
+identifying various data that are not exposed by annotations.
+This feature is highly experimental and may change in the future.
+
+For example, to find the locations where all C<$ref> keywords are applied B<successfully>:
+
+  my @used_ref_at;
+  $js->evaluate($data, $schema_or_uri, {
+    callbacks => {
+      '$ref' => sub ($schema, $state) {
+        push @used_ref_at, $state->{data_path};
+      }
+    },
+  });
+
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
 =head2 traverse
@@ -207,7 +222,7 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
     callbacks => {
       '$ref' => sub ($schema, $state) {
         push @refs, Mojo::URL->new($schema->{'$ref'})
-          ->to_abs(JSON::Schema::Modern::Utilities::canonical_schema_uri($state));
+          ->to_abs(JSON::Schema::Modern::Utilities::canonical_uri($state));
       }
     },
   });
