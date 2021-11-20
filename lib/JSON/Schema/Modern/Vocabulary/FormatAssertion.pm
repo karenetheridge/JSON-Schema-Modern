@@ -209,6 +209,11 @@ Support is also provided for
 * the equivalent Draft 7 keyword, as formally specified in
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-7>.
 
+Assertion behaviour can be enabled by
+L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1.2/referencing this vocabulary explicitly>
+in a metaschema's C<$vocabulary> keyword, or by toggling the
+L<JSON::Schema::Modern/validate_formats> option.
+
 Overrides to particular format implementations, or additions of new ones, can be done through
 L<JSON::Schema::Modern/format_validations>.
 
