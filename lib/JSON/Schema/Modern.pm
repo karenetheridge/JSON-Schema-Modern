@@ -239,7 +239,16 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     );
   }
   catch ($e) {
-    push $state->{errors}->@*, $e->errors;
+    if ($e->$_isa('JSON::Schema::Modern::Result')) {
+      push $state->{errors}->@*, $e->errors;
+    }
+    elsif ($e->$_isa('JSON::Schema::Modern::Error')) {
+      push $state->{errors}->@*, $e;
+    }
+    else {
+      ()= E($state, 'EXCEPTION: '.$e);
+    }
+
     return $state;
   }
 

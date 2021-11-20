@@ -183,6 +183,8 @@ sub traverse ($self, $evaluator) {
     }
   );
 
+  return $state if $state->{errors}->@*;
+
   # we don't store the metaschema_uri in $state nor in resource_index, but we can figure it out
   # easily enough.
   my $metaschema_uri = (is_plain_hashref($self->schema) ? $self->schema->{'$schema'} : undef)
