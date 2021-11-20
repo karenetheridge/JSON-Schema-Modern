@@ -480,20 +480,24 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       delete $unknown_keywords{$keyword};
 
       my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
-      next if not $vocabulary->can($method);
-
       $state->{keyword} = $keyword;
-      my $error_count = $state->{errors}->@*;
-      if (not $vocabulary->$method($data, $schema, $state)) {
-        warn 'result is false but there are no errors (keyword: '.$keyword.')'
-          if $error_count == $state->{errors}->@*;
-        $valid = 0;
+
+      if ($vocabulary->can($method)) {
+        my $error_count = $state->{errors}->@*;
+
+        if (not $vocabulary->$method($data, $schema, $state)) {
+          warn 'result is false but there are no errors (keyword: '.$keyword.')'
+            if $error_count == $state->{errors}->@*;
+          $valid = 0;
+
+          last ALL_KEYWORDS if $state->{short_circuit};
+          next;
+        }
       }
-      elsif (my $sub = $state->{callbacks}{$keyword}) {
+
+      if (my $sub = $state->{callbacks}{$keyword}) {
         $sub->($schema, $state);
       }
-
-      last ALL_KEYWORDS if not $valid and $state->{short_circuit};
 
       push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];
     }

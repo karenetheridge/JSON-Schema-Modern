@@ -11,6 +11,8 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use JSON::Schema::Modern;
+use lib 't/lib';
+use Helper;
 
 my $js = JSON::Schema::Modern->new;
 
@@ -96,7 +98,6 @@ subtest 'evaluation callbacks' => sub {
   );
   ok($result, 'evaluation was successful');
 
-  ok($result, 'evaluation was successful');
   cmp_deeply(
     \@used_ref_at,
     bag(
@@ -105,6 +106,37 @@ subtest 'evaluation callbacks' => sub {
       '/0/a/b',
     ),
     'successful subschemas have callbacks called, but not failed subschemas',
+  );
+};
+
+subtest 'callbacks for keywords without eval subs' => sub {
+  my %keywords;
+  my $result = $js->evaluate(
+    'hello',
+    {
+      '$id' => 'my_weird_schema',
+      '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+      '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/core' => true },
+      '$anchor' => 'my_anchor',
+      '$comment' => 'my comment',
+      '$defs' => { foo => true },
+      '$dynamicAnchor' => 'dynamicanchor',
+      if => true, then => true, else => true,
+    },
+    {
+      callbacks => {
+        map +($_ => sub ($schema, $state) {
+          ++$keywords{$state->{keyword}}
+        }), qw($anchor $comment $defs $dynamicAnchor if then else $schema $vocabulary),
+      },
+    },
+  );
+  ok($result, 'evaluation was successful');
+
+  cmp_deeply(
+    \%keywords,
+    { map +($_ => 1), qw($anchor $comment $defs $dynamicAnchor if then else $schema $vocabulary) },
+    'callbacks are triggered for keywords even when they lack evaluation subs',
   );
 };
 
