@@ -877,6 +877,11 @@ subtest '$vocabulary' => sub {
       errors => [
         {
           instanceLocation => '',
+          keywordLocation => '/$vocabulary',
+          error => 'metaschemas must have an $id',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/$vocabulary/#~1notauri',
           error => '"#/notauri" is not a valid URI',
         },
@@ -884,11 +889,6 @@ subtest '$vocabulary' => sub {
           instanceLocation => '',
           keywordLocation => '/$vocabulary/https:~1~1foo',
           error => '$vocabulary value at "https://foo" is not a boolean',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/$vocabulary',
-          error => 'metaschemas must have an $id',
         },
       ],
     },
