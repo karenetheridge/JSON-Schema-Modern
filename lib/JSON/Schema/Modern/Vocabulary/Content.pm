@@ -15,7 +15,8 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Storable 'dclone';
-use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type);
+use Feature::Compat::Try;
+use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type E abort);
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -41,16 +42,43 @@ sub _traverse_keyword_contentEncoding ($self, $schema, $state) {
 
 sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
-  return A($state, $schema->{$state->{keyword}});
+
+  if ($state->{validate_content_schemas}) {
+    my $decoder = $state->{evaluator}->get_encoding($schema->{contentEncoding});
+    abort($state, 'cannot find decoder for contentEncoding "%s"', $schema->{contentEncoding})
+      if not $decoder;
+
+    try { $state->{_content_ref} = $decoder->(\$data) }
+    catch ($e) { return E($state, $e) }
+  }
+
+  return A($state, $schema->{$state->{keyword}})
 }
 
 sub _traverse_keyword_contentMediaType { goto \&_traverse_keyword_contentEncoding }
 
-sub _eval_keyword_contentMediaType { goto \&_eval_keyword_contentEncoding }
+sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
+  return 1 if not is_type('string', $data);
+
+  if ($state->{validate_content_schemas}) {
+    my $decoder = $state->{evaluator}->get_media_type($schema->{contentMediaType});
+    abort($state, 'cannot find decoder for contentMediaType "%s"', $schema->{contentMediaType})
+      if not $decoder;
+
+    # contentEncoding failed to decode the content
+    return 1 if exists $schema->{contentEncoding} and not exists $state->{_content_ref};
+
+    try { $state->{_content_ref} = $decoder->($state->{_content_ref} // \$data) }
+    catch ($e) { return E($state, $e) }
+  }
+
+  return A($state, $schema->{$state->{keyword}})
+}
 
 sub _traverse_keyword_contentSchema ($self, $schema, $state) {
-  # since contentSchema should never be evaluated in the context of the containing schema, it is
-  # not appropriate to gather identifiers found therein -- but we can still validate the subschema.
+  # since contentSchema should never be assumed to be evaluated in the context of the containing
+  # schema, it is not appropriate to gather identifiers found therein -- but we can still validate
+  # the subschema.
   $self->traverse_subschema($schema, +{ %$state, identifiers => [] });
 }
 
@@ -58,7 +86,13 @@ sub _eval_keyword_contentSchema ($self, $data, $schema, $state) {
   return 1 if not exists $schema->{contentMediaType};
   return 1 if not is_type('string', $data);
 
-  return A($state, dclone($schema->{contentSchema}));
+  return A($state, dclone($schema->{contentSchema})) if not $state->{validate_content_schemas};
+
+  return 1 if not exists $state->{_content_ref};  # contentMediaType failed to decode the content
+
+  return 1 if $self->eval($state->{_content_ref}->$*, $schema->{contentSchema},
+    { %$state, schema_path => $state->{schema_path}.'/contentSchema' });
+  return E($state, 'subschema is not valid');
 }
 
 1;
@@ -84,5 +118,11 @@ Support is also provided for
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-8>.
 * the equivalent Draft 7 keywords that correspond to this vocabulary and are formally specified in
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-8>.
+
+Assertion behaviour can be enabled by toggling the L<JSON::Schema::Modern/validate_content_schemas>
+option.
+
+New handlers for C<contentEncoding> and C<contentMediaType> can be done through
+L<JSON::Schema::Modern/add_encoding> and L<JSON::Schema::Modern/add_media_type>.
 
 =cut

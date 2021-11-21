@@ -38,7 +38,6 @@ acceptance_tests(
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
       { file => 'optional/bignum.json' },     # TODO: see issue #10
-      { file => 'optional/content.json' },    # assertion behaviour removed in draft2019-09; will not implement
       # various edge cases that are difficult to accomodate
       { file => 'optional/ecmascript-regex.json', group_description => '\w in patterns matches [A-Za-z0-9_], not unicode letters', test_description => [ 'literal unicode character in json string', 'unicode character in hex format in string' ] },
       { file => 'optional/ecmascript-regex.json', group_description => '\d in pattern matches [0-9], not unicode digits', test_description => 'non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)' },
