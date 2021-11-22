@@ -512,10 +512,10 @@ subtest 'annotate_unknown_keywords' => sub {
   );
 
   cmp_deeply(
-    JSON::Schema::Modern->new(collect_annotations => 1, annotate_unknown_keywords => 1)->evaluate(
+    (my $result = JSON::Schema::Modern->new(collect_annotations => 1, annotate_unknown_keywords => 1)->evaluate(
       $data,
       $schema,
-    )->TO_JSON,
+    ))->TO_JSON,
     {
       valid => true,
       annotations => [
@@ -557,6 +557,20 @@ subtest 'annotate_unknown_keywords' => sub {
       ],
     },
     'unknown keywords are collected as annotations',
+  );
+
+  cmp_deeply(
+    [ $result->annotations ],
+    [
+      methods(keyword => 'prefixItems', unknown => bool(0)),
+      methods(keyword => 'bloop', unknown => bool(1)),
+      methods(keyword => 'properties', unknown => bool(0)),
+      methods(keyword => 'unevaluatedProperties', unknown => bool(0)),
+      methods(keyword => 'blap', unknown => bool(1)),
+      methods(keyword => 'properties', unknown => bool(0)),
+      methods(keyword => 'blip', unknown => bool(1)),
+    ],
+    '"unknown" keyword is set on the annotation objects for unknown keywords',
   );
 };
 

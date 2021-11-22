@@ -242,6 +242,7 @@ sub A ($state, $annotation) {
     keyword_location => $keyword_location,
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
     annotation => $annotation,
+    $state->{unknown} ? ( unknown => 1 ) : (),
   );
 
   return 1;

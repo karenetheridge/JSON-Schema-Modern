@@ -16,7 +16,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
 use MooX::TypeTiny;
-use Types::Standard qw(Str InstanceOf);
+use Types::Standard qw(Str InstanceOf Bool);
 use namespace::clean;
 
 has [qw(
@@ -39,6 +39,12 @@ has absolute_keyword_location => (
 has annotation => (
   is => 'ro',
   required => 1,
+);
+
+has unknown => (
+  is => 'ro',
+  isa => Bool,
+  default => 0,
 );
 
 sub TO_JSON ($self) {
@@ -100,6 +106,10 @@ defined, if there is no base URI for the schema and no C<$ref> was followed. Not
 actually fragmentless URI in most cases, as the indicated error will occur at a path
 below the position where the most recent identifier had been declared in the schema. Further, if the
 schema never declared an absolute base URI (containing a scheme), this URI won't be absolute either.
+
+=head2 unknown
+
+A boolean flag, indicating whether the keyword is a known vocabulary keyword or unknown.
 
 =head2 annotation
 
