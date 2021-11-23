@@ -412,6 +412,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
   my $valid = 1;
+  # we must check the array length on every iteration because some keywords can change it!
   for (my $idx = 0; $idx <= $state->{vocabularies}->$#*; ++$idx) {
     my $vocabulary = $state->{vocabularies}[$idx];
     foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
