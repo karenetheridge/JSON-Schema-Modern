@@ -18,7 +18,7 @@ use Mojo::URL;
 use Carp 'croak';
 use List::Util 1.29 'pairs';
 use Ref::Util 0.100 'is_plain_hashref';
-use Safe::Isa;
+use Safe::Isa 1.000008;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
 use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef slurpy);
