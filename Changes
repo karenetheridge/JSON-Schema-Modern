@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.526     2021-11-23 05:11:46Z
           - fix evaluate() callbacks for keywords that have no
             runtime-specific actions
