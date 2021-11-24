@@ -146,7 +146,7 @@ sub add_schema {
     );
 
   croak(!(caller())[0]->isa(__PACKAGE__)
-    ? join('; ', map $_->keyword_location.': '.$_->error, $document->errors)
+    ? join("\n", $document->errors)
     : JSON::Schema::Modern::Result->new(
       output_format => $self->output_format,
       valid => 0,

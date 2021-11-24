@@ -27,6 +27,8 @@ use namespace::clean;
 use overload
   'bool'  => sub { $_[0]->valid },
   '&'     => \&combine,
+  '0+'    => sub { Scalar::Util::refaddr($_[0]) },
+  '""' => sub { $_[0]->stringify },
   fallback => 1;
 
 has valid => (
@@ -160,6 +162,8 @@ sub combine ($self, $other, $swap) {
   );
 }
 
+sub stringify ($self) { $self->error_count ? join("\n", $self->errors) : 'valid' }
+
 sub TO_JSON ($self) {
   $self->format($self->output_format);
 }
@@ -248,7 +252,7 @@ C<allOf> failed evaluation).
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD OUTPUT_FORMATS result
+=for Pod::Coverage BUILD OUTPUT_FORMATS result stringify
 
 =head2 format
 
