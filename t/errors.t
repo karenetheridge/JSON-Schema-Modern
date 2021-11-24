@@ -21,7 +21,7 @@ my $js_short = JSON::Schema::Modern->new(short_circuit => 1);
 subtest 'multiple types' => sub {
   my $result = $js->evaluate(true, { type => ['string','number'] });
   ok(!$result, 'type returned false');
-  is($result, 1, 'got error count');
+  is($result->error_count, 1, 'got error count');
 
   cmp_deeply(
     [ $result->errors ],

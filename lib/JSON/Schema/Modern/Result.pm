@@ -26,7 +26,6 @@ use namespace::clean;
 
 use overload
   'bool'  => sub { $_[0]->valid },
-  '0+'    => sub { $_[0]->count },
   '&'     => \&combine,
   fallback => 1;
 
