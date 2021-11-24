@@ -83,10 +83,8 @@ subtest 'media_type and encoding handlers' => sub {
             contentMediaType => 'application/json',
             contentSchema => {
               type => 'object',
-              properties => {
-                foo => {
-                  type => 'number',
-                },
+              additionalProperties => {
+                type => 'number',
               },
             },
           },
@@ -111,13 +109,13 @@ subtest 'media_type and encoding handlers' => sub {
       errors => [
         {
           instanceLocation => '/encoded_object/foo',
-          keywordLocation => '/properties/encoded_object/contentSchema/properties/foo/type',
+          keywordLocation => '/properties/encoded_object/contentSchema/additionalProperties/type',
           error => 'wrong type (expected number)',
         },
         {
           instanceLocation => '/encoded_object',
-          keywordLocation => '/properties/encoded_object/contentSchema/properties',
-          error => 'not all properties are valid',
+          keywordLocation => '/properties/encoded_object/contentSchema/additionalProperties',
+          error => 'not all additional properties are valid',
         },
         {
           instanceLocation => '/encoded_object',
@@ -210,6 +208,20 @@ subtest 'media_type and encoding handlers' => sub {
       ],
     },
     'under draft7, these keywords are assertions',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      # this is a ISO-8601 string that is json-encoded and then base64-encoded
+      { encoded_object => MIME::Base64::encode('{"'.chr(0xe9).'clair": 42}', '') },
+      $schema,
+      {
+        specification_version => 'draft7',
+        validate_content_schemas => 1,
+      },
+    )->TO_JSON,
+    { valid => true },
+    'successfully able to decode a non-UTF-8-encoded string',
   );
 };
 

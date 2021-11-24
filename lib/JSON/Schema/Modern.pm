@@ -831,8 +831,9 @@ has _media_type => (
   lazy => 1,
   default => sub ($self) {
     +{
+      # note: utf-8 decoding is NOT done, as we can't be sure that's the correct charset!
       'application/json' => sub ($content_ref) {
-        \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1)->decode($content_ref->$*);
+        \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode($content_ref->$*);
       },
       'text/plain' => sub ($content_ref) { $content_ref }
     };

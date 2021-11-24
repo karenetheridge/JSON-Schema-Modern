@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fixes to base64 and json decoders used in the Content vocabulary
 
 0.526     2021-11-23 05:11:46Z
           - fix evaluate() callbacks for keywords that have no
