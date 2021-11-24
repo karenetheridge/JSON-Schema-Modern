@@ -851,7 +851,8 @@ has _encoding => (
   default => sub ($self) {
     +{
       'base64' => sub ($content_ref) {
-        die "invalid characters in base64 string" if $content_ref->$* =~ m{[^A-Za-z0-9+/]};
+        die "invalid characters in base64 string"
+          if $content_ref->$* =~ m{[^A-Za-z0-9+/=]} or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode($content_ref->$*);
       },
     };
