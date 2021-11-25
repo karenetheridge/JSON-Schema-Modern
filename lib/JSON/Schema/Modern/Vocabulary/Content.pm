@@ -48,6 +48,7 @@ sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
     abort($state, 'cannot find decoder for contentEncoding "%s"', $schema->{contentEncoding})
       if not $decoder;
 
+    # decode the data now, so we can report errors for the right keyword
     try { $state->{_content_ref} = $decoder->(\$data) }
     catch ($e) { return E($state, $e) }
   }
@@ -68,6 +69,7 @@ sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
     # contentEncoding failed to decode the content
     return 1 if exists $schema->{contentEncoding} and not exists $state->{_content_ref};
 
+    # decode the data now, so we can report errors for the right keyword
     try { $state->{_content_ref} = $decoder->($state->{_content_ref} // \$data) }
     catch ($e) { return E($state, $e) }
   }

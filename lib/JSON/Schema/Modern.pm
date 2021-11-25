@@ -1138,7 +1138,7 @@ You can use it thusly:
 
 Takes an encoding name and a subref which takes a single scalar reference, which is expected to be
 a reference to a string, which SHOULD be a 7-bit or 8-bit string. Result values MUST be a scalar-reference
-to a string.
+to a string (which is then dereferenced for the C<contentMediaType> keyword).
 
 =for stopwords natively
 
