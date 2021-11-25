@@ -1223,7 +1223,8 @@ validation will always succeed):
 
 =head2 Specification Compliance
 
-This implementation is now fully specification-compliant, but until version 1.000 is released, it is
+This implementation is now fully specification-compliant (for versions draft7, draft2019-09,
+draft2020-12), but until version 1.000 is released, it is
 still deemed to be missing some optional but quite useful features, such as:
 
 =for :list
