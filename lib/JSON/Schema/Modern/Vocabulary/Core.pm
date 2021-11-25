@@ -293,6 +293,8 @@ sub _traverse_keyword_defs { shift->traverse_object_schemas(@_) }
 sub __fetch_vocabulary_data ($self, $state, $schema_info) {
 
   if (not exists $schema_info->{schema}{'$vocabulary'}) {
+    # "If "$vocabulary" is absent, an implementation MAY determine behavior based on the meta-schema
+    # if it is recognized from the URI value of the referring schema's "$schema" keyword."
     my $metaschema_uri = $state->{evaluator}->METASCHEMA_URIS->{$schema_info->{specification_version}};
     return $state->{evaluator}->_get_metaschema_vocabulary_classes($metaschema_uri)->@*;
   }
