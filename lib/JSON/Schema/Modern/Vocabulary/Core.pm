@@ -132,8 +132,7 @@ sub _traverse_keyword_schema ($self, $schema, $state) {
 
   # remember, if we don't have a sibling $id, we must be at the document root with no identifiers
   if ($state->{identifiers}->@*) {
-    $state->{identifiers}[-1]{specification_version} = $state->{spec_version};
-    $state->{identifiers}[-1]{vocabularies} = $state->{vocabularies};
+    $state->{identifiers}[-1]->@{qw(specification_version vocabularies)} = $state->@{qw(spec_version vocabularies)};
   }
 
   return 1;
