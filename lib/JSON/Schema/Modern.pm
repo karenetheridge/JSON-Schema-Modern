@@ -529,7 +529,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   if ($valid) {
     push $state->{annotations}->@*, @new_annotations;
-    annotate_self(+{ %$state, keyword => $_, unknown => 1 }, $schema)
+    annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
       foreach sort keys %unknown_keywords;
   }
 
