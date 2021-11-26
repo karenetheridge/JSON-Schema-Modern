@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.526
+version 0.527
 
 =head1 SYNOPSIS
 
@@ -161,8 +161,9 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans> and/or
-L</validate_formats> settings for just this evaluation call.
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
+L</validate_formats>, and/or L<validate_content_schemas>
+settings for just this evaluation call.
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
@@ -195,9 +196,9 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans> and/or
-L</validate_formats>, L<validate_content_schemas> settings for just this
-evaluation call.
+L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
+L</validate_formats>, and/or L<validate_content_schemas>
+settings for just this evaluation call.
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 identifying various data that are not exposed by annotations.
@@ -319,7 +320,7 @@ You can use it thusly:
 
 Takes an encoding name and a subref which takes a single scalar reference, which is expected to be
 a reference to a string, which SHOULD be a 7-bit or 8-bit string. Result values MUST be a scalar-reference
-to a string.
+to a string (which is then dereferenced for the C<contentMediaType> keyword).
 
 =for stopwords natively
 
@@ -476,7 +477,8 @@ C<idn-hostname> requires L<Net::IDN::Encode>
 
 =head2 Specification Compliance
 
-This implementation is now fully specification-compliant, but until version 1.000 is released, it is
+This implementation is now fully specification-compliant (for versions draft7, draft2019-09,
+draft2020-12), but until version 1.000 is released, it is
 still deemed to be missing some optional but quite useful features, such as:
 
 =over 4
