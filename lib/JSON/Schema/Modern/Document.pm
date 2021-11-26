@@ -139,11 +139,11 @@ around _add_resources => sub {
 };
 
 # shims for Mojo::JSON::Pointer
-sub data { goto \&schema }
+sub data { shift->schema(@_) }
 sub FOREIGNBUILDARGS { () }
 
 # for JSON serializers
-sub TO_JSON { goto \&schema }
+sub TO_JSON { shift->schema }
 
 sub BUILD ($self, $args) {
   croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
