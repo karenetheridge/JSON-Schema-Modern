@@ -851,7 +851,8 @@ has _encoding => (
   lazy => 1,
   default => sub ($self) {
     +{
-      'base64' => sub ($content_ref) {
+      identity => sub ($content_ref) { $content_ref },
+      base64 => sub ($content_ref) {
         die "invalid characters in base64 string"
           if $content_ref->$* =~ m{[^A-Za-z0-9+/=]} or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode($content_ref->$*);
@@ -1145,6 +1146,7 @@ to a string (which is then dereferenced for the C<contentMediaType> keyword).
 Encodings handled natively are:
 
 =for :list
+* C<identity>
 * C<base64>
 
 See also L<HTTP::Message/encode>.
