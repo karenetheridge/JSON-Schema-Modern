@@ -518,7 +518,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       }
 
       if (my $sub = $state->{callbacks}{$keyword}) {
-        $sub->($schema, $state);
+        $sub->($data, $schema, $state);
       }
 
       push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];
@@ -1036,7 +1036,7 @@ For example, to find the locations where all C<$ref> keywords are applied B<succ
   my @used_ref_at;
   $js->evaluate($data, $schema_or_uri, {
     callbacks => {
-      '$ref' => sub ($schema, $state) {
+      '$ref' => sub ($data, $schema, $state) {
         push @used_ref_at, $state->{data_path};
       }
     },

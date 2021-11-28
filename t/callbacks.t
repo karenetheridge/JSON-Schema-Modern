@@ -38,7 +38,7 @@ subtest 'evaluation callbacks' => sub {
     },
     my $config = {
       callbacks => {
-        '$ref' => sub ($schema, $state) {
+        '$ref' => sub ($data, $schema, $state) {
           push @used_ref_at, $state->{data_path};
         },
       },
@@ -125,7 +125,7 @@ subtest 'callbacks for keywords without eval subs' => sub {
     },
     {
       callbacks => {
-        map +($_ => sub ($schema, $state) {
+        map +($_ => sub ($data, $schema, $state) {
           ++$keywords{$state->{keyword}}
         }), qw($anchor $comment $defs $dynamicAnchor if then else $schema $vocabulary),
       },
