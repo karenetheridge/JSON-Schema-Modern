@@ -473,58 +473,64 @@ subtest 'AND two result objects together' => sub {
 
   cmp_deeply(
     (my $one_true = $results[0] & $results[1]),
-    methods(valid => false),
-    listmethods(
-      errors => [
-        map methods(TO_JSON => {
-          instance_location => 'instance location 0-'.$_,
-          keyword_location => 'keyword location 0-'.$_,
-          error => 'error 0-'.$_,
-        }), 0..1
-      ],
-      annotations => [
-        map methods(TO_JSON => {
-          instance_location => 'instance location 1-'.$_,
-          keyword_location => 'keyword location 1-'.$_,
-          annotation => 'annotation 1-'.$_,
-        }), 0..1
-      ],
+    all(
+      methods(valid => false),
+      listmethods(
+        errors => [
+          map methods(TO_JSON => {
+            instanceLocation => 'instance location 0-'.$_,
+            keywordLocation => 'keyword location 0-'.$_,
+            error => 'error 0-'.$_,
+          }), 0..1
+        ],
+        annotations => [
+          map methods(TO_JSON => {
+            instanceLocation => 'instance location 1-'.$_,
+            keywordLocation => 'keyword location 1-'.$_,
+            annotation => 'annotation 1-'.$_,
+          }), 0..1
+        ],
+      ),
     ),
     'ANDing true and false results = invalid, but errors and annotations both preserved',
   );
 
   cmp_deeply(
     (my $both_true = $results[1] & $results[3]),
-    methods(valid => true),
-    listmethods(
-      annotations => [
-        map {
-          my $count = $_;
-          map methods(TO_JSON => {
-            instance_location => 'instance location '.$count.'-'.$_,
-            keyword_location => 'keyword location '.$count.'-'.$_,
-            annotation => 'annotation '.$count.'-'.$_,
-          }), 0..1
-        } 1,3
-      ],
+    all(
+      methods(valid => true),
+      listmethods(
+        annotations => [
+          map {
+            my $count = $_;
+            map methods(TO_JSON => {
+              instanceLocation => 'instance location '.$count.'-'.$_,
+              keywordLocation => 'keyword location '.$count.'-'.$_,
+              annotation => 'annotation '.$count.'-'.$_,
+            }), 0..1
+          } 1,3
+        ],
+      ),
     ),
     'ANDing two true results = valid',
   );
 
   cmp_deeply(
     (my $both_false = $results[0] & $results[2]),
-    methods(valid => false),
-    listmethods(
-      errors => [
-        map {
-          my $count = $_;
-          map methods(TO_JSON => {
-            instance_location => 'instance location '.$count.'-'.$_,
-            keyword_location => 'keyword location '.$count.'-'.$_,
-            error => 'error '.$count.'-'.$_,
-          }), 0..1
-        } 0,2
-      ],
+    all(
+      methods(valid => false),
+      listmethods(
+        errors => [
+          map {
+            my $count = $_;
+            map methods(TO_JSON => {
+              instanceLocation => 'instance location '.$count.'-'.$_,
+              keywordLocation => 'keyword location '.$count.'-'.$_,
+              error => 'error '.$count.'-'.$_,
+            }), 0..1
+          } 0,2
+        ],
+      ),
     ),
     'ANDing two false results = invalid',
   );
