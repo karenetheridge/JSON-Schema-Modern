@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.527
+version 0.528
 
 =head1 SYNOPSIS
 
@@ -209,7 +209,7 @@ For example, to find the locations where all C<$ref> keywords are applied B<succ
   my @used_ref_at;
   $js->evaluate($data, $schema_or_uri, {
     callbacks => {
-      '$ref' => sub ($schema, $state) {
+      '$ref' => sub ($data, $schema, $state) {
         push @used_ref_at, $state->{data_path};
       }
     },
@@ -327,6 +327,10 @@ to a string (which is then dereferenced for the C<contentMediaType> keyword).
 Encodings handled natively are:
 
 =over 4
+
+=item *
+
+C<identity>
 
 =item *
 
