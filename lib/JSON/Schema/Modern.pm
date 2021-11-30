@@ -500,14 +500,13 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
 
       delete $unknown_keywords{$keyword};
-
-      my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
       $state->{keyword} = $keyword;
 
-      if ($vocabulary->can($method)) {
+      my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
+      if (my $sub = $vocabulary->can($method)) {
         my $error_count = $state->{errors}->@*;
 
-        if (not $vocabulary->$method($data, $schema, $state)) {
+        if (not $sub->($vocabulary, $data, $schema, $state)) {
           warn 'result is false but there are no errors (keyword: '.$keyword.')'
             if $error_count == $state->{errors}->@*;
           $valid = 0;

@@ -2,6 +2,7 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - evaluation callback sub signature has changed, to add $data
+          - minor performance improvement during evaluation
 
 0.527     2021-11-26 00:53:42Z
           - fixes to base64 and json decoders used in the Content vocabulary
