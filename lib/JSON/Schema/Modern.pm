@@ -778,7 +778,7 @@ sub _fetch_from_uri ($self, $uri) {
       my $document = $resource->{document};
       my $closest_resource = first { !length($_->[1]{path})       # document root
           || length($document_path)
-            && path($_->[1]{path})->subsumes($document_path) }    # path is above present location
+            && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
         sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
         grep { not length Mojo::URL->new($_->[0])->fragment }     # omit anchors
         $document->resource_pairs;
