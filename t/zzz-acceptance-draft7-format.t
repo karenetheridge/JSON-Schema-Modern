@@ -49,6 +49,7 @@ acceptance_tests(
           'uri-template.json',                        # not yet implemented
           # these all depend on optional prereqs
           $ENV{AUTOMATED_TESTING} && !eval { +require Time::Moment; 1 } ? qw(date-time.json date.json time.json) : (),
+          $ENV{AUTOMATED_TESTING} && !eval { +require DateTime::Format::RFC3339; 1 } ? 'date-time.json' : (),
           $ENV{AUTOMATED_TESTING} && !eval { +require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? qw(email.json idn-email.json) : (),
           $ENV{AUTOMATED_TESTING} && !eval { +require Data::Validate::Domain; 1 } ? 'hostname.json' : (),
           $ENV{AUTOMATED_TESTING} && !eval { +require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
