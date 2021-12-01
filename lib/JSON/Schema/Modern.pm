@@ -153,7 +153,7 @@ sub add_schema {
       errors => [ $document->errors ],
     )) if $document->has_errors;
 
-  if (not grep $_->{document} == $document, $self->_resource_values) {
+  if (not grep $_->{document} == $document, $self->_canonical_resources) {
     my $schema_content = $document->_serialized_schema
       // $document->_serialized_schema($self->_json_decoder->encode($document->schema));
 
@@ -161,7 +161,7 @@ sub add_schema {
           my $existing_content = $_->_serialized_schema
             // $_->_serialized_schema($self->_json_decoder->encode($_->schema));
           $existing_content eq $schema_content
-        } uniqint map $_->{document}, $self->_resource_values) {
+        } uniqint map $_->{document}, $self->_canonical_resources) {
       # we already have this schema content in another document object.
       $document = $existing_doc;
     }
@@ -554,7 +554,7 @@ has _resource_index => (
     _resource_index => 'elements',
     _resource_keys => 'keys',
     _add_resources_unsafe => 'set',
-    _resource_values => 'values',
+    _canonical_resources => 'values',
     _resource_exists => 'exists',
   },
   lazy => 1,
