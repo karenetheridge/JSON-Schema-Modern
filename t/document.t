@@ -45,7 +45,7 @@ subtest 'boolean document' => sub {
         schema => false,
       )
     },
-    qr/^canonical_uri cannot contain a fragment/,
+    qr/Reference .*did not pass type constraint/,
     'boolean schema with invalid canonical_uri (fragment)',
   );
 

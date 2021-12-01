@@ -33,7 +33,7 @@ has schema => (
 
 has canonical_uri => (
   is => 'rwp',
-  isa => InstanceOf['Mojo::URL'], # always fragmentless
+  isa => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
   lazy => 1,
   default => sub { Mojo::URL->new },
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
@@ -146,8 +146,6 @@ sub FOREIGNBUILDARGS { () }
 sub TO_JSON { shift->schema }
 
 sub BUILD ($self, $args) {
-  croak 'canonical_uri cannot contain a fragment' if defined $self->canonical_uri->fragment;
-
   my $original_uri = $self->canonical_uri->clone;
   my $state = $self->traverse($self->evaluator // JSON::Schema::Modern->new);
 
