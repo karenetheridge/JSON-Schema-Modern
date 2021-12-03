@@ -755,7 +755,6 @@ sub _get_or_load_resource ($self, $uri) {
 
   # TODO:
   # - load from network or disk
-  # - handle such resources with $anchor fragments
 
   return;
 };
