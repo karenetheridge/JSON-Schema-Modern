@@ -60,7 +60,7 @@ has resource_index => (
       path => Str,  # always a JSON pointer, relative to the document root
       specification_version => Str, # not an Enum due to module load ordering
       # the vocabularies used when evaluating instance data against schema
-      vocabularies => ArrayRef[my $vocabulary_class_type = ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
+      vocabularies => ArrayRef[ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       configs => HashRef,
       slurpy HashRef[Undef],  # no other fields allowed
     ]],
