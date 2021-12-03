@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - added FREEZE and THAW callbacks to assist with serialization
 
 0.528     2021-11-30 06:17:29Z
           - evaluation callback sub signature has changed, to add $data

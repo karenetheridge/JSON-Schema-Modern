@@ -17,14 +17,14 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::MaybeXS;
 use Carp qw(croak carp);
-use List::Util 1.55 qw(pairs first uniqint pairmap);
+use List::Util 1.55 qw(pairs first uniqint pairmap uniq);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
 use Storable 'dclone';
 use File::ShareDir 'dist_dir';
-use Module::Runtime 'use_module';
+use Module::Runtime qw(use_module require_module);
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
 use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName Tuple);
@@ -860,6 +860,27 @@ has _encoding => (
   },
 );
 
+sub FREEZE ($self, $serializer) {
+  my $data = +{ %$self };
+  # Cpanel::JSON::XS doesn't serialize: https://github.com/Sereal/Sereal/issues/266
+  # coderefs can't serialize cleanly and must be re-added by the user.
+  delete $data->@{qw(_json_decoder _format_validations _media_type _encoding)};
+  return $data;
+}
+
+sub THAW ($class, $serializer, $data) {
+  my %bare_attrs = delete $data->%{qw(_resource_index _vocabulary_classes _metaschema_vocabulary_classes)};
+
+  my $self = $class->new($data);
+  $self->_add_resources_unsafe($bare_attrs{_resource_index}->%*);
+  $self->_set_vocabulary_class($bare_attrs{_vocabulary_classes}->%*);
+  $self->_set_metaschema_vocabulary_classes($bare_attrs{_metaschema_vocabulary_classes}->%*);
+
+  # load all vocabulary classes
+  require_module($_) foreach uniq map $_->{vocabularies}->@*, $self->_canonical_resources;
+  return $self;
+}
+
 1;
 __END__
 
@@ -978,7 +999,7 @@ Defaults to false.
 
 =head1 METHODS
 
-=for Pod::Coverage BUILDARGS
+=for Pod::Coverage BUILDARGS FREEZE THAW
 
 =head2 evaluate_json_string
 
