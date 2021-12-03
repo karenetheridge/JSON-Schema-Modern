@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.529     2021-12-03 04:00:26Z
           - added FREEZE and THAW callbacks to assist with serialization
 
 0.528     2021-11-30 06:17:29Z
