@@ -566,11 +566,12 @@ has _resource_index => (
 around _add_resources => sub {
   my ($orig, $self) = (shift, shift);
 
-  $resource_type->($_[1]) if @_;  # check type of hash value against Dict
-
   my @resources;
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
     my ($key, $value) = @$pair;
+
+    $resource_type->($value); # check type of hash value against Dict
+
     if (my $existing = $self->_get_resource($key)) {
       # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
       # lack all identifiers altogether, but preserve other resources from the original document
