@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.530     2021-12-03 16:44:23Z
           - fix hash slice syntax that is not available before perl 5.28
 
 0.529     2021-12-03 04:00:26Z
