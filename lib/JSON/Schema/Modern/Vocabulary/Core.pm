@@ -293,7 +293,6 @@ sub _traverse_keyword_defs { shift->traverse_object_schemas(@_) }
 
 # translate vocabulary URIs into classes, caching the results (if any)
 sub __fetch_vocabulary_data ($self, $state, $schema_info) {
-
   if (not exists $schema_info->{schema}{'$vocabulary'}) {
     # "If "$vocabulary" is absent, an implementation MAY determine behavior based on the meta-schema
     # if it is recognized from the URI value of the referring schema's "$schema" keyword."
