@@ -33,8 +33,8 @@ my @warnings = warnings {
       todo_tests => [
         { file => [
             # these all depend on optional prereqs
-            !eval { +require Time::Moment; 1 } ? qw(format-date-time.json format-date.json format-time.json) : (),
-            !eval { +require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
+            !eval { require Time::Moment; 1 } ? qw(format-date-time.json format-date.json format-time.json) : (),
+            !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
           ] },
       ],
     },
