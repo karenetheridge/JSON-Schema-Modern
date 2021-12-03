@@ -869,7 +869,10 @@ sub FREEZE ($self, $serializer) {
 }
 
 sub THAW ($class, $serializer, $data) {
-  my %bare_attrs = delete $data->%{qw(_resource_index _vocabulary_classes _metaschema_vocabulary_classes)};
+  # sadly I can't do %bare_attrs = delete ...->%{...} until 5.28
+  my %bare_attrs;
+  @bare_attrs{qw(_resource_index _vocabulary_classes _metaschema_vocabulary_classes)}
+    = delete $data->@{qw(_resource_index _vocabulary_classes _metaschema_vocabulary_classes)};
 
   my $self = $class->new($data);
   $self->_add_resources_unsafe($bare_attrs{_resource_index}->%*);
