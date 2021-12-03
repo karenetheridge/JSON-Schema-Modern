@@ -74,7 +74,7 @@ sub eval_subschema_at_uri ($self, $data, $schema, $state, $uri) {
 
   return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
     +{
-      $schema_info->{document}->evaluation_configs->%*,
+      $schema_info->{configs}->%*,
       %$state,
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}
         .jsonp('', $state->{keyword}, exists $state->{_schema_path_suffix}

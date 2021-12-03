@@ -49,6 +49,7 @@ subtest 'load cached metaschema' => sub {
           resource_index => ignore,
         ),
       ),
+      configs => {},
     },
     'loaded metaschema from sharedir cache',
   );

@@ -55,6 +55,7 @@ subtest '$id sets canonical uri' => sub {
       '' => {
         path => '', canonical_uri => str(''), document => ignore, specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'http://localhost:4242/my_foo' => {
         path => '/$defs/foo',
@@ -62,6 +63,7 @@ subtest '$id sets canonical uri' => sub {
         document => methods(canonical_uri => str('')),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'resources indexed; document canonical_uri is still unset',
@@ -155,6 +157,7 @@ subtest 'anchors' => sub {
         document => methods(canonical_uri => str('http://localhost:4242')),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'http://localhost:4242#my_foo' => {
         path => '/$defs/foo',
@@ -162,6 +165,7 @@ subtest 'anchors' => sub {
         document => shallow($js->_get_resource('http://localhost:4242')->{document}),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'http://localhost:4242#my_bar' => {
         path => '/$defs/bar',
@@ -169,6 +173,7 @@ subtest 'anchors' => sub {
         document => shallow($js->_get_resource('http://localhost:4242')->{document}),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'http://localhost:4242#my_not' => {
         path => '/allOf/2/not',
@@ -176,6 +181,7 @@ subtest 'anchors' => sub {
         document => shallow($js->_get_resource('http://localhost:4242')->{document}),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'internal resource index is correct',
@@ -218,10 +224,12 @@ subtest '$anchor at root without $id' => sub {
       '' => {
         path => '', canonical_uri => str(''), document => ignore, specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       '#root' => {
         path => '', canonical_uri => str(''), document => ignore, specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       '#my_foo' => {
         path => '/$defs/foo',
@@ -229,6 +237,7 @@ subtest '$anchor at root without $id' => sub {
         document => ignore,
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'internal resource index is correct',
@@ -275,16 +284,19 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
         path => '', canonical_uri => str('https://foo.com/a/alpha'), document => ignore,
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'https://foo.com/a/beta' => {
         path => '/properties/b', canonical_uri => str('https://foo.com/a/beta'), document => ignore,
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'https://foo.com/a/zeta' => {
         path => '/properties/f', canonical_uri => str('https://foo.com/a/zeta'), document => ignore,
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'https://foo.com/a/beta#my_d' => {
         path => '/properties/b/properties/d',
@@ -292,6 +304,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
         document => ignore,
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'https://foo.com/a/zeta#my_h' => {
         path => '/properties/f/properties/h',
@@ -299,6 +312,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
         document => ignore,
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'internal resource index is correct',
@@ -468,6 +482,7 @@ subtest 'nested $ids' => sub {
         document => methods(canonical_uri => str('/foo/bar/baz.json')),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       '/foo/bar/alpha.json' => {
         path => '/properties/alpha',
@@ -475,6 +490,7 @@ subtest 'nested $ids' => sub {
         document => shallow($js->_get_resource('/foo/bar/baz.json')->{document}),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       '/beta/hello.json' => {
         path => '/properties/alpha/properties/beta',
@@ -482,6 +498,7 @@ subtest 'nested $ids' => sub {
         document => shallow($js->_get_resource('/foo/bar/baz.json')->{document}),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       '/beta/gamma.json' => {
         path => '/properties/alpha/properties/beta/properties/gamma',
@@ -489,6 +506,7 @@ subtest 'nested $ids' => sub {
         document => shallow($js->_get_resource('/foo/bar/baz.json')->{document}),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'properly resolved all the nested $ids',
@@ -543,6 +561,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document1),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema1.json' => {
         path => '/allOf/0',
@@ -550,6 +569,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document1),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema2.json' => {
         path => '/allOf/1',
@@ -557,6 +577,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document1),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'resources in initial schema are indexed',
@@ -582,6 +603,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document2),    # same uri as earlier, but now points to document2
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema1.json' => {
         path => '/allOf/0',
@@ -589,6 +611,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document1),    # still here! there is no reason to forget about it
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema2.json' => {
         path => '/allOf/1',
@@ -596,6 +619,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document1),    # still here! there is no reason to forget about it
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema3.json' => {
         path => '/anyOf/0',
@@ -603,6 +627,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document2),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema4.json' => {
         path => '/anyOf/1',
@@ -610,6 +635,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
         document => shallow($document2),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'resources in second schema are indexed; all resources from first schema are preserved except uri=""',
@@ -664,6 +690,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
         document => shallow($document1),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema1.json' => {
         path => '/allOf/0',
@@ -671,6 +698,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
         document => shallow($document1),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
       'subschema2.json' => {
         path => '/allOf/1',
@@ -678,6 +706,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
         document => shallow($document1),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
+        configs => {},
       },
     },
     'resources in initial schema are indexed',

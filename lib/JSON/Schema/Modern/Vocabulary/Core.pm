@@ -77,6 +77,7 @@ sub _traverse_keyword_id ($self, $schema, $state) {
       canonical_uri => $state->{initial_schema_uri}->clone,
       specification_version => $state->{spec_version}, # note! $schema keyword can change this
       vocabularies => $state->{vocabularies}, # reference, not copy
+      configs => $state->{configs},
     };
   return 1;
 }
@@ -92,6 +93,7 @@ sub _eval_keyword_id ($self, $data, $schema, $state) {
   $state->{schema_path} = '';
   $state->{spec_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
+  $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
   push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
 
   return 1;
@@ -156,6 +158,7 @@ sub _traverse_keyword_anchor ($self, $schema, $state) {
       canonical_uri => $canonical_uri,
       specification_version => $state->{spec_version},
       vocabularies => $state->{vocabularies}, # reference, not copy
+      configs => $state->{configs},
     };
   return 1;
 }

@@ -61,6 +61,7 @@ has resource_index => (
       specification_version => Str, # not an Enum due to module load ordering
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[my $vocabulary_class_type = ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
+      configs => HashRef,
       slurpy HashRef[Undef],  # no other fields allowed
     ]],
   handles_via => 'Hash',
@@ -107,12 +108,6 @@ has errors => (
   isa => ArrayRef[InstanceOf['JSON::Schema::Modern::Error']],
   lazy => 1,
   default => sub { [] },
-);
-
-has evaluation_configs => (
-  is => 'rwp',
-  isa => HashRef,
-  default => sub { {} },
 );
 
 around _add_resources => sub {
@@ -163,14 +158,12 @@ sub BUILD ($self, $args) {
       canonical_uri => $self->canonical_uri,
       specification_version => $state->{spec_version},
       vocabularies => $state->{vocabularies},
+      configs => $state->{configs},
     })
     if (not "$original_uri" and $original_uri eq $self->canonical_uri)
       or "$original_uri";
 
   $self->_add_resources($state->{identifiers}->@*);
-
-  # overlay the resulting configs with those that were provided by the caller
-  $self->_set_evaluation_configs(+{ $state->{configs}->%*, $self->evaluation_configs->%* });
 }
 
 sub traverse ($self, $evaluator) {
@@ -272,14 +265,6 @@ L</resource_index> and is constructed as that is built up.
 A list of L<JSON::Schema::Modern::Error> objects that resulted when the schema document was
 originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
 errors halt the parsing process.) Documents with errors cannot be evaluated.
-
-=head2 evaluation_configs
-
-An optional hashref of configuration values that will be provided to the evaluator during
-evaluation of this document. See the third parameter of L<JSON::Schema::Modern/evaluate>.
-This should never need to be set explicitly. This is sometimes populated automatically after
-creating a document object, depending on the keywords found in the schema, but they will never
-override anything you have already explicitly set.
 
 =head1 METHODS
 

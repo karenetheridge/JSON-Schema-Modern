@@ -179,6 +179,7 @@ sub add_schema {
         specification_version => $resource->{specification_version},
         vocabularies => $resource->{vocabularies},  # reference, not copy
         document => $document,
+        configs => $resource->{configs},
       });
   }
 
@@ -310,7 +311,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
         schema => $document->schema,
         document => $document,
         document_path => '',
-        (map +($_ => $base_resource->{$_}), qw(canonical_uri specification_version vocabularies)),
+        (map +($_ => $base_resource->{$_}), qw(canonical_uri specification_version vocabularies configs)),
       };
     }
 
@@ -331,7 +332,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       vocabularies => $schema_info->{vocabularies},
       callbacks => $config_override->{callbacks} // {},
       evaluator => $self,
-      $schema_info->{document}->evaluation_configs->%*,
+      $schema_info->{configs}->%*,
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
@@ -544,6 +545,7 @@ has _resource_index => (
       document => InstanceOf['JSON::Schema::Modern::Document'],
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[my $vocabulary_class_type = ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
+      configs => HashRef,
       slurpy HashRef[Undef],  # no other fields allowed
     ]],
   handles_via => 'Hash',
@@ -791,8 +793,7 @@ sub _fetch_from_uri ($self, $uri) {
         canonical_uri => $canonical_uri,
         document => $document,
         document_path => $document_path,
-        specification_version => $resource->{specification_version},
-        vocabularies => $resource->{vocabularies},  # reference, not copy
+        $resource->%{qw(specification_version vocabularies configs)}, # reference, not copy
       };
     }
   }
@@ -805,8 +806,7 @@ sub _fetch_from_uri ($self, $uri) {
         canonical_uri => $resource->{canonical_uri}->clone, # this is *not* the anchor-containing URI
         document => $resource->{document},
         document_path => $resource->{path},
-        specification_version => $resource->{specification_version},
-        vocabularies => $resource->{vocabularies},  # reference, not copy
+        $resource->%{qw(specification_version vocabularies configs)}, # reference, not copy
       };
     }
   }
