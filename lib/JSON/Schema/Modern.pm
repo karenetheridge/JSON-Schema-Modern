@@ -311,7 +311,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
         schema => $document->schema,
         document => $document,
         document_path => '',
-        (map +($_ => $base_resource->{$_}), qw(canonical_uri specification_version vocabularies configs)),
+        $base_resource->%{qw(canonical_uri specification_version vocabularies configs)},
       };
     }
 
