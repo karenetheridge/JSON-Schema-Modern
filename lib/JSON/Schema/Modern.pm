@@ -834,7 +834,8 @@ has _media_type => (
       'application/json' => sub ($content_ref) {
         \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode($content_ref->$*);
       },
-      'text/plain' => sub ($content_ref) { $content_ref }
+      map +($_ => sub ($content_ref) { $content_ref }),
+        qw(text/plain application/octet-stream),
     };
   },
 );
