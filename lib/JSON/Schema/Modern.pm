@@ -869,18 +869,11 @@ sub FREEZE ($self, $serializer) {
 }
 
 sub THAW ($class, $serializer, $data) {
-  # sadly I can't do %bare_attrs = delete ...->%{...} until 5.28
-  my %bare_attrs;
-  @bare_attrs{qw(_resource_index _vocabulary_classes _metaschema_vocabulary_classes)}
-    = delete $data->@{qw(_resource_index _vocabulary_classes _metaschema_vocabulary_classes)};
-
-  my $self = $class->new($data);
-  $self->_add_resources_unsafe($bare_attrs{_resource_index}->%*);
-  $self->_set_vocabulary_class($bare_attrs{_vocabulary_classes}->%*);
-  $self->_set_metaschema_vocabulary_classes($bare_attrs{_metaschema_vocabulary_classes}->%*);
+  my $self = bless($data, $class);
 
   # load all vocabulary classes
   require_module($_) foreach uniq map $_->{vocabularies}->@*, $self->_canonical_resources;
+
   return $self;
 }
 
