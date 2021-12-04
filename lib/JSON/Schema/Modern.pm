@@ -767,6 +767,7 @@ sub _get_or_load_resource ($self, $uri) {
 # - the path relative to the document root for this schema
 # - the specification version that applies to this schema
 # - the vocabularies to use when considering schema keywords
+# - the config overrides to set when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri ($self, $uri) {
   $uri = Mojo::URL->new($uri) if not is_ref($uri);
