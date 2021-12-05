@@ -831,6 +831,7 @@ has _media_type => (
   handles => {
     get_media_type => 'get',
     add_media_type => 'set',
+    _media_types => 'keys',
   },
   lazy => 1,
   default => sub ($self) {
@@ -845,7 +846,16 @@ has _media_type => (
   },
 );
 
-around get_media_type => sub ($orig, $self, $type) { $self->$orig(fc $type) };
+# get_media_type('TExT/bloop') will match an entry for 'text/*' or '*/*'
+# TODO: support queries for application/schema+json to match entry of application/json
+around get_media_type => sub ($orig, $self, $type) {
+  my $mt = $self->$orig(fc $type);
+  return $mt if $mt;
+
+  return $self->$orig((first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } $self->_media_types)
+    // '*/*');
+};
+
 before add_media_type => sub ($self, $type, $sub) { $media_type_type->({ $type => $sub }) };
 
 has _encoding => (
