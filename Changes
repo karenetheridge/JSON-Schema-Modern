@@ -2,6 +2,7 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - add method to add format implementations after construction
+          - treat media_type names case-insensitively, as per RFC6838
 
 0.530     2021-12-03 16:44:23Z
           - fix hash slice syntax that is not available before perl 5.28

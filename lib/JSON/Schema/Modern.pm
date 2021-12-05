@@ -27,7 +27,7 @@ use File::ShareDir 'dist_dir';
 use Module::Runtime qw(use_module require_module);
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName Tuple);
+use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName Tuple Map);
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
@@ -823,9 +823,10 @@ has _json_decoder => (
   default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1) },
 );
 
+# since media types are case-insensitive, all type names must be foldcased on insertion.
 has _media_type => (
   is => 'bare',
-  isa => HashRef[CodeRef],
+  isa => my $media_type_type = Map[Str->where(q{$_ eq CORE::fc($_)}), CodeRef],
   handles_via => 'Hash',
   handles => {
     get_media_type => 'get',
@@ -843,6 +844,9 @@ has _media_type => (
     };
   },
 );
+
+around get_media_type => sub ($orig, $self, $type) { $self->$orig(fc $type) };
+before add_media_type => sub ($self, $type, $sub) { $media_type_type->({ $type => $sub }) };
 
 has _encoding => (
   is => 'bare',
@@ -1153,7 +1157,7 @@ These media types are already known:
 
 =head2 get_media_type
 
-Fetches a decoder sub for the indicated media type.
+Fetches a decoder sub for the indicated media type. Lookups are performed B<without case sensitivity>.
 
 =for stopwords thusly
 

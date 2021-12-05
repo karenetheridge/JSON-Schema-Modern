@@ -10,6 +10,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
+use Test::Fatal;
 use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
@@ -53,24 +54,27 @@ subtest 'unrecognized encoding formats do not result in errors' => sub {
 subtest 'media_type and encoding handlers' => sub {
   my $js = JSON::Schema::Modern->new;
 
+  like(
+    exception { $js->add_media_type('FOO/BAR' => sub { \1 }) },
+    qr!Value "FOO/BAR" did not pass type constraint !,
+    'upper-cased names are not accepted',
+  );
+
   cmp_deeply(
     $js->get_media_type('application/json')->(\'{"alpha": "a string"}'),
     \ { alpha => 'a string' },
     'application/json media_type decoder',
   );
 
-  cmp_deeply(
-    $js->get_media_type('text/plain')->(\'foo'),
-    \'foo',
-    'text/plain media_type decoder',
-  );
+  cmp_deeply($js->get_media_type('text/plain')->(\'foo'), \'foo', 'text/plain media_type decoder');
+
+  cmp_deeply($js->get_media_type('tExt/PLaIN')->(\'foo'), \'foo', 'getter uses the casefolded name');
 
   cmp_deeply(
     $js->get_media_type('application/json')->($js->get_encoding('base64')->(\'eyJmb28iOiAiYmFyIn0K')),
     \ { foo => 'bar' },
     'base64 encoding decoder + application/json media_type decoder',
   );
-
 
   # evaluate some schemas under draft7 and see that they validate
   cmp_deeply(
