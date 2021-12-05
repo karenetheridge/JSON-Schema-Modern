@@ -100,7 +100,7 @@ has scalarref_booleans => (
 
 has _format_validations => (
   is => 'bare',
-  isa => Dict[
+  isa => my $format_type = Dict[
     (map +($_ => Optional[CodeRef]), qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex)),
     slurpy HashRef[Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef]],
   ],
@@ -108,10 +108,13 @@ has _format_validations => (
   handles_via => 'Hash',
   handles => {
     _get_format_validation => 'get',
+    add_format_validation => 'set',
   },
   lazy => 1,
   default => sub { {} },
 );
+
+before add_format_validation => sub ($self, $name, $sub) { $format_type->({ $name => $sub }) };
 
 around BUILDARGS => sub ($orig, $class, @args) {
   my $args = $class->$orig(@args);
@@ -953,10 +956,12 @@ to false.
 
 =head2 format_validations
 
+=for stopwords subref
+
 An optional hashref that allows overriding the validation method for formats, or adding new ones.
 Overrides to existing formats (see L</Format Validation>)
 must be specified in the form of C<< { $format_name => $format_sub } >>, where
-the format sub is a coderef that takes one argument and returns a boolean result. New formats must
+the format sub is a subref that takes one argument and returns a boolean result. New formats must
 be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
 where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
 number, or integer) the instance value must be for the format validation to be considered.
@@ -1107,6 +1112,16 @@ Returns C<undef> if the resource could not be found;
 if there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
 
+=head2 add_format_validation
+
+=for comment we are the nine Eleven Deniers
+
+  $js->add_format_validation(no_nines => { type => 'number', sub => sub ($value) { $value =~ m/^[0-8]$$/ });
+
+Adds support for a custom format. The data type that this format applies to must be supplied; all
+values of any other type will automatically be deemed to be valid, and will not be passed to the
+subref.
+
 =head2 add_vocabulary
 
   $js->add_vocabulary('My::Custom::Vocabulary::Class');
@@ -1124,8 +1139,6 @@ L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods.
   $js->add_media_type('application/furble' => sub ($content_ref) {
     return ...;  # data representing the deserialized text for Content-Type: application/furble
   });
-
-=for stopwords subref
 
 Takes a media-type name and a subref which takes a single scalar reference, which is expected to be
 a reference to a string, which might contain wide characters (i.e. not octets), especially when used

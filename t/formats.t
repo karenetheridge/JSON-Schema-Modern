@@ -140,6 +140,18 @@ subtest 'override a format sub' => sub {
     },
   );
 
+  like(
+    exception { $js->add_format_validation(uuid_bad => 1) },
+    qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
+    'check syntax of implementation when adding an override to existing format',
+  );
+
+  like(
+    exception { $js->add_format_validation(mult_5_bad => 1) },
+    qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
+    'check syntax of implementation when adding a new format',
+  );
+
   cmp_deeply(
     $js->evaluate(
       [
