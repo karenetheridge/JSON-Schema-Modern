@@ -32,6 +32,7 @@ our @EXPORT_OK = qw(
   is_equal
   is_elements_unique
   jsonp
+  unjsonp
   local_annotations
   canonical_uri
   E
@@ -166,6 +167,11 @@ sub is_elements_unique ($array, $equal_indices = undef) {
 # shorthand for creating and appending json pointers
 sub jsonp {
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_plain_arrayref($_) ? @$_ : $_), grep defined, @_);
+}
+
+# splits a json pointer apart into its path segments
+sub unjsonp ($path) {
+  return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $path;
 }
 
 # get all annotations produced for the current instance data location (that are visible to this
@@ -345,7 +351,7 @@ __END__
 
 This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
-=for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp local_annotations
+=for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp unjsonp local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
 annotate_self is_uri_reference
 
