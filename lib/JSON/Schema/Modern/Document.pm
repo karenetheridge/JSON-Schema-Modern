@@ -114,10 +114,11 @@ around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
 
-  $resource_type->($_[1]) if @_;  # check type of hash value against Dict
-
   foreach my $pair (pairs @_) {
     my ($key, $value) = @$pair;
+
+    $resource_type->($value); # check type of hash value against Dict
+
     if (my $existing = $self->_get_resource($key)) {
       croak 'uri "'.$key.'" conflicts with an existing schema resource'
         if $existing->{path} ne $value->{path}
