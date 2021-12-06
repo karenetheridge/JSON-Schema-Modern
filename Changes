@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.531     2021-12-06 05:39:53Z
           - add method to add format implementations after construction
           - treat media_type names case-insensitively, as per RFC6838,
