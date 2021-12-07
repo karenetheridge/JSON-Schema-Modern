@@ -168,6 +168,9 @@ sub BUILD ($self, $args) {
 }
 
 sub traverse ($self, $evaluator) {
+  die 'wrong class - use JSON::Schema::Modern::Document::OpenAPI instead'
+    if is_plain_hashref($self->schema) and exists $self->schema->{openapi};
+
   my $state = $evaluator->traverse($self->schema,
     {
       initial_schema_uri => $self->canonical_uri->clone,
