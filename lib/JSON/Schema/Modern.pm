@@ -142,6 +142,7 @@ sub add_schema {
     return $schema_info->{document};
   }
 
+  # document BUILD will trigger $self->traverse($schema)
   my $document = $_[0]->$_isa('JSON::Schema::Modern::Document') ? shift
     : JSON::Schema::Modern::Document->new(
       schema => shift,
