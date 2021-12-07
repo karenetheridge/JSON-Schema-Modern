@@ -39,6 +39,7 @@ our @CARP_NOT = qw(
   JSON::Schema::Modern::Document
   JSON::Schema::Modern::Vocabulary
   JSON::Schema::Modern::Vocabulary::Applicator
+  OpenAPI::Modern
 );
 
 use constant SPECIFICATION_VERSION_DEFAULT => 'draft2020-12';
