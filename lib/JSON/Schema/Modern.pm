@@ -838,11 +838,14 @@ has _media_type => (
   },
   lazy => 1,
   default => sub ($self) {
+    my $_json_media_type = sub ($content_ref) {
+      \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode($content_ref->$*);
+    };
     +{
       # note: utf-8 decoding is NOT done, as we can't be sure that's the correct charset!
-      'application/json' => sub ($content_ref) {
-        \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode($content_ref->$*);
-      },
+      'application/json' => $_json_media_type,
+      'application/schema+json' => $_json_media_type,
+      'application/schema-instance+json' => $_json_media_type,
       map +($_ => sub ($content_ref) { $content_ref }),
         qw(text/plain application/octet-stream),
     };
@@ -1166,6 +1169,8 @@ These media types are already known:
 
 =for :list
 * C<application/json>
+* C<application/schema+json>
+* C<application/schema-instance+json>
 * C<application/octet-stream>
 * C<text/plain>
 
