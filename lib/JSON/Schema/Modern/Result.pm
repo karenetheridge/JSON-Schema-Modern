@@ -21,6 +21,7 @@ use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
 use List::Util 1.50 'head';
+use Scalar::Util 'refaddr';
 use Safe::Isa;
 use namespace::clean;
 
@@ -146,7 +147,7 @@ sub count { $_[0]->valid ? $_[0]->annotation_count : $_[0]->error_count }
 sub combine ($self, $other, $swap) {
   die 'wrong type for & operation' if not $other->$_isa(__PACKAGE__);
 
-  return $self if $other == $self;
+  return $self if refaddr($other) == refaddr($self);
 
   return ref($self)->new(
     valid => $self->valid && $other->valid,

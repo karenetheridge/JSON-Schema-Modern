@@ -14,6 +14,7 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use JSON::Schema::Modern;
 use List::Util 'unpairs';
+use Scalar::Util 'refaddr';
 use lib 't/lib';
 use Helper;
 
@@ -71,7 +72,7 @@ subtest '$id sets canonical uri' => sub {
 
   my $doc1 = $js->{_resource_index}{''}{document};
   my $doc2 = $js->{_resource_index}{'http://localhost:4242/my_foo'}{document};
-  ok($doc1 == $doc2, 'the same document object is indexed under both URIs');
+  is(refaddr($doc1), refaddr($doc2), 'the same document object is indexed under both URIs');
 
   sub _find_all_values ($data) {
       if (ref $data eq 'ARRAY') {

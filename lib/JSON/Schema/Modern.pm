@@ -19,6 +19,7 @@ use JSON::MaybeXS;
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap uniq);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref);
+use Scalar::Util 'refaddr';
 use Mojo::URL;
 use Safe::Isa;
 use Path::Tiny;
@@ -158,7 +159,7 @@ sub add_schema {
       errors => [ $document->errors ],
     )) if $document->has_errors;
 
-  if (not grep $_->{document} == $document, $self->_canonical_resources) {
+  if (not grep refaddr($_->{document}) == refaddr($document), $self->_canonical_resources) {
     my $schema_content = $document->_serialized_schema
       // $document->_serialized_schema($self->_json_decoder->encode($document->schema));
 
@@ -584,7 +585,7 @@ around _add_resources => sub {
         next if $existing->{path} eq $value->{path}
           and $existing->{canonical_uri} eq $value->{canonical_uri}
           and $existing->{specification_version} eq $value->{specification_version}
-          and $existing->{document} == $value->{document};
+          and refaddr($existing->{document}) == refaddr($value->{document});
         croak 'uri "'.$key.'" conflicts with an existing schema resource';
       }
     }
