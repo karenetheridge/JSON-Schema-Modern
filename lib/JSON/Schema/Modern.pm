@@ -418,6 +418,8 @@ sub _traverse_subschema ($self, $schema, $state) {
 
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
+  return 1 if not keys %$schema;
+
   my $valid = 1;
   # we must check the array length on every iteration because some keywords can change it!
   for (my $idx = 0; $idx <= $state->{vocabularies}->$#*; ++$idx) {
@@ -485,6 +487,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   # this should never happen, due to checks in traverse
   abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
+
+  return 1 if not keys %$schema;
 
   my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
