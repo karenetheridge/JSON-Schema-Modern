@@ -1166,6 +1166,7 @@ These media types are already known:
 
 =for :list
 * C<application/json>
+* C<application/octet-stream>
 * C<text/plain>
 
 =head2 get_media_type
