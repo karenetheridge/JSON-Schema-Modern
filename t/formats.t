@@ -141,7 +141,10 @@ subtest 'override a format sub' => sub {
   );
 
   like(
-    exception { $js->add_format_validation(uuid_bad => 1) },
+    exception { $js->add_format_validation(
+      mult_2 => +{ type => 'integer', sub => sub { ($_[0] % 2) == 0 } },
+      uuid_bad => 1,
+    ) },
     qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
     'check syntax of implementation when adding an override to existing format',
   );

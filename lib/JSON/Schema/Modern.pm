@@ -116,7 +116,7 @@ has _format_validations => (
   default => sub { {} },
 );
 
-before add_format_validation => sub ($self, $name, $sub) { $format_type->({ $name => $sub }) };
+before add_format_validation => sub ($self, @kvs) { $format_type->({ @$_ }) foreach pairs @kvs };
 
 around BUILDARGS => sub ($orig, $class, @args) {
   my $args = $class->$orig(@args);
