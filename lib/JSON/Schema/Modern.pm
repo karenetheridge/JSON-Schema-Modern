@@ -1306,6 +1306,7 @@ SOURCES.>
 =head1 SEE ALSO
 
 =for :list
+* L<json-schema-eval>
 * L<https://json-schema.org>
 * L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://tools.ietf.org/html/rfc8259>
 * L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://tools.ietf.org/html/rfc3986>

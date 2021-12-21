@@ -1,0 +1,114 @@
+#!/usr/bin/perl
+# vim: set ts=8 sts=2 sw=2 tw=100 et :
+# PODNAME: json-schema-eval
+# ABSTRACT: A command-line interface to JSON::Schema::Modern::evaluate()
+use 5.020;  # for fc, unicode_strings features
+use strictures 2;
+use experimental qw(signatures postderef);
+use if "$]" >= 5.022, experimental => 're_strict';
+no if "$]" >= 5.031009, feature => 'indirect';
+no if "$]" >= 5.033001, feature => 'multidimensional';
+no if "$]" >= 5.033006, feature => 'bareword_filehandles';
+use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
+
+use Getopt::Long::Descriptive;
+use Path::Tiny;
+use JSON::Schema::Modern;
+
+my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
+  "$0 %o",
+  ['help|usage|?|h', 'print usage information and exit', { shortcircuit => 1 } ],
+
+  ['specification_version|version=s', 'which version of the JSON Schema specification to use'],
+  ['output_format=s', 'output format (flag, basic, detailed, verbose, terse)'],
+  ['short_circuit', 'return early in any execution path as soon as the outcome can be determined'],
+  ['max_traversal_depth=i', 'the maximum number of levels deep a schema traversal may go'],
+  ['validate_formats', 'treat format as an assertion, not merely an annotation'],
+  ['validate_content_schemas', 'treat contentMediaType and contentSchema keywords as assertions'],
+  ['collect_annotations', 'collect annotations'],
+  ['annotate_unknown_keywords', 'produce annotations for unknown keywords'],
+  # scalarref_booleans makes no sense in json-encoded data
+
+  ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used'],
+  ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used'],
+);
+
+my ($data, $schema) = delete $opt->@{qw(data schema)};
+
+if (defined $data) {
+  $data = path($data)->slurp_utf8;
+}
+else {
+  say 'enter data instance, followed by ^D:';
+  local $/;
+  $data = <STDIN>;
+  STDIN->clearerr;
+}
+
+if (defined $schema) {
+  $schema = path($schema)->slurp_utf8;
+}
+else {
+  say 'enter schema, followed by ^D:';
+  local $/;
+  $schema = <STDIN>;
+}
+
+my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
+
+my $js = JSON::Schema::Modern->new(%$opt);
+my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
+
+say $encoder->encode($result->TO_JSON);
+
+__END__
+
+=pod
+
+=head1 SYNOPSIS
+
+  json-schema-eval [ --specification_version|version <version> ] [ --output_format <format> ] [ --short_circuit ] [ --max_traversal_depth <depth> ] [ --validate_formats ] [ --validate_content_schemas ] [ --collect_annotations ] [ --annotate_unknown_keywords ] [ --data <filename> ] [ --schema <filename> ]
+
+=head1 DESCRIPTION
+
+A command-line interface to L<JSON::Schema::Modern/evaluate>.
+
+F<data.json> contains:
+
+  {"hello": 42}
+
+F<schema.json> contains:
+
+  {"type": ["string", "number"]}
+
+Run:
+
+  json-schema-eval --data data.json --schema schema.json
+
+produces output:
+
+  {
+    "valid": false,
+    "errors": [
+      {
+        "instanceLocation": "",
+        "keywordLocation": "/type",
+        "error": "wrong type (expected one of string, number)"
+      }
+    ]
+  }
+
+=head1 OPTIONS
+
+=for :stopwords schemas
+
+All boolean and string options in L<JSON::Schema::Modern> are available.
+
+Additionally, C<--data> is used to provide the filename containing a json-encoded data instance,
+and C<--schema> provides the filename containing a json-encoded schema.
+
+If either or both of these are not provided, STDIN is used as input.
+
+Only JSON-encoded data and schemas are supported at this time.
+
+=cut
