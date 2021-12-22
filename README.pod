@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.531
+version 0.532
 
 =head1 SYNOPSIS
 
@@ -307,6 +307,18 @@ C<application/json>
 
 =item *
 
+C<application/schema+json>
+
+=item *
+
+C<application/schema-instance+json>
+
+=item *
+
+C<application/octet-stream>
+
+=item *
+
 C<text/plain>
 
 =back
@@ -527,6 +539,10 @@ SOURCES.>
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<json-schema-eval>
 
 =item *
 
