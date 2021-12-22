@@ -225,4 +225,11 @@ Use of these formats will always evaluate to C<true>.
 =for :list
 * L<JSON::Schema::Modern/Format Validation>
 
+=head1 SUPPORT
+
+=for stopwords OpenAPI
+
+You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
+server|https://open-api.slack.com>, which are also great resources for finding help.
+
 =cut
