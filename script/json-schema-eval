@@ -55,6 +55,7 @@ else {
 }
 
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
+$encoder->indent_length(2) if $encoder->can('indent_length');
 
 my $js = JSON::Schema::Modern->new(%$opt);
 my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
