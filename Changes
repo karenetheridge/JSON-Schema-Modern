@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix exit statuses in json-schema-eval
 
 0.532     2021-12-22 19:14:06Z
           - add media_type decoders for application/schema+json,
