@@ -67,7 +67,17 @@ __END__
 
 =head1 SYNOPSIS
 
-  json-schema-eval [ --specification_version|version <version> ] [ --output_format <format> ] [ --short_circuit ] [ --max_traversal_depth <depth> ] [ --validate_formats ] [ --validate_content_schemas ] [ --collect_annotations ] [ --annotate_unknown_keywords ] [ --data <filename> ] [ --schema <filename> ]
+  json-schema-eval \
+    [ --specification_version|version <version> ] \
+    [ --output_format <format> ] \
+    [ --short_circuit ] \
+    [ --max_traversal_depth <depth> ] \
+    [ --validate_formats ] \
+    [ --validate_content_schemas ] \
+    [ --collect_annotations ] \
+    [ --annotate_unknown_keywords ] \
+    [ --data <filename> ] \
+    [ --schema <filename> ]
 
 =head1 DESCRIPTION
 
