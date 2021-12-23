@@ -115,7 +115,7 @@ The exit value is 0 when the result is valid, and -1 otherwise.
 
 =head1 OPTIONS
 
-=for :stopwords schemas
+=for stopwords schemas
 
 All boolean and string options in L<JSON::Schema::Modern> are available.
 
