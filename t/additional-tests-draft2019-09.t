@@ -12,6 +12,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More;
 use Test::Warnings 'warnings', ':no_end_test';
 use Test::Deep;
+use Config;
 use lib 't/lib';
 use Acceptance;
 
@@ -30,13 +31,21 @@ my @warnings = warnings {
     },
     output_file => $version.'-additional-tests.txt',
     test => {
-      todo_tests => [
+      $ENV{NO_TODO} ? () : ( todo_tests => [
         { file => [
             # these all depend on optional prereqs
             !eval { require Time::Moment; 1 } ? qw(format-date-time.json format-date.json format-time.json) : (),
             !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
           ] },
-      ],
+        # TODO: requires bigint support
+        { file => 'integers.json', group_description => 'type checks', test_description => [
+            'beyond int64 lower boundary', 'beyond int64 upper boundary',
+            $Config{ivsize} < 8 ? ('beyond int32 lower boundary', 'beyond int32 upper boundary') : (),
+          ] },
+        $Config{ivsize} < 8 ? { file => 'integers.json', group_description => 'int32 range checks',
+          test_description => [ 'beyond lower boundary', 'beyond upper boundary' ] } : (),
+        { file => 'integers.json', group_description => 'int64 range checks' },
+      ] ),
     },
   );
 };
