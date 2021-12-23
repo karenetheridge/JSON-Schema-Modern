@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.533     2021-12-23 19:45:11Z
           - fix exit statuses in json-schema-eval
 
