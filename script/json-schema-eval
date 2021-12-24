@@ -62,7 +62,7 @@ my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
 
 say $encoder->encode($result->TO_JSON);
 
-exit($result ? 0 : -1);
+exit($result ? 0 : 1);
 
 __END__
 
@@ -111,7 +111,8 @@ produces output:
     ]
   }
 
-The exit value is 0 when the result is valid, and -1 otherwise.
+The exit value (C<$?>) is 0 when the result is valid, 1 when it is invalid,
+and some other non-zero value if an exception occurred.
 
 =head1 OPTIONS
 
