@@ -68,20 +68,22 @@ sub is_type ($type, $value) {
   }
 
   if ($type eq 'string' or $type eq 'number' or $type eq 'integer') {
-    return 0 if not defined $value or is_ref($value);
+    return 0 if not defined $value;
     my $flags = B::svref_2object(\$value)->FLAGS;
 
     if ($type eq 'string') {
-      return $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
+      return !is_ref($value) && $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
     }
 
     # FIXME: Storable twiddles the PV flag when isUV. https://github.com/Perl/perl5/issues/19296
     if ($type eq 'number') {
-      return (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+      return ref($value) =~ /^Math::Big(?:Int|Float)$/
+        || (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK))
     }
 
     if ($type eq 'integer') {
-      return (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK))
+      return (ref($value) =~ /^Math::Big(?:Int|Float)$/
+          || (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK)))
         && int($value) == $value;
     }
   }
@@ -101,14 +103,15 @@ sub get_type ($value) {
   return 'array' if is_plain_arrayref($value);
   return 'boolean' if is_bool($value);
 
-  return (blessed($value) ? '' : 'reference to ').ref($value) if is_ref($value);
+  return ref($value) =~ /^Math::Big(?:Int|Float)$/ ? 'number' : (blessed($value) ? '' : 'reference to ').ref($value)
+    if is_ref($value);
 
   my $flags = B::svref_2object(\$value)->FLAGS;
   return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
   return 'number' if (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK));
 
   croak sprintf('ambiguous type for %s',
-    JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 0)->encode($value));
+    JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 0, allow_bignum => 1, allow_blessed => 1)->encode($value));
 }
 
 # compares two arbitrary data payloads for equality, as per
@@ -342,7 +345,7 @@ sub annotate_self ($state, $schema) {
 
 sub sprintf_num ($value) {
   # use original value as stored in the NV, without losing precision
-  sprintf('%s', $value);
+  ref($value) =~ /^Math::Big(?:Int|Float)$/ ? $value->bstr : sprintf('%s', $value);
 }
 
 1;

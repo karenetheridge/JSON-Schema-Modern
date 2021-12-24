@@ -46,10 +46,10 @@ required.json                                9          0     0
 type.json                                   80          0     0
 uniqueItems.json                            64          0     0
 unknownKeyword.json                          3          0     0
-optional/bignum.json                         3          6     0
+optional/bignum.json                         9          0     0
 optional/content.json                       10          0     0
 optional/ecmascript-regex.json              60         14     0
-optional/float-overflow.json                 0          1     0
+optional/float-overflow.json                 1          0     0
 optional/non-bmp-regex.json                 12          0     0
 ---------------------------------------------------------------
-TOTAL                                      878         21     0
+TOTAL                                      885         14     0

@@ -37,18 +37,6 @@ my @warnings = warnings {
             !eval { require Time::Moment; 1 } ? qw(format-date-time.json format-date.json format-time.json) : (),
             !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
           ] },
-        # TODO: requires bigint support
-        { file => 'integers.json', group_description => 'type checks', test_description => [
-            'beyond int64 lower boundary',
-            $Config{ivsize} < 8
-              ? ('beyond int64 lower boundary', 'int32 lower boundary',
-                'int32 upper boundary', 'beyond upper int64 boundary') : (),
-            'beyond int64 upper boundary',
-          ] },
-        $Config{ivsize} < 8 ? { file => 'integers.json', group_description => 'int32 range checks',
-          test_description => [ 'beyond lower boundary', 'beyond upper boundary' ] } : (),
-        { file => 'integers.json', group_description => 'int64 range checks',
-            $Config{ivsize} < 8 ? () : ( test_description => [ 'beyond lower boundary', 'beyond upper boundary' ] ) },
       ] ),
     },
   );

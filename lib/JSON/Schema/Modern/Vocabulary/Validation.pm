@@ -83,7 +83,6 @@ sub _eval_keyword_enum ($self, $data, $schema, $state) {
   my @s; my $idx = 0;
   my %s = ( scalarref_booleans => $state->{scalarref_booleans} );
   return 1 if any { is_equal($data, $_, $s[$idx++] = {%s}) } $schema->{enum}->@*;
-
   return E($state, 'value does not match'
     .(!(grep $_->{path}, @s) ? ''
       : ' (differences start '.join(', ', map 'from item #'.$_.' at "'.$s[$_]->{path}.'"', 0..$#s).')'));
@@ -107,11 +106,18 @@ sub _traverse_keyword_multipleOf ($self, $schema, $state) {
 sub _eval_keyword_multipleOf ($self, $data, $schema, $state) {
   return 1 if not is_type('number', $data);
 
-  my $quotient = $data / $schema->{multipleOf};
-  return E($state, 'overflow while calculating quotient')
-    if "$]" >= 5.022 ? isinf($quotient) : $quotient =~ /^-?Inf$/i;
+  if (ref($data) =~ /^Math::Big(?:Int|Float)$/) {
+    my ($quotient, $remainder) = $data->copy->bdiv($schema->{multipleOf});
+    return E($state, 'overflow while calculating quotient') if $quotient->is_inf;
+    return 1 if $remainder == 0;
+  }
+  else {
+    my $quotient = $data / $schema->{multipleOf};
+    return E($state, 'overflow while calculating quotient')
+      if "$]" >= 5.022 ? isinf($quotient) : $quotient =~ /^-?Inf$/i;
+    return 1 if int($quotient) == $quotient;
+  }
 
-  return 1 if int($quotient) == $quotient;
   return E($state, 'value is not a multiple of %s', sprintf_num($schema->{multipleOf}));
 }
 

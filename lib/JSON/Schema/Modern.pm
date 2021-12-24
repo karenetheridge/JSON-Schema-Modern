@@ -823,11 +823,12 @@ sub _fetch_from_uri ($self, $uri) {
   }
 }
 
+# used for internal encoding as well (when caching serialized schemas)
 has _json_decoder => (
   is => 'ro',
   isa => HasMethods[qw(encode decode)],
   lazy => 1,
-  default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1) },
+  default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1, allow_bignum => 1, allow_blessed => 1) },
 );
 
 # since media types are case-insensitive, all type names must be foldcased on insertion.
@@ -1297,11 +1298,12 @@ still deemed to be missing some optional but quite useful features, such as:
 =head1 SECURITY CONSIDERATIONS
 
 The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema,
-and the C<regex> format validator evaluates regular expressions from the data.
+the C<regex> format validator evaluates regular expressions from the data, and some keywords
+in the Validation vocabulary perform floating point operations on potentially-very large numbers.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
-potentially pathological constructs that may pose a security risk, either via denial of service
-or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM UNTRUSTED
-SOURCES.>
+detect potentially pathological constructs that may pose a security risk, either via denial of
+service or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM
+UNTRUSTED SOURCES.>
 
 =head1 SEE ALSO
 

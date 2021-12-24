@@ -37,7 +37,6 @@ acceptance_tests(
   output_file => $version.'-acceptance.txt',
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
-      { file => 'optional/bignum.json' },     # TODO: see issue #10
       # various edge cases that are difficult to accomodate
       { file => 'optional/ecmascript-regex.json', group_description => '\w in patterns matches [A-Za-z0-9_], not unicode letters', test_description => [ 'literal unicode character in json string', 'unicode character in hex format in string' ] },
       { file => 'optional/ecmascript-regex.json', group_description => '\d in pattern matches [0-9], not unicode digits', test_description => 'non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)' },
@@ -46,17 +45,6 @@ acceptance_tests(
       { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # TODO, see test suite PR#505
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'zero-width whitespace matches' },
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' },
-      { file => 'optional/float-overflow.json' },             # see slack logs re multipleOf algo
-      $Config{ivsize} < 8 || $Config{nvsize} < 8 ?            # see issue #10
-        { file => 'const.json',
-          group_description => 'float and integers are equal up to 64-bit representation limits',
-          test_description => 'float is valid' }
-        : (),
-      $Config{nvsize} >= 12 ? # see https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/438#issuecomment-714670854
-        { file => 'multipleOf.json',
-          group_description => 'invalid instance should not raise error when float division = inf',
-          test_description => 'always invalid, but naive implementations may raise an overflow error' }
-        : (),
     ] ),
   },
 );

@@ -15,6 +15,8 @@ use Test::Fatal;
 use Scalar::Util qw(isdual dualvar);
 use Config;
 use JSON::Schema::Modern::Utilities qw(is_type get_type);
+use Math::BigInt;
+use Math::BigFloat;
 use lib 't/lib';
 use Helper;
 
@@ -23,8 +25,8 @@ my %inflated_data = (
   boolean => [ false, true ],
   object => [ {}, { a => 1 } ],
   array => [ [], [ 1 ] ],
-  number => [ 3.1, 1.23456789012e10 ],
-  integer => [ 0, -1, 2, 2.0, 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65, 1000000000000000 ],
+  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123') ],
+  integer => [ 0, -1, 2, 2.0, 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65, 1000000000000000, Math::BigInt->new('1e20') ],
   string => [ '', '0', '-1', '2', '2.0', '3.1', 'école', 'ಠ_ಠ' ],
 );
 
@@ -65,7 +67,7 @@ foreach my $type (sort keys %inflated_data) {
   };
 }
 
-my $decoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1);
+my $decoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1, allow_bignum => 1);
 
 foreach my $type (sort keys %json_data) {
   subtest 'JSON-encoded data, type: '.$type => sub {
@@ -97,7 +99,7 @@ foreach my $type (sort keys %json_data) {
 
 subtest 'type: integer' => sub {
   ok(is_type('integer', $_), json_sprintf('%s is an integer', $_))
-    foreach (1, 2.0);
+    foreach (1, 2.0, 9223372036854775800000008, $decoder->decode('9223372036854775800000008'));
 
   ok(!is_type('integer', $_), json_sprintf('%s is not an integer', $_))
     foreach ('1', '2.0', 3.1, '4.2');

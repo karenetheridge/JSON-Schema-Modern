@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - very large/small numbers are now properly accomodated in all
+            cases, including from JSON-serialized data
 
 0.535     2021-12-28 06:38:37Z
           - mark more tests TODO (temporarily!) for small-int systems
