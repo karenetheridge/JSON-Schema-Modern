@@ -59,11 +59,10 @@ sub _traverse_keyword_type ($self, $schema, $state) {
 
 sub _eval_keyword_type ($self, $data, $schema, $state) {
   if (is_plain_arrayref($schema->{type})) {
-    # return 1 if any { is_type($_, $data) } $schema->{type}->@*;
-    foreach my $type ($schema->{type}->@*) {
-      return 1 if is_type($type, $data)
-        or ($type eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data));
-    }
+    return 1 if any {
+      is_type($_, $data)
+        or ($_ eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data))
+    } $schema->{type}->@*;
     return E($state, 'wrong type (expected one of %s)', join(', ', $schema->{type}->@*));
   }
   else {
