@@ -39,8 +39,11 @@ my @warnings = warnings {
           ] },
         # TODO: requires bigint support
         { file => 'integers.json', group_description => 'type checks', test_description => [
-            'beyond int64 lower boundary', 'beyond int64 upper boundary',
-            $Config{ivsize} < 8 ? ('beyond int32 lower boundary', 'beyond int32 upper boundary') : (),
+            'beyond int64 lower boundary',
+            $Config{ivsize} < 8
+              ? ('int64 lower boundary', 'beyond int32 lower boundary',
+                'beyond int32 upper boundary', 'upper int64 boundary') : (),
+            'beyond int64 upper boundary',
           ] },
         $Config{ivsize} < 8 ? { file => 'integers.json', group_description => 'int32 range checks',
           test_description => [ 'beyond lower boundary', 'beyond upper boundary' ] } : (),
