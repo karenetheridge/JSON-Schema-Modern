@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - clarify exit statuses for 'json-schema-eval'
           - fix numeric tests for architectures with small int size
+          - fix handling of unsigned ints that cannot be represented in a
+            signed int
 
 0.533     2021-12-23 19:45:11Z
           - fix exit statuses in json-schema-eval

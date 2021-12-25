@@ -122,5 +122,74 @@
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "equality checks",
+        "schema": {
+            "$comment": "on some architectures, some of these values may json-decode to strings",
+            "enum": [
+                -9223372036854775809,
+                -9223372036854775808,
+                -2147483649,
+                -2147483648,
+                0,
+                2147483647,
+                2147483648,
+                9223372036854775807,
+                9223372036854775808
+            ]
+        },
+        "tests": [
+            {
+                "description": "beyond int64 lower boundary",
+                "data": -9223372036854775809,
+                "valid": true
+            },
+            {
+                "description": "int64 lower boundary",
+                "data": -9223372036854775808,
+                "valid": true
+            },
+            {
+                "description": "beyond int32 lower boundary",
+                "data": -2147483649,
+                "valid": true
+            },
+            {
+                "description": "int32 lower boundary",
+                "data": -2147483648,
+                "valid": true
+            },
+            {
+                "description": "zero",
+                "data": 0,
+                "valid": true
+            },
+            {
+                "description": "one",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "int32 upper boundary",
+                "data": 2147483647,
+                "valid": true
+            },
+            {
+                "description": "beyond int32 upper boundary",
+                "data": 2147483648,
+                "valid": true
+            },
+            {
+                "description": "int64 upper boundary",
+                "data": 9223372036854775807,
+                "valid": true
+            },
+            {
+                "description": "beyond int64 upper boundary",
+                "data": 9223372036854775808,
+                "valid": true
+            }
+        ]
     }
 ]

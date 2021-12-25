@@ -74,12 +74,13 @@ sub is_type ($type, $value) {
       return $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
     }
 
+    # FIXME: Storable twiddles the PV flag when isUV. https://github.com/Perl/perl5/issues/19296
     if ($type eq 'number') {
-      return !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+      return (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK));
     }
 
     if ($type eq 'integer') {
-      return !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK))
+      return (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK))
         && int($value) == $value;
     }
   }
@@ -103,7 +104,7 @@ sub get_type ($value) {
 
   my $flags = B::svref_2object(\$value)->FLAGS;
   return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
-  return 'number' if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+  return 'number' if (!($flags & B::SVf_POK) || $flags & B::SVf_IVisUV) && ($flags & (B::SVf_IOK | B::SVf_NOK));
 
   croak sprintf('ambiguous type for %s',
     JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 0)->encode($value));
