@@ -5,6 +5,11 @@ use Path::Tiny;
 use HTTP::Tiny;
 use JSON::Schema::Modern;
 
+# ATTENTION DISTRO REPACKAGERS: do NOT use fresh copies of these files
+# from their source; it is important to include the original versions
+# of the files as they were packaged with this cpan distribution, or
+# surprising behaviour may occur.
+
 my %files = (
   'draft2020-12/meta/applicator.json'     => 'https://json-schema.org/draft/2020-12/meta/applicator',
   'draft2020-12/meta/content.json'        => 'https://json-schema.org/draft/2020-12/meta/content',
