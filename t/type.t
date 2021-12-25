@@ -22,7 +22,8 @@ my %inflated_data = (
   boolean => [ false, true ],
   object => [ {}, { a => 1 } ],
   array => [ [], [ 1 ] ],
-  number => [ 0, -1, 2, 2.0, 3.1 ],
+  number => [ 3.1 ],
+  integer => [ 0, -1, 2, 2.0 ],
   string => [ '', '0', '-1', '2', '2.0', '3.1', 'école', 'ಠ_ಠ' ],
 );
 
@@ -31,7 +32,8 @@ my %json_data = (
   boolean => [ 'false', 'true' ],
   object => [ '{}', '{"a":1}' ],
   array => [ '[]', '[1]' ],
-  number => [ '0', '-1', '2.0', '3.1' ],
+  number => [ '3.1' ],
+  integer => [ '0', '-1', '2.0' ],
   string => [ '""', '"0"', '"-1"', '"2.0"', '"3.1"',
     qq{"\x{c3}\x{a9}cole"}, qq{"\x{e0}\x{b2}\x{a0}_\x{e0}\x{b2}\x{a0}"} ],
 );
@@ -41,10 +43,17 @@ foreach my $type (sort keys %inflated_data) {
     foreach my $value ($inflated_data{$type}->@*) {
       my $value_copy = $value;
       ok(is_type($type, $value), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
-      is(get_type($value), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+      ok(is_type('number', $value), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
+        if $type eq 'integer';
+
+      {
+        my $type = $type eq 'integer' ? 'number' : $type;
+        is(get_type($value), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+      }
 
       foreach my $other_type (sort keys %inflated_data) {
         next if $other_type eq $type;
+        next if $type eq 'integer' and $other_type eq 'number';
 
         ok(!is_type($other_type, $value),
           json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
@@ -63,10 +72,17 @@ foreach my $type (sort keys %json_data) {
       $value = $decoder->decode($value);
       my $value_copy = $value;
       ok(is_type($type, $value), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
-      is(get_type($value), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+      ok(is_type('number', $value), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
+        if $type eq 'integer';
+
+      {
+        my $type = $type eq 'integer' ? 'number' : $type;
+        is(get_type($value), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+      }
 
       foreach my $other_type (sort keys %json_data) {
         next if $other_type eq $type;
+        next if $type eq 'integer' and $other_type eq 'number';
 
         ok(!is_type($other_type, $value),
           json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
