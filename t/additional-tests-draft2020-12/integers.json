@@ -92,7 +92,7 @@
         "description": "int64 range checks",
         "schema": {
             "$comment": "on some architectures, some of these values may decode to strings",
-            "minimum": 9223372036854775808,
+            "minimum": -9223372036854775808,
             "maximum": 9223372036854775807
         },
         "tests": [

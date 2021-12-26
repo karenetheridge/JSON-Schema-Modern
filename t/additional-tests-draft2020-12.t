@@ -47,7 +47,12 @@ my @warnings = warnings {
           ] },
         $Config{ivsize} < 8 ? { file => 'integers.json', group_description => 'int32 range checks',
           test_description => [ 'beyond lower boundary', 'beyond upper boundary' ] } : (),
-        { file => 'integers.json', group_description => 'int64 range checks' },
+        { file => 'integers.json', group_description => 'int64 range checks', test_description => [
+            'beyond lower boundary',
+            $Config{ivsize} < 8
+              ? ('lower boundary', 'beyond lower boundary', 'beyond upper boundary', 'upper boundary') : (),
+            'beyond upper boundary',
+          ] },
       ] ),
     },
   );
