@@ -16,6 +16,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
+use if "$]" >= 5.022, POSIX => 'isinf';
 use JSON::Schema::Modern::Utilities qw(is_type is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
 use namespace::clean;
 
@@ -107,7 +108,10 @@ sub _eval_keyword_multipleOf ($self, $data, $schema, $state) {
   return 1 if not is_type('number', $data);
 
   my $quotient = $data / $schema->{multipleOf};
-  return 1 if int($quotient) == $quotient and $quotient !~ /^-?Inf$/i;
+  return E($state, 'overflow while calculating quotient')
+    if "$]" >= 5.022 ? isinf($quotient) : $quotient =~ /^-?Inf$/i;
+
+  return 1 if int($quotient) == $quotient;
   return E($state, 'value is not a multiple of %s', sprintf_num($schema->{multipleOf}));
 }
 
