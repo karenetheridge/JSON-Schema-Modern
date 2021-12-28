@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - mark more tests TODO (temporarily!) for small-int systems
 
 0.534     2021-12-27 21:05:34Z
           - clarify exit statuses for 'json-schema-eval'
