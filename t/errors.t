@@ -1375,4 +1375,50 @@ subtest 'evaluate in the middle of a document' => sub {
   );
 };
 
+subtest 'numbers in output' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      5,
+      {
+        multipleOf => 1.23456789,
+        maximum => 4.23456789,
+        minimum => 6.23456789,
+        exclusiveMaximum => 4.23456789,
+        exclusiveMinimum => 6.23456789,
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/multipleOf',
+          error => 'value is not a multiple of 1.23456789',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/maximum',
+          error => 'value is larger than 4.23456789',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/exclusiveMaximum',
+          error => 'value is equal to or larger than 4.23456789',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/minimum',
+          error => 'value is smaller than 6.23456789',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/exclusiveMinimum',
+          error => 'value is equal to or smaller than 6.23456789',
+        },
+      ],
+    },
+    error => 'numbers in errors do not lose any digits of precision',
+  );
+};
+
 done_testing;

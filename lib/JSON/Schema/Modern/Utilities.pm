@@ -45,6 +45,7 @@ our @EXPORT_OK = qw(
   assert_uri_reference
   assert_uri
   annotate_self
+  sprintf_num
   true
   false
 );
@@ -339,6 +340,11 @@ sub annotate_self ($state, $schema) {
     : $schema->{$state->{keyword}});
 }
 
+sub sprintf_num ($value) {
+  # use original value as stored in the NV, without losing precision
+  sprintf('%s', $value);
+}
+
 1;
 __END__
 
@@ -354,7 +360,7 @@ This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp unjsonp local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
-annotate_self is_uri_reference
+annotate_self is_uri_reference sprintf_num
 
 =head1 SUPPORT
 
