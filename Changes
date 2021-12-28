@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.535     2021-12-28 06:38:37Z
           - mark more tests TODO (temporarily!) for small-int systems
 
 0.534     2021-12-27 21:05:34Z
