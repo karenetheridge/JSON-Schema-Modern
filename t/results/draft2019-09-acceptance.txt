@@ -1,5 +1,5 @@
-Results using Test::JSON::Schema::Acceptance 1.013
-with commit 329efe59c65ea9f49af9c5c07dd6f5d22cb67ef4 (2.0.0-443-g329efe5)
+Results using Test::JSON::Schema::Acceptance 1.014
+with commit 26f74befcd2286cce0b74c9ae17ecdd560245924 (2.0.0-452-g26f74be)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2019-09
 optional tests included: yes
@@ -52,7 +52,7 @@ required.json                                9          0     0
 type.json                                   80          0     0
 unevaluatedItems.json                       35          0     0
 unevaluatedProperties.json                 103          0     0
-uniqueItems.json                            64          0     0
+uniqueItems.json                            68          0     0
 unknownKeyword.json                          3          0     0
 vocabulary.json                              3          0     0
 optional/bignum.json                         9          0     0
@@ -61,4 +61,4 @@ optional/float-overflow.json                 1          0     0
 optional/non-bmp-regex.json                 12          0     0
 optional/refOfUnknownKeyword.json            4          0     0
 ---------------------------------------------------------------
-TOTAL                                     1142         14     0
+TOTAL                                     1146         14     0

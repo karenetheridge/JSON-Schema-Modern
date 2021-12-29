@@ -1,4 +1,4 @@
-Results using Test::JSON::Schema::Acceptance 1.013
+Results using Test::JSON::Schema::Acceptance 1.014
 specification version: draft7
 using custom test directory: t/additional-tests-draft7
 optional tests included: no
