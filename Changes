@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix number/integer differentiation on small-int systems
 
 0.536     2021-12-30 05:32:44Z
           - very large/small numbers are now properly accomodated in all

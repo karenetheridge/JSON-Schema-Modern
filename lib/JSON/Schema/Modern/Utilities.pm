@@ -81,9 +81,8 @@ sub is_type ($type, $value) {
     }
 
     if ($type eq 'integer') {
-      return (ref($value) =~ /^Math::Big(?:Int|Float)$/
-          || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK)))
-        && int($value) == $value;
+      return ref($value) =~ /^Math::Big(?:Int|Float)$/ && $value->is_int
+        || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK)) && int($value) == $value;
     }
   }
 
