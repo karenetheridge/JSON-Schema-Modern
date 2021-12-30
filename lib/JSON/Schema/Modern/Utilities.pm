@@ -77,7 +77,7 @@ sub is_type ($type, $value) {
 
     if ($type eq 'number') {
       return ref($value) =~ /^Math::Big(?:Int|Float)$/
-        || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK))
+        || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
     }
 
     if ($type eq 'integer') {
