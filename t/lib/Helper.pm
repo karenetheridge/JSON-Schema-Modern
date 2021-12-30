@@ -10,7 +10,7 @@ my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, allow_bignum => 1
 
 # like sprintf, but all list items are JSON-encoded. assumes placeholders are %s!
 sub json_sprintf {
-  sprintf(shift, map +(ref($_) =~ /^Math::Big(Int|Float)$/ ? ref($_).'->new('.$_.')' : $encoder->encode($_)), @_);
+  sprintf(shift, map +(ref($_) =~ /^Math::Big(Int|Float)$/ ? ref($_).'->new(\''.$_.'\')' : $encoder->encode($_)), @_);
 }
 
 1;
