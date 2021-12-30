@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.537     2021-12-30 22:49:02Z
           - fix number/integer differentiation on small-int systems
           - improve division calculations if either argument is a non-integer
 
