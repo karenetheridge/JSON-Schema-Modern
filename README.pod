@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.535
+version 0.536
 
 =head1 SYNOPSIS
 
@@ -530,11 +530,12 @@ additional output formats beyond C<flag>, C<basic>, and C<terse> (L<https://json
 =head1 SECURITY CONSIDERATIONS
 
 The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema,
-and the C<regex> format validator evaluates regular expressions from the data.
+the C<regex> format validator evaluates regular expressions from the data, and some keywords
+in the Validation vocabulary perform floating point operations on potentially-very large numbers.
 No effort is taken (at this time) to sanitize the regular expressions for embedded code or
-potentially pathological constructs that may pose a security risk, either via denial of service
-or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM UNTRUSTED
-SOURCES.>
+detect potentially pathological constructs that may pose a security risk, either via denial of
+service or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM
+UNTRUSTED SOURCES.>
 
 =head1 SEE ALSO
 
