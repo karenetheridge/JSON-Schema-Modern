@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - remove no-longer-needed TODO in tests that caused warnings in
+            small-int systems
 
 0.537     2021-12-30 22:49:02Z
           - fix number/integer differentiation on small-int systems

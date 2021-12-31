@@ -73,7 +73,6 @@ foreach my $type (sort keys %json_data) {
   subtest 'JSON-encoded data, type: '.$type => sub {
     foreach my $value ($json_data{$type}->@*) {
       $value = $decoder->decode($value);
-      local $TODO = 'bignums are not handled yet'  if $Config{ivsize} < 8 and ($value < -2**32 or $value > 2**32-1);
       my $value_copy = $value;
       ok(is_type($type, $value), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
       ok(is_type('number', $value), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
