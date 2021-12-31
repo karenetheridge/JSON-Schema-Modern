@@ -13,7 +13,6 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Fatal;
 use Scalar::Util qw(isdual dualvar);
-use Config;
 use JSON::Schema::Modern::Utilities qw(is_type get_type);
 use Math::BigInt;
 use Math::BigFloat;

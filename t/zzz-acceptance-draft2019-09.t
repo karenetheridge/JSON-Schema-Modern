@@ -11,7 +11,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
 use List::Util 1.50 'head';
-use Config;
 use lib 't/lib';
 use Acceptance;
 

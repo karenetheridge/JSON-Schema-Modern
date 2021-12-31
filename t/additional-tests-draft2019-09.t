@@ -12,7 +12,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use Test::More;
 use Test::Warnings 'warnings', ':no_end_test';
 use Test::Deep;
-use Config;
 use lib 't/lib';
 use Acceptance;
 
