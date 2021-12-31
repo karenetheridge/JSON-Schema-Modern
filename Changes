@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.538     2021-12-31 21:18:21Z
           - remove no-longer-needed TODO in tests that caused warnings in
             small-int systems
 
