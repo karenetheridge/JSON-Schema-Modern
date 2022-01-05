@@ -591,7 +591,7 @@ subtest 'exceptions' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/properties/x',
-          error => 'invalid schema type: number',
+          error => 'invalid schema type: integer',
         },
       ],
     },

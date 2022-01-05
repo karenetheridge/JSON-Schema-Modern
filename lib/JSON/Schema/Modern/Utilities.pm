@@ -93,20 +93,20 @@ sub is_type ($type, $value) {
   return ref($value) eq $type;
 }
 
-# only the core six types are reported (integers are numbers)
-# use is_type('integer') to differentiate numbers from integers.
 sub get_type ($value) {
   return 'null' if not defined $value;
   return 'object' if is_plain_hashref($value);
   return 'array' if is_plain_arrayref($value);
   return 'boolean' if is_bool($value);
 
-  return ref($value) =~ /^Math::Big(?:Int|Float)$/ ? 'number' : (blessed($value) ? '' : 'reference to ').ref($value)
+  return ref($value) =~ /^Math::Big(?:Int|Float)$/ ? ($value->is_int ? 'integer' : 'number')
+      : (blessed($value) ? '' : 'reference to ').ref($value)
     if is_ref($value);
 
   my $flags = B::svref_2object(\$value)->FLAGS;
   return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
-  return 'number' if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+  return int($value) == $value ? 'integer' : 'number'
+    if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
 
   croak sprintf('ambiguous type for %s',
     JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 0, allow_bignum => 1, allow_blessed => 1)->encode($value));
@@ -128,7 +128,7 @@ sub is_equal ($x, $y, $state = undef) {
   return 0 if $types[0] ne $types[1];
   return 1 if $types[0] eq 'null';
   return $x eq $y if $types[0] eq 'string';
-  return $x == $y if $types[0] eq 'boolean' or $types[0] eq 'number';
+  return $x == $y if grep $types[0] eq $_, qw(boolean number integer);
 
   my $path = $state->{path};
   if ($types[0] eq 'object') {

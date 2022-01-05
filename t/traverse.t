@@ -61,7 +61,7 @@ subtest 'traversal with callbacks' => sub {
         instanceLocation => '',
         keywordLocation => '/if',
         absoluteKeywordLocation => 'https://foo.com#/if',
-        error => 'invalid schema type: number',
+        error => 'invalid schema type: integer',
       },
     ],
     'errors encountered during traversal are returned',
