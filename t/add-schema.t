@@ -91,7 +91,7 @@ subtest 'evaluate a uri' => sub {
           instanceLocation => '/$schema',
           keywordLocation => '/allOf/0/$ref/properties/$schema/type',
           absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/meta/core#/properties/$schema/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           instanceLocation => '',
@@ -156,7 +156,7 @@ subtest 'evaluate a uri' => sub {
           instanceLocation => '',
           keywordLocation => '/type',
           absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/meta/core#/properties/$schema/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
       ],
     },
@@ -766,13 +766,13 @@ subtest 'external resource with externally-supplied uri; main resource with mult
           instanceLocation => '',
           keywordLocation => '/$ref/type',
           absoluteKeywordLocation => 'http://localhost:1234/integer.json#/type',
-          error => 'wrong type (expected integer)',
+          error => 'got string, not integer',
         },
         {
           instanceLocation => '',
           keywordLocation => '/type',
           absoluteKeywordLocation => 'https://main.com#/type',
-          error => 'wrong type (expected object)',
+          error => 'got string, not object',
         },
       ],
     },
@@ -820,7 +820,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
           keywordLocation => '/additionalProperties/$ref/type',
           # the canonical URI is what the evaluator knows it as, even if the document doesn't know
           absoluteKeywordLocation => 'https://localhost:1234/mydef.json#/$defs/integer/type',
-          error => 'wrong type (expected integer)',
+          error => 'got string, not integer',
         },
         {
           instanceLocation => '',
@@ -855,7 +855,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/$ref/type',
           absoluteKeywordLocation => 'https://otherhost.com/mydef.json#/$defs/integer/type',
-          error => 'wrong type (expected integer)',
+          error => 'got string, not integer',
         },
         {
           instanceLocation => '',

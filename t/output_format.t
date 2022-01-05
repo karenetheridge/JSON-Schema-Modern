@@ -59,12 +59,12 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/allOf/0/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       {
         instanceLocation => '',
         keywordLocation => '/allOf/1/oneOf/0/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       {
         instanceLocation => '',
@@ -84,12 +84,12 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/anyOf/0/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       {
         instanceLocation => '',
         keywordLocation => '/anyOf/1/then/type',
-        error => 'wrong type (expected array)',
+        error => 'got object, not array',
       },
       {
         instanceLocation => '',
@@ -109,7 +109,7 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/else/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       {
         instanceLocation => '',
@@ -239,12 +239,12 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/allOf/0/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       {
         instanceLocation => '',
         keywordLocation => '/allOf/1/oneOf/0/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       # - "summary" error from /allOf/1/oneOf is omitted
       {
@@ -256,12 +256,12 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/anyOf/0/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       {
         instanceLocation => '',
         keywordLocation => '/anyOf/1/then/type',
-        error => 'wrong type (expected array)',
+        error => 'got object, not array',
       },
       # - "summary" error from /anyOf/1/then is omitted
       # - "summary" error from /anyOf is omitted
@@ -273,7 +273,7 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/else/type',
-        error => 'wrong type (expected number)',
+        error => 'got object, not number',
       },
       # - "summary" error from /else is omitted
       {

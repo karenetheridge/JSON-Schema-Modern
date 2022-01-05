@@ -17,7 +17,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
 use if "$]" >= 5.022, POSIX => 'isinf';
-use JSON::Schema::Modern::Utilities qw(is_type is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
+use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -59,17 +59,18 @@ sub _traverse_keyword_type ($self, $schema, $state) {
 }
 
 sub _eval_keyword_type ($self, $data, $schema, $state) {
+  my $type = get_type($data);
   if (is_plain_arrayref($schema->{type})) {
     return 1 if any {
-      is_type($_, $data)
-        or ($_ eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data))
+      $type eq $_ or ($_ eq 'number' and $type eq 'integer')
+        or ($_ eq 'boolean' and $state->{scalarref_booleans} and $type eq 'reference to SCALAR')
     } $schema->{type}->@*;
-    return E($state, 'wrong type (expected one of %s)', join(', ', $schema->{type}->@*));
+    return E($state, 'got %s, not one of %s', $type, join(', ', $schema->{type}->@*));
   }
   else {
-    return 1 if is_type($schema->{type}, $data)
-      or ($schema->{type} eq 'boolean' and $state->{scalarref_booleans} and is_type('reference to SCALAR', $data));
-    return E($state, 'wrong type (expected %s)', $schema->{type});
+    return 1 if $type eq $schema->{type} or ($schema->{type} eq 'number' and $type eq 'integer')
+      or ($schema->{type} eq 'boolean' and $state->{scalarref_booleans} and $type eq 'reference to SCALAR');
+    return E($state, 'got %s, not %s', $type, $schema->{type});
   }
 }
 

@@ -32,7 +32,7 @@ subtest 'multiple types' => sub {
           instance_location => '',
           keyword_location => '/type',
           absolute_keyword_location => undef,
-          error => 'wrong type (expected one of string, number)',
+          error => 'got boolean, not one of string, number',
         ),
       ),
     ],
@@ -47,7 +47,7 @@ subtest 'multiple types' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/type',
-          error => 'wrong type (expected one of string, number)',
+          error => 'got boolean, not one of string, number',
         },
       ],
     },
@@ -678,7 +678,7 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/$ref/type',
           absoluteKeywordLocation => 'http://localhost:4242/object.json#/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
@@ -1207,13 +1207,13 @@ subtest 'absoluteKeywordLocation' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/0/type',
           absoluteKeywordLocation => 'https://localhost:1234/foo.json#/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
           keywordLocation => '/allOf/1/allOf/0/type',
           absoluteKeywordLocation => 'https://localhost:1234/bar/alpha#/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
@@ -1225,7 +1225,7 @@ subtest 'absoluteKeywordLocation' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/2/type',
           absoluteKeywordLocation => 'https://localhost:1234/bloop#/allOf/2/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
@@ -1249,13 +1249,13 @@ subtest 'absoluteKeywordLocation' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/0/type',
           absoluteKeywordLocation => 'foo.json#/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
           keywordLocation => '/allOf/1/allOf/0/type',
           absoluteKeywordLocation => 'bar/alpha#/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
@@ -1266,7 +1266,7 @@ subtest 'absoluteKeywordLocation' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/2/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '',
@@ -1361,7 +1361,7 @@ subtest 'evaluate in the middle of a document' => sub {
           instanceLocation => '/request/body/bar',
           keywordLocation => '/some/other/thing/$ref/foo/$ref/properties/bar/type',
           absoluteKeywordLocation => 'https://my-inner-schema#/allOf/0/properties/bar/type',
-          error => 'wrong type (expected string)',
+          error => 'got array, not string',
         },
         {
           instanceLocation => '/request/body',

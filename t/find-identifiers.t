@@ -538,7 +538,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/0/type',
           absoluteKeywordLocation => 'subschema1.json#/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           instanceLocation => '',
@@ -667,7 +667,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
           instanceLocation => '',
           keywordLocation => '/allOf/0/type',
           absoluteKeywordLocation => 'subschema1.json#/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           instanceLocation => '',
@@ -786,7 +786,7 @@ subtest 'relative uri in $id' => sub {
           instanceLocation => '',
           keywordLocation => '/type',
           absoluteKeywordLocation => 'foo/bar/baz.json#/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
       ],
     },

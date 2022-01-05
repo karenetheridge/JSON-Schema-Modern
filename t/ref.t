@@ -126,7 +126,7 @@ subtest '$id with an empty fragment' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/0/$ref/type',
           absoluteKeywordLocation => 'http://localhost:4242/my_foo#/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           absoluteKeywordLocation => 'http://localhost:4242/my_foo',
@@ -164,7 +164,7 @@ subtest '$recursiveRef without nesting behaves like $ref' => sub {
           instanceLocation => '',
           keywordLocation => '/anyOf/0/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got object, not string',
         },
         # /anyOf/1 with ''
         # /anyOf/1/additionalProperties/$recursiveRef with '/foo'
@@ -173,7 +173,7 @@ subtest '$recursiveRef without nesting behaves like $ref' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/$recursiveRef/anyOf/0/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got object, not string',
         },
         # /anyOf/1/additionalProperties/$recursiveRef/anyOf/1 with /foo
         # additionalProperties:  consider /foo/bar
@@ -186,13 +186,13 @@ subtest '$recursiveRef without nesting behaves like $ref' => sub {
           instanceLocation => '/foo/baz',
           keywordLocation => '/anyOf/1/additionalProperties/$recursiveRef/anyOf/1/additionalProperties/$recursiveRef/anyOf/0/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           instanceLocation => '/foo/baz',
           keywordLocation => '/anyOf/1/additionalProperties/$recursiveRef/anyOf/1/additionalProperties/$recursiveRef/anyOf/1/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/1/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '/foo/baz',
@@ -391,7 +391,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
           instanceLocation => '/foo/bar',
           keywordLocation => '/additionalProperties/additionalProperties/$ref/type',
           absoluteKeywordLocation => 'https://innerbase.com#/type',
-          error => 'wrong type (expected one of object, boolean)',
+          error => 'got integer, not one of object, boolean',
         },
         {
           instanceLocation => '/foo',
@@ -475,19 +475,19 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
           instanceLocation => '',
           keywordLocation => '/anyOf/0/type',
           absoluteKeywordLocation => 'strings_only#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got object, not string',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/$ref/anyOf/0/type',
           absoluteKeywordLocation => 'strings_only#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/$ref/anyOf/1/type',
           absoluteKeywordLocation => 'strings_only#/anyOf/1/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '/foo',
@@ -570,19 +570,19 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
           instanceLocation => '',
           keywordLocation => '/anyOf/0/type',
           absoluteKeywordLocation => 'base#/anyOf/0/type',
-          error => 'wrong type (expected boolean)',
+          error => 'got object, not boolean',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/anyOf/0/type',
           absoluteKeywordLocation => 'inner#/anyOf/0/type',
-          error => 'wrong type (expected integer)',
+          error => 'got boolean, not integer',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/anyOf/1/type',
           absoluteKeywordLocation => 'inner#/anyOf/1/type',
-          error => 'wrong type (expected object)',
+          error => 'got boolean, not object',
         },
         {
           instanceLocation => '/foo',
@@ -619,25 +619,25 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
           instanceLocation => '',
           keywordLocation => '/anyOf/0/type',
           absoluteKeywordLocation => 'base#/anyOf/0/type',
-          error => 'wrong type (expected boolean)',
+          error => 'got object, not boolean',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/anyOf/0/type',
           absoluteKeywordLocation => 'inner#/anyOf/0/type',
-          error => 'wrong type (expected integer)',
+          error => 'got object, not integer',
         },
         {
           instanceLocation => '/foo/bar',
           keywordLocation => '/anyOf/1/additionalProperties/anyOf/1/additionalProperties/$recursiveRef/anyOf/0/type',
           absoluteKeywordLocation => 'inner#/anyOf/0/type',
-          error => 'wrong type (expected integer)',
+          error => 'got boolean, not integer',
         },
         {
           instanceLocation => '/foo/bar',
           keywordLocation => '/anyOf/1/additionalProperties/anyOf/1/additionalProperties/$recursiveRef/anyOf/1/type',
           absoluteKeywordLocation => 'inner#/anyOf/1/type',
-          error => 'wrong type (expected object)',
+          error => 'got boolean, not object',
         },
         {
           instanceLocation => '/foo/bar',
@@ -699,7 +699,7 @@ subtest '$dynamicRef without nesting behaves like $ref' => sub {
           instanceLocation => '',
           keywordLocation => '/anyOf/0/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got object, not string',
         },
         # /anyOf/1 with ''
         # /anyOf/1/additionalProperties/$dynamicRef with '/foo'
@@ -708,7 +708,7 @@ subtest '$dynamicRef without nesting behaves like $ref' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/anyOf/1/additionalProperties/$dynamicRef/anyOf/0/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got object, not string',
         },
         # /anyOf/1/additionalProperties/$dynamicRef/anyOf/1 with /foo
         # additionalProperties:  consider /foo/bar
@@ -721,13 +721,13 @@ subtest '$dynamicRef without nesting behaves like $ref' => sub {
           instanceLocation => '/foo/baz',
           keywordLocation => '/anyOf/1/additionalProperties/$dynamicRef/anyOf/1/additionalProperties/$dynamicRef/anyOf/0/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/0/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
         {
           instanceLocation => '/foo/baz',
           keywordLocation => '/anyOf/1/additionalProperties/$dynamicRef/anyOf/1/additionalProperties/$dynamicRef/anyOf/1/type',
           absoluteKeywordLocation => 'http://localhost:4242#/anyOf/1/type',
-          error => 'wrong type (expected object)',
+          error => 'got integer, not object',
         },
         {
           instanceLocation => '/foo/baz',
@@ -825,7 +825,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
           instanceLocation => '/foo/bar',
           keywordLocation => '/additionalProperties/additionalProperties/$ref/type',
           absoluteKeywordLocation => 'https://innerbase.com#/type',
-          error => 'wrong type (expected one of object, boolean)',
+          error => 'got integer, not one of object, boolean',
         },
         {
           instanceLocation => '/foo',
@@ -977,7 +977,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
           instanceLocation => '',
           keywordLocation => '/$ref/$dynamicRef/type',
           absoluteKeywordLocation => 'start#/$defs/main/type',
-          error => 'wrong type (expected string)',
+          error => 'got integer, not string',
         },
       ],
     },

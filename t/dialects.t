@@ -1043,7 +1043,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
           instanceLocation => '',
           keywordLocation => '/type',
           absoluteKeywordLocation => 'http://localhost:1234/my-meta-schema#/type',
-          error => 'wrong type (expected object)',
+          error => 'got boolean, not object',
         },
       ],
     },
@@ -1064,7 +1064,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
           instanceLocation => '/allOf/0',
           keywordLocation => '/allOf/0/$ref/allOf/1/$ref/properties/allOf/$ref/items/$recursiveRef/type',
           absoluteKeywordLocation => 'http://localhost:1234/my-meta-schema#/type',
-          error => 'wrong type (expected object)',
+          error => 'got boolean, not object',
         },
         {
           instanceLocation => '/allOf',

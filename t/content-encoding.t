@@ -130,7 +130,7 @@ subtest 'media_type and encoding handlers' => sub {
         {
           instanceLocation => '/encoded_object/foo',
           keywordLocation => '/properties/encoded_object/contentSchema/additionalProperties/type',
-          error => 'wrong type (expected number)',
+          error => 'got string, not number',
         },
         {
           instanceLocation => '/encoded_object',

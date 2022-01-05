@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - updated error message for the "type" keyword to include the actual
+            type, as well as the expected type(s)
 
 0.538     2021-12-31 21:18:21Z
           - remove no-longer-needed TODO in tests that caused warnings in
