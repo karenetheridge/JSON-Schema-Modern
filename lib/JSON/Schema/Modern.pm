@@ -5,7 +5,7 @@ package JSON::Schema::Modern;
 # ABSTRACT: Validate data against a schema
 # KEYWORDS: JSON Schema data validation structure specification
 
-our $VERSION = '0.539';
+our $VERSION = '0.540';
 
 use 5.020;  # for fc, unicode_strings features
 use Moo;
