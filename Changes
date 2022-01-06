@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.539     2022-01-06 04:07:20Z
           - updated error message for the "type" keyword to include the actual
             type, as well as the expected type(s)
 

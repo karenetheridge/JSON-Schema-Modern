@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.538
+version 0.539
 
 =head1 SYNOPSIS
 
@@ -164,7 +164,7 @@ or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
-L</validate_formats>, and/or L<validate_content_schemas>
+L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
@@ -199,7 +199,7 @@ or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
-L</validate_formats>, and/or L<validate_content_schemas>
+L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
@@ -582,8 +582,6 @@ L<https://json-schema.org/draft-07/json-schema-release-notes.html>
 L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
 
 =back
-
-=head1 SUPPORT
 
 =for stopwords OpenAPI
 
