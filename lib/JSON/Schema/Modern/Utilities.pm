@@ -41,7 +41,6 @@ our @EXPORT_OK = qw(
   assert_keyword_exists
   assert_keyword_type
   assert_pattern
-  is_uri_reference
   assert_uri_reference
   assert_uri
   annotate_self
@@ -294,26 +293,20 @@ sub assert_pattern ($state, $pattern) {
   return 1;
 }
 
-sub is_uri_reference ($ref) {
-  croak 'is_uri_reference called in void context' if not defined wantarray;
-
-  return 0
-    # see also uri-reference format sub
-    if fc(Mojo::URL->new($ref)->to_unsafe_string) ne fc($ref)
-      or $ref =~ /[^[:ascii:]]/
-      or $ref =~ /#/
-        and $ref !~ m{#$}                          # empty fragment
-        and $ref !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
-        and $ref !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
-
-  return 1;
-}
-
 sub assert_uri_reference ($state, $schema) {
   croak 'assert_uri_reference called in void context' if not defined wantarray;
 
-  return 1 if is_uri_reference($schema->{$state->{keyword}});
-  return E($state, '%s value is not a valid URI reference', $state->{keyword});
+  my $string = $schema->{$state->{keyword}};
+  return E($state, '%s value is not a valid URI reference', $state->{keyword})
+    # see also uri-reference format sub
+    if fc(Mojo::URL->new($string)->to_unsafe_string) ne fc($string)
+      or $string =~ /[^[:ascii:]]/
+      or $string =~ /#/
+        and $string !~ m{#$}                          # empty fragment
+        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
+        and $string !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
+
+  return 1;
 }
 
 sub assert_uri ($state, $schema, $override = undef) {
@@ -361,7 +354,7 @@ This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_equal is_elements_unique jsonp unjsonp local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
-annotate_self is_uri_reference sprintf_num
+annotate_self sprintf_num
 
 =head1 SUPPORT
 
