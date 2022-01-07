@@ -278,9 +278,9 @@ See C<&> at L</OVERLOADS>.
 
 =head1 SUPPORT
 
-=for stopwords OpenAPI
-
 You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
 server|https://open-api.slack.com>, which are also great resources for finding help.
+
+=for stopwords OpenAPI
 
 =cut
