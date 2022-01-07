@@ -108,7 +108,7 @@ produces output:
       {
         "instanceLocation": "",
         "keywordLocation": "/type",
-        "error": "wrong type (expected one of string, number)"
+        "error": "got integer, not one of string, number"
       }
     ]
   }
