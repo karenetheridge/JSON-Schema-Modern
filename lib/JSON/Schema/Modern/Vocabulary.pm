@@ -153,7 +153,7 @@ Evaluates a subschema. Callers are expected to establish a new C<$state> scope.
 
 =head2 eval_subschema_at_uri
 
-Resolves a URI to a subschema, then evaluates that subschema (essentially the `$ref` keyword).
+Resolves a URI to a subschema, then evaluates that subschema (essentially the C<$ref> keyword).
 
 =head1 SUPPORT
 
