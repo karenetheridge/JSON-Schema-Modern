@@ -113,19 +113,19 @@ must compose, describing the basic structure expected of a vocabulary class.
 
 =head2 vocabulary
 
-The canonical URI(s) describing the vocabulary for each draft specification version, as described in
+Returns the canonical URI(s) describing the vocabulary for each draft specification version, as described in
 L<JSON Schema Core Meta-specification, section 8.1.2|https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1.2>.
 Must be implemented by the composing class.
 
 =head2 evaluation_order
 
-A positive integer, used as a sort key for determining the evaluation order of this vocabulary. If
+Returns a positive integer, used as a sort key for determining the evaluation order of this vocabulary. If
 not overridden in a custom vocabulary class, its evaluation order will be after all built-in
 vocabularies. You probably don't need to define this.
 
 =head2 keywords
 
-The list of keywords defined by the vocabulary. Must be implemented by the composing class.
+Returns the list of keywords defined by the vocabulary. Must be implemented by the composing class.
 
 =head2 traverse
 
@@ -133,15 +133,15 @@ Traverses a subschema. Callers are expected to establish a new C<$state> scope.
 
 =head2 traverse_subschema
 
-Recursively traverses the schema at the current keyword.
+Recursively traverses the schema at the current keyword, as in the C<not> keyword.
 
 =head2 traverse_array_schemas
 
-Recursively traverses the list of subschemas at the current keyword.
+Recursively traverses the list of subschemas at the current keyword, as in the C<allOf> keyword.
 
 =head2 traverse_object_schemas
 
-Recursively traverses the (subschema) values of the object at the current keyword.
+Recursively traverses the (subschema) values of the object at the current keyword, as in the C<$defs> keyword.
 
 =head2 traverse_property_schema
 
