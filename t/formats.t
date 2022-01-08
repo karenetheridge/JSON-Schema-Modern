@@ -371,4 +371,50 @@ subtest 'custom metaschemas' => sub {
   );
 };
 
+subtest 'unimplemented formats' => sub {
+  my $js = JSON::Schema::Modern->new(validate_formats => 1);
+  cmp_deeply(
+    $js->evaluate(
+      'hello',
+      {
+        format => 'uri-template',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          error => 'unimplemented format "uri-template"',
+        },
+      ],
+    },
+    'error when an unimplemented format is used',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      'hello',
+      {
+        anyOf => [
+          { minLength => 1 },
+          { format => 'uri-template' },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/anyOf/1/format',
+          error => 'unimplemented format "uri-template"',
+        },
+      ],
+    },
+    'error is seen even when containing subschema would be true',
+  );
+};
+
 done_testing;
