@@ -58,7 +58,7 @@ sub acceptance_tests (%options) {
       $js_short_circuit->add_schema($uri => $schema) if not $ENV{NO_SHORT_CIRCUIT};
     }
     catch ($e) {
-      die $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e->TO_JSON) : $e;
+      die $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e) : $e;
     }
   };
 
