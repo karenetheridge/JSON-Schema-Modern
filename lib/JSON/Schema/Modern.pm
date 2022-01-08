@@ -828,7 +828,7 @@ has _json_decoder => (
   is => 'ro',
   isa => HasMethods[qw(encode decode)],
   lazy => 1,
-  default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1, allow_bignum => 1, allow_blessed => 1) },
+  default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1, allow_bignum => 1, convert_blessed => 1) },
 );
 
 # since media types are case-insensitive, all type names must be foldcased on insertion.
