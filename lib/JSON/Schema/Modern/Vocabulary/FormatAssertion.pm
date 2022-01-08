@@ -131,8 +131,6 @@ sub keywords {
       eval { qr/$_[0]/; 1 ? 1 : 0 };
     },
 
-    # TODO: if the metaschema's $vocabulary entry is true, then we must die on
-    # encountering these unimplemented formats.
     'iri-reference' => sub { 1 },
     'uri-template' => sub { 1 },
   };
@@ -218,7 +216,7 @@ Overrides to particular format implementations, or additions of new ones, can be
 L<JSON::Schema::Modern/format_validations>.
 
 Formats C<iri-reference> and C<uri-template> are not yet implemented.
-Use of these formats will always evaluate to C<true>.
+Use of these formats will always result in an error.
 
 =head1 SEE ALSO
 
