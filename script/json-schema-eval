@@ -120,7 +120,8 @@ and some other non-zero value if an exception occurred.
 
 =for stopwords schemas
 
-All boolean and string options in L<JSON::Schema::Modern> are available.
+All boolean and string options used as L<constructors to
+JSON::Schema::Modern|JSON::Schema::Modern/CONFIGURATION OPTIONS> are available.
 
 Additionally, C<--data> is used to provide the filename containing a json-encoded data instance,
 and C<--schema> provides the filename containing a json-encoded schema.
