@@ -293,6 +293,7 @@ sub assert_pattern ($state, $pattern) {
   return 1;
 }
 
+# this is only suitable for checking URIs within schemas themselves
 sub assert_uri_reference ($state, $schema) {
   croak 'assert_uri_reference called in void context' if not defined wantarray;
 
@@ -309,6 +310,7 @@ sub assert_uri_reference ($state, $schema) {
   return 1;
 }
 
+# this is only suitable for checking URIs within schemas themselves
 sub assert_uri ($state, $schema, $override = undef) {
   croak 'assert_uri called in void context' if not defined wantarray;
 
