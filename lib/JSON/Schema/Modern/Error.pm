@@ -15,6 +15,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
+use JSON::PP ();
 use MooX::TypeTiny;
 use Types::Standard qw(Str Undef InstanceOf);
 use namespace::clean;
@@ -42,6 +43,12 @@ has keyword => (
   is => 'ro',
   isa => Str|Undef,
   required => 1,
+);
+
+has exception => (
+  is => 'rw',
+  isa => InstanceOf['JSON::PP::Boolean'],
+  coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
 );
 
 sub TO_JSON ($self) {

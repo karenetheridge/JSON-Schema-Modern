@@ -218,6 +218,7 @@ sub E ($state, $error_string, @args) {
     keyword_location => $keyword_location,
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
     error => @args ? sprintf($error_string, @args) : $error_string,
+    $state->{exception} ? ( exception => $state->{exception} ) : (),
   );
 
   return 0;
@@ -262,7 +263,9 @@ sub A ($state, $annotation) {
 # Therefore this is only appropriate during the evaluation phase, not the traverse phase.
 sub abort ($state, $error_string, @args) {
   ()= E($state, $error_string, @args);
-  die pop $state->{errors}->@*;
+  my $error = pop $state->{errors}->@*;
+  $error->exception(1);
+  die $error;
 }
 
 sub assert_keyword_exists ($state, $schema) {

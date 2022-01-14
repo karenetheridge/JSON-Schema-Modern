@@ -20,7 +20,7 @@ use MooX::HandlesVia;
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
-use List::Util 1.50 'head';
+use List::Util 1.50 qw(head any);
 use Scalar::Util 'refaddr';
 use Safe::Isa;
 use namespace::clean;
@@ -38,6 +38,14 @@ has valid => (
   coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
 );
 sub result { goto \&valid } # backcompat only
+
+has exception => (
+  is => 'rw',
+  isa => InstanceOf['JSON::PP::Boolean'],
+  coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
+  lazy => 1,
+  default => sub { any { $_->exception } $_[0]->errors },
+);
 
 has $_.'s' => (
   is => 'bare',

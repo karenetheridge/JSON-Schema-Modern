@@ -64,7 +64,7 @@ my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
 
 say $encoder->encode($result->TO_JSON);
 
-exit($result ? 0 : 1);
+exit($result ? 0 : $result->exception ? 2 : 1);
 
 __END__
 
