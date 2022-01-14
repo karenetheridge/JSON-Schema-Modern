@@ -54,6 +54,7 @@ else {
   say 'enter schema, followed by ^D:';
   local $/;
   $schema = <STDIN>;
+  say '';
 }
 
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
