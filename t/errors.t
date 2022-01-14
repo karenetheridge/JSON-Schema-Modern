@@ -581,7 +581,7 @@ subtest 'exceptions' => sub {
       {
         allOf => [
           { properties => { x => 1 } },
-          { properties => { x => false } },
+          { properties => { x => 'hi' } },
         ],
       }
     )->TO_JSON,
@@ -593,9 +593,14 @@ subtest 'exceptions' => sub {
           keywordLocation => '/allOf/0/properties/x',
           error => 'invalid schema type: integer',
         },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/properties/x',
+          error => 'invalid schema type: string',
+        },
       ],
     },
-    'a subschema of an invalid type returns an error at the right position, and evaluation aborts',
+    'a subschema of an invalid type returns an error at the right position, and evaluation continues',
   );
 
   cmp_deeply(
@@ -604,7 +609,7 @@ subtest 'exceptions' => sub {
       {
         allOf => [
           { type => 'whargarbl' },
-          false,
+          { type => 'whoops' },
         ],
       }
     )->TO_JSON,
@@ -616,9 +621,14 @@ subtest 'exceptions' => sub {
           keywordLocation => '/allOf/0/type',
           error => 'unrecognized type "whargarbl"',
         },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/type',
+          error => 'unrecognized type "whoops"',
+        },
       ],
     },
-    'invalid argument to "type" returns an error at the right position, and evaluation aborts',
+    'invalid argument to "type" returns an error at the right position, and evaluation continues',
   );
 };
 
