@@ -29,38 +29,60 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['annotate_unknown_keywords', 'produce annotations for unknown keywords'],
   # scalarref_booleans makes no sense in json-encoded data
 
+  ['validate-schema:s', 'validate the provided schema against its meta-schema. do not provide --data or --schema.' ],
+
   ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used'],
   ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used'],
 );
 
 print($usage->text), exit if $opt->help;
 
-my ($data, $schema) = delete $opt->@{qw(data schema)};
+my ($data, $schema, $validate_schema) = delete $opt->@{qw(data schema validate_schema)};
 
-if (defined $data) {
-  $data = path($data)->slurp_utf8;
+die '--validate-schema and --data should not be used together' if defined $data and defined $validate_schema;
+die '--validate-schema and --schema should not be used together' if defined $schema and defined $validate_schema;
+
+my $js = JSON::Schema::Modern->new(%$opt);
+
+if (defined $validate_schema) {
+  if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename
+    $data = path($validate_schema)->slurp_utf8;
+  }
+  else {
+    say 'enter schema, followed by ^D:';
+    local $/;
+    $data = <STDIN>;
+    say '';
+  }
+
+  my $spec_version = $js->specification_version // $js->SPECIFICATION_VERSION_DEFAULT;
+  $schema = '{"$ref": "'.$js->METASCHEMA_URIS->{$spec_version}.'"}';
 }
 else {
-  say 'enter data instance, followed by ^D:';
-  local $/;
-  $data = <STDIN>;
-  STDIN->clearerr;
-}
+  if (defined $data) {
+    $data = path($data)->slurp_utf8;
+  }
+  else {
+    say 'enter data instance, followed by ^D:';
+    local $/;
+    $data = <STDIN>;
+    STDIN->clearerr;
+  }
 
-if (defined $schema) {
-  $schema = path($schema)->slurp_utf8;
-}
-else {
-  say 'enter schema, followed by ^D:';
-  local $/;
-  $schema = <STDIN>;
-  say '';
+  if (defined $schema) {
+    $schema = path($schema)->slurp_utf8;
+  }
+  else {
+    say 'enter schema, followed by ^D:';
+    local $/;
+    $schema = <STDIN>;
+    say '';
+  }
 }
 
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
 $encoder->indent_length(2) if $encoder->can('indent_length');
 
-my $js = JSON::Schema::Modern->new(%$opt);
 my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
 
 say $encoder->encode($result->TO_JSON);
@@ -83,7 +105,8 @@ __END__
     [ --collect_annotations ] \
     [ --annotate_unknown_keywords ] \
     [ --data <filename> ] \
-    [ --schema <filename> ]
+    [ --schema <filename> ] \
+    [ --validate-schema [filename] ]
 
 =head1 DESCRIPTION
 
@@ -114,6 +137,16 @@ produces output:
     ]
   }
 
+Or run:
+
+  json-schema-eval --validate-schema schema.json
+
+produces output:
+
+  {
+    "valid": true
+  }
+
 The exit value (C<$?>) is 0 when the result is valid, 1 when it is invalid,
 and some other non-zero value if an exception occurred.
 
@@ -130,6 +163,10 @@ and C<--schema> provides the filename containing a json-encoded schema.
 If either or both of these are not provided, STDIN is used as input.
 
 Only JSON-encoded data and schemas are supported at this time.
+
+Alternatively, you can use C<--validate-schema> and either provide a filename containing a
+json-encoded schema, or omit the argument to read a schema from STDIN. The schema
+will be evaluated against its meta-schema for the corresponding specification version.
 
 =head1 SUPPORT
 

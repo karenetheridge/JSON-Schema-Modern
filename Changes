@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - make "unimplemented format" errors more visible
           - fixed serializing of results in acceptance tests
+          - add --validate-schema option to json-schema-eval to provide an
+            easy way to validate a schema against its meta-schema
 
 0.539     2022-01-06 04:07:20Z
           - updated error message for the "type" keyword to include the actual
