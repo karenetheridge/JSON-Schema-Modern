@@ -18,7 +18,7 @@ use JSON::Schema::Modern;
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   "$0 %o",
   ['help|usage|?|h', 'print usage information and exit', { shortcircuit => 1 } ],
-
+  [],
   ['specification_version|version=s', 'which version of the JSON Schema specification to use'],
   ['output_format=s', 'output format (flag, basic, detailed, verbose, terse)'],
   ['short_circuit', 'return early in any execution path as soon as the outcome can be determined'],
@@ -28,11 +28,10 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['collect_annotations', 'collect annotations'],
   ['annotate_unknown_keywords', 'produce annotations for unknown keywords'],
   # scalarref_booleans makes no sense in json-encoded data
-
+  [],
   ['validate-schema:s', 'validate the provided schema against its meta-schema. do not provide --data or --schema.' ],
-
-  ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used'],
-  ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used'],
+  ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used)'],
+  ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used)'],
 );
 
 print($usage->text), exit if $opt->help;
