@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.540     2022-01-17 18:58:36Z
           - make "unimplemented format" errors more visible
           - fixed serializing of results in acceptance tests
