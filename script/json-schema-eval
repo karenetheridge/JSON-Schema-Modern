@@ -30,6 +30,7 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   # scalarref_booleans makes no sense in json-encoded data
   [],
   ['validate-schema:s', 'validate the provided schema against its meta-schema. do not provide --data or --schema.' ],
+  ['add-schema=s@', 'the filename of an extra schema to load, so it can be used by $ref' ],
   ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used)'],
   ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used)'],
 );
@@ -82,6 +83,10 @@ else {
 my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
 $encoder->indent_length(2) if $encoder->can('indent_length');
 
+foreach my $add_schema (@{$opt->add_schema//[]}) {
+  $js->add_schema($encoder->decode(path($add_schema)->slurp_utf8));
+}
+
 my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
 
 say $encoder->encode($result->TO_JSON);
@@ -106,6 +111,7 @@ __END__
     [ --data <filename> ] \
     [ --schema <filename> ] \
     [ --validate-schema [filename] ]
+    [ --add-schema [filename ]
 
 =head1 DESCRIPTION
 
@@ -166,6 +172,11 @@ Only JSON-encoded data and schemas are supported at this time.
 Alternatively, you can use C<--validate-schema> and either provide a filename containing a
 json-encoded schema, or omit the argument to read a schema from STDIN. The schema
 will be evaluated against its meta-schema for the corresponding specification version.
+
+Additional schemas, that you wish to use via the C<$ref> keyword, can be added with
+C<< --add-schema <filename> >>. The actual filename is insignificant: Make sure you use an C<$id>
+keyword within that schema that matches the value you use in the C<$ref>. This option can be used
+more than once.
 
 =head1 SUPPORT
 
