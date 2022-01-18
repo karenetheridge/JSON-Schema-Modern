@@ -111,7 +111,7 @@ __END__
     [ --data <filename> ] \
     [ --schema <filename> ] \
     [ --validate-schema [filename] ]
-    [ --add-schema [filename ]
+    [ --add-schema <filename> ]
 
 =head1 DESCRIPTION
 
