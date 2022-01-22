@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - new "strict" option (and --strict flag to json-schema-eval), for
+            disallowing unknown keywords
 
 0.541     2022-01-17 23:57:35Z
           - add --add-schema option to json-schema-eval to allow for the

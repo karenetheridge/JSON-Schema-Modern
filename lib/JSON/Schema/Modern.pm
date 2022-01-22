@@ -100,6 +100,11 @@ has scalarref_booleans => (
   isa => Bool,
 );
 
+has strict => (
+  is => 'ro',
+  isa => Bool,
+);
+
 has _format_validations => (
   is => 'bare',
   isa => my $format_type = Dict[
@@ -423,6 +428,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   return 1 if not keys %$schema;
 
   my $valid = 1;
+  my %unknown_keywords = map +($_ => undef), keys %$schema;
   # we must check the array length on every iteration because some keywords can change it!
   for (my $idx = 0; $idx <= $state->{vocabularies}->$#*; ++$idx) {
     my $vocabulary = $state->{vocabularies}[$idx];
@@ -432,6 +438,7 @@ sub _traverse_subschema ($self, $schema, $state) {
       # keywords adjacent to $ref are not evaluated before draft2019-09
       next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
 
+      delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
       my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
 
@@ -445,6 +452,13 @@ sub _traverse_subschema ($self, $schema, $state) {
         $sub->($schema, $state);
       }
     }
+  }
+
+  delete $state->{keyword};
+
+  if ($self->strict and keys %unknown_keywords) {
+    abort($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
+      join(', ', sort keys %unknown_keywords));
   }
 
   # check for previously-supported but now removed keywords
@@ -535,6 +549,13 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
       push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];
     }
+  }
+
+  delete $state->{keyword};
+
+  if ($self->strict and keys %unknown_keywords) {
+    abort($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
+      join(', ', sort keys %unknown_keywords));
   }
 
   $state->{annotations} = $orig_annotations;
@@ -1029,6 +1050,11 @@ When true, any type that is expected to be a boolean B<in the instance data> may
 as the scalar references C<\0> or C<\1> (which are serialized as booleans by JSON backends).
 Defaults to false.
 
+=head2 strict
+
+When true, unrecognized keywords are disallowed in schemas (they will cause an immediate abort
+in L</traverse> or L</evaluate>).
+
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW
@@ -1052,7 +1078,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
-L</validate_formats>, and/or L</validate_content_schemas>
+L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
@@ -1076,7 +1102,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
-L</validate_formats>, and/or L</validate_content_schemas>
+L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
