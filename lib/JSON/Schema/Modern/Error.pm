@@ -63,7 +63,7 @@ sub TO_JSON ($self) {
 }
 
 sub stringify ($self) {
-  '\''.$self->instance_location.'\': '.$self->error;
+  'at \''.$self->instance_location.'\': '.$self->error;
 }
 
 1;
