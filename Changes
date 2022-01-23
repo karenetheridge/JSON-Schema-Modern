@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.542     2022-01-23 08:17:08Z
           - new "strict" option (and --strict flag to json-schema-eval), for
             disallowing unknown keywords
