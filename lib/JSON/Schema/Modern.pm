@@ -156,14 +156,16 @@ sub add_schema {
       evaluator => $self,  # used mainly for traversal during document construction
     );
 
-  croak(!(caller())[0]->isa(__PACKAGE__)
-    ? join("\n", $document->errors)
-    : JSON::Schema::Modern::Result->new(
+  if ($document->has_errors) {
+    my $result = JSON::Schema::Modern::Result->new(
       output_format => $self->output_format,
       valid => 0,
       errors => [ $document->errors ],
       exception => 1,
-    )) if $document->has_errors;
+    );
+    die $result if (caller())[0]->isa(__PACKAGE__);
+    croak $result.'';
+  }
 
   if (not grep refaddr($_->{document}) == refaddr($document), $self->_canonical_resources) {
     my $schema_content = $document->_serialized_schema
