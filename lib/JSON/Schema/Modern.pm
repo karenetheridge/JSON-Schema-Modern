@@ -1083,6 +1083,14 @@ L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</sc
 L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
+You can also pass use these keys to alter behaviour (these are generally only used by custom validation
+applications that contain embedded JSON Schemas):
+
+=for :list
+* C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
+* C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
@@ -1104,8 +1112,16 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
-L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
+
+You can also pass use these keys to alter behaviour (these are generally only used by custom validation
+applications that contain embedded JSON Schemas):
+
+=for :list
+* C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
+* C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 identifying various data that are not exposed by annotations.
@@ -1132,6 +1148,15 @@ The result is a L<JSON::Schema::Modern::Result> object, which can also be used a
 Traverses the provided schema without evaluating it against any instance data. Returns the
 internal state object accumulated during the traversal, including any identifiers found therein, and
 any errors found during parsing. For internal purposes only.
+
+Optionally, a hashref can be passed as a second parameter which alters some
+behaviour (these are generally only used by custom validation
+applications that contain embedded JSON Schemas):
+
+=for :list
+* C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+* C<metaschema_uri>: use the indicated URI as the metaschema
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 extracting data from within schemas and skipping properties that may look like keywords but actually
