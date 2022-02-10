@@ -2,6 +2,8 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - now allowing runtime overriding of the "strict" configuration
+          - add "effective_base_uri", for adjusting the locations of errors
+            and annotations against a dynamic base
 
 0.542     2022-01-23 08:17:08Z
           - new "strict" option (and --strict flag to json-schema-eval), for

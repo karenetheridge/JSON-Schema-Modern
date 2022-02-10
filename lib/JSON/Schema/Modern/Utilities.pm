@@ -204,7 +204,8 @@ sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
+  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix})
+    ->to_abs($state->{effective_base_uri});
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
@@ -237,7 +238,8 @@ sub E ($state, $error_string, @args) {
 sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations};
 
-  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix});
+  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix})
+    ->to_abs($state->{effective_base_uri});
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});

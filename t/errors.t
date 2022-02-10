@@ -1437,4 +1437,39 @@ subtest 'numbers in output' => sub {
   );
 };
 
+subtest 'effective_base_uri' => sub {
+  cmp_deeply(
+    $js->evaluate(
+      5,
+      {
+        '$id' => 'foo',
+        '$defs' => { bar => false },
+        '$ref' => '#/$defs/bar',
+        not => true,
+      },
+      {
+        effective_base_uri => 'https://example.com',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref',
+          absoluteKeywordLocation => 'https://example.com/foo#/$defs/bar',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/not',
+          absoluteKeywordLocation => 'https://example.com/foo#/not',
+          error => 'subschema is valid',
+        },
+      ],
+    },
+    'error locations are relative to the effective_base_uri, but $ref usage is not restricted',
+  );
+};
+
 done_testing;

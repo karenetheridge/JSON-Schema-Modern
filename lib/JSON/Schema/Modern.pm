@@ -243,6 +243,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     initial_schema_uri => $initial_uri,     # the canonical URI as of the start of this method, or last $id
     traversed_schema_path => $initial_path, # the accumulated traversal path as of the start, or last $id
     schema_path => '',                      # the rest of the path, since the start of this method, or last $id
+    effective_base_uri => Mojo::URL->new(''),
     errors => [],
     identifiers => [],
     configs => {},
@@ -298,12 +299,14 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
   my $initial_path = $config_override->{traversed_schema_path} // '';
+  my $effective_base_uri = Mojo::URL->new($config_override->{effective_base_uri}//'');
 
   my $state = {
     data_path => $config_override->{data_path} // '',
     traversed_schema_path => $initial_path, # the accumulated path as of the start of evaluation, or last $id or $ref
     initial_schema_uri => Mojo::URL->new,   # the canonical URI as of the start of evaluation, or last $id or $ref
     schema_path => '',                  # the rest of the path, since the start of evaluation, or last $id or $ref
+    effective_base_uri => $effective_base_uri, # resolve locations against this for errors and annotations
     errors => [],
   };
 
@@ -1088,6 +1091,7 @@ applications that contain embedded JSON Schemas):
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+* C<effective_base_uri>: locations in errors and annotations are resolved against this URI
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
@@ -1120,6 +1124,7 @@ applications that contain embedded JSON Schemas):
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+* C<effective_base_uri>: locations in errors and annotations are resolved against this URI
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 identifying various data that are not exposed by annotations.
