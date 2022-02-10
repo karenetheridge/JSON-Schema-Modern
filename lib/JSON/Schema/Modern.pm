@@ -297,13 +297,12 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
 sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
-  my $base_uri = Mojo::URL->new;  # TODO: will be set by a global attribute
   my $initial_path = $config_override->{traversed_schema_path} // '';
 
   my $state = {
     data_path => $config_override->{data_path} // '',
     traversed_schema_path => $initial_path, # the accumulated path as of the start of evaluation, or last $id or $ref
-    initial_schema_uri => $base_uri,    # the canonical URI as of the start of evaluation, or last $id or $ref
+    initial_schema_uri => Mojo::URL->new,   # the canonical URI as of the start of evaluation, or last $id or $ref
     schema_path => '',                  # the rest of the path, since the start of evaluation, or last $id or $ref
     errors => [],
   };
@@ -313,15 +312,14 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     my $schema_info;
 
     if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
-      # TODO: resolve this URI against 'base_uri'
       $schema_info = $self->_fetch_from_uri($schema_reference);
-      $state->{initial_schema_uri} = Mojo::URL->new($config_override->{initial_schema_uri} // $base_uri);
+      $state->{initial_schema_uri} = Mojo::URL->new($config_override->{initial_schema_uri} // '');
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-      my $document = $self->add_schema($base_uri, $schema_reference);
+      my $document = $self->add_schema('', $schema_reference);
       my $base_resource = $document->_get_resource($document->canonical_uri)
-        || croak "couldn't get resource from '$base_uri'";
+        || croak "couldn't get resource: document parse error";
 
       $schema_info = {
         schema => $document->schema,
