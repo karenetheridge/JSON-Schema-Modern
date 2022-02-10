@@ -1387,7 +1387,7 @@ subtest 'evaluate in the middle of a document' => sub {
         },
       ],
     },
-    error => 'error has correct locations from override hash',
+    'error has correct locations from override hash',
   );
 };
 
@@ -1433,7 +1433,7 @@ subtest 'numbers in output' => sub {
         },
       ],
     },
-    error => 'numbers in errors do not lose any digits of precision',
+    'numbers in errors do not lose any digits of precision',
   );
 };
 
