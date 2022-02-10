@@ -351,7 +351,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(validate_formats validate_content_schemas short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans)),
+      } qw(validate_formats validate_content_schemas short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans strict)),
     };
 
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
@@ -555,7 +555,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   delete $state->{keyword};
 
-  if ($self->strict and keys %unknown_keywords) {
+  if ($state->{strict} and keys %unknown_keywords) {
     abort($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
       join(', ', sort keys %unknown_keywords));
   }
@@ -1112,7 +1112,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
-L</validate_formats>, and/or L</validate_content_schemas>
+L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation
