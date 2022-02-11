@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.543     2022-02-11 04:11:55Z
           - now allowing runtime overriding of the "strict" configuration
           - add "effective_base_uri", for adjusting the locations of errors
