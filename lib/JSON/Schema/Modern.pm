@@ -163,8 +163,7 @@ sub add_schema {
       errors => [ $document->errors ],
       exception => 1,
     );
-    die $result if (caller())[0]->isa(__PACKAGE__);
-    croak $result.'';
+    die $result;
   }
 
   if (not grep refaddr($_->{document}) == refaddr($document), $self->_canonical_resources) {

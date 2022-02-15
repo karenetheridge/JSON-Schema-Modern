@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - add_schema() now has more consistent exception handling
 
 0.543     2022-02-11 04:11:55Z
           - now allowing runtime overriding of the "strict" configuration

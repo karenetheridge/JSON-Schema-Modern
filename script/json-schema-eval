@@ -13,6 +13,8 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Getopt::Long::Descriptive;
 use Path::Tiny;
+use Safe::Isa;
+use Feature::Compat::Try;
 use JSON::Schema::Modern;
 
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
@@ -85,7 +87,13 @@ my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1,
 $encoder->indent_length(2) if $encoder->can('indent_length');
 
 foreach my $add_schema (@{$opt->add_schema//[]}) {
-  $js->add_schema($encoder->decode(path($add_schema)->slurp_utf8));
+  try {
+    $js->add_schema($encoder->decode(path($add_schema)->slurp_utf8));
+  }
+  catch ($e) {
+    say $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e->TO_JSON) : $e;
+    exit 2;
+  }
 }
 
 my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
