@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.544     2022-02-16 05:53:08Z
           - add_schema() now has more consistent exception handling
 
