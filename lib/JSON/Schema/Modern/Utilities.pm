@@ -265,6 +265,7 @@ sub A ($state, $annotation) {
 # Therefore this is only appropriate during the evaluation phase, not the traverse phase.
 sub abort ($state, $error_string, @args) {
   ()= E($state, $error_string, @args);
+  croak 'abort() called during traverse' if $state->{traverse};
   my $error = pop $state->{errors}->@*;
   $error->exception(1);
   die $error;

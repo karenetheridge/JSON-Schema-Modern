@@ -248,6 +248,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     configs => {},
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
+    traverse => 1,
   };
 
   try {
@@ -290,6 +291,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     }
   }
 
+  delete $state->{traverse};
   return $state;
 }
 
@@ -459,7 +461,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   delete $state->{keyword};
 
   if ($self->strict and keys %unknown_keywords) {
-    abort($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
+    ()= E($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
       join(', ', sort keys %unknown_keywords));
   }
 

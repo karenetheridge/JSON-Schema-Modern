@@ -116,7 +116,7 @@ sub _traverse_keyword_schema ($self, $schema, $state) {
   }
   else {
     my $schema_info = $state->{evaluator}->_fetch_from_uri($schema->{'$schema'});
-    abort($state, 'EXCEPTION: unable to find resource %s', $schema->{'$schema'}) if not $schema_info;
+    return E($state, 'EXCEPTION: unable to find resource %s', $schema->{'$schema'}) if not $schema_info;
 
     ($spec_version, $vocabularies) = $self->__fetch_vocabulary_data({ %$state,
         keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
