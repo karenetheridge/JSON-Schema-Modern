@@ -97,13 +97,28 @@ subtest 'type: integer' => sub {
 
 ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception');
 
-my $file = __FILE__;
-my $line;
-like(
-  exception { $line = __LINE__; get_type(dualvar(5, "five")) },
-  qr/^ambiguous type for "five" at $file line $line/,
-  'ambiguous type results in exception',
-);
+subtest 'ambiguous types' => sub {
+  my $file = __FILE__;
+  my $line;
+  like(
+    exception { $line = __LINE__; get_type(dualvar(5, "five")) },
+    qr/^ambiguous type for "five" at $file line $line/,
+    'ambiguous type results in exception',
+  );
+
+  SKIP: {
+    skip 'on perls >= 5.35.9, reading the string form of an integer value no longer sets the flag SVf_POK', 1
+      if "$]" >= 5.035009;
+
+    my $number = 5;
+    ()= sprintf('%s', $number);
+    like(
+      exception { $line = __LINE__; get_type($number) },
+      qr/^ambiguous type for 5 at $file line $line/,
+      'number that is later treated as a string results in an ambiguous type',
+    );
+  }
+};
 
 subtest 'is_type and get_type for references' => sub {
   foreach my $test (
