@@ -2,6 +2,8 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - avoid new experimental warning on 5.35.9
+          - skip unresolvable identifiers for future drafts in acceptance
+            tests (added in TJSA 1.016)
 
 0.544     2022-02-16 05:53:08Z
           - add_schema() now has more consistent exception handling

@@ -49,6 +49,7 @@ sub acceptance_tests (%options) {
   $encoder->indent_length(2) if $encoder->can('indent_length');
 
   my $add_resource = sub ($uri, $schema) {
+    return if $uri =~ m{/draft-next/};
     try {
       # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
       local $SIG{__WARN__} = sub {
