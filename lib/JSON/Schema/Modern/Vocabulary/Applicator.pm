@@ -9,7 +9,7 @@ our $VERSION = '0.545';
 use 5.020;
 use Moo;
 use strictures 2;
-use experimental qw(signatures postderef);
+use experimental qw(signatures postderef args_array_with_signatures);
 use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
