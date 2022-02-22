@@ -3,6 +3,9 @@ use strict;
 use warnings;
 use Path::Tiny;
 use HTTP::Tiny;
+
+use lib 'lib';
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::Schema::Modern;
 
 # ATTENTION DISTRO REPACKAGERS: do NOT use fresh copies of these files
