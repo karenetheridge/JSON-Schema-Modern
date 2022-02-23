@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.546     2022-02-23 01:33:03Z
           - avoid use of newly-experimental signature syntax on 5.35.9
 
