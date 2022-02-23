@@ -37,7 +37,7 @@ has valid => (
   isa => InstanceOf['JSON::PP::Boolean'],
   coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
 );
-sub result { goto \&valid } # backcompat only
+sub result { shift->valid } # backcompat only
 
 has exception => (
   is => 'rw',

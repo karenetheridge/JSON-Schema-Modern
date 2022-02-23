@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - avoid use of newly-experimental signature syntax on 5.35.9
 
 0.545     2022-02-22 04:30:36Z
           - avoid new experimental warning on 5.35.9

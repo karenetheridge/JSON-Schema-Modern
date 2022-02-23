@@ -43,35 +43,35 @@ sub _eval_keyword_title ($self, $data, $schema, $state) {
   annotate_self($state, $schema);
 }
 
-sub _traverse_keyword_description { goto \&_traverse_keyword_title }
+sub _traverse_keyword_description { shift->_traverse_keyword_title(@_) }
 
-sub _eval_keyword_description { goto \&_eval_keyword_title }
+sub _eval_keyword_description { shift->_eval_keyword_title(@_) }
 
 sub _traverse_keyword_default { 1 }
 
-sub _eval_keyword_default { goto \&_eval_keyword_title }
+sub _eval_keyword_default { shift->_eval_keyword_title(@_) }
 
 sub _traverse_keyword_deprecated ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'boolean');
   return 1;
 }
 
-sub _eval_keyword_deprecated { goto \&_eval_keyword_title }
+sub _eval_keyword_deprecated { shift->_eval_keyword_title(@_) }
 
-sub _traverse_keyword_readOnly { goto \&_traverse_keyword_deprecated }
+sub _traverse_keyword_readOnly { shift->_traverse_keyword_deprecated(@_) }
 
-sub _eval_keyword_readOnly { goto \&_eval_keyword_title }
+sub _eval_keyword_readOnly { shift->_eval_keyword_title(@_) }
 
-sub _traverse_keyword_writeOnly { goto \&_traverse_keyword_deprecated }
+sub _traverse_keyword_writeOnly { shift->_traverse_keyword_deprecated(@_) }
 
-sub _eval_keyword_writeOnly { goto \&_eval_keyword_title }
+sub _eval_keyword_writeOnly { shift->_eval_keyword_title(@_) }
 
 sub _traverse_keyword_examples ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
   return 1;
 }
 
-sub _eval_keyword_examples { goto \&_eval_keyword_title }
+sub _eval_keyword_examples { shift->_eval_keyword_title(@_) }
 
 1;
 __END__
