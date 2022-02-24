@@ -10,6 +10,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More;
+use Test::Needs;
 use List::Util 1.50 'head';
 use lib 't/lib';
 use Acceptance;
@@ -22,7 +23,15 @@ BEGIN {
     if not -d '.git' and not grep $ENV{$_}, @variables;
 }
 
-if (-d '.git' or $ENV{AUTHOR_TESTING} or $ENV{EXTENDED_TESTING}) {
+if ($ENV{EXTENDED_TESTING}) {
+  test_needs 'Time::Moment';
+  test_needs 'DateTime::Format::RFC3339';
+  test_needs 'Email::Address::XS', 1.04;
+  test_needs 'Data::Validate::Domain';
+  test_needs 'Net::IDN::Encode';
+}
+
+if (-d '.git' or $ENV{AUTHOR_TESTING}) {
   eval { require Time::Moment; 1 } or fail $@;
   eval { require DateTime::Format::RFC3339; 1 } or fail $@;
   eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } or fail $@;
