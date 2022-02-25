@@ -50,6 +50,10 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
 
   return 1 if not is_type('array', $data);
 
+  # local applicator keywords count as "evaluated"
+  return 1 if exists $schema->{ $state->{spec_version} =~ /^draft(?:7|2019-09)$/ ? 'additionalItems' : 'items' };
+  return 1 if $state->{spec_version} !~ /^draft(?:7|2019-09)$/ and exists $schema->{contains};
+
   my @annotations = local_annotations($state);
 
   # a relevant keyword already produced a 'true' annotation at this location
@@ -61,11 +65,14 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
     if any { $bools{$_->keyword} && is_type('boolean', $_->annotation) && $_->annotation }
       @annotations;
 
-  # otherwise, evaluate at every instance item greater than the max of all 'prefixItems'/numeric
-  # 'items' annotations that isn't in a 'contains' annotation
+  # otherwise, evaluate at every instance item greater than the max of all 'prefixItems'
+  # or numeric 'items' annotations
   my $max_index_annotation_keyword = $state->{spec_version} eq 'draft2019-09' ? 'items' : 'prefixItems';
-  my $last_index = max(-1, grep is_type('integer', $_),
-    map +($_->keyword eq $max_index_annotation_keyword ? $_->annotation : ()), @annotations);
+  my $last_index = max(-1,
+    (grep is_type('integer', $_),
+      map +($_->keyword eq $max_index_annotation_keyword ? $_->annotation : ()), @annotations),
+    ($schema->{$max_index_annotation_keyword}//[])->$#*,
+  );
 
   return 1 if $last_index == $data->$#*;
 
@@ -120,6 +127,8 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
 
   return 1 if not is_type('object', $data);
 
+  return 1 if exists $schema->{additionalProperties};
+
   my @evaluated_properties = map {
     my $keyword = $_->keyword;
     (grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties))
@@ -130,6 +139,10 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
   my @orig_annotations = $state->{annotations}->@*;
   my (@valid_properties, @new_annotations);
   foreach my $property (sort keys %$data) {
+    next if exists(($schema->{properties}//{})->{$property})
+      or any { $property =~ m/$_/ } keys(($schema->{patternProperties}//{})->%*)
+      or exists $schema->{additionalProperties};
+
     next if any { $_ eq $property } @evaluated_properties;
 
     if (is_type('boolean', $schema->{unevaluatedProperties})) {
