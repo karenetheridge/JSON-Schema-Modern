@@ -162,6 +162,7 @@ sub add_schema {
       valid => 0,
       errors => [ $document->errors ],
       exception => 1,
+      mode => 'traverse',
     );
     die $result;
   }
@@ -730,6 +731,7 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
       }
       $state->{errors}->@* ],
     exception => 1,
+    traverse => 1,
   ) if $state->{errors}->@*;
   return ($state->{spec_version}, $state->{vocabularies});
 }
