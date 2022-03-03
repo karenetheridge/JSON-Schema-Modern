@@ -91,7 +91,7 @@ foreach my $add_schema (@{$opt->add_schema//[]}) {
     $js->add_schema($encoder->decode(path($add_schema)->slurp_utf8));
   }
   catch ($e) {
-    say $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e->TO_JSON) : $e;
+    say $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e->TO_JSON) : '"'.$e.'"';
     exit 2;
   }
 }
