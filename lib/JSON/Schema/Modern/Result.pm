@@ -40,7 +40,7 @@ has valid => (
 sub result { shift->valid } # backcompat only
 
 has exception => (
-  is => 'rw',
+  is => 'ro',
   isa => InstanceOf['JSON::PP::Boolean'],
   coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
   lazy => 1,

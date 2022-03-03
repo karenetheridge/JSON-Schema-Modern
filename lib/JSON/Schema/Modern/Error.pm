@@ -46,7 +46,7 @@ has keyword => (
 );
 
 has exception => (
-  is => 'rw',
+  is => 'ro',
   isa => InstanceOf['JSON::PP::Boolean'],
   coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
 );

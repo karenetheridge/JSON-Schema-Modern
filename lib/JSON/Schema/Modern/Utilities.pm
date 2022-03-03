@@ -264,11 +264,9 @@ sub A ($state, $annotation) {
 # errors (consider if we were in the middle of evaluating a "not" or "if").
 # Therefore this is only appropriate during the evaluation phase, not the traverse phase.
 sub abort ($state, $error_string, @args) {
-  ()= E($state, $error_string, @args);
+  ()= E({ %$state, exception => 1 }, $error_string, @args);
   croak 'abort() called during traverse' if $state->{traverse};
-  my $error = pop $state->{errors}->@*;
-  $error->exception(1);
-  die $error;
+  die pop $state->{errors}->@*;
 }
 
 sub assert_keyword_exists ($state, $schema) {
