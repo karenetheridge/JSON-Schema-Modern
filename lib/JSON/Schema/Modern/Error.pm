@@ -119,6 +119,10 @@ schema never declared an absolute base URI (containing a scheme), this URI won't
 
 The actual error string.
 
+=head2 exception
+
+Indicates the error's severity is sufficient to stop evaluation.
+
 =head1 METHODS
 
 =for Pod::Coverage stringify
