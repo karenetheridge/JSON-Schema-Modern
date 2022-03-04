@@ -28,7 +28,6 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['validate_formats', 'treat format as an assertion, not merely an annotation'],
   ['validate_content_schemas', 'treat contentMediaType and contentSchema keywords as assertions'],
   ['collect_annotations', 'collect annotations'],
-  ['annotate_unknown_keywords', 'produce annotations for unknown keywords'],
   ['strict', 'disallow unknown keywords'],
   # scalarref_booleans makes no sense in json-encoded data
   [],
@@ -116,7 +115,6 @@ __END__
     [ --validate_formats ] \
     [ --validate_content_schemas ] \
     [ --collect_annotations ] \
-    [ --annotate_unknown_keywords ] \
     [ --strict ] \
     [ --data <filename> ] \
     [ --schema <filename> ] \

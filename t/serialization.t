@@ -19,7 +19,6 @@ use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' 
 my $js = JSON::Schema::Modern->new(
   validate_formats => 1,
   collect_annotations => 1,
-  annotate_unknown_keywords => 1,
   scalarref_booleans => 1,
   max_traversal_depth => 42,
   specification_version => 'draft2019-09',
@@ -55,7 +54,6 @@ my @serialized_attributes = sort qw(
   validate_formats
   validate_content_schemas
   collect_annotations
-  annotate_unknown_keywords
   scalarref_booleans
   _resource_index
   _vocabulary_classes

@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - "annotate_unknown_keywords" option removed; behaviour is now on
+            for draft2020-12 and off otherwise
 
 0.547     2022-03-03 06:08:51Z
           - improved error stringification on document error

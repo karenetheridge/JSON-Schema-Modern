@@ -64,16 +64,7 @@ subtest '<= draft7: $ref in combination with any other keyword causes the other 
         ],
       }
     )->TO_JSON,
-    {
-      valid => true,
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/allOf/1/maximum',
-          annotation => 0,
-        },
-      ],
-    },
+    { valid => true },
     'keywords adjacent to $ref are not evaluated',
   );
 };

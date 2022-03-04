@@ -90,11 +90,6 @@ has collect_annotations => (
   isa => Bool,
 );
 
-has annotate_unknown_keywords => (
-  is => 'ro',
-  isa => Bool,
-);
-
 has scalarref_booleans => (
   is => 'ro',
   isa => Bool,
@@ -354,7 +349,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(validate_formats validate_content_schemas short_circuit collect_annotations annotate_unknown_keywords scalarref_booleans strict)),
+      } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans strict)),
     };
 
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
@@ -567,8 +562,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   if ($valid) {
     push $state->{annotations}->@*, @new_annotations;
-    annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
-      foreach sort keys %unknown_keywords;
+    if ($state->{collect_annotations} and $state->{spec_version} !~ qr/^draft(7|2019-09)$/) {
+      annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
+        foreach sort keys %unknown_keywords;
+    }
   }
 
   return $valid;
@@ -1043,13 +1040,6 @@ When true, annotations are collected from keywords that produce them, when valid
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
 Defaults to false.
 
-=head2 annotate_unknown_keywords
-
-When true, keywords that are not recognized by any vocabulary are collected as annotations (where
-the value of the annotation is the value of the keyword). L</collect_annotations> must also be true
-in order for this to have any effect.
-Defaults to false (for now).
-
 =head2 scalarref_booleans
 
 When true, any type that is expected to be a boolean B<in the instance data> may also be expressed
@@ -1083,7 +1073,7 @@ The schema must be in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
+L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
 L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
@@ -1116,7 +1106,7 @@ The schema must be in one of these forms:
 * or a URI string indicating the location where such a schema is located.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
+L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
 L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 

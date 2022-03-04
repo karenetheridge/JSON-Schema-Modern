@@ -479,7 +479,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
   );
 };
 
-subtest 'annotate_unknown_keywords' => sub {
+subtest 'annotate unknown keywords' => sub {
   my $data = {
     item => [ 1 ],
     property => { foo => 1 },
@@ -487,7 +487,7 @@ subtest 'annotate_unknown_keywords' => sub {
   my $schema = {
     properties => {
       item => {
-        prefixItems => [ true, true ],
+        items => true,
         unevaluatedItems => false,
         bloop => 5,
       },
@@ -501,18 +501,18 @@ subtest 'annotate_unknown_keywords' => sub {
   };
 
   cmp_deeply(
-    JSON::Schema::Modern->new(annotate_unknown_keywords => 1)->evaluate(
+    JSON::Schema::Modern->new->evaluate(
       $data,
       $schema,
     )->TO_JSON,
     {
       valid => true,
     },
-    'no annotations even when config value is true but collect_annotations is false',
+    'no annotations even when collect_annotations is false',
   );
 
   cmp_deeply(
-    (my $result = JSON::Schema::Modern->new(collect_annotations => 1, annotate_unknown_keywords => 1)->evaluate(
+    (my $result = JSON::Schema::Modern->new(collect_annotations => 1)->evaluate(
       $data,
       $schema,
     ))->TO_JSON,
@@ -521,7 +521,7 @@ subtest 'annotate_unknown_keywords' => sub {
       annotations => [
         {
           instanceLocation => '/item',
-          keywordLocation => '/properties/item/prefixItems',
+          keywordLocation => '/properties/item/items',
           annotation => true,
         },
         {
@@ -562,7 +562,7 @@ subtest 'annotate_unknown_keywords' => sub {
   cmp_deeply(
     [ $result->annotations ],
     [
-      methods(keyword => 'prefixItems', unknown => bool(0)),
+      methods(keyword => 'items', unknown => bool(0)),
       methods(keyword => 'bloop', unknown => bool(1)),
       methods(keyword => 'properties', unknown => bool(0)),
       methods(keyword => 'unevaluatedProperties', unknown => bool(0)),
@@ -571,6 +571,43 @@ subtest 'annotate_unknown_keywords' => sub {
       methods(keyword => 'blip', unknown => bool(1)),
     ],
     '"unknown" keyword is set on the annotation objects for unknown keywords',
+  );
+
+  cmp_deeply(
+    $result = JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
+        ->evaluate(
+      $data,
+      $schema,
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '/item',
+          keywordLocation => '/properties/item/items',
+          annotation => true,
+        },
+        # no bloop
+        {
+          instanceLocation => '/property',
+          keywordLocation => '/properties/property/properties',
+          annotation => [ 'foo' ],
+        },
+        {
+          instanceLocation => '/property',
+          keywordLocation => '/properties/property/unevaluatedProperties',
+          annotation => [],
+        },
+        # no blap
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          annotation => [ 'item', 'property' ],
+        },
+        # no blip
+      ],
+    },
+    'no annotations from unknown keywords in draft2019-09',
   );
 };
 
