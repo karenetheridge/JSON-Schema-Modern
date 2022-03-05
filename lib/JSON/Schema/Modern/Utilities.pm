@@ -236,7 +236,7 @@ sub E ($state, $error_string, @args) {
 # - annotations
 # - collect_annotations
 sub A ($state, $annotation) {
-  return 1 if not $state->{collect_annotations};
+  return 1 if not $state->{collect_annotations} or $state->{spec_version} eq 'draft7';
 
   my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix})
     ->to_abs($state->{effective_base_uri});
