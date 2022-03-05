@@ -97,8 +97,8 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'subschema is not valid against all additional items') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'subschema is not valid against all additional items') if not $valid;
   return A($state, true);
 }
 
@@ -157,8 +157,8 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all additional properties are valid') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all additional properties are valid') if not $valid;
   return A($state, \@valid_properties);
 }
 

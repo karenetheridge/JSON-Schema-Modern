@@ -83,10 +83,8 @@ sub _eval_keyword_allOf ($self, $data, $schema, $state) {
     }
   }
 
-  if (@invalid == 0) {
-    push $state->{annotations}->@*, @new_annotations;
-    return 1;
-  }
+  push $state->{annotations}->@*, @new_annotations;
+  return 1 if @invalid == 0;
 
   my $pl = @invalid > 1;
   return E($state, 'subschema%s %s %s not valid', $pl?'s':'', join(', ', @invalid), $pl?'are':'is');
@@ -125,10 +123,9 @@ sub _eval_keyword_oneOf ($self, $data, $schema, $state) {
     last if @valid > 1 and $state->{short_circuit};
   }
 
-  if (@valid == 1) {
-    push $state->{annotations}->@*, @new_annotations;
-    return 1;
-  }
+  push $state->{annotations}->@*, @new_annotations;
+  return 1 if @valid == 1;
+
   if (not @valid) {
     push $state->{errors}->@*, @errors;
     return E($state, 'no subschemas are valid');
@@ -144,7 +141,7 @@ sub _eval_keyword_not ($self, $data, $schema, $state) {
   return 1 if not $self->eval($data, $schema->{not},
     +{ %$state, schema_path => $state->{schema_path}.'/not',
       short_circuit => $state->{short_circuit} || !$state->{collect_annotations},
-      errors => [], annotations => [ $state->{annotations}->@* ] });
+      errors => [] });
 
   return E($state, 'subschema is valid');
 }
@@ -192,8 +189,8 @@ sub _eval_keyword_dependentSchemas ($self, $data, $schema, $state) {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all dependencies are satisfied') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all dependencies are satisfied') if not $valid;
   return 1;
 }
 
@@ -252,8 +249,8 @@ sub _eval_keyword_dependencies ($self, $data, $schema, $state) {
     }
   }
 
-  return E($state, 'not all dependencies are satisfied') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all dependencies are satisfied') if not $valid;
   return 1;
 }
 
@@ -320,10 +317,9 @@ sub _eval_keyword__items_array_schemas ($self, $data, $schema, $state) {
     };
   }
 
-  return E($state, 'not all items are valid') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
-  return A($state,
-    ($state->{_last_items_index}//-1) == $data->$#* ? true : $state->{_last_items_index});
+  return E($state, 'not all items are valid') if not $valid;
+  return A($state, ($state->{_last_items_index}//-1) == $data->$#* ? true : $state->{_last_items_index});
 }
 
 # schema-based items (all drafts), and additionalItems (up to and including draft2019-09)
@@ -359,9 +355,9 @@ sub _eval_keyword__items_schema ($self, $data, $schema, $state) {
 
   $state->{_last_items_index} = $data->$#*;
 
+  push $state->{annotations}->@*, @new_annotations;
   return E($state, 'subschema is not valid against all %sitems',
     $state->{keyword} eq 'additionalItems' ? 'additional ' : '') if not $valid;
-  push $state->{annotations}->@*, @new_annotations;
   return A($state, true);
 }
 
@@ -437,8 +433,8 @@ sub _eval_keyword_properties ($self, $data, $schema, $state) {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all properties are valid') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all properties are valid') if not $valid;
   return A($state, \@valid_properties);
 }
 
@@ -487,8 +483,8 @@ sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
     }
   }
 
-  return E($state, 'not all properties are valid') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all properties are valid') if not $valid;
   return A($state, [ uniqstr @valid_properties ]);
 }
 
@@ -530,8 +526,8 @@ sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all additional properties are valid') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all additional properties are valid') if not $valid;
   return A($state, \@valid_properties);
 }
 
@@ -557,8 +553,8 @@ sub _eval_keyword_propertyNames ($self, $data, $schema, $state) {
     last if $state->{short_circuit};
   }
 
-  return E($state, 'not all property names are valid') if not $valid;
   push $state->{annotations}->@*, @new_annotations;
+  return E($state, 'not all property names are valid') if not $valid;
   return 1;
 }
 

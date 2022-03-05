@@ -58,7 +58,13 @@ subtest 'allOf' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [], # annotation from /allOf/1 is not saved
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1/title',
+          annotation => 'allOf title',
+        }),
+      ],
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf/0', error => 'subschema is false' }),
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf', error => 'subschema 0 is not valid' }),
@@ -152,7 +158,18 @@ subtest 'oneOf' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [], # annotation from /allOf/1 is not saved
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/oneOf/1/title',
+          annotation => 'oneOf title',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/oneOf/2/title',
+          annotation => 'oneOf title2',
+        }),
+      ],
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/oneOf', error => 'multiple subschemas are valid: 1, 2' }),
       ],
@@ -215,7 +232,13 @@ subtest 'not' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [], # annotation from /not is not saved
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/not/title',
+          annotation => 'not title',
+        }),
+      ],
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' }),
       ],
