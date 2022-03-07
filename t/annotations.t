@@ -37,7 +37,7 @@ subtest 'allOf' => sub {
   my $state = {
     %$initial_state,
     keyword => 'allOf',
-    annotations => [ 'a previous annotation' ],
+    annotations => [],
     errors => [],
   };
 
@@ -58,7 +58,7 @@ subtest 'allOf' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [ 'a previous annotation' ], # annotation from /allOf/1 is not saved
+      annotations => [], # annotation from /allOf/1 is not saved
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf/0', error => 'subschema is false' }),
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/allOf', error => 'subschema 0 is not valid' }),
@@ -74,6 +74,8 @@ subtest 'allOf' => sub {
       true,
     ],
   };
+  $state->{annotations} = [];
+  $state->{errors} = [];
 
   ok(
     $state->{vocabularies}[0]->_eval_keyword_allOf(1, $pass_schema, $state),
@@ -85,13 +87,13 @@ subtest 'allOf' => sub {
     {
       %$new_state,
       annotations => [
-        'a previous annotation',
         methods(TO_JSON => {
           instanceLocation => '',
           keywordLocation => '/allOf/1/title',
           annotation => 'allOf title',
         }),
       ],
+      errors => [],
     },
     'passing allOf: state is correct after evaluating',
   );
@@ -128,7 +130,7 @@ subtest 'oneOf' => sub {
   my $state = {
     %$initial_state,
     keyword => 'oneOf',
-    annotations => [ 'a previous annotation' ],
+    annotations => [],
     errors => [],
   };
 
@@ -150,7 +152,7 @@ subtest 'oneOf' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [ 'a previous annotation' ], # annotations from /oneOf/1, /oneOf/2 are not saved
+      annotations => [], # annotation from /allOf/1 is not saved
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/oneOf', error => 'multiple subschemas are valid: 1, 2' }),
       ],
@@ -166,6 +168,9 @@ subtest 'oneOf' => sub {
     ],
   };
 
+  $state->{annotations} = [];
+  $state->{errors} = [];
+
   ok(
     $state->{vocabularies}[0]->_eval_keyword_oneOf(1, $pass_schema, $state),
     'evaluation of the oneOf keyword succeeds',
@@ -176,13 +181,13 @@ subtest 'oneOf' => sub {
     {
       %$new_state,
       annotations => [
-        'a previous annotation',
         methods(TO_JSON => {
           instanceLocation => '',
           keywordLocation => '/oneOf/1/title',
           annotation => 'oneOf title',
         }),
       ],
+      errors => [],
     },
     'passing oneOf: state is correct after evaluating',
   );
@@ -192,7 +197,7 @@ subtest 'not' => sub {
   my $state = {
     %$initial_state,
     keyword => 'not',
-    annotations => [ 'a previous annotation' ],
+    annotations => [],
     errors => [],
   };
 
@@ -210,7 +215,7 @@ subtest 'not' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [ 'a previous annotation' ], # annotation from /not is not saved
+      annotations => [], # annotation from /not is not saved
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' }),
       ],
@@ -222,6 +227,9 @@ subtest 'not' => sub {
     not => { not => { title => 'not title' } },
   };
 
+  $state->{annotations} = [];
+  $state->{errors} = [];
+
   ok(
     $state->{vocabularies}[0]->_eval_keyword_not(1, $pass_schema, $state),
     'evaluation of the not keyword succeeds',
@@ -231,9 +239,8 @@ subtest 'not' => sub {
     $state,
     {
       %$new_state,
-      annotations => [
-        'a previous annotation',
-      ],
+      annotations => [],
+      errors => [],
     },
     'passing not: state is correct after evaluating',
   );
