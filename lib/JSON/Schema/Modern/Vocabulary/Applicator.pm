@@ -273,7 +273,6 @@ sub _eval_keyword_items ($self, $data, $schema, $state) {
   return $self->_eval_keyword__items_array_schemas($data, $schema, $state)
     if is_plain_arrayref($schema->{items});
 
-  $state->{_last_items_index} //= -1;
   return $self->_eval_keyword__items_schema($data, $schema, $state);
 }
 
@@ -287,6 +286,7 @@ sub _eval_keyword_additionalItems ($self, $data, $schema, $state) {
 # prefixItems (draft 2020-12), array-based items (all drafts)
 sub _eval_keyword__items_array_schemas ($self, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
+  return 1 if ($state->{_last_items_index}//-1) == $data->$#*;
 
   my @orig_annotations = $state->{annotations}->@*;
   my @new_annotations;
@@ -318,20 +318,21 @@ sub _eval_keyword__items_array_schemas ($self, $data, $schema, $state) {
   }
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, $state->{_last_items_index} == $data->$#* ? true : $state->{_last_items_index});
   return E($state, 'not all items are valid') if not $valid;
-  return A($state, ($state->{_last_items_index}//-1) == $data->$#* ? true : $state->{_last_items_index});
+  return 1;
 }
 
 # schema-based items (all drafts), and additionalItems (up to and including draft2019-09)
 sub _eval_keyword__items_schema ($self, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
-  return 1 if $state->{_last_items_index} == $data->$#*;
+  return 1 if ($state->{_last_items_index}//-1) == $data->$#*;
 
   my @orig_annotations = $state->{annotations}->@*;
   my @new_annotations;
   my $valid = 1;
 
-  foreach my $idx ($state->{_last_items_index}+1 .. $data->$#*) {
+  foreach my $idx (($state->{_last_items_index}//-1)+1 .. $data->$#*) {
     if (is_type('boolean', $schema->{$state->{keyword}})) {
       next if $schema->{$state->{keyword}};
       $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx },
@@ -356,9 +357,10 @@ sub _eval_keyword__items_schema ($self, $data, $schema, $state) {
   $state->{_last_items_index} = $data->$#*;
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, true);
   return E($state, 'subschema is not valid against all %sitems',
     $state->{keyword} eq 'additionalItems' ? 'additional ' : '') if not $valid;
-  return A($state, true);
+  return 1;
 }
 
 sub _traverse_keyword_contains { shift->traverse_subschema(@_) }
@@ -404,16 +406,13 @@ sub _eval_keyword_properties ($self, $data, $schema, $state) {
 
   my $valid = 1;
   my @orig_annotations = $state->{annotations}->@*;
-  my (@valid_properties, @new_annotations);
+  my (@properties, @new_annotations);
   foreach my $property (sort keys $schema->{properties}->%*) {
     next if not exists $data->{$property};
+    push @properties, $property;
 
     if (is_type('boolean', $schema->{properties}{$property})) {
-      if ($schema->{properties}{$property}) {
-        push @valid_properties, $property;
-        next;
-      }
-
+      next if $schema->{properties}{$property};
       $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
         _schema_path_suffix => $property }, 'property not permitted');
     }
@@ -423,7 +422,6 @@ sub _eval_keyword_properties ($self, $data, $schema, $state) {
           +{ %$state, annotations => \@annotations,
             data_path => jsonp($state->{data_path}, $property),
             schema_path => jsonp($state->{schema_path}, 'properties', $property) })) {
-        push @valid_properties, $property;
         push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
         next;
       }
@@ -434,8 +432,9 @@ sub _eval_keyword_properties ($self, $data, $schema, $state) {
   }
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, \@properties);
   return E($state, 'not all properties are valid') if not $valid;
-  return A($state, \@valid_properties);
+  return 1;
 }
 
 sub _traverse_keyword_patternProperties ($self, $schema, $state) {
@@ -454,15 +453,12 @@ sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
 
   my $valid = 1;
   my @orig_annotations = $state->{annotations}->@*;
-  my (@valid_properties, @new_annotations);
+  my (@properties, @new_annotations);
   foreach my $property_pattern (sort keys $schema->{patternProperties}->%*) {
     foreach my $property (sort grep m/$property_pattern/, keys %$data) {
+      push @properties, $property;
       if (is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
-        if ($schema->{patternProperties}{$property_pattern}) {
-          push @valid_properties, $property;
-          next;
-        }
-
+        next if $schema->{patternProperties}{$property_pattern};
         $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
           _schema_path_suffix => $property_pattern }, 'property not permitted');
       }
@@ -472,7 +468,6 @@ sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
             +{ %$state, annotations => \@annotations,
               data_path => jsonp($state->{data_path}, $property),
               schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern) })) {
-          push @valid_properties, $property;
           push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
           next;
         }
@@ -484,8 +479,9 @@ sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
   }
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, [ uniqstr @properties ]);
   return E($state, 'not all properties are valid') if not $valid;
-  return A($state, [ uniqstr @valid_properties ]);
+  return 1;
 }
 
 sub _traverse_keyword_additionalProperties { shift->traverse_subschema(@_) }
@@ -495,18 +491,15 @@ sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
 
   my $valid = 1;
   my @orig_annotations = $state->{annotations}->@*;
-  my (@valid_properties, @new_annotations);
+  my (@properties, @new_annotations);
   foreach my $property (sort keys %$data) {
     next if exists $schema->{properties} and exists $schema->{properties}{$property};
     next if exists $schema->{patternProperties}
       and any { $property =~ /$_/ } keys $schema->{patternProperties}->%*;
 
+    push @properties, $property;
     if (is_type('boolean', $schema->{additionalProperties})) {
-      if ($schema->{additionalProperties}) {
-        push @valid_properties, $property;
-        next;
-      }
-
+      next if $schema->{additionalProperties};
       $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property) },
         'additional property not permitted');
     }
@@ -516,7 +509,6 @@ sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
           +{ %$state, annotations => \@annotations,
             data_path => jsonp($state->{data_path}, $property),
             schema_path => $state->{schema_path}.'/additionalProperties' })) {
-        push @valid_properties, $property;
         push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
         next;
       }
@@ -527,8 +519,9 @@ sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
   }
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, \@properties);
   return E($state, 'not all additional properties are valid') if not $valid;
-  return A($state, \@valid_properties);
+  return 1;
 }
 
 sub _traverse_keyword_propertyNames { shift->traverse_subschema(@_) }

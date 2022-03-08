@@ -20,7 +20,7 @@ use MooX::HandlesVia;
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
-use List::Util 1.50 qw(head any);
+use List::Util 1.50 'any';
 use Scalar::Util 'refaddr';
 use Safe::Isa;
 use namespace::clean;
@@ -100,9 +100,6 @@ sub format ($self, $style) {
     };
   }
   elsif ($style eq 'terse') {
-    # we can also drop errors for unevaluatedItems, unevaluatedProperties
-    # when there is another (non-discarded) error at the same instance location or parent keyword
-    # location (indicating that "unevaluated" is actually "unsuccessfully evaluated").
     my (%instance_locations, %keyword_locations);
 
     my @errors = grep {
@@ -121,20 +118,6 @@ sub format ($self, $style) {
             and ($keyword ne 'additionalProperties' or $error eq 'additional property not permitted'))
             and ($keyword ne 'dependentRequired' or $error ne 'not all dependencies are satisfied')
         );
-
-      if ($keep and $keyword and $keyword =~ /^unevaluated(?:Items|Properties)$/) {
-        if ($error !~ /"$keyword" keyword present, but/) {
-          my $parent_keyword_location = join('/', head(-1, split('/', $_->keyword_location)));
-          my $parent_instance_location = join('/', head(-1, split('/', $_->instance_location)));
-
-          $keep = (
-            (($keyword eq 'unevaluatedProperties' and $error eq 'additional property not permitted')
-              or ($keyword eq 'unevaluatedItems' and $error eq 'additional item not permitted'))
-            and not $instance_locations{$_->instance_location}
-            and not grep m/^$parent_keyword_location/, keys %keyword_locations
-          );
-        }
-      }
 
       ++$instance_locations{$_->instance_location} if $keep;
       ++$keyword_locations{$_->keyword_location} if $keep;

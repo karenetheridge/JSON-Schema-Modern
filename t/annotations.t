@@ -28,7 +28,7 @@ my $initial_state = {
   spec_version => 'draft2019-09',
   vocabularies => [
     (map use_module($_)->new,
-      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator MetaData)),
+      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator Validation MetaData)),
   ],
   evaluator => $js,
 };
@@ -288,6 +288,587 @@ subtest 'not' => sub {
       valid => true,
     },
     'annotations are still collected inside a "not", otherwise the unevaluatedProperties would have returned false',
+  );
+};
+
+subtest 'prefixItems' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'prefixItems',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_prefixItems([], { prefixItems => [ true ] }, $state),
+    'no items means that "prefixItems" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [],
+    },
+    'no items: no annotation is produced by prefixItems',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'prefixItems',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_prefixItems([ 1 ], { prefixItems => [ true ] }, $state),
+    'one item',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/prefixItems',
+          annotation => true,
+        }),
+      ],
+      errors => [],
+    },
+    'passing prefixItems: one item is annotated',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'prefixItems',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_prefixItems(
+      [ 1, 5, 9 ],
+      { prefixItems => [ { title => 'hi', maximum => 3 }, { title => 'hi', maximum => 3 } ] },
+      $state),
+    'two items, one failing',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '/0',
+          keywordLocation => '/prefixItems/0/title',
+          annotation => 'hi',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/prefixItems',
+          annotation => 1,
+        }),
+      ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '/1',
+          keywordLocation => '/prefixItems/1/maximum',
+          error => 'value is larger than 3',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/prefixItems',
+          error => 'not all items are valid',
+        }),
+      ],
+    },
+    'failing prefixItems still collects annotations',
+  );
+};
+
+subtest 'schema-items' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'items',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_items([], { items => true }, $state),
+    'no items means that "items" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [],
+    },
+    'no items: no annotation is produced by items',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'items',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_items([ 1 ], { items => true }, $state),
+    'one item',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          annotation => true,
+        }),
+      ],
+      errors => [],
+    },
+    'passing items: one item is annotated',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'items',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_items(
+      [ 1, 5 ],
+      { items => { title => 'hi', maximum => 3 } },
+      $state),
+    'two items, one failing',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '/0',
+          keywordLocation => '/items/title',
+          annotation => 'hi',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          annotation => true,
+        }),
+      ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '/1',
+          keywordLocation => '/items/maximum',
+          error => 'value is larger than 3',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        }),
+      ],
+    },
+    'failing items still collects annotations',
+  );
+};
+
+subtest 'additionalItems' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'additionalItems',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_items([], { additionalItems => true }, $state),
+    'no items means that "additionalItems" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [],
+    },
+    'no items: no annotation is produced by additionaltems',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'additionalItems',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_additionalItems([ 1 ], { additionalItems => false }, $state),
+    'one item',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [],
+    },
+    'additionalItems does nothing without items',
+  );
+};
+
+subtest 'properties' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'properties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_properties({}, { properties => { foo => true } }, $state),
+    'no items means that "properties" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          annotation => [],
+        }),
+      ],
+      errors => [],
+    },
+    'no properties: annotation is still produced by properties',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'properties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_properties({ foo => 1 }, { properties => { foo => true } }, $state),
+    'one property',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          annotation => [ 'foo' ],
+        }),
+      ],
+      errors => [],
+    },
+    'passing properties: one property is annotated',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'properties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_properties(
+      { foo => 1, bar => 5 },
+      { properties => {
+          foo => { title => 'hi', maximum => 3 },
+          bar => { title => 'hi', maximum => 3 },
+        },
+      },
+      $state),
+    'two properties, one failing',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/title',
+          annotation => 'hi',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          annotation => [ qw(bar foo) ],
+        }),
+      ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '/bar',
+          keywordLocation => '/properties/bar/maximum',
+          error => 'value is larger than 3',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        }),
+      ],
+    },
+    'failing properties still collects annotations',
+  );
+};
+
+subtest 'patternProperties' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'patternProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_patternProperties({}, { patternProperties => { foo => true } }, $state),
+    'no items means that "patternProperties" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/patternProperties',
+          annotation => [],
+        }),
+      ],
+      errors => [],
+    },
+    'no pProperties: annotation is still produced by patternProperties',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'patternProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_patternProperties({ foo => 1 }, { patternProperties => { foo => true } }, $state),
+    'one property',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/patternProperties',
+          annotation => [ 'foo' ],
+        }),
+      ],
+      errors => [],
+    },
+    'passing properties: one property is annotated',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'patternProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_patternProperties(
+      { foo => 1, bar => 5 },
+      { patternProperties => {
+          foo => { title => 'hi', maximum => 3 },
+          bar => { title => 'hi', maximum => 3 },
+        },
+      },
+      $state),
+    'two properties, one failing',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '/foo',
+          keywordLocation => '/patternProperties/foo/title',
+          annotation => 'hi',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/patternProperties',
+          annotation => [ qw(bar foo) ],
+        }),
+      ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '/bar',
+          keywordLocation => '/patternProperties/bar/maximum',
+          error => 'value is larger than 3',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/patternProperties',
+          error => 'not all properties are valid',
+        }),
+      ],
+    },
+    'failing patternProperties still collects annotations',
+  );
+};
+
+subtest 'additionalProperties' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'additionalProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_additionalProperties([], { additionalProperties => true }, $state),
+    'no items means that "additionalProperties" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [],
+    },
+    'no properties: no annotation is produced by additionalProperties',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'additionalProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_additionalProperties({ foo => 1 }, { additionalProperties => true }, $state),
+    'one property',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          annotation => [ 'foo' ],
+        }),
+      ],
+      errors => [],
+    },
+    'passing additionalProperties: one property is annotated',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'additionalProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_additionalProperties(
+      { foo => 1, bar => 3, baz => 5 },
+      {
+        properties => { foo => true },
+        additionalProperties => { title => 'hi', maximum => 3 },
+      },
+      $state),
+    'two properties, one failing',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '/bar',
+          keywordLocation => '/additionalProperties/title',
+          annotation => 'hi',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          annotation => [ qw(bar baz) ],
+        }),
+      ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '/baz',
+          keywordLocation => '/additionalProperties/maximum',
+          error => 'value is larger than 3',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          error => 'not all additional properties are valid',
+        }),
+      ],
+    },
+    'failing properties still collects annotations',
   );
 };
 

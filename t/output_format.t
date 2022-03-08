@@ -146,16 +146,6 @@ cmp_deeply(
         keywordLocation => '/properties/gamma/items',
         error => 'subschema is not valid against all items',
       },
-      (map +{
-        instanceLocation => '/gamma/'.$_,
-        keywordLocation => '/properties/gamma/unevaluatedItems',
-        error => 'additional item not permitted',
-      }, (0..1)),
-      {
-        instanceLocation => '/gamma',
-        keywordLocation => '/properties/gamma/unevaluatedItems',
-        error => 'subschema is not valid against all additional items',
-      },
       {
         instanceLocation => '/theta/0',
         keywordLocation => '/properties/theta/items',
@@ -205,16 +195,6 @@ cmp_deeply(
         instanceLocation => '',
         keywordLocation => '/required',
         error => 'missing property: bar',
-      },
-      (map +{
-        instanceLocation => '/'.$_,
-        keywordLocation => '/unevaluatedProperties',
-        error => 'additional property not permitted',
-      }, qw(alpha beta foo gamma theta zulu)),
-      {
-        instanceLocation => '',
-        keywordLocation => '/unevaluatedProperties',
-        error => 'not all additional properties are valid',
       },
     ],
   },
@@ -298,9 +278,6 @@ cmp_deeply(
         error => 'additional item not permitted',
       },
       # - "summary" error from /properties/gamma/items is omitted
-      # - /properties/gamma/unevaluatedItems errors at /gamma/0, /gamma/1 are omitted because
-      # we do have a schema covering them at /properties/gamma/items -- those subschemas just
-      # evaluated to false
       # - "summary" error from /properties/gamma/unevaluatedItems is omitted
       {
         instanceLocation => '/theta/0',
@@ -321,8 +298,6 @@ cmp_deeply(
         error => 'additional property not permitted',
       },
       # - "summary" error from /additionalProperties is omitted
-      # - /unevaluatedProperties errors at all top level properties are removed because they are
-      #   also covered by failures at /additionalProperties
       # - "summary" error from /unevaluatedProperties is omitted
       {
         instanceLocation => '/zulu',
