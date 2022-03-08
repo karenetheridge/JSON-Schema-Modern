@@ -641,7 +641,7 @@ subtest 'annotate unknown keywords' => sub {
   );
 };
 
-subtest 'draft2019-09: items + additionalItems' => sub {
+subtest 'items + additionalItems, prefixItems + items' => sub {
   cmp_deeply(
     JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
         ->evaluate(
@@ -666,10 +666,10 @@ subtest 'draft2019-09: items + additionalItems' => sub {
   );
 
   cmp_deeply(
-    $js->evaluate(
-      [],
+    my $result = JSON::Schema::Modern->new(collect_annotations => 1)->evaluate(
+      [ 1, 2, 3 ],
       {
-        prefixItems => [ { maximum => 5 } ],
+        prefixItems => [ { maximum => 5 }, { maximum => 5 }, { maximum => 5 } ],
         items => { maximum => 0 },
       }
     )->TO_JSON,
@@ -681,10 +681,10 @@ subtest 'draft2019-09: items + additionalItems' => sub {
           keywordLocation => '/prefixItems',
           annotation => true,
         },
-        # no error nor annotation from additionalItems
+        # no error nor annotation from items
       ],
     },
-    'schema-based items + additionalItems',
+    'prefixItems + schema-based items',
   );
 };
 
