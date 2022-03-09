@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.547
+version 0.548
 
 =head1 SYNOPSIS
 
@@ -117,13 +117,6 @@ When true, annotations are collected from keywords that produce them, when valid
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
 Defaults to false.
 
-=head2 annotate_unknown_keywords
-
-When true, keywords that are not recognized by any vocabulary are collected as annotations (where
-the value of the annotation is the value of the keyword). L</collect_annotations> must also be true
-in order for this to have any effect.
-Defaults to false (for now).
-
 =head2 scalarref_booleans
 
 When true, any type that is expected to be a boolean B<in the instance data> may also be expressed
@@ -168,7 +161,7 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
+L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
 L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
@@ -226,7 +219,7 @@ or a URI string indicating the location where such a schema is located.
 =back
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
-L</short_circuit>, L</collect_annotations>, L</annotate_unknown_keywords>, L</scalarref_booleans>,
+L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
 L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
