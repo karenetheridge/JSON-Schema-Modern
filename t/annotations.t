@@ -28,7 +28,7 @@ my $initial_state = {
   spec_version => 'draft2019-09',
   vocabularies => [
     (map use_module($_)->new,
-      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator Validation MetaData)),
+      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator Validation MetaData Unevaluated)),
   ],
   evaluator => $js,
 };
@@ -869,6 +869,111 @@ subtest 'additionalProperties' => sub {
       ],
     },
     'failing properties still collects annotations',
+  );
+};
+
+subtest 'unevaluatedProperties' => sub {
+  my $state = {
+    %$initial_state,
+    keyword => 'unevaluatedProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_unevaluatedProperties([], { unevaluatedProperties => true }, $state),
+    'no items means that "unevaluatedProperties" succeeds',
+  );
+
+  cmp_deeply(
+    $state,
+    my $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [],
+    },
+    'no properties: no annotation is produced by unevaluatedProperties',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'unevaluatedProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    $state->{vocabularies}[0]->_eval_keyword_unevaluatedProperties({ foo => 1 }, { unevaluatedProperties => true }, $state),
+    'one property',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedProperties',
+          annotation => [ 'foo' ],
+        }),
+      ],
+      errors => [],
+    },
+    'passing unevaluatedProperties: one property is annotated',
+  );
+
+  $state = {
+    %$initial_state,
+    keyword => 'unevaluatedProperties',
+    annotations => [],
+    errors => [],
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_unevaluatedProperties(
+      { foo => 1, bar => 3, baz => 5 },
+      {
+        properties => { foo => true },
+        unevaluatedProperties => { title => 'hi', maximum => 3 },
+      },
+      $state),
+    'two properties, one failing',
+  );
+
+  cmp_deeply(
+    $state,
+    {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [
+        (map methods(TO_JSON => {
+          instanceLocation => '/'.$_,
+          keywordLocation => '/unevaluatedProperties/title',
+          annotation => 'hi',
+        }), qw(bar foo)),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedProperties',
+          annotation => [ qw(bar baz foo) ],
+        }),
+      ],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '/baz',
+          keywordLocation => '/unevaluatedProperties/maximum',
+          error => 'value is larger than 3',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedProperties',
+          error => 'not all additional properties are valid',
+        }),
+      ],
+    },
+    'failing unevaluatedProperties still collects annotations',
   );
 };
 

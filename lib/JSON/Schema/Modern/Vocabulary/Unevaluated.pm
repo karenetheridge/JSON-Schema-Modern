@@ -98,8 +98,9 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
   }
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, true);
   return E($state, 'subschema is not valid against all additional items') if not $valid;
-  return A($state, true);
+  return 1;
 }
 
 sub _traverse_keyword_unevaluatedProperties ($self, $schema, $state) {
@@ -128,16 +129,13 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
 
   my $valid = 1;
   my @orig_annotations = $state->{annotations}->@*;
-  my (@valid_properties, @new_annotations);
+  my (@properties, @new_annotations);
   foreach my $property (sort keys %$data) {
     next if any { $_ eq $property } @evaluated_properties;
+    push @properties, $property;
 
     if (is_type('boolean', $schema->{unevaluatedProperties})) {
-      if ($schema->{unevaluatedProperties}) {
-        push @valid_properties, $property;
-        next;
-      }
-
+      next if $schema->{unevaluatedProperties};
       $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property) },
         'additional property not permitted');
     }
@@ -147,7 +145,6 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
           +{ %$state, annotations => \@annotations,
             data_path => jsonp($state->{data_path}, $property),
             schema_path => $state->{schema_path}.'/unevaluatedProperties' })) {
-        push @valid_properties, $property;
         push @new_annotations, @annotations[$#orig_annotations+1 .. $#annotations];
         next;
       }
@@ -158,8 +155,9 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
   }
 
   push $state->{annotations}->@*, @new_annotations;
+  A($state, \@properties);
   return E($state, 'not all additional properties are valid') if not $valid;
-  return A($state, \@valid_properties);
+  return 1;
 }
 
 1;
