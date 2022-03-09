@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.548     2022-03-09 06:27:10Z
           - "annotate_unknown_keywords" option removed; behaviour is now on
             for draft2020-12 and off otherwise
