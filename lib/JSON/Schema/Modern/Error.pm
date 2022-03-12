@@ -17,7 +17,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
 use JSON::PP ();
 use MooX::TypeTiny;
-use Types::Standard qw(Str Undef InstanceOf);
+use Types::Standard qw(Str Undef InstanceOf Enum);
 use namespace::clean;
 
 use overload
@@ -51,6 +51,11 @@ has exception => (
   coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
 );
 
+has mode => (
+  is => 'rw',
+  isa => Enum[qw(traverse evaluate)],
+);
+
 sub TO_JSON ($self) {
   return +{
     # note that locations are JSON pointers, not uri fragments!
@@ -63,7 +68,9 @@ sub TO_JSON ($self) {
 }
 
 sub stringify ($self) {
-  'at \''.$self->instance_location.'\': '.$self->error;
+  ($self->mode//'') eq 'traverse'
+    ? 'at \''.$self->keyword_location.'\': '.$self->error
+    : 'at \''.$self->instance_location.'\': '.$self->error;
 }
 
 1;
@@ -125,7 +132,7 @@ Indicates the error's severity is sufficient to stop evaluation.
 
 =head1 METHODS
 
-=for Pod::Coverage stringify
+=for Pod::Coverage stringify mode
 
 =head2 TO_JSON
 

@@ -244,7 +244,6 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     configs => {},
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
-    traverse => 1,
   };
 
   try {
@@ -728,7 +727,6 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
       }
       $state->{errors}->@* ],
     exception => 1,
-    traverse => 1,
   ) if $state->{errors}->@*;
   return ($state->{spec_version}, $state->{vocabularies});
 }

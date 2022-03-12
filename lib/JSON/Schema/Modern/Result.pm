@@ -47,12 +47,6 @@ has exception => (
   default => sub { any { $_->exception } $_[0]->errors },
 );
 
-has mode => (
-  is => 'ro',
-  isa => Enum[qw(traverse evaluate)],
-  default => 'evaluate',
-);
-
 has $_.'s' => (
   is => 'bare',
   isa => ArrayRef[InstanceOf['JSON::Schema::Modern::'.ucfirst]],
@@ -161,11 +155,7 @@ sub combine ($self, $other, $swap) {
 }
 
 sub stringify ($self) {
-  $self->error_count
-    ? ($self->mode eq 'traverse'
-        ? join("\n", map +('at \''.$_->keyword_location.'\': '.$_->error), $self->errors)
-        : join("\n", map +('at \''.$_->instance_location.'\': '.$_->error), $self->errors)
-    ) : 'valid'
+  $self->error_count ? join("\n", $self->errors) : 'valid'
 }
 
 sub TO_JSON ($self) {
@@ -226,10 +216,6 @@ appended to those of the first).
 =head2 valid
 
 A boolean. Indicates whether validation was successful or failed.
-
-=head2 mode
-
-Indicates whether the result was produced during the C<traverse> or C<evaluate> phase of execution.
 
 =head2 errors
 
