@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.549     2022-03-22 03:55:15Z
           - properly detect the metaschema in json-schema-eval
             --validate-schema
