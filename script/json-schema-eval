@@ -15,6 +15,7 @@ use Getopt::Long::Descriptive;
 use Path::Tiny;
 use Safe::Isa;
 use Feature::Compat::Try;
+use Ref::Util 'is_plain_hashref';
 use JSON::Schema::Modern;
 
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
@@ -46,6 +47,9 @@ die '--validate-schema and --schema should not be used together' if defined $sch
 
 my $js = JSON::Schema::Modern->new(%$opt);
 
+my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
+$encoder->indent_length(2) if $encoder->can('indent_length');
+
 if (defined $validate_schema) {
   if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename
     $data = path($validate_schema)->slurp_utf8;
@@ -57,8 +61,10 @@ if (defined $validate_schema) {
     say '';
   }
 
-  my $spec_version = $js->specification_version // $js->SPECIFICATION_VERSION_DEFAULT;
-  $schema = '{"$ref": "'.$js->METASCHEMA_URIS->{$spec_version}.'"}';
+  $data = $encoder->decode($data);
+  my $schema_uri = is_plain_hashref($data) && $data->{'$schema'} ? $data->{'$schema'}
+    : $js->METASCHEMA_URIS->{$js->specification_version // $js->SPECIFICATION_VERSION_DEFAULT};
+  $schema = { '$ref' => $schema_uri };
 }
 else {
   if (defined $data) {
@@ -80,10 +86,10 @@ else {
     $schema = <STDIN>;
     say '';
   }
-}
 
-my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
-$encoder->indent_length(2) if $encoder->can('indent_length');
+  $data = $encoder->decode($data);
+  $schema = $encoder->decode($schema);
+}
 
 foreach my $add_schema (@{$opt->add_schema//[]}) {
   try {
@@ -95,7 +101,7 @@ foreach my $add_schema (@{$opt->add_schema//[]}) {
   }
 }
 
-my $result = $js->evaluate($encoder->decode($data), $encoder->decode($schema));
+my $result = $js->evaluate($data, $schema);
 
 say $encoder->encode($result->TO_JSON);
 

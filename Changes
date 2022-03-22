@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - properly detect the metaschema in json-schema-eval
+            --validate-schema
 
 0.548     2022-03-09 06:27:10Z
           - "annotate_unknown_keywords" option removed; behaviour is now on
