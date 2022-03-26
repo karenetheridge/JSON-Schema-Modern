@@ -162,6 +162,12 @@ sub TO_JSON ($self) {
   $self->format($self->output_format);
 }
 
+sub dump ($self) {
+  my $encoder = JSON::MaybeXS->new(utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
+  $encoder->indent_length(2) if $encoder->can('indent_length');
+  $encoder->encode($self);
+}
+
 # turns the JSON pointers in instance_location, keyword_location  into a URI fragments,
 # for strict draft-201909 adherence
 sub _map_uris ($data) {
@@ -268,6 +274,11 @@ is false.
 
 When provided with another result object, returns a new object with the combination of all results.
 See C<&> at L</OVERLOADS>.
+
+=head2 dump
+
+Returns a JSON string representing the result object, using the requested L</format>, according to
+the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>.
 
 =head1 SUPPORT
 

@@ -45,9 +45,6 @@ sub acceptance_tests (%options) {
   my $js = JSON::Schema::Modern->new($options{evaluator}->%*);
   my $js_short_circuit = $ENV{NO_SHORT_CIRCUIT} || JSON::Schema::Modern->new($options{evaluator}->%*, short_circuit => 1);
 
-  my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
-  $encoder->indent_length(2) if $encoder->can('indent_length');
-
   my $add_resource = sub ($uri, $schema) {
     return if $uri =~ m{/draft-next/};
     try {
@@ -59,7 +56,7 @@ sub acceptance_tests (%options) {
       $js_short_circuit->add_schema($uri => $schema) if not $ENV{NO_SHORT_CIRCUIT};
     }
     catch ($e) {
-      die $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e) : $e;
+      die $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump : $e;
     }
   };
 
@@ -68,8 +65,8 @@ sub acceptance_tests (%options) {
       my $result = $js->evaluate($instance_data, $schema);
       my $result_short = $ENV{NO_SHORT_CIRCUIT} || $js_short_circuit->evaluate($instance_data, $schema);
 
-      note 'result: ', $encoder->encode($result);
-      note 'short-circuited result: ', $encoder->encode($result_short)
+      note 'result: ', $result->dump;
+      note 'short-circuited result: ', $result_short->dump
         if not $ENV{NO_SHORT_CIRCUIT} and ($result xor $result_short);
 
       die 'results inconsistent between short_circuit = false and true'
@@ -81,12 +78,12 @@ sub acceptance_tests (%options) {
       # to count that as a failure (an exception would be caught and perhaps TODO'd).
       # (This might change if tests are added that are expected to produce exceptions.)
       foreach my $r ($result, ($ENV{NO_SHORT_CIRCUIT} ? () : $result_short)) {
-        warn('evaluation generated an exception: '.$encoder->encode($_))
+        warn('evaluation generated an exception: '.$_->dump)
           foreach
             grep +($_->{error} =~ /^EXCEPTION/
                 && $_->{error} !~ /but short_circuit is enabled/            # unevaluated*
                 && $_->{error} !~ /(max|min)imum value is not a number$/),  # optional/bignum.json
-              $r->TO_JSON->{errors}->@*;
+              $r->errors;
       }
 
       $result;

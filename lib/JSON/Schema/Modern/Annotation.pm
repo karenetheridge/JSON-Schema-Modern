@@ -58,6 +58,12 @@ sub TO_JSON ($self) {
   };
 }
 
+sub dump ($self) {
+  my $encoder = JSON::MaybeXS->new(utf8 => 0, convert_blessed => 1, canonical => 1, pretty => 1);
+  $encoder->indent_length(2) if $encoder->can('indent_length');
+  $encoder->encode($self);
+}
+
 1;
 __END__
 
@@ -125,6 +131,11 @@ L<https://json-schema.org/draft/2019-09/output/schema>, except that C<instanceLo
 C<keywordLocation> are JSON pointers, B<not> URI fragments. (See the
 C<strict_basic> L<JSON::Schema::Modern/output_format>
 if the distinction is important to you.)
+
+=head2 dump
+
+Returns a JSON string representing the error object, according to
+the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>.
 
 =head1 SUPPORT
 

@@ -53,5 +53,5 @@ foreach my $uri (values %files) {
   print "# validating $uri\n" if $ENV{DEBUG};
 
   my $result = $js->_fetch_from_uri($uri)->{document}->validate;
-  die $js->_json_decoder->pretty->encode($result) if not $result;
+  die $result->dump if not $result;
 }

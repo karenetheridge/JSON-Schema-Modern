@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - added 'dump' method to Result, Error and Annotation objects, for
+            easier debugging and generating test output
 
 0.549     2022-03-22 03:55:15Z
           - properly detect the metaschema in json-schema-eval

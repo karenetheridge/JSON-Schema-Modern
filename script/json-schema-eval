@@ -46,9 +46,7 @@ die '--validate-schema and --data should not be used together' if defined $data 
 die '--validate-schema and --schema should not be used together' if defined $schema and defined $validate_schema;
 
 my $js = JSON::Schema::Modern->new(%$opt);
-
-my $encoder = JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, pretty => 1, utf8 => 0);
-$encoder->indent_length(2) if $encoder->can('indent_length');
+my $decoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0);
 
 if (defined $validate_schema) {
   if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename
@@ -61,7 +59,7 @@ if (defined $validate_schema) {
     say '';
   }
 
-  $data = $encoder->decode($data);
+  $data = $decoder->decode($data);
   my $schema_uri = is_plain_hashref($data) && $data->{'$schema'} ? $data->{'$schema'}
     : $js->METASCHEMA_URIS->{$js->specification_version // $js->SPECIFICATION_VERSION_DEFAULT};
   $schema = { '$ref' => $schema_uri };
@@ -87,23 +85,23 @@ else {
     say '';
   }
 
-  $data = $encoder->decode($data);
-  $schema = $encoder->decode($schema);
+  $data = $decoder->decode($data);
+  $schema = $decoder->decode($schema);
 }
 
 foreach my $add_schema (@{$opt->add_schema//[]}) {
   try {
-    $js->add_schema($encoder->decode(path($add_schema)->slurp_utf8));
+    $js->add_schema($decoder->decode(path($add_schema)->slurp_utf8));
   }
   catch ($e) {
-    say $e->$_isa('JSON::Schema::Modern::Result') ? $encoder->encode($e->TO_JSON) : '"'.$e.'"';
+    say $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump: '"'.$e.'"';
     exit 2;
   }
 }
 
 my $result = $js->evaluate($data, $schema);
 
-say $encoder->encode($result->TO_JSON);
+say $result->dump;
 
 exit($result ? 0 : $result->exception ? 2 : 1);
 
