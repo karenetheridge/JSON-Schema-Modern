@@ -877,11 +877,6 @@ subtest '$vocabulary' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$vocabulary',
-          error => 'metaschemas must have an $id',
-        },
-        {
-          instanceLocation => '',
           keywordLocation => '/$vocabulary/#~1notauri',
           error => '"#/notauri" is not a valid URI',
         },
@@ -927,17 +922,7 @@ subtest '$vocabulary' => sub {
         },
       },
     )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/items/$vocabulary',
-          absoluteKeywordLocation => 'foobar#/$vocabulary',
-          error => '$vocabulary can only appear at the document root',
-        },
-      ],
-    },
+    { valid => true },
     '$vocabulary location check - document root',
   );
 
@@ -1139,6 +1124,58 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       ],
     },
     'custom metaschemas are okay, but the document must be known',
+  );
+
+  $js->add_schema({
+    '$id' => 'https://metaschema/with/misplaced/vocabulary/keyword/base',
+    items => {
+      '$id' => 'subschema',
+      '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/core' => true },
+    },
+  });
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://metaschema/with/misplaced/vocabulary/keyword/subschema' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary',
+          absoluteKeywordLocation => 'https://metaschema/with/misplaced/vocabulary/keyword/subschema#/$vocabulary',
+          error => '$vocabulary can only appear at the document root',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"https://metaschema/with/misplaced/vocabulary/keyword/subschema" is not a valid metaschema',
+        },
+      ],
+    },
+    '$vocabulary location check - document root',
+  );
+
+
+  $js->add_schema('https://metaschema/with/no/id',
+    { '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/core' => true } });
+  cmp_deeply(
+    $js->evaluate(1, { '$schema' => 'https://metaschema/with/no/id' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary',
+          absoluteKeywordLocation => 'https://metaschema/with/no/id#/$vocabulary',
+          error => 'metaschemas must have an $id',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"https://metaschema/with/no/id" is not a valid metaschema',
+        },
+      ],
+    },
+    'metaschemas must have an i$id',
   );
 
   $js->add_schema({
