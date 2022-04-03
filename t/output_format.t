@@ -1,5 +1,4 @@
-use strict;
-use warnings;
+use strictures 2;
 use 5.020;
 use experimental qw(signatures postderef);
 use if "$]" >= 5.022, experimental => 're_strict';
