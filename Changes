@@ -5,6 +5,8 @@ Revision history for JSON-Schema-Modern
             easier debugging and generating test output
           - adjusted syntax checks for $vocabulary keyword to allow for
             bundled metaschemas
+          - new validate_schema() method, for easily validating a schema
+            against its metaschema
 
 0.549     2022-03-22 03:55:15Z
           - properly detect the metaschema in json-schema-eval

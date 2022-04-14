@@ -379,6 +379,15 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   );
 }
 
+sub validate_schema ($self, $schema, $config_override = {}) {
+  croak 'validate_schema called in void context' if not defined wantarray;
+
+  my $metaschema_uri = is_plain_hashref($schema) && $schema->{'$schema'} ? $schema->{'$schema'}
+    : $self->METASCHEMA_URIS->{$self->specification_version // $self->SPECIFICATION_VERSION_DEFAULT};
+
+  return $self->evaluate($schema, $metaschema_uri, $config_override);
+}
+
 sub get ($self, $uri) {
   my $schema_info = $self->_fetch_from_uri($uri);
   return if not $schema_info;
@@ -1133,6 +1142,13 @@ For example, to find the locations where all C<$ref> keywords are applied B<succ
   });
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
+
+=head2 validate_schema
+
+  $result = $js->validate_schema($schema);
+
+Evaluates the provided schema as instance data against its metaschema. Accepts C<$schema> and
+C<$config_override> parameters in the same form as L</evaluate>.
 
 =head2 traverse
 
