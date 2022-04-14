@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.550     2022-04-14 04:32:32Z
           - added 'dump' method to Result, Error and Annotation objects, for
             easier debugging and generating test output
