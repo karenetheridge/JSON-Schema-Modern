@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.549
+version 0.550
 
 =head1 SYNOPSIS
 
@@ -262,6 +262,13 @@ For example, to find the locations where all C<$ref> keywords are applied B<succ
   });
 
 The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
+
+=head2 validate_schema
+
+  $result = $js->validate_schema($schema);
+
+Evaluates the provided schema as instance data against its metaschema. Accepts C<$schema> and
+C<$config_override> parameters in the same form as L</evaluate>.
 
 =head2 traverse
 
