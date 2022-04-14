@@ -9,7 +9,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More 0.88;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use Test::Fatal;
 use Test::Deep;
 use Data::Dumper;
 use JSON::Schema::Modern;
