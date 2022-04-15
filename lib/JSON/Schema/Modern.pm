@@ -955,6 +955,7 @@ __END__
   use JSON::Schema::Modern;
 
   $js = JSON::Schema::Modern->new(
+    specification_version => 'draft2020-12',
     output_format => 'flag',
     ... # other options
   );
@@ -975,8 +976,13 @@ These values are all passed as arguments to the constructor.
 
 Indicates which version of the JSON Schema specification is used during evaluation. When not set,
 this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest version (draft2020-12). When left unset, the use of C<$schema> keywords in
-the schema is permitted, to switch between draft versions.
+the latest version (currently C<draft2020-12>).
+
+The use of this option is I<HIGHLY> encouraged to ensure continued correct operation of your schema.
+It is not guaranteed that the current default value will stay the same over time.
+
+Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
+specification version.
 
 May be one of:
 
