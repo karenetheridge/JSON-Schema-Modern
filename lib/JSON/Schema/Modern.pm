@@ -17,7 +17,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::MaybeXS;
 use Carp qw(croak carp);
-use List::Util 1.55 qw(pairs first uniqint pairmap uniq);
+use List::Util 1.55 qw(pairs first uniqint pairmap uniq any);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use Scalar::Util 'refaddr';
 use Mojo::URL;
@@ -49,6 +49,11 @@ use constant SPECIFICATION_VERSIONS_SUPPORTED => [qw(draft7 draft2019-09 draft20
 has specification_version => (
   is => 'ro',
   isa => Enum(SPECIFICATION_VERSIONS_SUPPORTED),
+  coerce => sub {
+    return $_[0] if any { $_[0] eq $_ } SPECIFICATION_VERSIONS_SUPPORTED->@*;
+    my $real = 'draft'.($_[0]//'');
+    (any { $real eq $_ } SPECIFICATION_VERSIONS_SUPPORTED->@*) ? $real : $_[0];
+  },
 );
 
 has output_format => (
@@ -987,11 +992,11 @@ specification version.
 May be one of:
 
 =for :list
-* L<C<draft2020-12>|https://json-schema.org/specification-links.html#2020-12>,
+* L<C<draft2020-12 or 2020-12>|https://json-schema.org/specification-links.html#2020-12>,
   corresponding to metaschema C<https://json-schema.org/draft/2020-12/schema>.
-* L<C<draft2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
+* L<C<draft2019-09 or 2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
-* L<C<draft7>|https://json-schema.org/specification-links.html#draft-7>,
+* L<C<draft7 or 7>|https://json-schema.org/specification-links.html#draft-7>,
   corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
 
 =head2 output_format

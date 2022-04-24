@@ -23,6 +23,26 @@ use Helper;
   );
 }
 
+subtest 'specification aliases' => sub {
+  is(
+    JSON::Schema::Modern->new(specification_version => '2020-12')->specification_version,
+    'draft2020-12',
+    '2020-12 is an alias for draft2020-12',
+  );
+
+  is(
+    JSON::Schema::Modern->new(specification_version => '2019-09')->specification_version,
+    'draft2019-09',
+    '2019-09 is an alias for draft2019-09',
+  );
+
+  is(
+    JSON::Schema::Modern->new(specification_version => '7')->specification_version,
+    'draft7',
+    '7 is an alias for draft7',
+  );
+};
+
 subtest '$ref and older specification versions' => sub {
   cmp_deeply(
     JSON::Schema::Modern->new->evaluate(
