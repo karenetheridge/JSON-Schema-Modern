@@ -984,7 +984,7 @@ this value is derived from the C<$schema> keyword in the schema used in evaluati
 the latest version (currently C<draft2020-12>).
 
 The use of this option is I<HIGHLY> encouraged to ensure continued correct operation of your schema.
-It is not guaranteed that the current default value will stay the same over time.
+The current default value will not stay the same over time.
 
 Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
 specification version.
