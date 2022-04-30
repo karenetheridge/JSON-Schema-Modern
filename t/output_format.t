@@ -522,4 +522,39 @@ subtest 'AND two result objects together' => sub {
   );
 };
 
+subtest annotations => sub {
+  my %args = (
+    valid => 1,
+    annotations => [
+      JSON::Schema::Modern::Annotation->new(
+        keyword => 'foo',
+        instance_location => 'instance location',
+        keyword_location => 'keyword location ',
+        annotation => 'annotation',
+      )
+    ],
+  );
+
+  cmp_deeply(
+    JSON::Schema::Modern::Result->new(%args)->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => 'instance location',
+          keywordLocation => 'keyword location ',
+          annotation => 'annotation',
+        },
+      ],
+    },
+    'by default, annotations are included in the formatted output',
+  );
+
+  cmp_deeply(
+    JSON::Schema::Modern::Result->new(%args, formatted_annotations => 0)->TO_JSON,
+    { valid => true },
+    'but inclusion can be disabled',
+  );
+};
+
 done_testing;

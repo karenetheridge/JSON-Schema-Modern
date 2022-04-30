@@ -4,6 +4,8 @@ Revision history for JSON-Schema-Modern
           - the "specification_version" configuration option now accepts
             values without "draft" in the name, to facilitate a new naming
             convention used for future specification versions
+          - new "formatted_annotations" option for JSON::Schema::Modern::Result,
+            to allow for omitting annotations from result output
 
 0.550     2022-04-14 04:32:32Z
           - added 'dump' method to Result, Error and Annotation objects, for

@@ -15,7 +15,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use MooX::TypeTiny;
-use Types::Standard qw(ArrayRef InstanceOf Enum);
+use Types::Standard qw(ArrayRef InstanceOf Enum Bool);
 use MooX::HandlesVia;
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
@@ -68,11 +68,19 @@ has output_format => (
   default => 'basic',
 );
 
+has formatted_annotations => (
+  is => 'ro',
+  isa => Bool,
+  default => 1,
+);
+
 sub BUILD ($self, $) {
   warn 'result is false but there are no errors' if not $self->valid and not $self->error_count;
 }
 
-sub format ($self, $style) {
+sub format ($self, $style, $formatted_annotations = undef) {
+  $formatted_annotations //= $self->formatted_annotations;
+
   if ($style eq 'flag') {
     return +{ valid => $self->valid };
   }
@@ -80,7 +88,7 @@ sub format ($self, $style) {
     return +{
       valid => $self->valid,
       $self->valid
-        ? ($self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
+        ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, $self->errors ]),
     };
   }
@@ -89,7 +97,7 @@ sub format ($self, $style) {
     return +{
       valid => $self->valid,
       $self->valid
-        ? ($self->annotation_count ? (annotations => [ map _map_uris($_->TO_JSON), $self->annotations ]) : ())
+        ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map _map_uris($_->TO_JSON), $self->annotations ]) : ())
         : (errors => [ map _map_uris($_->TO_JSON), $self->errors ]),
     };
   }
@@ -125,7 +133,7 @@ sub format ($self, $style) {
     return +{
       valid => $self->valid,
       $self->valid
-        ? ($self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
+        ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, @errors ]),
     };
   }
@@ -151,6 +159,7 @@ sub combine ($self, $other, $swap) {
       $other->errors,
     ],
     output_format => $self->output_format,
+    formatted_annotations => $self->formatted_annotations || $other->formatted_annotations,
   );
 }
 
@@ -249,6 +258,10 @@ values are provided as fragment-only URI references rather than JSON pointers.
 * C<terse> is not described in any specification; it is like C<basic>, but omits some redundant
 errors (for example the one for the C<allOf> keyword that is added when any of the subschemas under
 C<allOf> failed evaluation).
+
+=head2 formatted_annotations
+
+A boolean flag indicating whether L</format> should include annotations in the output. Defaults to true.
 
 =head1 METHODS
 
