@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.551     2022-05-01 01:29:51Z
           - the "specification_version" configuration option now accepts
             values without "draft" in the name, to facilitate a new naming
