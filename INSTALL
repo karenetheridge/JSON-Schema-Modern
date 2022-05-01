@@ -59,10 +59,10 @@ distribution's installer can be run.  They can be found under the
 ## Other Prerequisites
 
 This distribution may require additional modules to be installed after running
-Build.PL or Makefile.PL.
+Build.PL.
 Look for prerequisites in the following phases:
 
-* to run ./Build or make, PHASE = build
+* to run ./Build, PHASE = build
 * to use the module code itself, PHASE = runtime
 * to run tests, PHASE = test
 
