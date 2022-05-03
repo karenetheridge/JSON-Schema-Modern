@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix result serialization from exceptions (broken in 0.550)
 
 0.551     2022-05-01 01:29:51Z
           - the "specification_version" configuration option now accepts
