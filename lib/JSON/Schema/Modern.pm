@@ -162,7 +162,6 @@ sub add_schema {
       valid => 0,
       errors => [ $document->errors ],
       exception => 1,
-      mode => 'traverse',
     );
     die $result;
   }
