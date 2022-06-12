@@ -1103,7 +1103,7 @@ applications that contain embedded JSON Schemas):
 * C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
 * C<effective_base_uri>: locations in errors and annotations are resolved against this URI
 
-The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
+The return value is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
 =head2 evaluate
 
@@ -1151,7 +1151,7 @@ For example, to find the locations where all C<$ref> keywords are applied B<succ
     },
   });
 
-The result is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
+The return value is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
 =head2 validate_schema
 
