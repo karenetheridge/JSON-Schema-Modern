@@ -3,7 +3,7 @@ use warnings;
 package JSON::Schema::Modern;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Validate data against a schema
-# KEYWORDS: JSON Schema data validation structure specification
+# KEYWORDS: JSON Schema validator data validation structure specification
 
 our $VERSION = '0.553';
 
