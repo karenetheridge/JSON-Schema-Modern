@@ -293,6 +293,22 @@ See C<&> at L</OVERLOADS>.
 Returns a JSON string representing the result object, using the requested L</format>, according to
 the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>.
 
+=head1 SERIALIZATION
+
+Results (and their contained errors and annotations) can be serialized in a number of ways.
+
+Results have defined L</output_format>s, which can be generated as nested unblessed hashes/arrays
+and are suitable for serializing using a JSON encoder for use in another application. A JSON string of
+the result can be obtained directly using L</dump>.
+
+If it is preferable to omit direct references to the schema (for example in an application where the
+schema is not published), but still convey some semantic information about the nature of the errors,
+stringify the object directly. This also means that result objects can be thrown as exceptions, or
+embedded in error messages.
+
+If you are embedding the full result inside another data structure, perhaps to be serialized to JSON
+(or another format) later on, use L</TO_JSON> or L</format>.
+
 =head1 SUPPORT
 
 You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack

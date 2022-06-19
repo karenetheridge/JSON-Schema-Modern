@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - expanded on the documentation for serializing results.
 
 0.552     2022-05-03 03:31:59Z
           - fix result serialization from exceptions (broken in 0.550)
