@@ -53,7 +53,7 @@ __END__
 
 Implementation of the JSON Schema Draft 2020-12 "Format-Annotation" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2020-12/vocab/format-annotation> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7>.
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01#section-7>.
 
 Support is also provided for
 

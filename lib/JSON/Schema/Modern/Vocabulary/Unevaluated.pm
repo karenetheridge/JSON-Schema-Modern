@@ -173,7 +173,7 @@ __END__
 
 Implementation of the JSON Schema Draft 2020-12 "Unevaluated" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2020-12/vocab/unevaluated> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-11>.
+L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-01#section-11>.
 
 Support is also provided for the equivalent Draft 2019-09 keywords in the
 JSON Schema Draft 2019-09 "Applicator" vocabulary, indicated in metaschemas
