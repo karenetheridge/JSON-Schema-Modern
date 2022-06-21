@@ -224,7 +224,7 @@ use the result of L<JSON::Schema::Modern/evaluate> in boolean context.
 
 The object also contains a I<bitwise AND> overload (C<&>), for combining two results into one (the
 result is valid iff both inputs are valid; annotations and errors from the second argument are
-appended to those of the first).
+appended to those of the first in a new Result object).
 
 =head1 ATTRIBUTES
 
