@@ -991,11 +991,11 @@ specification version.
 May be one of:
 
 =for :list
-* L<C<draft2020-12 or 2020-12>|https://json-schema.org/specification-links.html#2020-12>,
+* L<C<draft2020-12> or C<2020-12>|https://json-schema.org/specification-links.html#2020-12>,
   corresponding to metaschema C<https://json-schema.org/draft/2020-12/schema>.
-* L<C<draft2019-09 or 2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
+* L<C<draft2019-09> or C<2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>.
-* L<C<draft7 or 7>|https://json-schema.org/specification-links.html#draft-7>,
+* L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>,
   corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
 
 =head2 output_format
