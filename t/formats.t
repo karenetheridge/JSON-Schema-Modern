@@ -416,4 +416,93 @@ subtest 'unimplemented formats' => sub {
   );
 };
 
+subtest 'format: pure_integer' => sub {
+  my $js = JSON::Schema::Modern->new(
+    validate_formats => 1,
+    format_validations => +{
+      pure_integer => +{ type => 'integer', sub => sub ($value) {
+        !ref($value) && (B::svref_2object(\$value)->FLAGS & B::SVf_IOK)
+      } },
+    },
+  );
+
+  my $decoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0);
+  cmp_deeply(
+    $js->evaluate(
+      [
+        map $decoder->decode($_),
+          '"hello"',
+          '3.1',
+          '3.0',
+          '3',
+      ],
+      {
+        items => {
+          type => 'integer',
+          format => 'pure_integer',
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/0',
+          keywordLocation => '/items/type',
+          error => 'got string, not integer',
+        },
+        {
+          instanceLocation => '/1',
+          keywordLocation => '/items/type',
+          error => 'got number, not integer',
+        },
+        {
+          instanceLocation => '/2',
+          keywordLocation => '/items/format',
+          error => 'not a pure_integer',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'pure_integer format with type',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      [
+        map $decoder->decode($_),
+          '"hello"',
+          '3.1',
+          '3.0',
+          '3',
+      ],
+      {
+        items => {
+          format => 'pure_integer',
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/2',
+          keywordLocation => '/items/format',
+          error => 'not a pure_integer',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'pure_integer format without type',
+  );
+};
+
 done_testing;
