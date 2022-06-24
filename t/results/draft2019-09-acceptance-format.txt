@@ -1,5 +1,5 @@
-Results using Test::JSON::Schema::Acceptance 1.016
-with commit 637f0ac3ebdd110065ab846918c03b364d9ee253 (2.0.0-465-g637f0ac)
+Results using Test::JSON::Schema::Acceptance 1.017
+with commit 69acf52990b004240839ae19b4bec8fb01d50876 (2.0.0-554-g69acf52)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2019-09
 using custom test directory: <base test directory>/optional/format

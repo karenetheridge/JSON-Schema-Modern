@@ -1,5 +1,5 @@
-Results using Test::JSON::Schema::Acceptance 1.016
-with commit 637f0ac3ebdd110065ab846918c03b364d9ee253 (2.0.0-465-g637f0ac)
+Results using Test::JSON::Schema::Acceptance 1.017
+with commit 69acf52990b004240839ae19b4bec8fb01d50876 (2.0.0-554-g69acf52)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2020-12
 using custom test directory: <base test directory>/optional/format
@@ -10,7 +10,7 @@ filename                                  pass  todo-fail  fail
 date-time.json                              25          0     0
 date.json                                   43          0     0
 duration.json                               24          0     0
-email.json                                  15          0     0
+email.json                                  20          2     0
 hostname.json                               18          0     0
 idn-email.json                              10          0     0
 idn-hostname.json                           35         16     0
@@ -28,4 +28,4 @@ uri-template.json                            1          9     0
 uri.json                                    19          1     0
 uuid.json                                   15          0     0
 ---------------------------------------------------------------
-TOTAL                                      395         38     0
+TOTAL                                      400         40     0
