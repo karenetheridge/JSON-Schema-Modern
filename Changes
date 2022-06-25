@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.553     2022-06-25 03:27:14Z
           - expanded on the documentation for serializing results.
           - updated IETF URI references from draft-bhutton-json-schema-00
             to draft-bhutton-json-schema-01, to reflect the updates to
