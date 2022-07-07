@@ -311,6 +311,26 @@ subtest 'behaviour with a $schema keyword' => sub {
     'semantics can be changed to another draft version',
   );
 
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      {
+        '$schema' => 'http://json-schema.org/draft-07/schema',
+        unevaluatedProperties => false,
+      },
+    )->TO_JSON,
+    { valid => true },
+    'schema is accepted with $schema without an empty fragment',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{''},
+    superhashof({
+      specification_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+    }),
+    '..and is still recognized as draft7',
+  );
 
   cmp_deeply(
     $js->evaluate(
