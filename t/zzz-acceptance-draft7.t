@@ -23,6 +23,12 @@ BEGIN {
 
 my $version = 'draft7';
 
+my $orig_warn_handler = $SIG{__WARN__};
+$SIG{__WARN__} = sub {
+  return if $_[0] =~ /^no-longer-supported "id" keyword present \(at location "[^"]+"\): this should be rewritten as "\$id"/;
+  goto &$orig_warn_handler if $orig_warn_handler;
+};
+
 acceptance_tests(
   acceptance => {
     specification => $version,

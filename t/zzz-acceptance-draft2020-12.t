@@ -23,6 +23,12 @@ BEGIN {
 
 my $version = 'draft2020-12';
 
+my $orig_warn_handler = $SIG{__WARN__};
+$SIG{__WARN__} = sub {
+  return if $_[0] =~ /^no-longer-supported "dependencies" keyword present \(at location ""\): this should be rewritten as "dependentSchemas" or "dependentRequired"/;
+  goto &$orig_warn_handler if $orig_warn_handler;
+};
+
 acceptance_tests(
   acceptance => {
     specification => $version,
@@ -35,7 +41,10 @@ acceptance_tests(
   output_file => $version.'-acceptance.txt',
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
+      # I am not interested in forward-supporting "dependencies"
+      { file => 'optional/dependencies-compatibility.json' },
       # various edge cases that are difficult to accomodate
+      { file => 'optional/ecmascript-regex.json', group_description => '\a is not an ECMA 262 control escape', test_description => 'when used as a pattern' },
       { file => 'optional/ecmascript-regex.json', group_description => '\w in patterns matches [A-Za-z0-9_], not unicode letters', test_description => [ 'literal unicode character in json string', 'unicode character in hex format in string' ] },
       { file => 'optional/ecmascript-regex.json', group_description => '\d in pattern matches [0-9], not unicode digits', test_description => 'non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)' },
       { file => 'optional/ecmascript-regex.json', group_description => '\w in patternProperties matches [A-Za-z0-9_], not unicode letters', test_description => [ 'literal unicode character in json string', 'unicode character in hex format in string' ] },

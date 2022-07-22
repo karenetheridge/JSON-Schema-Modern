@@ -63,6 +63,7 @@ acceptance_tests(
           $ENV{AUTOMATED_TESTING} && !eval { require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
+      { file => 'email.json', group_description => 'validation of e-mail addresses', test_description => [ 'an invalid domain', 'an invalid IPv4-address-literal' ] },
       { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
         test_description => 'an invalid IRI based on IPv6' },
       { file => 'idn-hostname.json',
