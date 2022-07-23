@@ -28,7 +28,7 @@ use File::ShareDir 'dist_dir';
 use Module::Runtime qw(use_module require_module);
 use MooX::TypeTiny 0.002002;
 use MooX::HandlesVia;
-use Types::Standard 1.010002 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional slurpy ArrayRef Undef ClassName Tuple Map);
+use Types::Standard 1.016003 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional Slurpy ArrayRef Undef ClassName Tuple Map);
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
@@ -109,7 +109,7 @@ has _format_validations => (
   is => 'bare',
   isa => my $format_type = Dict[
     (map +($_ => Optional[CodeRef]), qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex)),
-    slurpy HashRef[Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef]],
+    Slurpy[HashRef[Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef]]],
   ],
   init_arg => 'format_validations',
   handles_via => 'Hash',
@@ -593,7 +593,7 @@ has _resource_index => (
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[my $vocabulary_class_type = ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       configs => HashRef,
-      slurpy HashRef[Undef],  # no other fields allowed
+      Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
   handles_via => 'Hash',
   handles => {

@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - use new Slurpy type in Types::Standard
 
 0.553     2022-06-25 03:27:14Z
           - expanded on the documentation for serializing results.

@@ -21,7 +21,7 @@ use Ref::Util 0.100 'is_plain_hashref';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
 use MooX::HandlesVia;
-use Types::Standard qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef slurpy);
+use Types::Standard 1.016003 qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef Slurpy);
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer';
@@ -62,7 +62,7 @@ has resource_index => (
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       configs => HashRef,
-      slurpy HashRef[Undef],  # no other fields allowed
+      Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
   handles_via => 'Hash',
   handles => {
