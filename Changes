@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.554     2022-07-24 00:08:54Z
           - use new Slurpy type in Types::Standard
 
 0.553     2022-06-25 03:27:14Z
