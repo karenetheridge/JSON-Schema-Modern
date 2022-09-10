@@ -147,7 +147,7 @@ sub _traverse_keyword_format ($self, $schema, $state) {
 
 sub _eval_keyword_format ($self, $data, $schema, $state) {
   abort($state, 'unimplemented format "%s"', $schema->{format})
-    if $schema->{format} eq 'iri-reference' or $schema->{format} eq 'uri-template';
+    if $schema->{format} eq 'uri-template';
 
   try {
     if ($schema->{format} eq 'date-time' or $schema->{format} eq 'date') {
@@ -215,8 +215,8 @@ L<JSON::Schema::Modern/validate_formats> option.
 Overrides to particular format implementations, or additions of new ones, can be done through
 L<JSON::Schema::Modern/format_validations>.
 
-Formats C<iri-reference> and C<uri-template> are not yet implemented.
-Use of these formats will always result in an error.
+Format C<uri-template> is not yet implemented.
+Use of this format will always result in an error.
 
 =head1 SEE ALSO
 

@@ -53,7 +53,7 @@ acceptance_tests(
   test => {
     $ENV{NO_TODO} ? () : ( todo_tests => [
       { file => [
-          'iri-reference.json',                       # not yet implemented
+          'iri-reference.json',                       # all strings are considered valid
           'uri-template.json',                        # not yet implemented
           # these all depend on optional prereqs
           $ENV{AUTOMATED_TESTING} && !eval { require Time::Moment; 1 } ? qw(date-time.json date.json time.json) : (),
