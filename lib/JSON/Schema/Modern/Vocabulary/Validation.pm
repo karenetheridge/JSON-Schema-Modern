@@ -76,7 +76,6 @@ sub _eval_keyword_type ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_enum ($self, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
-  return E($state, '"enum" values are not unique') if not is_elements_unique($schema->{enum});
   return 1;
 }
 
