@@ -69,8 +69,8 @@ sub TO_JSON ($self) {
 
 sub stringify ($self) {
   ($self->mode//'evaluate') eq 'traverse'
-    ? 'at \''.$self->keyword_location.'\': '.$self->error
-    : 'at \''.$self->instance_location.'\': '.$self->error;
+    ? '\''.$self->keyword_location.'\': '.$self->error
+    : '\''.$self->instance_location.'\': '.$self->error;
 }
 
 sub dump ($self) {

@@ -557,4 +557,45 @@ subtest annotations => sub {
   );
 };
 
+subtest 'data_only' => sub {
+  my $result = JSON::Schema::Modern::Result->new(
+    valid => 0,
+    errors => [
+      JSON::Schema::Modern::Error->new(
+        keyword => 'hello',
+        instance_location => '/foo/bar',
+        keyword_location => '/allOf/0/hello',
+        error => 'schema is invalid',
+      ),
+      JSON::Schema::Modern::Error->new(
+        keyword => 'goodbye',
+        instance_location => '/foo/bar',
+        keyword_location => '/allOf/1/goodbye',
+        error => 'schema is invalid',
+      ),
+      JSON::Schema::Modern::Error->new(
+        keyword => 'allOf',
+        instance_location => '/foo/bar',
+        keyword_location => '/allOf',
+        error => 'subschemas 0, 1 are not valid',
+      ),
+    ],
+  );
+
+  is(
+    $result->format('data_only'),
+    "'/foo/bar': schema is invalid\n'/foo/bar': subschemas 0, 1 are not valid",
+    'data_only format outputs a string of data locations only, with duplicates removed',
+  );
+
+
+  $_->mode('traverse') foreach $result->errors;
+
+  is(
+    $result->format('data_only'),
+    "'/allOf/0/hello': schema is invalid\n'/allOf/1/goodbye': schema is invalid\n'/allOf': subschemas 0, 1 are not valid",
+    'data_only format uses keyword locations when result came from traverse',
+  );
+};
+
 done_testing;

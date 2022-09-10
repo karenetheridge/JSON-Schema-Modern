@@ -20,7 +20,7 @@ use MooX::HandlesVia;
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
-use List::Util 1.50 'any';
+use List::Util 1.50 qw(any uniq);
 use Scalar::Util 'refaddr';
 use Safe::Isa;
 use namespace::clean;
@@ -60,7 +60,7 @@ has $_.'s' => (
 ) foreach qw(error annotation);
 
 # strict_basic can only be used with draft2019-09.
-use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse)];
+use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse data_only)];
 
 has output_format => (
   is => 'rw',
@@ -137,6 +137,13 @@ sub format ($self, $style, $formatted_annotations = undef) {
         : (errors => [ map $_->TO_JSON, @errors ]),
     };
   }
+  elsif ($style eq 'data_only') {
+    return 'valid' if not $self->error_count;
+    # Note: this output is going to be confusing when coming from a schema with a 'oneOf', 'not',
+    # etc. Perhaps generating the strings with indentation levels, as derived from a nested format,
+    # might be more readable.
+    return join("\n", uniq(map $_->stringify, $self->errors));
+  }
 
   die 'unsupported output format';
 }
@@ -163,11 +170,13 @@ sub combine ($self, $other, $swap) {
   );
 }
 
+
 sub stringify ($self) {
-  $self->error_count ? join("\n", $self->errors) : 'valid'
+  return $self->format('data_only');
 }
 
 sub TO_JSON ($self) {
+  die 'cannot produce JSON output for data_only format' if $self->output_format eq 'data_only';
   $self->format($self->output_format);
 }
 
@@ -244,7 +253,7 @@ Returns an array of L<JSON::Schema::Modern::Annotation> objects.
 
 =for stopwords subschemas
 
-One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
+One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>, C<data_only>. Defaults to C<basic>.
 
 =for :list
 * C<flag> returns just the result of the evaluation: either C<{"valid": true}> or C<{"valid": false}>.
@@ -258,6 +267,11 @@ values are provided as fragment-only URI references rather than JSON pointers.
 * C<terse> is not described in any specification; it is like C<basic>, but omits some redundant
 errors (for example the one for the C<allOf> keyword that is added when any of the subschemas under
 C<allOf> failed evaluation).
+* C<data_only> returns a string, not a data structure: it contains a list of errors identified only
+by their C<instance_location> and error message (or C<keyword_location>, when the error occurred
+while loading the schema itself). This format is suitable for generating errors when the schema is
+not published, or for describing errors with the schema itself. This is not an official
+specification format and may change slightly over time, as it is tested in production environments.
 
 =head2 formatted_annotations
 
