@@ -564,7 +564,7 @@ __END__
 
 Implementation of the JSON Schema Draft 2020-12 "Applicator" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2020-12/vocab/applicator> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-01#section-10>.
+L<https://json-schema.org/draft/2020-12/json-schema-core.html#section-10>.
 
 Support is also provided for
 

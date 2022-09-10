@@ -110,7 +110,7 @@ __END__
 
 Implementation of the JSON Schema Draft 2020-12 "Content" vocabulary, indicated in metaschemas
 with the URI C<https://json-schema.org/draft/2020-12/vocab/content> and formally specified in
-L<https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01#section-8>.
+L<https://json-schema.org/draft/2020-12/json-schema-validation.html#section-8>.
 
 Support is also provided for
 
