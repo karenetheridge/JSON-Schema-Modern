@@ -6,6 +6,9 @@ Revision history for JSON-Schema-Modern
           - the "iri-reference" format is now supported, sort of (all strings
             will be accepted as valid)
           - "enum" no longer incorrectly errors if elements are not unique
+          - new experimental output format: "data_only", which encapsulates
+            what is produced when a JSON::Schema::Modern::Result object is
+            stringified
 
 0.554     2022-07-24 00:08:54Z
           - use new Slurpy type in Types::Standard
