@@ -985,9 +985,6 @@ the latest version (currently C<draft2020-12>).
 The use of this option is I<HIGHLY> encouraged to ensure continued correct operation of your schema.
 The current default value will not stay the same over time.
 
-Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
-specification version.
-
 May be one of:
 
 =for :list
@@ -997,6 +994,9 @@ May be one of:
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>
 * L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>,
   corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
+
+Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
+specification version.
 
 =head2 output_format
 
