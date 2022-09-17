@@ -167,6 +167,8 @@ sub is_elements_unique ($array, $equal_indices = undef) {
 }
 
 # shorthand for creating and appending json pointers
+# the first argument is a a json pointer; remaining arguments are path segments to be encoded and
+# appended
 sub jsonp {
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_plain_arrayref($_) ? @$_ : $_), grep defined, @_);
 }
@@ -183,6 +185,7 @@ sub local_annotations ($state) {
 }
 
 # shorthand for finding the canonical uri of the present schema location
+# last argument can be an arrayref, usually coming from $state->{_schema_path_suffix}
 sub canonical_uri ($state, @extra_path) {
   splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_plain_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
