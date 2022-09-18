@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.556     2022-09-18 22:41:50Z
           - some performance optimizations for schema traversal and evaluation
 
