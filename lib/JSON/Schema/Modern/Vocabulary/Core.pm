@@ -93,6 +93,15 @@ sub _eval_keyword_id ($self, $data, $schema, $state) {
   $state->{schema_path} = '';
   $state->{spec_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
+  # it's possible that a different schema resource has its own set of configs, different from the
+  # JSM attribute value
+  if ($state->{validate_formats}) {
+    $state->{vocabularies} = [
+      map s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/r, $state->{vocabularies}->@*
+    ];
+    require JSON::Schema::Modern::Vocabulary::FormatAssertion;
+  }
+
   $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
   push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
 

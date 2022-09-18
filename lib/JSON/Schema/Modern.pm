@@ -355,6 +355,13 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans strict)),
     };
 
+    if ($state->{validate_formats}) {
+      $state->{vocabularies} = [
+        map s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/r, $state->{vocabularies}->@*
+      ];
+      require JSON::Schema::Modern::Vocabulary::FormatAssertion;
+    }
+
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
     warn 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
   }
@@ -543,14 +550,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   $state->{annotations} = [];
   my @new_annotations;
 
-  my @vocabularies = $state->{vocabularies}->@*; # override locally only (copy, not reference)
-  if ($state->{validate_formats}) {
-    s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/ foreach @vocabularies;
-    require JSON::Schema::Modern::Vocabulary::FormatAssertion;
-  }
-
   ALL_KEYWORDS:
-  foreach my $vocabulary (@vocabularies) {
+  foreach my $vocabulary ($state->{vocabularies}->@*) {
     # [ [ $keyword => $subref|undef ], [ ... ] ]
     my $keyword_list = $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
       map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
