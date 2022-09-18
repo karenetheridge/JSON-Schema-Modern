@@ -426,6 +426,18 @@ my %removed_keywords = (
   },
 );
 
+# {
+#   $spec_version => {
+#     $vocabulary_class => {
+#       traverse => [ [ $keyword => $subref ], [ ... ] ],
+#       evaluate => [ [ $keyword => $subref ], [ ... ] ],
+#     }
+#   }
+# }
+# If we could serialize coderefs, this could be an object attribute;
+# otherwise, we might as well persist this for the lifetime of the process.
+our $vocabulary_cache = {};
+
 sub _traverse_subschema ($self, $schema, $state) {
   delete $state->{keyword};
 
@@ -444,7 +456,15 @@ sub _traverse_subschema ($self, $schema, $state) {
   # we must check the array length on every iteration because some keywords can change it!
   for (my $idx = 0; $idx <= $state->{vocabularies}->$#*; ++$idx) {
     my $vocabulary = $state->{vocabularies}[$idx];
-    foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
+
+    # [ [ $keyword => $subref ], [ ... ] ]
+    my $keyword_list = $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
+      map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
+        $vocabulary->keywords($state->{spec_version})
+    ];
+
+    foreach my $keyword_tuple ($keyword_list->@*) {
+      my ($keyword, $sub) = $keyword_tuple->@*;
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
@@ -452,16 +472,15 @@ sub _traverse_subschema ($self, $schema, $state) {
 
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
-      my $method = '_traverse_keyword_'.($keyword =~ s/^\$//r);
 
-      if (not $vocabulary->$method($schema, $state)) {
+      if (not $sub->($vocabulary, $schema, $state)) {
         die 'traverse returned false but we have no errors' if not $state->{errors}->@*;
         $valid = 0;
         next;
       }
 
-      if (my $sub = $state->{callbacks}{$keyword}) {
-        $sub->($schema, $state);
+      if (my $callback = $state->{callbacks}{$keyword}) {
+        $callback->($schema, $state);
       }
     }
   }
@@ -532,7 +551,14 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   ALL_KEYWORDS:
   foreach my $vocabulary (@vocabularies) {
-    foreach my $keyword ($vocabulary->keywords($state->{spec_version})) {
+    # [ [ $keyword => $subref|undef ], [ ... ] ]
+    my $keyword_list = $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
+      map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
+        $vocabulary->keywords($state->{spec_version})
+    ];
+
+    foreach my $keyword_tuple ($keyword_list->@*) {
+      my ($keyword, $sub) = $keyword_tuple->@*;
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
@@ -541,8 +567,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
 
-      my $method = '_eval_keyword_'.($keyword =~ s/^\$//r);
-      if (my $sub = $vocabulary->can($method)) {
+      if ($sub) {
         my $error_count = $state->{errors}->@*;
 
         if (not $sub->($vocabulary, $data, $schema, $state)) {
@@ -555,8 +580,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
         }
       }
 
-      if (my $sub = $state->{callbacks}{$keyword}) {
-        $sub->($data, $schema, $state);
+      if (my $callback = $state->{callbacks}{$keyword}) {
+        $callback->($data, $schema, $state);
       }
 
       push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];
