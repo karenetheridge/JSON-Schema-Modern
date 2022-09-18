@@ -501,6 +501,14 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
     if $state->{depth}++ > $self->max_traversal_depth;
 
+  my $schema_type = get_type($schema);
+  return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
+
+  # this should never happen, due to checks in traverse
+  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
+
+  return 1 if not keys %$schema;
+
   # find all schema locations in effect at this data path + canonical_uri combination
   # if any of them are absolute prefix of this schema location, we are in a loop.
   my $canonical_uri = canonical_uri($state);
@@ -509,14 +517,6 @@ sub _eval_subschema ($self, $data, $schema, $state) {
     if grep substr($schema_location, 0, length) eq $_,
       keys $state->{seen}{$state->{data_path}}{$canonical_uri}->%*;
   $state->{seen}{$state->{data_path}}{$canonical_uri}{$schema_location}++;
-
-  my $schema_type = get_type($schema);
-  return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
-
-  # this should never happen, due to checks in traverse
-  abort($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
-
-  return 1 if not keys %$schema;
 
   my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
