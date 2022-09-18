@@ -1177,6 +1177,7 @@ For example, to find the locations where all C<$ref> keywords are applied B<succ
   });
 
 The return value is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
+Callbacks are not compatible with L</short_circuit> mode.
 
 =head2 validate_schema
 
