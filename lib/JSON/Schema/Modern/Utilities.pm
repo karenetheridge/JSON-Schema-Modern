@@ -15,7 +15,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use B;
 use Carp 'croak';
-use JSON::MaybeXS 1.004001 'is_bool';
+use JSON::MaybeXS 1.004004 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use Scalar::Util 'blessed';
 use Storable 'dclone';
