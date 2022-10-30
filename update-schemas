@@ -35,6 +35,8 @@ my %files = (
   'draft2019-09/schema.json'              => 'https://json-schema.org/draft/2019-09/schema',
 
   'draft7/schema.json' => 'http://json-schema.org/draft-07/schema#',
+
+  'LICENSE' => 'https://raw.githubusercontent.com/json-schema-org/json-schema-spec/main/LICENSE',
 );
 
 foreach my $target (keys %files) {
@@ -50,6 +52,7 @@ foreach my $target (keys %files) {
 
 my $js = JSON::Schema::Modern->new(validate_formats => 1);
 foreach my $uri (values %files) {
+  next if $uri =~ /LICENSE$/;
   print "# validating $uri\n" if $ENV{DEBUG};
 
   my $result = $js->_fetch_from_uri($uri)->{document}->validate;
