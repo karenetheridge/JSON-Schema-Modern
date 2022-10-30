@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - improvements to processing of keywords in the Content vocabulary
+            (contentEncoding, contentMediaType, contentSchema)
 
 0.556     2022-09-18 22:41:50Z
           - some performance optimizations for schema traversal and evaluation

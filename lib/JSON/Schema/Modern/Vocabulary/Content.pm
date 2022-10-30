@@ -49,8 +49,13 @@ sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
       if not $decoder;
 
     # decode the data now, so we can report errors for the right keyword
-    try { $state->{_content_ref} = $decoder->(\$data) }
-    catch ($e) { return E($state, $e) }
+    try {
+      $state->{_content_ref} = $decoder->(\$data);
+    }
+    catch ($e) {
+      chomp $e;
+      return E($state, 'could not decode %s string: %s', $schema->{contentEncoding}, $e);
+    };
   }
 
   return A($state, $schema->{$state->{keyword}})
@@ -70,8 +75,14 @@ sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
     return 1 if exists $schema->{contentEncoding} and not exists $state->{_content_ref};
 
     # decode the data now, so we can report errors for the right keyword
-    try { $state->{_content_ref} = $decoder->($state->{_content_ref} // \$data) }
-    catch ($e) { return E($state, $e) }
+    try {
+      $state->{_content_ref} = $decoder->($state->{_content_ref} // \$data);
+    }
+    catch ($e) {
+      chomp $e;
+      delete $state->{_content_ref};
+      return E($state, 'could not decode %s string: %s', $schema->{contentMediaType}, $e);
+    }
   }
 
   return A($state, $schema->{$state->{keyword}})

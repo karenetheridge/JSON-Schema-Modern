@@ -5,6 +5,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
+use utf8;
 
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
@@ -14,7 +15,7 @@ use JSON::Schema::Modern;
 use lib 't/lib';
 use Helper;
 
-subtest 'unrecognized encoding formats do not result in errors' => sub {
+subtest 'unrecognized encoding formats do not result in errors, when not asserting' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);
 
   cmp_deeply(
@@ -85,17 +86,24 @@ subtest 'media_type and encoding handlers' => sub {
 
   $js = JSON::Schema::Modern->new;
 
+  # MIME::Base64::decode("eyJmb28iOiAiYmFyIn0K") -> {"foo": "bar"}
+  # JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode(q!{"foo": "bar"}!) -> { foo => 'bar' }
+
   cmp_deeply(
     $js->get_media_type('application/json')->($js->get_encoding('base64')->(\'eyJmb28iOiAiYmFyIn0K')),
     \ { foo => 'bar' },
     'base64 encoding decoder + application/json media_type decoder',
   );
+};
 
-  # evaluate some schemas under draft7 and see that they validate
+subtest 'draft2020-12 assertions' => sub {
+  my $js = JSON::Schema::Modern->new;
+
   cmp_deeply(
     $js->evaluate(
       my $data = { encoded_object => 'eyJmb28iOiAiYmFyIn0K' },
       my $schema = {
+        type => 'object',
         properties => {
           encoded_object => {
             contentEncoding => 'base64',
@@ -103,7 +111,7 @@ subtest 'media_type and encoding handlers' => sub {
             contentSchema => {
               type => 'object',
               additionalProperties => {
-                type => 'number',
+                const => 'ಠ_ಠ',
               },
             },
           },
@@ -115,21 +123,66 @@ subtest 'media_type and encoding handlers' => sub {
   );
 
   cmp_deeply(
-    $js->evaluate(
-      $data,
+    my $result = $js->evaluate(
+      { encoded_object => 'blur^p=' },  # invalid base64
       $schema,
-      {
-        specification_version => 'draft7',
-        validate_content_schemas => 1,
-      },
+      { validate_content_schemas => 1 },
     )->TO_JSON,
     {
       valid => false,
       errors => [
         {
-          instanceLocation => '/encoded_object/foo',
-          keywordLocation => '/properties/encoded_object/contentSchema/additionalProperties/type',
-          error => 'got string, not number',
+          instanceLocation => '/encoded_object',
+          keywordLocation => '/properties/encoded_object/contentEncoding',
+          error => 'could not decode base64 string: invalid characters',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'contentEncoding first decodes the string, erroring if it can\'t',
+  );
+
+  cmp_deeply(
+    $result = $js->evaluate(
+      { encoded_object => 'bm90IGpzb24=' }, # base64-encoded "not json"
+      $schema,
+      { validate_content_schemas => 1 },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/encoded_object',
+          keywordLocation => '/properties/encoded_object/contentMediaType',
+          error => re(qr!could not decode application/json string: \'null\' expected, at character offset 0!),
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'then contentMediaType parses the decoded string, erroring if it can\'t, and does not continue with the schema',
+  );
+
+  cmp_deeply(
+    $result = $js->evaluate(
+      { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
+      $schema,
+      { validate_content_schemas => 1 },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/encoded_object/hi',
+          keywordLocation => '/properties/encoded_object/contentSchema/additionalProperties/const',
+          error => 'value does not match',
         },
         {
           instanceLocation => '/encoded_object',
@@ -148,8 +201,95 @@ subtest 'media_type and encoding handlers' => sub {
         },
       ],
     },
-    'under draft7, these keywords are assertions',
+    'contentSchema evaluates the decoded data',
   );
+
+  cmp_deeply(
+    $result = $js->evaluate(
+      { encoded_object => 'eyJoaSI6IuCyoF/gsqAifQ==' }, # base64-encoded, json-encoded { hi => "ಠ_ಠ" }
+      $schema,
+      { validate_content_schemas => 1 },
+    )->TO_JSON,
+    { valid => true },
+    'contentSchema successfully evaluates the decoded data',
+  );
+};
+
+subtest 'draft7 assertions' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
+
+  cmp_deeply(
+    my $result = $js->evaluate(
+      { encoded_object => 'blur^p=' },  # invalid base64
+      my $schema = {
+        type => 'object',
+        properties => {
+          encoded_object => {
+            contentEncoding => 'base64',
+            contentMediaType => 'application/json',
+            contentSchema => {
+              type => 'object',
+              additionalProperties => {
+                const => 'ಠ_ಠ',
+              },
+            },
+          },
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/encoded_object',
+          keywordLocation => '/properties/encoded_object/contentEncoding',
+          error => 'could not decode base64 string: invalid characters',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'in draft7, assertion behaviour is the default',
+  );
+
+  cmp_deeply(
+    $result = $js->evaluate(
+      { encoded_object => 'bm90IGpzb24=' }, # base64-encoded "not json"
+      $schema,
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/encoded_object',
+          keywordLocation => '/properties/encoded_object/contentMediaType',
+          error => re(qr!could not decode application/json string: \'null\' expected, at character offset 0!),
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'in draft7, then contentMediaType parses the decoded string, erroring if it can\'t, and does not continue with the schema',
+  );
+
+  cmp_deeply(
+    $result = $js->evaluate(
+      { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
+      $schema,
+    )->TO_JSON,
+    { valid => true },
+    'under draft7, content* are assertions by default, but contentSchema does not exist',
+  );
+};
+
+subtest 'more assertions' => sub {
+  my $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->evaluate(
@@ -160,7 +300,6 @@ subtest 'media_type and encoding handlers' => sub {
         contentSchema => false,
       },
       {
-        specification_version => 'draft7',
         validate_content_schemas => 1,
       },
     )->TO_JSON,
@@ -185,7 +324,6 @@ subtest 'media_type and encoding handlers' => sub {
         contentSchema => false,
       },
       {
-        specification_version => 'draft7',
         validate_content_schemas => 1,
       },
     )->TO_JSON,
@@ -200,47 +338,6 @@ subtest 'media_type and encoding handlers' => sub {
       ],
     },
     'evaluation aborts with an unrecognized contentMediaType',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      { encoded_object => 'eyJmb28iOi%iYmFyIn0K' }, # character outside of the base64 range
-      $schema,
-      {
-        specification_version => 'draft7',
-        validate_content_schemas => 1,
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '/encoded_object',
-          keywordLocation => '/properties/encoded_object/contentEncoding',
-          error => re(qr/^invalid characters in base64 string/),
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/properties',
-          error => 'not all properties are valid',
-        },
-      ],
-    },
-    'under draft7, these keywords are assertions',
-  );
-
-  cmp_deeply(
-    $js->evaluate(
-      # this is a ISO-8601 string that is json-encoded and then base64-encoded
-      { encoded_object => MIME::Base64::encode('{"'.chr(0xe9).'clair": 42}', '') },
-      $schema,
-      {
-        specification_version => 'draft7',
-        validate_content_schemas => 1,
-      },
-    )->TO_JSON,
-    { valid => true },
-    'successfully able to decode a non-UTF-8-encoded string',
   );
 };
 

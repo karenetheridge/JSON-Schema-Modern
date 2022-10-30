@@ -909,7 +909,7 @@ has _media_type => (
   lazy => 1,
   default => sub ($self) {
     my $_json_media_type = sub ($content_ref) {
-      \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode($content_ref->$*);
+      \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1)->decode($content_ref->$*);
     };
     +{
       # note: utf-8 decoding is NOT done, as we can't be sure that's the correct charset!
@@ -947,7 +947,7 @@ has _encoding => (
     +{
       identity => sub ($content_ref) { $content_ref },
       base64 => sub ($content_ref) {
-        die "invalid characters in base64 string"
+        die "invalid characters\n"
           if $content_ref->$* =~ m{[^A-Za-z0-9+/=]} or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode($content_ref->$*);
       },
