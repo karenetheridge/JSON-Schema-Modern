@@ -177,10 +177,11 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
       : $default_spec ? +{ type => 'string', sub => $default_spec }
       : undef;
 
+  A($state, $schema->{format});
   return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
     if $spec and is_type($spec->{type}, $data) and not $spec->{sub}->($data);
 
-  return A($state, $schema->{format});
+  return 1;
 }
 
 1;

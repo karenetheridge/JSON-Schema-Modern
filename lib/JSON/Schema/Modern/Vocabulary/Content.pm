@@ -43,6 +43,8 @@ sub _traverse_keyword_contentEncoding ($self, $schema, $state) {
 sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
 
+  A($state, $schema->{$state->{keyword}});
+
   if ($state->{validate_content_schemas}) {
     my $decoder = $state->{evaluator}->get_encoding($schema->{contentEncoding});
     abort($state, 'cannot find decoder for contentEncoding "%s"', $schema->{contentEncoding})
@@ -58,13 +60,15 @@ sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
     };
   }
 
-  return A($state, $schema->{$state->{keyword}})
+  return 1;
 }
 
 sub _traverse_keyword_contentMediaType { shift->_traverse_keyword_contentEncoding(@_) }
 
 sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
+
+  A($state, $schema->{$state->{keyword}});
 
   if ($state->{validate_content_schemas}) {
     my $decoder = $state->{evaluator}->get_media_type($schema->{contentMediaType});
@@ -85,7 +89,7 @@ sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
     }
   }
 
-  return A($state, $schema->{$state->{keyword}})
+  return 1;
 }
 
 sub _traverse_keyword_contentSchema ($self, $schema, $state) {
@@ -99,7 +103,8 @@ sub _eval_keyword_contentSchema ($self, $data, $schema, $state) {
   return 1 if not exists $schema->{contentMediaType};
   return 1 if not is_type('string', $data);
 
-  return A($state, dclone($schema->{contentSchema})) if not $state->{validate_content_schemas};
+  A($state, dclone($schema->{contentSchema}));
+  return 1 if not $state->{validate_content_schemas};
 
   return 1 if not exists $state->{_content_ref};  # contentMediaType failed to decode the content
 
