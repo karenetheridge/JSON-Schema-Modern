@@ -310,6 +310,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     errors => [],
   };
 
+  exists $config_override->{$_} and die $_.' not supported as a config override'
+    foreach qw(output_format specification_version);
+
   my $valid;
   try {
     my $schema_info;
