@@ -206,6 +206,35 @@ subtest 'draft2020-12 assertions' => sub {
 
   cmp_deeply(
     $result = $js->evaluate(
+      { encoded_object => 'bnVsbA==' }, # base64-encoded, json-encoded undef
+      $schema,
+      { validate_content_schemas => 1 },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/encoded_object',
+          keywordLocation => '/properties/encoded_object/contentSchema/type',
+          error => 'got null, not object',
+        },
+        {
+          instanceLocation => '/encoded_object',
+          keywordLocation => '/properties/encoded_object/contentSchema',
+          error => 'subschema is not valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'null data is handled properly',
+  );
+
+  cmp_deeply(
+    $result = $js->evaluate(
       { encoded_object => 'eyJoaSI6IuCyoF/gsqAifQ==' }, # base64-encoded, json-encoded { hi => "ಠ_ಠ" }
       $schema,
       { validate_content_schemas => 1 },
