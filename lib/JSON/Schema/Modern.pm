@@ -912,21 +912,20 @@ has _media_type => (
   lazy => 1,
   default => sub ($self) {
     my $_json_media_type = sub ($content_ref) {
+      # utf-8 decoding is always done, as per the JSON spec.
+      # other charsets are not supported: see RFC8259 §11
       \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1)->decode($content_ref->$*);
     };
     +{
-      # note: utf-8 decoding is NOT done, as we can't be sure that's the correct charset!
-      'application/json' => $_json_media_type,
-      'application/schema+json' => $_json_media_type,
-      'application/schema-instance+json' => $_json_media_type,
+      (map +($_ => $_json_media_type),
+        qw(application/json application/schema+json application/schema-instance+json)),
       map +($_ => sub ($content_ref) { $content_ref }),
         qw(text/plain application/octet-stream),
     };
   },
 );
 
-# get_media_type('TExT/bloop') will match an entry for 'text/*' or '*/*'
-# TODO: support queries for application/schema+json to match entry of application/json
+# get_media_type('TExT/bloop') will fall through to matching an entry for 'text/*' or '*/*'
 around get_media_type => sub ($orig, $self, $type) {
   my $mt = $self->$orig(fc $type);
   return $mt if $mt;
@@ -1296,6 +1295,7 @@ Fetches a decoder sub for the indicated media type. Lookups are performed B<with
 
 You can use it thusly:
 
+  $js->add_media_type('application/furble' => sub { ... }); # as above
   my $decoder = $self->get_media_type('application/furble') or die 'cannot find media type decoder';
   my $content_ref = $decoder->(\$content_string);
 
