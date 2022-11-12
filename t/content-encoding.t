@@ -66,7 +66,7 @@ subtest 'media_type and encoding handlers' => sub {
     'application/json media_type decoder',
   );
 
-  cmp_deeply($js->get_media_type('text/plain')->(\'foo'), \'foo', 'text/plain media_type decoder');
+  cmp_deeply($js->get_media_type('text/plain')->(\'foo'), \'foo', 'default text/plain media_type decoder');
 
   cmp_deeply($js->get_media_type('tExt/PLaIN')->(\'foo'), \'foo', 'getter uses the casefolded name');
 
@@ -74,12 +74,15 @@ subtest 'media_type and encoding handlers' => sub {
   cmp_deeply($js->get_media_type('furble/bloop')->(\''), \'1', 'getter matches to wildcard entries');
 
   $js->add_media_type('text/*' => sub { \'wildcard' });
-  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'foo', 'getter prefers case-insensitive matches to wildcard entries');
+  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'wildcard', 'getter uses new override entry for wildcard');
+
+  $js->add_media_type('text/plain' => sub { \'plain' });
+  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter prefers case-insensitive matches to wildcard entries');
   cmp_deeply($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'getter matches to wildcard entries');
   cmp_deeply($js->get_media_type('TExT/*')->(\'foo'), \'wildcard', 'text/* matches itself');
 
   $js->add_media_type('*/*' => sub { \'wildercard' });
-  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'foo', 'getter still prefers case-insensitive matches to wildcard entries');
+  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter still prefers case-insensitive matches to wildcard entries');
   cmp_deeply($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'text/* is preferred to */*');
   cmp_deeply($js->get_media_type('*/*')->(\'foo'), \'wildercard', '*/* matches */*');
   cmp_deeply($js->get_media_type('fOO/bar')->(\'foo'), \'wildercard', '*/* is returned as a last resort');

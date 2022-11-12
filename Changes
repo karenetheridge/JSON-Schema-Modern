@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - add fallback media type handling for text/*
 
 0.557     2022-10-30 21:59:04Z
           - improvements to processing of keywords in the Content vocabulary

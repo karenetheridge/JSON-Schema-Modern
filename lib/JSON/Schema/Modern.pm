@@ -920,7 +920,7 @@ has _media_type => (
       (map +($_ => $_json_media_type),
         qw(application/json application/schema+json application/schema-instance+json)),
       map +($_ => sub ($content_ref) { $content_ref }),
-        qw(text/plain application/octet-stream),
+        qw(text/* application/octet-stream),
     };
   },
 );
@@ -1285,7 +1285,7 @@ These media types are already known:
 * C<application/schema+json>
 * C<application/schema-instance+json>
 * C<application/octet-stream>
-* C<text/plain>
+* C<text/*>
 
 =head2 get_media_type
 
