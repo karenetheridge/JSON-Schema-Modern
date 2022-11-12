@@ -5,7 +5,7 @@ Revision history for JSON-Schema-Modern
 0.557     2022-10-30 21:59:04Z
           - improvements to processing of keywords in the Content vocabulary
             (contentEncoding, contentMediaType, contentSchema)
-          - LICENSE now provided withb bundled metaschema files
+          - LICENSE now provided with bundled metaschema files
 
 0.556     2022-09-18 22:41:50Z
           - some performance optimizations for schema traversal and evaluation
