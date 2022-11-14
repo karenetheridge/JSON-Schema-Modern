@@ -187,7 +187,7 @@ sub local_annotations ($state) {
 # shorthand for finding the canonical uri of the present schema location
 # last argument can be an arrayref, usually coming from $state->{_schema_path_suffix}
 sub canonical_uri ($state, @extra_path) {
-  return $state->{initial_schema_uri} if not length($state->{schema_path}) and not @extra_path;
+  return $state->{initial_schema_uri} if not @extra_path and not length($state->{schema_path});
   splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_plain_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($state->{schema_path}, @extra_path) : $state->{schema_path});
