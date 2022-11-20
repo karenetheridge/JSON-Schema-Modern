@@ -58,9 +58,9 @@ subtest 'allOf' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/allOf/1/title',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/allOf/1/title',
           annotation => 'allOf title',
         }),
       ],
@@ -92,9 +92,9 @@ subtest 'allOf' => sub {
     {
       %$new_state,
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/allOf/1/title',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/allOf/1/title',
           annotation => 'allOf title',
         }),
       ],
@@ -158,14 +158,14 @@ subtest 'oneOf' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/oneOf/1/title',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/oneOf/1/title',
           annotation => 'oneOf title',
         }),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/oneOf/2/title',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/oneOf/2/title',
           annotation => 'oneOf title2',
         }),
       ],
@@ -197,9 +197,9 @@ subtest 'oneOf' => sub {
     {
       %$new_state,
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/oneOf/1/title',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/oneOf/1/title',
           annotation => 'oneOf title',
         }),
       ],
@@ -232,9 +232,9 @@ subtest 'not' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/not/title',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/not/title',
           annotation => 'not title',
         }),
       ],
@@ -332,9 +332,9 @@ subtest 'prefixItems' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/prefixItems',
+       superhashof({
+          instance_location => '',
+          keyword_location => '/prefixItems',
           annotation => true,
         }),
       ],
@@ -364,14 +364,14 @@ subtest 'prefixItems' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '/0',
-          keywordLocation => '/prefixItems/0/title',
+        superhashof({
+          instance_location => '/0',
+          keyword_location => '/prefixItems/0/title',
           annotation => 'hi',
         }),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/prefixItems',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/prefixItems',
           annotation => 1,
         }),
       ],
@@ -434,9 +434,9 @@ subtest 'schema-items' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/items',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/items',
           annotation => true,
         }),
       ],
@@ -466,14 +466,14 @@ subtest 'schema-items' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '/0',
-          keywordLocation => '/items/title',
+        superhashof({
+          instance_location => '/0',
+          keyword_location => '/items/title',
           annotation => 'hi',
         }),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/items',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/items',
           annotation => true,
         }),
       ],
@@ -561,9 +561,9 @@ subtest 'properties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/properties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/properties',
           annotation => [],
         }),
       ],
@@ -590,9 +590,9 @@ subtest 'properties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/properties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/properties',
           annotation => [ 'foo' ],
         }),
       ],
@@ -626,14 +626,14 @@ subtest 'properties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '/foo',
-          keywordLocation => '/properties/foo/title',
+        superhashof({
+          instance_location => '/foo',
+          keyword_location => '/properties/foo/title',
           annotation => 'hi',
         }),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/properties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/properties',
           annotation => [ qw(bar foo) ],
         }),
       ],
@@ -673,9 +673,9 @@ subtest 'patternProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/patternProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/patternProperties',
           annotation => [],
         }),
       ],
@@ -702,9 +702,9 @@ subtest 'patternProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/patternProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/patternProperties',
           annotation => [ 'foo' ],
         }),
       ],
@@ -738,14 +738,14 @@ subtest 'patternProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '/foo',
-          keywordLocation => '/patternProperties/foo/title',
+        superhashof({
+          instance_location => '/foo',
+          keyword_location => '/patternProperties/foo/title',
           annotation => 'hi',
         }),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/patternProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/patternProperties',
           annotation => [ qw(bar foo) ],
         }),
       ],
@@ -808,9 +808,9 @@ subtest 'additionalProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/additionalProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/additionalProperties',
           annotation => [ 'foo' ],
         }),
       ],
@@ -843,14 +843,14 @@ subtest 'additionalProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '/bar',
-          keywordLocation => '/additionalProperties/title',
+        superhashof({
+          instance_location => '/bar',
+          keyword_location => '/additionalProperties/title',
           annotation => 'hi',
         }),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/additionalProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/additionalProperties',
           annotation => [ qw(bar baz) ],
         }),
       ],
@@ -913,9 +913,9 @@ subtest 'unevaluatedProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/unevaluatedProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/unevaluatedProperties',
           annotation => [ 'foo' ],
         }),
       ],
@@ -948,14 +948,14 @@ subtest 'unevaluatedProperties' => sub {
       %$state,
       initial_schema_uri => str(''),
       annotations => [
-        (map methods(TO_JSON => {
-          instanceLocation => '/'.$_,
-          keywordLocation => '/unevaluatedProperties/title',
+        (map superhashof({
+          instance_location => '/'.$_,
+          keyword_location => '/unevaluatedProperties/title',
           annotation => 'hi',
         }), qw(bar foo)),
-        methods(TO_JSON => {
-          instanceLocation => '',
-          keywordLocation => '/unevaluatedProperties',
+        superhashof({
+          instance_location => '',
+          keyword_location => '/unevaluatedProperties',
           annotation => [ qw(bar baz foo) ],
         }),
       ],

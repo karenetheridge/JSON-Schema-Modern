@@ -179,9 +179,9 @@ sub unjsonp ($path) {
 }
 
 # get all annotations produced for the current instance data location (that are visible to this
-# schema location)
+# schema location) - remember these are hashrefs, not Annotation objects
 sub local_annotations ($state) {
-  grep $_->instance_location eq $state->{data_path}, $state->{annotations}->@*;
+  grep $_->{instance_location} eq $state->{data_path}, $state->{annotations}->@*;
 }
 
 # shorthand for finding the canonical uri of the present schema location
@@ -243,23 +243,24 @@ sub E ($state, $error_string, @args) {
 sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations} or $state->{spec_version} eq 'draft7';
 
-  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix})
-    ->to_abs($state->{effective_base_uri});
+  # we store the absolute uri in unresolved form until needed,
+  # and perform the rest of the calculations later.
+
+  my $uri = [ canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix}),
+    $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
 
-  undef $uri if $uri eq '' and $keyword_location eq ''
-    or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
-
-  push $state->{annotations}->@*, JSON::Schema::Modern::Annotation->new(
+  push $state->{annotations}->@*, {
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
-    defined $uri ? ( absolute_keyword_location => $uri ) : (),
+    # we calculate absolute_keyword_location when instantiating the Annotation object for Result
+    _uri => $uri,
     annotation => $annotation,
     $state->{_unknown} ? ( unknown => 1 ) : (),
-  );
+  };
 
   return 1;
 }
