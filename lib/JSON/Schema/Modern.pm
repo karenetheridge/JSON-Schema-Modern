@@ -248,6 +248,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     configs => {},
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
+    traverse => 1,
   };
 
   try {
