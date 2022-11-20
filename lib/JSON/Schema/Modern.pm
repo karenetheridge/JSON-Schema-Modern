@@ -1072,7 +1072,9 @@ number, or integer) the instance value must be for the format validation to be c
 When true, the C<contentMediaType> and C<contentSchema> keywords are not treated as pure annotations:
 C<contentEncoding> (when present) is used to decode the applied data payload and then
 C<contentMediaType> will be used as the media-type for decoding to produce the data payload which is
-then applied to the schema in C<contentSchema> for validation.
+then applied to the schema in C<contentSchema> for validation. (Note that treating these keywords as
+anything beyond simple annotations is contrary to the specification, therefore this option defaults
+to false.)
 
 See L</add_media_type> and L</add_encoding> for adding additional type support.
 
