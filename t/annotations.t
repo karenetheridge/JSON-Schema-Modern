@@ -1101,7 +1101,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is set to true, unevaluatedProperties passes, and annotations are returned',
   );
 
-  $js = JSON::Schema::Modern->new();
+  $js = JSON::Schema::Modern->new;
 
   cmp_deeply(
     $js->evaluate(
