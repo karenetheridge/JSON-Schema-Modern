@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.557
+version 0.558
 
 =head1 SYNOPSIS
 
@@ -107,7 +107,9 @@ number, or integer) the instance value must be for the format validation to be c
 When true, the C<contentMediaType> and C<contentSchema> keywords are not treated as pure annotations:
 C<contentEncoding> (when present) is used to decode the applied data payload and then
 C<contentMediaType> will be used as the media-type for decoding to produce the data payload which is
-then applied to the schema in C<contentSchema> for validation.
+then applied to the schema in C<contentSchema> for validation. (Note that treating these keywords as
+anything beyond simple annotations is contrary to the specification, therefore this option defaults
+to false.)
 
 See L</add_media_type> and L</add_encoding> for adding additional type support.
 
@@ -397,7 +399,7 @@ C<application/octet-stream>
 
 =item *
 
-C<text/plain>
+C<text/*>
 
 =back
 
@@ -409,6 +411,7 @@ Fetches a decoder sub for the indicated media type. Lookups are performed B<with
 
 You can use it thusly:
 
+  $js->add_media_type('application/furble' => sub { ... }); # as above
   my $decoder = $self->get_media_type('application/furble') or die 'cannot find media type decoder';
   my $content_ref = $decoder->(\$content_string);
 

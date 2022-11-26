@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.558     2022-11-26 02:43:15Z
           - add fallback media type handling for text/*
           - performance is (hopefully) improved by delaying some calculations
             in annotations until they are needed
