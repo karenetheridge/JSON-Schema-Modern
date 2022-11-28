@@ -19,7 +19,7 @@ my $js = JSON::Schema::Modern->new(collect_annotations => 1, short_circuit => 0)
 
 my $initial_state = {
   short_circuit => 0,
-  collect_annotations => 1,
+  collect_annotations => 1<<8,
   initial_schema_uri => Mojo::URL->new,
   data_path => '',
   schema_path => '',
@@ -977,52 +977,81 @@ subtest 'unevaluatedProperties' => sub {
 };
 
 subtest 'collect_annotations and unevaluated keywords' => sub {
-  my $js = JSON::Schema::Modern->new(collect_annotations => 0);
+  my $js = JSON::Schema::Modern->new(collect_annotations => 0); #, short_circuit => 1
 
   cmp_deeply(
     $js->evaluate(
       [ 1 ],
-      {
+      my $schema = {
         '$id' => 'unevaluatedItems.json',
         prefixItems => [ true ],
         unevaluatedItems => false,
       },
     )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/unevaluatedItems',
-          absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
-          error => 'EXCEPTION: "unevaluatedItems" keyword present, but annotation collection is disabled',
-        },
-      ],
-    },
-    'when "collect_annotations" is explicitly set to false, unevaluatedItems cannot be used',
+    { valid => true },
+    'when "collect_annotations" is explicitly set to false, unevaluatedItems can still be used (valid result, no annotations in result)',
   );
 
   cmp_deeply(
     $js->evaluate(
-      { foo => 1 },
-      {
-        '$id' => 'unevaluatedProperties.json',
-        properties => { foo => true },
-        unevaluatedProperties => false,
-      },
+      [ 1, 2 ],
+      $schema,
     )->TO_JSON,
     {
       valid => false,
       errors => [
         {
+          instanceLocation => '/1',
+          keywordLocation => '/unevaluatedItems',
+          absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
+          error => 'additional item not permitted',
+        },
+        {
           instanceLocation => '',
-          keywordLocation => '/unevaluatedProperties',
-          absoluteKeywordLocation => 'unevaluatedProperties.json#/unevaluatedProperties',
-          error => 'EXCEPTION: "unevaluatedProperties" keyword present, but annotation collection is disabled',
+          keywordLocation => '/unevaluatedItems',
+          absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
+          error => 'subschema is not valid against all additional items',
         },
       ],
     },
-    'when "collect_annotations" is explicitly set to false, unevaluatedProperties cannot be used',
+    'when "collect_annotations" is explicitly set to false, unevaluatedItems can still be used (invalid result)',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1 },
+      $schema = {
+        '$id' => 'unevaluatedProperties.json',
+        properties => { foo => true },
+        unevaluatedProperties => false,
+      },
+    )->TO_JSON,
+    { valid => true },
+    'when "collect_annotations" is explicitly set to false, unevaluatedProperties can still be used (valid result, no annotations)',
+  );
+  cmp_deeply(
+    $js->evaluate(
+      { foo => 1, bar => 2 },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/bar',
+          keywordLocation => '/unevaluatedProperties',
+          absoluteKeywordLocation => 'unevaluatedProperties.json#/unevaluatedProperties',
+          error => 'additional property not permitted',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/unevaluatedProperties',
+          absoluteKeywordLocation => 'unevaluatedProperties.json#/unevaluatedProperties',
+          error => 'not all additional properties are valid',
+        },
+      ],
+    },
+    'when "collect_annotations" is explicitly set to false, unevaluatedProperties can still be used (invalid result)',
   );
 
   cmp_deeply(
@@ -1031,26 +1060,62 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
         item => [ 1 ],
         property => { foo => 1 },
       },
-      {
+      $schema = {
         properties => {
           item => { '$ref' => 'unevaluatedItems.json' },
           property => { '$ref' => 'unevaluatedProperties.json' },
         },
       },
     )->TO_JSON,
+    { valid => true },
+    'when "collect_annotations" is explicitly set to false, unevaluatedProperties still be used, even in other documents (valid result)',
+  );
+
+  cmp_deeply(
+    $js->evaluate(
+      {
+        item => [ 1, 2 ],
+        property => { foo => 1, bar => 2 },
+      },
+      $schema,
+    )->TO_JSON,
     {
       valid => false,
       errors => [
         {
+          instanceLocation => '/item/1',
+          keywordLocation => '/properties/item/$ref/unevaluatedItems',
+          absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
+          error => 'additional item not permitted',
+        },
+        {
           instanceLocation => '/item',
           keywordLocation => '/properties/item/$ref/unevaluatedItems',
           absoluteKeywordLocation => 'unevaluatedItems.json#/unevaluatedItems',
-          error => 'EXCEPTION: "unevaluatedItems" keyword present, but annotation collection is disabled',
+          error => 'subschema is not valid against all additional items',
+        },
+        {
+          instanceLocation => '/property/bar',
+          keywordLocation => '/properties/property/$ref/unevaluatedProperties',
+          absoluteKeywordLocation => 'unevaluatedProperties.json#/unevaluatedProperties',
+          error => 'additional property not permitted',
+        },
+        {
+          instanceLocation => '/property',
+          keywordLocation => '/properties/property/$ref/unevaluatedProperties',
+          absoluteKeywordLocation => 'unevaluatedProperties.json#/unevaluatedProperties',
+          error => 'not all additional properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
         },
       ],
     },
-    'when "collect_annotations" is explicitly set to false, unevaluatedProperties cannot be used, even in other documents',
+    'when "collect_annotations" is explicitly set to false, unevaluatedProperties still be used, even in other documents (invalid result)',
   );
+
 
   $js = JSON::Schema::Modern->new(collect_annotations => 1);
 

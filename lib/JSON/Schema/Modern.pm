@@ -366,6 +366,11 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       require JSON::Schema::Modern::Vocabulary::FormatAssertion;
     }
 
+    # we're going to set collect_annotations during evaluation when we see an unevaluated* keyword,
+    # but after we pass to a new data scope we'll clear it again.. unless we've got the config set
+    # globally for the entire evaluation, so we store that value in a high bit.
+    $state->{collect_annotations} = ($state->{collect_annotations}//0) << 8;
+
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
     warn 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
   }
@@ -553,6 +558,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   my $orig_annotations = $state->{annotations};
   $state->{annotations} = [];
   my @new_annotations;
+
+  # in order to collect annotations from applicator keywords only when needed, we twiddle the low
+  # bit if we see a local unevaluated* keyword, and clear it again as we move on to a new data path.
+  $state->{collect_annotations} |= 0+(exists $schema->{unevaluatedItems} || exists $schema->{unevaluatedProperties});
 
   ALL_KEYWORDS:
   foreach my $vocabulary ($state->{vocabularies}->@*) {

@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - further tweak performance by only collecting annotations when
+            explicitly requested, or needed by the current evaluation scope
 
 0.560     2022-12-20 20:00:05Z
           - fix a test that depended on optional prereqs

@@ -7,6 +7,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
+use Test::Without::Module 'Time::Moment';
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
@@ -315,11 +316,11 @@ cmp_deeply(
 );
 
 
-$js = JSON::Schema::Modern->new(short_circuit => 0, collect_annotations => 0);
-foreach my $keyword (qw(unevaluatedItems unevaluatedProperties)) {
+$js = JSON::Schema::Modern->new(validate_formats => 1);
+{
   $result = $js->evaluate(
-    1,
-    { $keyword => false },
+    'foo',
+    { format => 'date-time'},
   );
 
   cmp_deeply(
@@ -329,8 +330,8 @@ foreach my $keyword (qw(unevaluatedItems unevaluatedProperties)) {
       errors => my $errors = [
         {
           instanceLocation => '',
-          keywordLocation => '/'.$keyword,
-          error => 'EXCEPTION: "'.$keyword.'" keyword present, but annotation collection is disabled',
+          keywordLocation => '/format',
+          error => re(qr{^EXCEPTION: cannot validate format "date-time": Can't locate Time/Moment\.pm}),
         },
       ],
     },

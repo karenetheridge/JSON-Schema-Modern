@@ -33,12 +33,7 @@ sub keywords ($self, $spec_version) {
 }
 
 sub _traverse_keyword_unevaluatedItems ($self, $schema, $state) {
-  my $valid = $self->traverse_subschema($schema, $state);
-
-  # remember that annotations need to be collected in order to evaluate this keyword
-  $state->{configs}{collect_annotations} = 1;
-
-  return $valid;
+  $self->traverse_subschema($schema, $state);
 }
 
 sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
@@ -83,7 +78,8 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
     else {
       if ($self->eval($data->[$idx], $schema->{unevaluatedItems},
           +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-            schema_path => $state->{schema_path}.'/unevaluatedItems' })) {
+            schema_path => $state->{schema_path}.'/unevaluatedItems',
+            collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }
 
@@ -98,12 +94,7 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_unevaluatedProperties ($self, $schema, $state) {
-  my $valid = $self->traverse_subschema($schema, $state);
-
-  # remember that annotations need to be collected in order to evaluate this keyword
-  $state->{configs}{collect_annotations} = 1;
-
-  return $valid;
+  $self->traverse_subschema($schema, $state);
 }
 
 sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
@@ -135,7 +126,8 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
     else {
       if ($self->eval($data->{$property}, $schema->{unevaluatedProperties},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
-            schema_path => $state->{schema_path}.'/unevaluatedProperties' })) {
+            schema_path => $state->{schema_path}.'/unevaluatedProperties',
+            collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }
 
