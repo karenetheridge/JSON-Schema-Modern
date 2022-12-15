@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix regression where formats do not validate beyond a $ref (since
+            v0.556)
 
 0.558     2022-11-26 02:43:15Z
           - add fallback media type handling for text/*

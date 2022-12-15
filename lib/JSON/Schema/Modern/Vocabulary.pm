@@ -72,6 +72,14 @@ sub eval_subschema_at_uri ($self, $data, $schema, $state, $uri) {
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
 
+  my $vocabularies = $schema_info->{vocabularies};
+  if ($state->{validate_formats}) {
+    $vocabularies = [
+      map s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/r, $state->{vocabularies}->@*
+    ];
+    require JSON::Schema::Modern::Vocabulary::FormatAssertion;
+  }
+
   return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
     +{
       $schema_info->{configs}->%*,
@@ -85,7 +93,7 @@ sub eval_subschema_at_uri ($self, $data, $schema, $state, $uri) {
       document_path => $schema_info->{document_path},
       spec_version => $schema_info->{specification_version},
       schema_path => '',
-      vocabularies => $schema_info->{vocabularies}, # reference, not copy
+      vocabularies => $vocabularies,
     });
 }
 

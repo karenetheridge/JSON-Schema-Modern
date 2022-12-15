@@ -1,0 +1,53 @@
+[
+    {
+        "description": "format validation after a $ref",
+        "schema": {
+            "$defs": {
+                "my_format": {
+                    "type": "string",
+                    "format": "date"
+                }
+            },
+            "$ref": "#/$defs/my_format"
+        },
+        "tests": [
+            {
+                "description": "invalid date",
+                "data": "1998-12-111",
+                "valid": false
+            },
+            {
+                "description": "valid date",
+                "data": "1998-12-11",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "format validation after an $id",
+        "schema": {
+            "type": "array",
+            "items": {
+                "$id": "bloop",
+                "allOf": [
+                    {
+                        "type": "string",
+                        "format": "date"
+                    }
+                ]
+            }
+        },
+        "tests": [
+            {
+                "description": "invalid date",
+                "data": [ "1998-12-111" ],
+                "valid": false
+            },
+            {
+                "description": "valid date",
+                "data": [ "1998-12-11" ],
+                "valid": true
+            }
+        ]
+    }
+]
