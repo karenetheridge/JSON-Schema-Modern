@@ -1,7 +1,7 @@
 # Benchmarking results, Fastly Core Systems Hackathon 2022
 
 _(this page only contains information suitable for public consumption. for more info, please see the
-Fastly-specific document [here](...).)_
+Fastly-specific document [here](https://docs.google.com/document/d/15z0zlr43IFELGfN52l9ioOn0Ek7dam_kvexamUlO2Ak/edit).)_
 
 This data was generated with [Devel::NYTProf](https://metacpan.org/pod/Devel::NYTProf), an excellent profiler utility.
 
