@@ -78,7 +78,7 @@ sub acceptance_tests (%options) {
       # to count that as a failure (an exception would be caught and perhaps TODO'd).
       # (This might change if tests are added that are expected to produce exceptions.)
       foreach my $r ($result, ($ENV{NO_SHORT_CIRCUIT} ? () : $result_short)) {
-        warn('evaluation generated an exception: '.$_->dump)
+        print STDERR 'evaluation generated an exception: '.$_->dump
           foreach
             grep +($_->{error} =~ /^EXCEPTION/
                 && $_->{error} !~ /but short_circuit is enabled/            # unevaluated*
