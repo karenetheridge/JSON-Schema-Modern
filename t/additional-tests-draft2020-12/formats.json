@@ -5,20 +5,20 @@
             "$defs": {
                 "my_format": {
                     "type": "string",
-                    "format": "date"
+                    "format": "duration"
                 }
             },
             "$ref": "#/$defs/my_format"
         },
         "tests": [
             {
-                "description": "invalid date",
-                "data": "1998-12-111",
+                "description": "invalid duration",
+                "data": "PT1D",
                 "valid": false
             },
             {
-                "description": "valid date",
-                "data": "1998-12-11",
+                "description": "valid duration",
+                "data": "P4Y",
                 "valid": true
             }
         ]
@@ -32,20 +32,20 @@
                 "allOf": [
                     {
                         "type": "string",
-                        "format": "date"
+                        "format": "duration"
                     }
                 ]
             }
         },
         "tests": [
             {
-                "description": "invalid date",
-                "data": [ "1998-12-111" ],
+                "description": "invalid duration",
+                "data": [ "PT1D" ],
                 "valid": false
             },
             {
-                "description": "valid date",
-                "data": [ "1998-12-11" ],
+                "description": "valid duration",
+                "data": [ "P4Y" ],
                 "valid": true
             }
         ]
