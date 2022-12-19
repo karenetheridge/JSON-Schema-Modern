@@ -164,7 +164,7 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
     }
   }
   catch ($e) {
-    return E($state, 'cannot validate format "%s": %s', $schema->{format}, $e);
+    abort($state, 'EXCEPTION: cannot validate format "%s": %s', $schema->{format}, $e);
   }
 
   # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
