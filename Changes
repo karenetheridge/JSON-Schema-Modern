@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.560     2022-12-20 20:00:05Z
           - fix a test that depended on optional prereqs
 
