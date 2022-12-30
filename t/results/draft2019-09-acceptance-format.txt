@@ -1,5 +1,5 @@
-Results using Test::JSON::Schema::Acceptance 1.017
-with commit 69acf52990b004240839ae19b4bec8fb01d50876 (2.0.0-554-g69acf52)
+Results using Test::JSON::Schema::Acceptance 1.018
+with commit d21ed578aeb13b55dfe3604db53adb4750e1abc3 (2.0.0-695-gd21ed57)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2019-09
 using custom test directory: <base test directory>/optional/format
@@ -9,7 +9,7 @@ filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
 date-time.json                              25          0     0
 date.json                                   43          0     0
-duration.json                               24          0     0
+duration.json                               25          0     0
 email.json                                  15          0     0
 hostname.json                               18          0     0
 idn-email.json                              10          0     0
@@ -20,12 +20,12 @@ iri-reference.json                          11          2     0
 iri.json                                    14          1     0
 json-pointer.json                           38          0     0
 regex.json                                   8          0     0
-relative-json-pointer.json                  15          0     0
-time.json                                   38          0     0
+relative-json-pointer.json                  18          0     0
+time.json                                   41          0     0
 unknown.json                                 7          0     0
 uri-reference.json                          13          0     0
 uri-template.json                            1          9     0
-uri.json                                    19          1     0
-uuid.json                                   15          0     0
+uri.json                                    25          1     0
+uuid.json                                   21          0     0
 ---------------------------------------------------------------
-TOTAL                                      404         29     0
+TOTAL                                      423         29     0

@@ -1,5 +1,5 @@
-Results using Test::JSON::Schema::Acceptance 1.017
-with commit 69acf52990b004240839ae19b4bec8fb01d50876 (2.0.0-554-g69acf52)
+Results using Test::JSON::Schema::Acceptance 1.018
+with commit d21ed578aeb13b55dfe3604db53adb4750e1abc3 (2.0.0-695-gd21ed57)
 from git://github.com/json-schema-org/JSON-Schema-Test-Suite.git:
 specification version: draft2020-12
 optional tests included: yes
@@ -44,23 +44,25 @@ oneOf.json                                  27          0     0
 pattern.json                                 9          0     0
 patternProperties.json                      23          0     0
 prefixItems.json                            11          0     0
-properties.json                             21          0     0
+properties.json                             28          0     0
 propertyNames.json                          10          0     0
-ref.json                                    47          0     0
-refRemote.json                              19          0     0
-required.json                                9          0     0
+ref.json                                    64          0     0
+refRemote.json                              27          0     0
+required.json                               16          0     0
 type.json                                   80          0     0
 unevaluatedItems.json                       58          0     0
-unevaluatedProperties.json                 110          0     0
+unevaluatedProperties.json                 111          0     0
 uniqueItems.json                            68          0     0
 unknownKeyword.json                          3          0     0
 vocabulary.json                              3          0     0
 optional/bignum.json                         9          0     0
+optional/cross-draft.json                    1          0     0
 optional/dependencies-compatibility.json    22         14     0
 optional/ecmascript-regex.json              60         15     0
 optional/float-overflow.json                 1          0     0
 optional/format-assertion.json               4          0     0
+optional/no-schema.json                      3          0     0
 optional/non-bmp-regex.json                 12          0     0
 optional/refOfUnknownKeyword.json            4          0     0
 ---------------------------------------------------------------
-TOTAL                                     1227         29     0
+TOTAL                                     1271         29     0
