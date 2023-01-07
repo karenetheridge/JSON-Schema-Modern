@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.561     2023-01-07 20:57:37Z
           - further tweak performance by only collecting annotations when
             explicitly requested, or needed by the current evaluation scope
 
