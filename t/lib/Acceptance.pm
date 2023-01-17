@@ -66,7 +66,7 @@ sub acceptance_tests (%options) {
 
       note 'result: ', $result->dump;
       note 'short-circuited result: ', $result_short->dump
-        if not $ENV{NO_SHORT_CIRCUIT} and ($result xor $result_short);
+        if not $ENV{NO_SHORT_CIRCUIT};
 
       die 'results inconsistent between short_circuit = false and true'
         if not $ENV{NO_SHORT_CIRCUIT}
