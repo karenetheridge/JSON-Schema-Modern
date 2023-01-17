@@ -1,0 +1,53 @@
+[
+    {
+        "description": "format validation after a $ref",
+        "schema": {
+            "$defs": {
+                "my_format": {
+                    "type": "string",
+                    "format": "duration"
+                }
+            },
+            "$ref": "#/$defs/my_format"
+        },
+        "tests": [
+            {
+                "description": "invalid duration",
+                "data": "PT1D",
+                "valid": false
+            },
+            {
+                "description": "valid duration",
+                "data": "P4Y",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "format validation after an $id",
+        "schema": {
+            "type": "array",
+            "items": {
+                "$id": "bloop",
+                "allOf": [
+                    {
+                        "type": "string",
+                        "format": "duration"
+                    }
+                ]
+            }
+        },
+        "tests": [
+            {
+                "description": "invalid duration",
+                "data": [ "PT1D" ],
+                "valid": false
+            },
+            {
+                "description": "valid duration",
+                "data": [ "P4Y" ],
+                "valid": true
+            }
+        ]
+    }
+]
