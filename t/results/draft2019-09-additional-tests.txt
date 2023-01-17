@@ -6,6 +6,7 @@ optional tests included: no
 filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
 anchor.json                                  2          0     0
+annotation-collection.json                   8          0     0
 badRef.json                                  3          0     0
 faux-buggy-schemas.json                      2          0     0
 format-date-time.json                        4          0     0
@@ -26,4 +27,4 @@ short-circuit.json                          20          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                              5          0     0
 ---------------------------------------------------------------
-TOTAL                                      953          0     0
+TOTAL                                      961          0     0

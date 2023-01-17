@@ -1,0 +1,78 @@
+[
+    {
+        "description": "annotations come from an allOf, unevaluated is a sibling",
+        "schema": {
+            "allOf": [ { "properties": { "foo": true } } ],
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "properties evaluated from allOf",
+                "data": { "foo": 1 },
+                "valid": true
+            },
+            {
+                "description": "extra property",
+                "data": { "bar": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "annotations from adjacent keywords, unevaluated is a sibling",
+        "schema": {
+            "properties": { "foo": true },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "properties evaluated from additionalProperties",
+                "data": { "foo": 1 },
+                "valid": true
+            },
+            {
+                "description": "extra property",
+                "data": { "bar": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "annotations come from an allOf, unevaluated is in an allOf",
+        "schema": {
+            "allOf": [ { "properties": { "foo": true } } ],
+            "anyOf": [ { "unevaluatedProperties": false } ]
+        },
+        "tests": [
+            {
+                "description": "properties evaluated from allOf, but unevaluated is buried",
+                "data": { "foo": 1 },
+                "valid": false
+            },
+            {
+                "description": "no properties",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "annotations from adjacent keywords, unevaluated is in an allOf",
+        "schema": {
+            "anyOf": [ { "properties": { "foo": true } } ],
+            "allOf": [ { "unevaluatedProperties": false } ]
+        },
+        "tests": [
+            {
+                "description": "properties evaluated from additionalProperties, but unevaluated is buried",
+                "data": { "foo": 1 },
+                "valid": false
+            },
+            {
+                "description": "no properties",
+                "data": {},
+                "valid": true
+            }
+        ]
+    }
+]
