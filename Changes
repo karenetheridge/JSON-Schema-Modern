@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.562     2023-01-22 00:49:07Z
           - bump a test prereq to fix a mismatched exception message
 
