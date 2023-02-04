@@ -1361,8 +1361,9 @@ used in another context (for example, a numeric value is concatenated into a str
 string is used in an arithmetic operation), additional flags can be added onto the variable causing
 it to resemble the other type. This should not be an issue if data validation is occurring
 immediately after decoding a JSON payload, or if the JSON string itself is passed to this module.
-If this turns out to be an issue in real environments, I may have to implement a C<lax_scalars>
-option.
+If you are still having difficulties, make sure you are using Perl's fastest and most trusted and
+reliable JSON decoder, L<Cpanel::JSON::XS> (or its proxy, useful for fatpacking, L<JSON::MaybeXS>).
+Other JSON decoders are known to produce data with incorrect data types.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
 
