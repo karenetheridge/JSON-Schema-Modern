@@ -977,7 +977,7 @@ subtest 'unevaluatedProperties' => sub {
 };
 
 subtest 'collect_annotations and unevaluated keywords' => sub {
-  my $js = JSON::Schema::Modern->new(collect_annotations => 0); #, short_circuit => 1
+  my $js = JSON::Schema::Modern->new(collect_annotations => 0);
 
   cmp_deeply(
     $js->evaluate(
