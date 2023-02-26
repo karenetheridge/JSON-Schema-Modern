@@ -70,8 +70,7 @@ sub acceptance_tests (%options) {
 
       die 'results inconsistent between short_circuit = false and true'
         if not $ENV{NO_SHORT_CIRCUIT}
-          and ($result xor $result_short)
-          and not grep $_->error =~ /but short_circuit is enabled/, $result_short->errors;
+          and ($result xor $result_short);
 
       # if any errors contain an exception, generate a warning so we can be sure
       # to count that as a failure (an exception would be caught and perhaps TODO'd).
@@ -80,7 +79,6 @@ sub acceptance_tests (%options) {
         print STDERR 'evaluation generated an exception: '.$_->dump
           foreach
             grep +($_->{error} =~ /^EXCEPTION/
-                && $_->{error} !~ /but short_circuit is enabled/            # unevaluated*
                 && $_->{error} !~ /(max|min)imum value is not a number$/),  # optional/bignum.json
               $r->errors;
       }

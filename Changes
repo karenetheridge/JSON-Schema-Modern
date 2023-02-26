@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - further tweak performance by short-circuiting inside some
+            subschemas (but not when annotations must be collected for
+            "unevaluated" keywords)
 
 0.563     2023-02-04 23:38:13Z
           - documentation update: improve language around data types and

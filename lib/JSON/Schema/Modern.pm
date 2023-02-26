@@ -563,6 +563,11 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   # bit if we see a local unevaluated* keyword, and clear it again as we move on to a new data path.
   $state->{collect_annotations} |= 0+(exists $schema->{unevaluatedItems} || exists $schema->{unevaluatedProperties});
 
+  # in order to collect annotations for unevaluated* keywords, we sometimes need to ignore the
+  # suggestion to short_circuit evaluation at this scope (but lower scopes are still fine)
+  $state->{short_circuit} = ($state->{short_circuit} || delete($state->{short_circuit_suggested}))
+    && !exists($schema->{unevaluatedItems}) && !exists($schema->{unevaluatedProperties});
+
   ALL_KEYWORDS:
   foreach my $vocabulary ($state->{vocabularies}->@*) {
     # [ [ $keyword => $subref|undef ], [ ... ] ]

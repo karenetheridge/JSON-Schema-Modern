@@ -218,7 +218,7 @@ subtest 'not' => sub {
   };
 
   my $fail_schema = {
-    not => { title => 'not title' },   # passes; creates annotations
+    not => { title => 'not title' },   # passes; skips annotations because nothing needs them
   };
 
   ok(
@@ -231,19 +231,47 @@ subtest 'not' => sub {
     my $new_state = {
       %$state,
       initial_schema_uri => str(''),
-      annotations => [
-        superhashof({
-          instance_location => '',
-          keyword_location => '/not/title',
-          annotation => 'not title',
-        }),
-      ],
+      annotations => [],
       errors => [
         methods(TO_JSON => { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' }),
       ],
     },
     'failing not: state is correct after evaluating',
   );
+
+
+  $state = {
+    %$initial_state,
+    keyword => 'not',
+    annotations => [],
+    errors => [],
+  };
+
+  $fail_schema = {
+    not => {
+      properties => { foo => true },
+      unevaluatedProperties => false,
+    },   # passes; annotations are collected because unevaluated* needs them
+  };
+
+  ok(
+    !$state->{vocabularies}[0]->_eval_keyword_not(1, $fail_schema, $state),
+    'evaluation of the not keyword fails',
+  );
+
+  cmp_deeply(
+    $state,
+    $new_state = {
+      %$state,
+      initial_schema_uri => str(''),
+      annotations => [],
+      errors => [
+        methods(TO_JSON => { instanceLocation => '', keywordLocation => '/not', error => 'subschema is valid' }),
+      ],
+    },
+    'failing not: state is correct after evaluating (annotations will be ultimately discarded)',
+  );
+
 
   my $pass_schema = {
     not => { not => { title => 'not title' } },
