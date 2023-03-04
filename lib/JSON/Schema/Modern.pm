@@ -1298,11 +1298,11 @@ then dereferenced for the C<contentSchema> keyword).
 These media types are already known:
 
 =for :list
-* C<application/json>
-* C<application/schema+json>
-* C<application/schema-instance+json>
-* C<application/octet-stream>
-* C<text/*>
+* C<application/json> - see L<RFC 4627|https://www.rfc-editor.org/rfc/rfc4627>
+* C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
+* C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
+* C<application/octet-stream> - passes strings through unchanged
+* C<text/*> - passes strings through unchanged
 
 =head2 get_media_type
 
@@ -1331,8 +1331,8 @@ to a string (which is then dereferenced for the C<contentMediaType> keyword).
 Encodings handled natively are:
 
 =for :list
-* C<identity>
-* C<base64>
+* C<identity> - passes strings through unchanged
+* C<base64> - see L<RFC 4648 §4|https://www.rfc-editor.org/rfc/rfc4648#section-4>
 
 See also L<HTTP::Message/encode>.
 
