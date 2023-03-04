@@ -1318,8 +1318,8 @@ You can use it thusly:
 
 =head2 add_encoding
 
-  $js->add_media_type('application/furble' => sub ($content_ref) {
-    return \ ...;  # data representing the deserialized content for Content-Type: application/furble
+  $js->add_encoding('bloop' => sub ($content_ref) {
+    return \ ...;  # data representing the deserialized content for Content-Transfer-Encoding: bloop
   });
 
 Takes an encoding name and a subref which takes a single scalar reference, which is expected to be
