@@ -4,6 +4,7 @@ Revision history for JSON-Schema-Modern
           - further tweak performance by short-circuiting inside some
             subschemas (but not when annotations must be collected for
             "unevaluated" keywords)
+          - added support for 'base64url' encoding
 
 0.563     2023-02-04 23:38:13Z
           - documentation update: improve language around data types and

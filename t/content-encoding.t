@@ -97,6 +97,12 @@ subtest 'media_type and encoding handlers' => sub {
     \ { foo => 'bar' },
     'base64 encoding decoder + application/json media_type decoder',
   );
+
+  cmp_deeply(
+    $js->get_media_type('application/json')->($js->get_encoding('base64url')->(\'eyJmb28iOiJiYXIifQ')),
+    \ { foo => 'bar' },
+    'base64url encoding decoder + application/json media_type decoder',
+  );
 };
 
 subtest 'draft2020-12 assertions' => sub {

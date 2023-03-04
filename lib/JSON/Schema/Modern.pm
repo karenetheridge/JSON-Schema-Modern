@@ -966,7 +966,12 @@ has _encoding => (
       base64 => sub ($content_ref) {
         die "invalid characters\n"
           if $content_ref->$* =~ m{[^A-Za-z0-9+/=]} or $content_ref->$* =~ m{=(?=[^=])};
-        require MIME::Base64; \ MIME::Base64::decode($content_ref->$*);
+        require MIME::Base64; \ MIME::Base64::decode_base64($content_ref->$*);
+      },
+      base64url => sub ($content_ref) {
+        die "invalid characters\n"
+          if $content_ref->$* =~ m{[^A-Za-z0-9=_-]} or $content_ref->$* =~ m{=(?=[^=])};
+        require MIME::Base64; \ MIME::Base64::decode_base64url($content_ref->$*);
       },
     };
   },
@@ -1333,6 +1338,7 @@ Encodings handled natively are:
 =for :list
 * C<identity> - passes strings through unchanged
 * C<base64> - see L<RFC 4648 §4|https://www.rfc-editor.org/rfc/rfc4648#section-4>
+* C<base64url> - see L<RFC 4648 §5|https://www.rfc-editor.org/rfc/rfc4648#section-5>
 
 See also L<HTTP::Message/encode>.
 
