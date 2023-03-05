@@ -129,7 +129,8 @@ sub _traverse_keyword_not { shift->traverse_subschema(@_) }
 sub _eval_keyword_not ($self, $data, $schema, $state) {
   return 1 if not $self->eval($data, $schema->{not},
     +{ %$state, schema_path => $state->{schema_path}.'/not',
-      short_circuit_suggested => !$state->{collect_annotations}, collect_annotations => 0,
+      short_circuit_suggested => 1, # errors do not propagate upward from this subschema
+      collect_annotations => 0,     # nor do annotations
       errors => [] });
 
   return E($state, 'subschema is valid');
