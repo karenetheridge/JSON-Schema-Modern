@@ -386,7 +386,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     }
   }
 
-  die 'evaluate validity inconstent with error count' if $valid xor !$state->{errors}->@*;
+  die 'evaluate validity inconsistent with error count' if $valid xor !$state->{errors}->@*;
 
   return JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,
