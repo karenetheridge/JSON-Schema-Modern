@@ -490,13 +490,17 @@ sub _traverse_subschema ($self, $schema, $state) {
       $state->{keyword} = $keyword;
 
       if (not $sub->($vocabulary, $schema, $state)) {
-        die 'traverse returned false but we have no errors' if not $state->{errors}->@*;
+        die 'traverse result is false but there are no errors (keyword: '.$keyword.')' if not $state->{errors}->@*;
         $valid = 0;
         next;
       }
 
       if (my $callback = $state->{callbacks}{$keyword}) {
-        $callback->($schema, $state);
+        if (not $callback->($schema, $state)) {
+          die 'callback result is false but there are no errors (keyword: '.$keyword.')' if not $state->{errors}->@*;
+          $valid = 0;
+          next;
+        }
       }
     }
   }
@@ -590,7 +594,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
         my $error_count = $state->{errors}->@*;
 
         if (not $sub->($vocabulary, $data, $schema, $state)) {
-          warn 'result is false but there are no errors (keyword: '.$keyword.')'
+          warn 'evaluation result is false but there are no errors (keyword: '.$keyword.')'
             if $error_count == $state->{errors}->@*;
           $valid = 0;
 
@@ -600,7 +604,16 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       }
 
       if (my $callback = $state->{callbacks}{$keyword}) {
-        $callback->($data, $schema, $state);
+        my $error_count = $state->{errors}->@*;
+
+        if (not $callback->($data, $schema, $state)) {
+          warn 'callback result is false but there are no errors (keyword: '.$keyword.')'
+            if $error_count == $state->{errors}->@*;
+          $valid = 0;
+
+          last ALL_KEYWORDS if $state->{short_circuit};
+          next;
+        }
       }
 
       push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];

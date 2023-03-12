@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - traverse and evaluate callbacks can now produce errors,
+            which are incorporated into the overall evaluation results
 
 0.564     2023-03-04 00:43:42Z
           - further tweak performance by short-circuiting inside some

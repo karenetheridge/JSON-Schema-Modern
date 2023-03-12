@@ -139,4 +139,74 @@ subtest 'callbacks for keywords without eval subs' => sub {
   );
 };
 
+subtest 'callbacks that produce errors' => sub {
+  my $result = $js->evaluate(
+    my $data = {
+      alpha => 1,
+      beta => 'foo',
+    },
+    my $schema = {
+      properties => { alpha => { type => 'number' } },
+      additionalProperties => { type => 'number' },
+    },
+    my $configs = {
+      callbacks => {
+        type => sub ($data, $schema, $state) {
+          JSON::Schema::Modern::Utilities::E($state, 'this is a callback error');
+        },
+      },
+    },
+  );
+  cmp_deeply(
+    $result->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/alpha',
+          keywordLocation => '/properties/alpha/type',
+          error => 'this is a callback error',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '/beta',
+          keywordLocation => '/additionalProperties/type',
+          error => 'got string, not number',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+      ],
+    },
+    'result object contains the callback error, and the other errors',
+  );
+
+  $result = $js->evaluate($data, $schema, { %$configs, short_circuit => 1 });
+  cmp_deeply(
+    $result->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/alpha',
+          keywordLocation => '/properties/alpha/type',
+          error => 'this is a callback error',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'result object contains the callback error, and short-circuits execution',
+  );
+};
+
 done_testing;
