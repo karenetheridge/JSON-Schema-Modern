@@ -182,7 +182,7 @@ sub _traverse_keyword_pattern ($self, $schema, $state) {
 sub _eval_keyword_pattern ($self, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
 
-  return 1 if $data =~ m/$schema->{pattern}/;
+  return 1 if $data =~ m/(?:$schema->{pattern})/;
   return E($state, 'pattern does not match');
 }
 
