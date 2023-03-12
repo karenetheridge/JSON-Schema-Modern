@@ -629,7 +629,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   $state->{annotations} = $orig_annotations;
 
-  if ($valid) {
+  if ($valid and $state->{collect_annotations}) {
     push $state->{annotations}->@*, @new_annotations;
     if ($state->{collect_annotations} and $state->{spec_version} !~ qr/^draft(7|2019-09)$/) {
       annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
