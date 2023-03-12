@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.565     2023-03-12 21:19:27Z
           - traverse and evaluate callbacks can now produce errors,
             which are incorporated into the overall evaluation results
           - fix bad handling of empty patterns in "pattern",
