@@ -559,9 +559,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
-  my $orig_annotations = $state->{annotations};
+
+  # set aside annotations collected so far; they are not used in the current scope's evaluation
+  my $parent_annotations = $state->{annotations};
   $state->{annotations} = [];
-  my @new_annotations;
 
   # in order to collect annotations from applicator keywords only when needed, we twiddle the low
   # bit if we see a local unevaluated* keyword, and clear it again as we move on to a new data path.
@@ -615,8 +616,6 @@ sub _eval_subschema ($self, $data, $schema, $state) {
           next;
         }
       }
-
-      push @new_annotations, $state->{annotations}->@[$#new_annotations+1 .. $state->{annotations}->$#*];
     }
   }
 
@@ -627,15 +626,13 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       join(', ', sort keys %unknown_keywords));
   }
 
-  $state->{annotations} = $orig_annotations;
-
-  if ($valid and $state->{collect_annotations}) {
-    push $state->{annotations}->@*, @new_annotations;
-    if ($state->{collect_annotations} and $state->{spec_version} !~ qr/^draft(7|2019-09)$/) {
-      annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
-        foreach sort keys %unknown_keywords;
-    }
+  if ($valid and $state->{collect_annotations} and $state->{spec_version} !~ qr/^draft(7|2019-09)$/) {
+    annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
+      foreach sort keys %unknown_keywords;
   }
+
+  # only keep new annotations if schema is valid
+  push $parent_annotations->@*, $state->{annotations}->@* if $valid;
 
   return $valid;
 }
