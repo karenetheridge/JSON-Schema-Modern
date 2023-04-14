@@ -18,6 +18,7 @@ use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
 use if "$]" >= 5.022, POSIX => 'isinf';
 use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
+use Math::BigFloat;
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -107,7 +108,9 @@ sub _eval_keyword_multipleOf ($self, $data, $schema, $state) {
   return 1 if not is_type('number', $data);
 
   # if either value is a float, use the bignum library for the calculation for an accurate remainder
-  if (ref($data) =~ /^Math::Big(?:Int|Float)$/ or ref($schema->{multipleOf}) =~ /^Math::Big(?:Int|Float)$/) {
+  if (ref($data) =~ /^Math::Big(?:Int|Float)$/
+      or ref($schema->{multipleOf}) =~ /^Math::Big(?:Int|Float)$/
+      or get_type($data) eq 'number' or get_type($schema->{multipleOf}) eq 'number') {
     $data = ref($data) =~ /^Math::Big(?:Int|Float)$/ ? $data->copy : Math::BigFloat->new($data);
     my $divisor = ref($schema->{multipleOf}) =~ /^Math::Big(?:Int|Float)$/ ? $schema->{multipleOf} : Math::BigFloat->new($schema->{multipleOf});
     my ($quotient, $remainder) = $data->bdiv($divisor);
