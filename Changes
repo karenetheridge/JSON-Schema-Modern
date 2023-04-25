@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - vocabularies are now evaluated in a different order: Validation
+            and Format vocabularies now come before Applicator, in order to
+            allow faster short circuiting when errors are encountered.
 
 0.566     2023-05-11 03:34:59Z
           - treat ambiguous types as a normal error, rather than an exception

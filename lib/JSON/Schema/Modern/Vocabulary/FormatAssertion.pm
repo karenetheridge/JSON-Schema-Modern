@@ -24,7 +24,7 @@ sub vocabulary {
   'https://json-schema.org/draft/2020-12/vocab/format-assertion' => 'draft2020-12';
 }
 
-sub evaluation_order { 3 }
+sub evaluation_order { 2 }
 
 sub keywords {
   qw(format);

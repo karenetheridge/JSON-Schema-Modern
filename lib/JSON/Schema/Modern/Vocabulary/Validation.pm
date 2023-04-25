@@ -28,7 +28,7 @@ sub vocabulary {
   'https://json-schema.org/draft/2020-12/vocab/validation' => 'draft2020-12';
 }
 
-sub evaluation_order { 2 }
+sub evaluation_order { 1 }
 
 sub keywords ($self, $spec_version) {
   return (

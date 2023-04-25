@@ -28,7 +28,7 @@ sub vocabulary {
   'https://json-schema.org/draft/2020-12/vocab/applicator' => 'draft2020-12';
 }
 
-sub evaluation_order { 1 }
+sub evaluation_order { 3 }
 
 # the keyword order is arbitrary, except:
 # - if must be evaluated before then, else

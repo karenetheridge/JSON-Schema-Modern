@@ -8,6 +8,6 @@ sub vocabulary {
 
 sub keywords {}
 
-sub evaluation_order { 2 }  # conflicts with Validation vocabulary
+sub evaluation_order { 1 }  # conflicts with Validation vocabulary
 
 1;
