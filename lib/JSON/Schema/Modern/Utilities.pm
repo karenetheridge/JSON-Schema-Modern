@@ -107,8 +107,7 @@ sub get_type ($value) {
   return int($value) == $value ? 'integer' : 'number'
     if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
 
-  croak sprintf('ambiguous type for %s',
-    JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 0, allow_bignum => 1, convert_blessed => 1)->encode($value));
+  return 'ambiguous type';
 }
 
 # compares two arbitrary data payloads for equality, as per
