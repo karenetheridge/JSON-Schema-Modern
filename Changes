@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.566     2023-05-11 03:34:59Z
           - treat ambiguous types as a normal error, rather than an exception
             which may provide incorrect location data
