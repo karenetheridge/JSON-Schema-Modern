@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.567     2023-06-03 22:11:23Z
           - vocabularies are now evaluated in a different order: Validation
             and Format vocabularies now come before Applicator, in order to
             allow faster short circuiting when errors are encountered.
