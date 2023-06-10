@@ -944,8 +944,8 @@ has _media_type => (
     +{
       (map +($_ => $_json_media_type),
         qw(application/json application/schema+json application/schema-instance+json)),
-      map +($_ => sub ($content_ref) { $content_ref }),
-        qw(text/* application/octet-stream),
+      (map +($_ => sub ($content_ref) { $content_ref }),
+        qw(text/* application/octet-stream)),
     };
   },
 );
