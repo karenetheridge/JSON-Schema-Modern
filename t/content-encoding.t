@@ -87,6 +87,19 @@ subtest 'media_type and encoding handlers' => sub {
   cmp_deeply($js->get_media_type('*/*')->(\'foo'), \'wildercard', '*/* matches */*');
   cmp_deeply($js->get_media_type('fOO/bar')->(\'foo'), \'wildercard', '*/* is returned as a last resort');
 
+  cmp_deeply(
+    $js->get_media_type('application/x-ndjson')->(\qq!{"foo":1,"bar":2}\n["a","b",3]\r\n"\x{e0}\x{b2}\x{a0}\x{5f}\x{e0}\x{b2}\x{a0}"!),
+    \ [ { foo => 1, bar => 2 }, [ 'a', 'b', 3 ], 'ಠ_ಠ' ],
+    'application/x-ndjson happy path with unicode',
+  );
+
+  like(
+    exception { $js->get_media_type('application/x-ndjson')->(\qq!{"foo":1,"bar":2}\n["a","b",]!) },
+    qr/^parse error at line 2: malformed JSON string/,
+    'application/x-ndjson dies with line number of the bad data',
+  );
+
+
   $js = JSON::Schema::Modern->new;
 
   # MIME::Base64::decode("eyJmb28iOiAiYmFyIn0K") -> {"foo": "bar"}
