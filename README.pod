@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.567
+version 0.568
 
 =head1 SYNOPSIS
 
@@ -396,6 +396,14 @@ C<application/schema-instance+json> - see L<proposed definition|https://json-sch
 =item *
 
 C<application/octet-stream> - passes strings through unchanged
+
+=item *
+
+C<application/x-www-form-urlencoded>
+
+=item *
+
+C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
 
 =item *
 
