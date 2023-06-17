@@ -64,7 +64,7 @@ sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_contentMediaType { shift->_traverse_keyword_contentEncoding(@_) }
+sub _traverse_keyword_contentMediaType { goto \&_traverse_keyword_contentEncoding }
 
 sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
   return 1 if not is_type('string', $data);

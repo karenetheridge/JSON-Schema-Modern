@@ -194,7 +194,7 @@ sub _eval_keyword_recursiveAnchor ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_dynamicAnchor { shift->_traverse_keyword_anchor(@_) }
+sub _traverse_keyword_dynamicAnchor { goto \&_traverse_keyword_anchor }
 
 # we already indexed the $dynamicAnchor uri, so there is nothing more to do at evaluation time.
 # we explicitly do NOT set $state->{initial_schema_uri}.
@@ -210,7 +210,7 @@ sub _eval_keyword_ref ($self, $data, $schema, $state) {
   $self->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
-sub _traverse_keyword_recursiveRef { shift->_traverse_keyword_ref(@_) }
+sub _traverse_keyword_recursiveRef { goto \&_traverse_keyword_ref }
 
 sub _eval_keyword_recursiveRef ($self, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{initial_schema_uri});
@@ -225,7 +225,7 @@ sub _eval_keyword_recursiveRef ($self, $data, $schema, $state) {
   return $self->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
-sub _traverse_keyword_dynamicRef { shift->_traverse_keyword_ref(@_) }
+sub _traverse_keyword_dynamicRef { goto \&_traverse_keyword_ref }
 
 sub _eval_keyword_dynamicRef ($self, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$dynamicRef'})->to_abs($state->{initial_schema_uri});

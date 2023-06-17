@@ -10,7 +10,7 @@ use 5.020;
 use Moo;
 use strictures 2;
 use stable 0.031 'postderef';
-use experimental 'signatures';
+use experimental 0.026 qw(signatures args_array_with_signatures);
 use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
@@ -235,7 +235,7 @@ sub _eval_keyword_dependencies ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_prefixItems { shift->traverse_array_schemas(@_) }
 
-sub _eval_keyword_prefixItems { shift->_eval_keyword__items_array_schemas(@_) }
+sub _eval_keyword_prefixItems { goto \&_eval_keyword__items_array_schemas }
 
 sub _traverse_keyword_items ($self, $schema, $state) {
   if (is_plain_arrayref($schema->{items})) {
@@ -249,17 +249,15 @@ sub _traverse_keyword_items ($self, $schema, $state) {
 }
 
 sub _eval_keyword_items ($self, $data, $schema, $state) {
-  return $self->_eval_keyword__items_array_schemas($data, $schema, $state)
-    if is_plain_arrayref($schema->{items});
-
-  return $self->_eval_keyword__items_schema($data, $schema, $state);
+  goto \&_eval_keyword__items_array_schemas if is_plain_arrayref($schema->{items});
+  goto \&_eval_keyword__items_schema;
 }
 
 sub _traverse_keyword_additionalItems { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_additionalItems ($self, $data, $schema, $state) {
   return 1 if not exists $state->{_last_items_index};
-  return $self->_eval_keyword__items_schema($data, $schema, $state);
+  goto \&_eval_keyword__items_schema;
 }
 
 # prefixItems (draft 2020-12), array-based items (all drafts)
