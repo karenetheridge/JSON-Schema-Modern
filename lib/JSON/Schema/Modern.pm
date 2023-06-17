@@ -947,6 +947,9 @@ has _media_type => (
         qw(application/json application/schema+json application/schema-instance+json)),
       (map +($_ => sub ($content_ref) { $content_ref }),
         qw(text/* application/octet-stream)),
+      'application/x-www-form-urlencoded' => sub ($content_ref) {
+        \ Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*)->to_hash;
+      },
       'application/x-ndjson' => sub ($content_ref) {
         my $decoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1);
         my $line = 0; # line numbers start at 1
@@ -1330,6 +1333,7 @@ These media types are already known:
 * C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
 * C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
 * C<application/octet-stream> - passes strings through unchanged
+* C<application/x-www-form-urlencoded>
 * C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
 * C<text/*> - passes strings through unchanged
 

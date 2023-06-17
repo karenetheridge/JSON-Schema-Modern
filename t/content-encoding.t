@@ -89,6 +89,12 @@ subtest 'media_type and encoding handlers' => sub {
   cmp_deeply($js->get_media_type('fOO/bar')->(\'foo'), \'wildercard', '*/* is returned as a last resort');
 
   cmp_deeply(
+    $js->get_media_type('application/x-www-form-urlencoded')->(\qq!\x{c3}\x{a9}clair=\x{e0}\x{b2}\x{a0}\x{5f}\x{e0}\x{b2}\x{a0}!),
+    \ { 'éclair' => 'ಠ_ಠ' },
+    'application/x-www-form-urlencoded happy path with unicode',
+  );
+
+  cmp_deeply(
     $js->get_media_type('application/x-ndjson')->(\qq!{"foo":1,"bar":2}\n["a","b",3]\r\n"\x{e0}\x{b2}\x{a0}\x{5f}\x{e0}\x{b2}\x{a0}"!),
     \ [ { foo => 1, bar => 2 }, [ 'a', 'b', 3 ], 'ಠ_ಠ' ],
     'application/x-ndjson happy path with unicode',
