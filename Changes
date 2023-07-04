@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fixed some edge cases with ipv6 format validation
 
 0.568     2023-06-17 07:16:54Z
           - add media-type support for application/x-ndjson and

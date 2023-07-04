@@ -1,0 +1,96 @@
+[
+    {
+        "description": "validation of ipv6 strings",
+        "schema": {
+            "type": "string",
+            "format": "ipv6"
+        },
+        "tests": [
+            {
+                "description": "fully expanded with zeroes",
+                "data": "0000:0000:0000:0000:0000:0000:0000:0000",
+                "valid": true
+            },
+            {
+                "description": "partially collapsed zeroes",
+                "data": "00:000:00:0:000:000:000:0000",
+                "valid": true
+            },
+            {
+                "description": "4,2 zeroes",
+                "data": "0:0:0:0::0:0",
+                "valid": true
+            },
+            {
+                "description": "8 single zeroes, no double colon",
+                "data": "0:0:0:0:0:0:0:0",
+                "valid": true
+            },
+            {
+                "description": "7 single zeroes, leading double colon",
+                "data": "::0:0:0:0:0:0:0",
+                "valid": true
+            },
+            {
+                "description": "6 single zeroes, leading double colon",
+                "data": "::0:0:0:0:0:0",
+                "valid": true
+            },
+            {
+                "description": "5 single zeroes, leading double colon",
+                "data": "::0:0:0:0:0",
+                "valid": true
+            },
+            {
+                "description": "4 single zeroes, leading double colon",
+                "data": "::0:0:0:0",
+                "valid": true
+            },
+            {
+                "description": "3 single zeroes, leading double colon",
+                "data": "::0:0:0",
+                "valid": true
+            },
+            {
+                "description": "2 single zeroes, leading double colon",
+                "data": "::0:0",
+                "valid": true
+            },
+            {
+                "description": "1 single zero, leading double colon",
+                "data": "::0",
+                "valid": true
+            },
+            {
+                "description": "1 single zero, trailing double colon",
+                "data": "0::",
+                "valid": true
+            },
+            {
+                "description": "2 leading colons with 8 zeroes",
+                "data": "::0:0:0:0:0:0:0:0",
+                "valid": false
+            },
+            {
+                "description": "1 leading colon with 8 zeroes",
+                "data": ":0:0:0:0:0:0:0:0",
+                "valid": false
+            },
+            {
+                "description": "colons in the middle with 8 zeroes",
+                "data": "0:0:0:0::0:0:0:0",
+                "valid": false
+            },
+            {
+                "description": "1 trailing colon with 8 zeroes",
+                "data": "0:0:0:0:0:0:0:0:",
+                "valid": false
+            },
+            {
+                "description": "2 trailing colons with 8 zeroes",
+                "data": "0:0:0:0:0:0:0:0::",
+                "valid": false
+            }
+        ]
+    }
+]

@@ -102,7 +102,7 @@ sub keywords {
     'idn-hostname' => sub { $is_hostname->($idn_decode->($_[0])) },
     ipv4 => $is_ipv4,
     ipv6 => sub {
-      ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,7}[[:xdigit:]]{0,4}$/
+      ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,8}[[:xdigit:]]{0,4}$/
         || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){1,6}((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
             && $is_ipv4->($1))
         && $_[0] !~ /:::/
@@ -111,9 +111,11 @@ sub keywords {
         && do {
           my $double_colons = ()= ($_[0] =~ /::/g);
           my $colon_components = grep length, split(/:+/, $_[0], -1);
-          $double_colons < 2 && ($double_colons > 0
-            || ($colon_components == 8 && !defined $1)
-            || ($colon_components == 7 && defined $1))
+          ($double_colons == 1
+            && ((!defined $1 && $colon_components < 8) || (defined $1 && $colon_components < 7)))
+            ||
+          ($double_colons == 0
+            && ((!defined $1 && $colon_components == 8) || (defined $1 && $colon_components == 7)));
         };
     },
     uri => sub {
