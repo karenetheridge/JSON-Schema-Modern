@@ -113,12 +113,12 @@ The keyword that produced the annotation.
 =head2 instance_location
 
 The path in the instance where the annotation was produced; encoded as per the JSON Pointer
-specification (L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
+specification (L<RFC 6901|https://datatracker.ietf.org/doc/html/rfc6901>).
 
 =head2 keyword_location
 
 The schema path taken during evaluation to arrive at the annotation; encoded as per the JSON Pointer
-specification (L<RFC 6901|https://tools.ietf.org/html/rfc6901>).
+specification (L<RFC 6901|https://datatracker.ietf.org/doc/html/rfc6901>).
 
 =head2 absolute_keyword_location
 

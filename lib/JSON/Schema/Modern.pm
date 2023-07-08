@@ -1158,7 +1158,7 @@ in L</traverse> or L</evaluate>).
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of a JSON-encoded string (in accordance with
-L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
+L<RFC8259|https://datatracker.ietf.org/doc/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
 The schema must be in one of these forms:
 
@@ -1329,7 +1329,7 @@ then dereferenced for the C<contentSchema> keyword).
 These media types are already known:
 
 =for :list
-* C<application/json> - see L<RFC 4627|https://www.rfc-editor.org/rfc/rfc4627>
+* C<application/json> - see L<RFC 4627|https://datatracker.ietf.org/doc/html/rfc4627>
 * C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
 * C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
 * C<application/octet-stream> - passes strings through unchanged
@@ -1365,8 +1365,8 @@ Encodings handled natively are:
 
 =for :list
 * C<identity> - passes strings through unchanged
-* C<base64> - see L<RFC 4648 §4|https://www.rfc-editor.org/rfc/rfc4648#section-4>
-* C<base64url> - see L<RFC 4648 §5|https://www.rfc-editor.org/rfc/rfc4648#section-5>
+* C<base64> - see L<RFC 4648 §4|https://datatracker.ietf.org/doc/html/rfc4648#section-4>
+* C<base64url> - see L<RFC 4648 §5|https://datatracker.ietf.org/doc/html/rfc4648#section-5>
 
 See also L<HTTP::Message/encode>.
 
@@ -1471,8 +1471,8 @@ UNTRUSTED SOURCES.>
 =for :list
 * L<json-schema-eval>
 * L<https://json-schema.org>
-* L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://tools.ietf.org/html/rfc8259>
-* L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://tools.ietf.org/html/rfc3986>
+* L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://datatracker.ietf.org/doc/html/rfc8259>
+* L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://datatracker.ietf.org/doc/html/rfc3986>
 * L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
 * L<JSON::Schema::Tiny>: a more stripped-down implementation of the specification, with fewer
   dependencies and faster evaluation
