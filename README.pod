@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.568
+version 0.569
 
 =head1 SYNOPSIS
 
@@ -148,7 +148,7 @@ in L</traverse> or L</evaluate>).
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of a JSON-encoded string (in accordance with
-L<RFC8259|https://tools.ietf.org/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
+L<RFC8259|https://datatracker.ietf.org/doc/html/rfc8259>). B<The string is expected to be UTF-8 encoded.>
 
 The schema must be in one of these forms:
 
@@ -383,7 +383,7 @@ These media types are already known:
 
 =item *
 
-C<application/json> - see L<RFC 4627|https://www.rfc-editor.org/rfc/rfc4627>
+C<application/json> - see L<RFC 4627|https://datatracker.ietf.org/doc/html/rfc4627>
 
 =item *
 
@@ -445,11 +445,11 @@ C<identity> - passes strings through unchanged
 
 =item *
 
-C<base64> - see L<RFC 4648 §4|https://www.rfc-editor.org/rfc/rfc4648#section-4>
+C<base64> - see L<RFC 4648 §4|https://datatracker.ietf.org/doc/html/rfc4648#section-4>
 
 =item *
 
-C<base64url> - see L<RFC 4648 §5|https://www.rfc-editor.org/rfc/rfc4648#section-5>
+C<base64url> - see L<RFC 4648 §5|https://datatracker.ietf.org/doc/html/rfc4648#section-5>
 
 =back
 
@@ -645,11 +645,11 @@ L<https://json-schema.org>
 
 =item *
 
-L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://tools.ietf.org/html/rfc8259>
+L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://datatracker.ietf.org/doc/html/rfc8259>
 
 =item *
 
-L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://tools.ietf.org/html/rfc3986>
+L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://datatracker.ietf.org/doc/html/rfc3986>
 
 =item *
 

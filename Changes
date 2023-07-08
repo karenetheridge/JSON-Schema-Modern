@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.569     2023-07-08 23:36:06Z
           - fixed some edge cases with ipv6 format validation
 
 0.568     2023-06-17 07:16:54Z
