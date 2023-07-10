@@ -120,7 +120,7 @@ sub _eval_keyword_multipleOf ($self, $data, $schema, $state) {
   }
   else {
     my $quotient = $data / $schema->{multipleOf};
-    return E($state, 'overflow while calculating quotient')
+    return E($state, 'overflow while calculating quotient of integers')
       if "$]" >= 5.022 ? isinf($quotient) : $quotient =~ /^-?Inf$/i;
     return 1 if int($quotient) == $quotient;
   }
