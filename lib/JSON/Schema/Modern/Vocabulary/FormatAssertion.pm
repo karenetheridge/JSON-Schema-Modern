@@ -34,9 +34,6 @@ sub keywords {
 {
   # for now, all built-in formats are constrained to the 'string' type
 
-  my $is_datetime = sub {
-    eval { Time::Moment->from_string(uc($_[0])) } ? 1 : 0,
-  };
   my $is_email = sub {
     Email::Address::XS->parse($_[0])->is_valid;
   };
@@ -68,15 +65,30 @@ sub keywords {
 
   my $formats = +{
     'date-time' => sub {
-      $is_datetime->($_[0]) || (
-        $_[0] =~ m/^(?:\d{4}-\d\d-\d\dT\d\d:\d\d):(\d\d)(?:\.\d+)?(?:[Zz]|[+-]\d\d:\d\d)$/a
-          && $1 eq '60'
-          && do {
+      # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6
+      $_[0] =~ m/^\d{4}-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:Z|[+-](\d\d):(\d\d))$/ia
+        && $1 >= 1 && $1 <= 12        # date-month
+        && $2 >= 1 && $2 <= 31        # date-mday
+        && $3 <= 23                   # time-hour
+        && $4 <= 59                   # time-minute
+        && $5 <= 60                   # time-second
+        && (!defined $6 || $6 <= 23)  # time-hour in time-numoffset
+        && (!defined $7 || $7 <= 59)  # time-minute in time-numoffset
+
+        # Time::Moment does month+day sanity check (with leap years), but not leap seconds
+        && ($5 <= 59 && eval { Time::Moment->from_string(uc($_[0])) }
+          || do {
             require DateTime::Format::RFC3339;
             eval { DateTime::Format::RFC3339->parse_datetime($_[0]) };
-          });
+        });
     },
-    date => sub { $_[0] =~ /^\d{4}-(?:\d\d)-(?:\d\d)$/a && $is_datetime->($_[0].'T00:00:00Z') },
+    date => sub {
+      # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6 full-date
+      $_[0] =~ m/^(\d{4})-(\d\d)-(\d\d)$/a
+        && $2 >= 1 && $2 <= 12        # date-month
+        && $3 >= 1 && $3 <= 31        # date-mday
+        && eval { Time::Moment->new(year => $1, month => $2, day => $3) };
+    },
     time => sub {
       return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))$/a
         or $1 > 23
