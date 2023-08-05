@@ -36,6 +36,7 @@ sub acceptance_tests (%options) {
     $options{acceptance}->%*,
     $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR})
       : $ENV{TEST_PREFIXDIR} ? (test_dir => path($ENV{TEST_PREFIXDIR}, 'tests', $options{acceptance}{specification})) : (),
+    supported_specifications => [ qw(draft7 draft2019-09 draft2020-12) ],
   );
   $accepter = $accepter->new(%$accepter,
       test_dir => $accepter->test_dir->child($options{acceptance}{test_subdir}))
