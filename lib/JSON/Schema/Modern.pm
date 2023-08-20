@@ -1127,7 +1127,7 @@ See L</add_media_type> and L</add_encoding> for adding additional type support.
 =for stopwords shhh
 
 Technically only draft7 allows this and drafts 2019-09 and 2020-12 prohibit ever returning the
-subschema evaluation results together with their parent schema's, so shhh. I'm trying to get this
+subschema evaluation results together with their parent schema's results, so shhh. I'm trying to get this
 fixed for the next draft.
 
 =head2 collect_annotations
