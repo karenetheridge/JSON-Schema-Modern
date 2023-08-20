@@ -1083,9 +1083,10 @@ Passed to L<JSON::Schema::Modern::Result/output_format>.
 =head2 short_circuit
 
 When true, evaluation will return early in any execution path as soon as the outcome can be
-determined, rather than continuing to find all errors or annotations. Be aware that this can result
-in invalid results in the presence of keywords that depend on annotations, namely
-C<unevaluatedItems> and C<unevaluatedProperties>.
+determined, rather than continuing to find all errors or annotations.
+This option is safe to use in all circumstances, even in the presence of
+C<unevaluatedItems> and C<unevaluatedProperties> keywords: the validation result will not change;
+only some errors will be omitted from the result.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
