@@ -91,17 +91,7 @@ has validate_content_schemas => (
   default => sub { ($_[0]->specification_version//'') eq 'draft7' },
 );
 
-has collect_annotations => (
-  is => 'ro',
-  isa => Bool,
-);
-
-has scalarref_booleans => (
-  is => 'ro',
-  isa => Bool,
-);
-
-has strict => (
+has [qw(collect_annotations scalarref_booleans strict)] => (
   is => 'ro',
   isa => Bool,
 );
