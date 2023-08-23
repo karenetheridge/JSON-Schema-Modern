@@ -91,7 +91,7 @@ has validate_content_schemas => (
   default => sub { ($_[0]->specification_version//'') eq 'draft7' },
 );
 
-has [qw(collect_annotations scalarref_booleans strict)] => (
+has [qw(collect_annotations scalarref_booleans stringy_numbers strict)] => (
   is => 'ro',
   isa => Bool,
 );
@@ -347,7 +347,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
-      } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans strict)),
+      } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict)),
     };
 
     if ($state->{validate_formats}) {
@@ -1128,8 +1128,38 @@ Defaults to false.
 
 =head2 scalarref_booleans
 
-When true, any type that is expected to be a boolean B<in the instance data> may also be expressed
+When true, any value that is expected to be a boolean B<in the instance data> may also be expressed
 as the scalar references C<\0> or C<\1> (which are serialized as booleans by JSON backends).
+
+Defaults to false.
+
+=head2 stringy_numbers
+
+When true, any value that is expected to be a number or integer B<in the instance data> may also be
+expressed as a string. This does B<not> apply to the C<const> or C<enum> keywords, but only
+the following keywords:
+
+=for :list
+* C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid
+* C<multipleOf>
+* C<maximum>
+* C<exclusiveMaximum>
+* C<minimum>
+* C<exclusiveMinimum>
+
+This allows you to write a schema like this (which validates a string representing an integer):
+
+  type: string
+  pattern: ^[0-9]$
+  multipleOf: 4
+  minimum: 16
+  maximum: 256
+
+Such keywords are only applied if the value looks like a number, and do not generate a failure
+otherwise. Values are determined to be numbers via L<perlapi/looks_like_number>.
+This option is only intended to be used for evaluating data from sources that can only be strings,
+such as the extracted value of an HTTP header or query parameter.
+
 Defaults to false.
 
 =head2 strict
@@ -1160,7 +1190,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
-L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</stringy_numbers>, L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation
@@ -1193,7 +1223,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
-L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</stringy_numbers>, L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation

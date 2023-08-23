@@ -31,7 +31,7 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['validate_content_schemas', 'treat contentMediaType and contentSchema keywords as assertions'],
   ['collect_annotations', 'collect annotations'],
   ['strict', 'disallow unknown keywords'],
-  # scalarref_booleans makes no sense in json-encoded data
+  # scalarref_booleans, stringy_numbers make no sense in json-encoded data
   [],
   ['validate-schema:s', 'validate the provided schema against its meta-schema. do not provide --data or --schema.' ],
   ['add-schema=s@', 'the filename of an extra schema to load, so it can be used by $ref' ],

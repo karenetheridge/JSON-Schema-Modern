@@ -20,6 +20,7 @@ my $js = JSON::Schema::Modern->new(
   validate_formats => 1,
   collect_annotations => 1,
   scalarref_booleans => 1,
+  stringy_numbers => 1,
   max_traversal_depth => 42,
   specification_version => 'draft2019-09',
 );
@@ -55,6 +56,7 @@ my @serialized_attributes = sort qw(
   validate_content_schemas
   collect_annotations
   scalarref_booleans
+  stringy_numbers
   _resource_index
   _vocabulary_classes
   _metaschema_vocabulary_classes
