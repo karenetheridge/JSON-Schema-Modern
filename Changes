@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.570     2023-09-02 20:42:03Z
           - small performance improvements to 'date-time' and 'date' format
             validation
           - new stringy_numbers option, for validating numbers more loosely
