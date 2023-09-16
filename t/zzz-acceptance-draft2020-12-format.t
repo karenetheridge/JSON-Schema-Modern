@@ -66,6 +66,13 @@ acceptance_tests(
         ] },
       # various edge cases that are difficult to accomodate
       { file => 'email.json', group_description => 'validation of e-mail addresses', test_description => [ 'an invalid domain', 'an invalid IPv4-address-literal' ] },
+      { file => 'hostname.json', test_description => [
+          'single label with hyphen',
+          'single label with digits',
+          'single label starting with digit',
+          'single label ending with digit',
+          'single label',
+        ] },
       { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
         test_description => 'an invalid IRI based on IPv6' },
       { file => 'idn-hostname.json',
