@@ -196,6 +196,9 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
     elsif ($schema->{format} eq 'email' or $schema->{format} eq 'idn-email') {
       require Email::Address::XS; Email::Address::XS->VERSION(1.04);
     }
+    # FIXME:
+    # draft7 hostname uses RFC1034
+    # draft2019-09+ hostname uses RFC1123
     elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
       require Data::Validate::Domain;
     }
