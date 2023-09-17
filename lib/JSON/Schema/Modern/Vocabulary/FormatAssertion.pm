@@ -207,8 +207,8 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
     abort($state, 'EXCEPTION: cannot validate format "%s": %s', $schema->{format}, $e);
   }
 
-  # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
-  # and add in the type if needed
+  # first check the subrefs from JSON::Schema::Modern->new(format_validations => { ... })
+  # and fall back to the default formats, which are all defined only for strings
   my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
   my $default_spec = $self->_get_default_format_validation($state, $schema->{format});
 
