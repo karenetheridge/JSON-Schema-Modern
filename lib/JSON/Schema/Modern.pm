@@ -1214,7 +1214,7 @@ The return value is a L<JSON::Schema::Modern::Result> object, which can also be 
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
-allows: null, boolean, string, number, object, array. (See L</TYPES> below.)
+allows: null, boolean, string, number, object, array. (See L</Types> below.)
 
 The schema must be in one of these forms:
 
