@@ -1091,7 +1091,7 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 =head2 validate_formats
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to true when specification_version is draft7, and false otherwise.
+to true when specification_version is draft7, and false for all other versions, but this may change in the future.
 
 =head2 format_validations
 
