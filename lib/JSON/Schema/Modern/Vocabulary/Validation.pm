@@ -206,7 +206,7 @@ sub _traverse_keyword_maxItems { goto \&_assert_non_negative_integer }
 sub _eval_keyword_maxItems ($self, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
   return 1 if @$data <= $schema->{maxItems};
-  return E($state, 'more than %d item%s', $schema->{maxItems}, $schema->{maxItems} > 1 ? 's' : '');
+  return E($state, 'array has more than %d item%s', $schema->{maxItems}, $schema->{maxItems} > 1 ? 's' : '');
 }
 
 sub _traverse_keyword_minItems { goto \&_assert_non_negative_integer }
@@ -214,7 +214,7 @@ sub _traverse_keyword_minItems { goto \&_assert_non_negative_integer }
 sub _eval_keyword_minItems ($self, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
   return 1 if @$data >= $schema->{minItems};
-  return E($state, 'fewer than %d item%s', $schema->{minItems}, $schema->{minItems} > 1 ? 's' : '');
+  return E($state, 'array has fewer than %d item%s', $schema->{minItems}, $schema->{minItems} > 1 ? 's' : '');
 }
 
 sub _traverse_keyword_uniqueItems ($self, $schema, $state) {
@@ -236,7 +236,7 @@ sub _eval_keyword_maxContains ($self, $data, $schema, $state) {
   return 1 if not exists $state->{_num_contains};
   return 1 if not is_type('array', $data);
 
-  return E($state, 'contains too many matching items')
+  return E($state, 'array contains more than %d matching items', $schema->{maxContains})
     if $state->{_num_contains} > $schema->{maxContains};
 
   return 1;
@@ -248,7 +248,7 @@ sub _eval_keyword_minContains ($self, $data, $schema, $state) {
   return 1 if not exists $state->{_num_contains};
   return 1 if not is_type('array', $data);
 
-  return E($state, 'contains too few matching items')
+  return E($state, 'array contains fewer than %d matching items', $schema->{minContains})
     if $state->{_num_contains} < $schema->{minContains};
 
   return 1;
@@ -259,7 +259,7 @@ sub _traverse_keyword_maxProperties { goto \&_assert_non_negative_integer }
 sub _eval_keyword_maxProperties ($self, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
   return 1 if keys %$data <= $schema->{maxProperties};
-  return E($state, 'more than %d propert%s', $schema->{maxProperties},
+  return E($state, 'object has more than %d propert%s', $schema->{maxProperties},
     $schema->{maxProperties} > 1 ? 'ies' : 'y');
 }
 
@@ -268,7 +268,7 @@ sub _traverse_keyword_minProperties { goto \&_assert_non_negative_integer }
 sub _eval_keyword_minProperties ($self, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
   return 1 if keys %$data >= $schema->{minProperties};
-  return E($state, 'fewer than %d propert%s', $schema->{minProperties},
+  return E($state, 'object has fewer than %d propert%s', $schema->{minProperties},
     $schema->{minProperties} > 1 ? 'ies' : 'y');
 }
 
@@ -285,7 +285,7 @@ sub _eval_keyword_required ($self, $data, $schema, $state) {
 
   my @missing = grep !exists $data->{$_}, $schema->{required}->@*;
   return 1 if not @missing;
-  return E($state, 'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
+  return E($state, 'object is missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
 }
 
 sub _traverse_keyword_dependentRequired ($self, $schema, $state) {
@@ -316,7 +316,7 @@ sub _eval_keyword_dependentRequired ($self, $data, $schema, $state) {
 
     if (my @missing = grep !exists($data->{$_}), $schema->{dependentRequired}{$property}->@*) {
       $valid = E({ %$state, _schema_path_suffix => $property },
-        'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
+        'object is missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
     }
   }
 

@@ -214,7 +214,7 @@ sub _eval_keyword_dependencies ($self, $data, $schema, $state) {
       # as in dependentRequired
       if (my @missing = grep !exists($data->{$_}), $schema->{dependencies}{$property}->@*) {
         $valid = E({ %$state, _schema_path_suffix => $property },
-          'missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
+          'object is missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
       }
     }
     else {

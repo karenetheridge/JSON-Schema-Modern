@@ -245,7 +245,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/dependentRequired/alpha',
-          error => 'missing properties: a, b, c',
+          error => 'object is missing properties: a, b, c',
         },
         {
           instanceLocation => '',
@@ -296,7 +296,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/dependencies/alpha',
-          error => 'missing properties: a, b, c',
+          error => 'object is missing properties: a, b, c',
         },
         {
           instanceLocation => '',

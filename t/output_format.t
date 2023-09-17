@@ -195,7 +195,7 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/required',
-        error => 'missing property: bar',
+        error => 'object is missing property: bar',
       },
     ],
   },
@@ -309,7 +309,7 @@ cmp_deeply(
       {
         instanceLocation => '',
         keywordLocation => '/required',
-        error => 'missing property: bar',
+        error => 'object is missing property: bar',
       },
     ],
   },
