@@ -199,7 +199,8 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
     elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
       require Data::Validate::Domain;
     }
-    elsif ($schema->{format} eq 'idn-hostname') {
+
+    if ($schema->{format} eq 'idn-hostname') {
       require Net::IDN::Encode;
     }
   }
