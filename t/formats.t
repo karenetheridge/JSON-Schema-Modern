@@ -506,4 +506,20 @@ subtest 'format: pure_integer' => sub {
   );
 };
 
+subtest 'unsupported formats in draft7' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft7', validate_formats => 1);
+
+  cmp_deeply(
+    my $res = $js->evaluate('123', { format => 'duration' })->TO_JSON,
+    { valid => true },
+    'duration is not implemented in draft7',
+  );
+
+  cmp_deeply(
+    $js->evaluate('123', { format => 'uuid' })->TO_JSON,
+    { valid => true },
+    'uuid is not implemented in draft7',
+  );
+};
+
 done_testing;

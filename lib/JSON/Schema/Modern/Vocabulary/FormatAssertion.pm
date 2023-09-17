@@ -150,8 +150,33 @@ sub keywords {
     'uri-template' => sub { 1 },
   };
 
-  sub _get_default_format_validation ($self, $format) {
-    return $formats->{$format};
+  my %formats_by_spec_version = (
+    draft7 => [qw(
+      date-time
+      date
+      time
+      email
+      idn-email
+      hostname
+      idn-hostname
+      ipv4
+      ipv6
+      uri
+      uri-reference
+      iri
+      json-pointer
+      relative-json-pointer
+      regex
+      iri-reference
+      uri-template
+    )],
+  );
+  $formats_by_spec_version{'draft2019-09'} =
+  $formats_by_spec_version{'draft2020-12'} = [$formats_by_spec_version{draft7}->@*, qw(duration uuid)];
+
+  sub _get_default_format_validation ($self, $state, $format) {
+    return $formats->{$format}
+      if grep $format eq $_, $formats_by_spec_version{$state->{spec_version}}->@*;
   }
 }
 
@@ -185,7 +210,7 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
   # first check the subrefs from JSON::Schema::Modern->new(format_evaluations => { ... })
   # and add in the type if needed
   my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
-  my $default_spec = $self->_get_default_format_validation($schema->{format});
+  my $default_spec = $self->_get_default_format_validation($state, $schema->{format});
 
   my $spec =
     $evaluator_spec ? ($default_spec ? +{ type => 'string', sub => $evaluator_spec } : $evaluator_spec)
