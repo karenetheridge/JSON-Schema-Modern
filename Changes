@@ -3,6 +3,7 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - removed duration and uuid formats for draft7 (they were not
             defined until the next spec version)
+          - properly default format validation to true in draft7
 
 0.570     2023-09-02 20:42:03Z
           - small performance improvements to 'date-time' and 'date' format

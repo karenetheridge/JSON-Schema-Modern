@@ -79,7 +79,9 @@ has max_traversal_depth => (
 has validate_formats => (
   is => 'ro',
   isa => Bool,
-  default => 0, # as specified by https://json-schema.org/draft/<version>/schema#/$vocabulary
+  lazy => 1,
+  # as specified by https://json-schema.org/draft/<version>/schema#/$vocabulary
+  default => sub { ($_[0]->specification_version//SPECIFICATION_VERSION_DEFAULT) eq 'draft7' ? 1 : 0 },
 );
 
 has validate_content_schemas => (
@@ -1089,7 +1091,7 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 =head2 validate_formats
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to false.
+to true when specification_version is draft7, and false otherwise.
 
 =head2 format_validations
 
