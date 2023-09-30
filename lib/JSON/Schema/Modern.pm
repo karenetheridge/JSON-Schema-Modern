@@ -450,7 +450,7 @@ our $vocabulary_cache = {};
 sub _traverse_subschema ($self, $schema, $state) {
   delete $state->{keyword};
 
-  return E($state, 'EXCEPTION: maximum traversal depth exceeded')
+  return E($state, 'EXCEPTION: maximum traversal depth (%d) exceeded', $self->max_traversal_depth)
     if $state->{depth}++ > $self->max_traversal_depth;
 
   my $schema_type = get_type($schema);
@@ -530,7 +530,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   $state->{dynamic_scope} = [ ($state->{dynamic_scope}//[])->@* ];
   delete $state->@{'keyword', grep /^_/, keys %$state};
 
-  abort($state, 'EXCEPTION: maximum evaluation depth exceeded')
+  abort($state, 'EXCEPTION: maximum evaluation depth (%d) exceeded', $self->max_traversal_depth)
     if $state->{depth}++ > $self->max_traversal_depth;
 
   my $schema_type = get_type($schema);

@@ -32,7 +32,7 @@ cmp_deeply(
         instanceLocation => '/0/0/0/0',
         keywordLocation => '/items/$ref/items/$ref/items/$ref/items',
         absoluteKeywordLocation => '#/items',
-        error => 'EXCEPTION: maximum evaluation depth exceeded',
+        error => 'EXCEPTION: maximum evaluation depth (6) exceeded',
       },
     ],
   },

@@ -130,7 +130,7 @@ subtest '$id with an empty fragment' => sub {
         },
         {
           absoluteKeywordLocation => 'http://localhost:4242/my_foo',
-          error => 'EXCEPTION: maximum evaluation depth exceeded',
+          error => 'EXCEPTION: maximum evaluation depth (2) exceeded',
           instanceLocation => '',
           keywordLocation => "/allOf/1/\$ref/\$ref",
         },

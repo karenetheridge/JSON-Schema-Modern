@@ -1155,7 +1155,7 @@ subtest 'absoluteKeywordLocation' => sub {
           instanceLocation => '/0',
           keywordLocation => '/items/$ref',
           absoluteKeywordLocation => '',
-          error => 'EXCEPTION: maximum evaluation depth exceeded',
+          error => 'EXCEPTION: maximum evaluation depth (1) exceeded',
         },
       ],
     },
