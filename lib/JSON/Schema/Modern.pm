@@ -331,6 +331,8 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
     abort($state, 'EXCEPTION: unable to find resource %s', $schema_reference)
       if not $schema_info;
+    abort($state, 'EXCEPTION: %s is not a schema', $schema_reference)
+      if not $schema_info->{document}->get_entity_at_location($schema_info->{document_path});
 
     $state = +{
       %$state,
@@ -818,6 +820,9 @@ sub _parse_keyword_schema ($self, $state, $metaschema_uri) {
   else {
     my $schema_info = $self->_fetch_from_uri($metaschema_uri);
     return E($state, 'EXCEPTION: unable to find resource %s', $metaschema_uri) if not $schema_info;
+    # this cannot happen unless there are other entity types in the index
+    return E($state, 'EXCEPTION: bad reference to $schema %s: not a schema', $schema_info->{canonical_uri})
+      if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
     if (not is_plain_hashref($schema_info->{schema})) {
       ()= E($state, 'metaschemas must be objects');

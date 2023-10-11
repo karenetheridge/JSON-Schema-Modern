@@ -4,6 +4,7 @@ Revision history for JSON-Schema-Modern
           - properly handle some edge cases where the "$schema" keyword can
             change the dialect to a different specification version with
             different Core vocabulary keywords
+          - evaluation at non-schema locations is now prohibited
 
 0.574     2023-11-13 00:50:55Z
           - better detection of schema locations, for use by Document

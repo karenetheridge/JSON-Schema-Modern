@@ -87,7 +87,6 @@ subtest '<= draft7: $ref in combination with any other keyword causes the other 
 };
 
 subtest '$ref adjacent to a path used in a $ref' => sub {
-  local $TODO = 'fixing this requires traversing the schema to mark which locations are unusable';
   cmp_deeply(
     JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(
       true,

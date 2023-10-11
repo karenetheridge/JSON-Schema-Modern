@@ -188,6 +188,8 @@ sub _eval_keyword_recursiveRef ($class, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{initial_schema_uri});
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
+  abort($state, 'EXCEPTION: bad reference to %s: not a schema', $schema_info->{canonical_uri})
+    if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
   if (is_plain_hashref($schema_info->{schema})
       and is_type('boolean', $schema_info->{schema}{'$recursiveAnchor'})
@@ -205,6 +207,8 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$dynamicRef'})->to_abs($state->{initial_schema_uri});
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
+  abort($state, 'EXCEPTION: bad reference to %s: not a schema', $schema_info->{canonical_uri})
+    if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
   # If the initially resolved starting point URI includes a fragment that was created by the
   # "$dynamicAnchor" keyword, ...

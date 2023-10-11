@@ -19,9 +19,9 @@ loose-types-const-enum.json                  8          0     0
 not-an-anchor.json                           2          0     0
 not-an-id.json                               2          0     0
 ref-and-id.json                              2          0     0
-ref.json                                    12          0     0
+ref.json                                    10          0     0
 short-circuit.json                          16          0     0
 unknownKeyword.json                          8          0     0
 vocabulary.json                              3          0     0
 ---------------------------------------------------------------
-TOTAL                                      761          0     0
+TOTAL                                      759          0     0

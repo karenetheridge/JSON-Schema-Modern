@@ -122,31 +122,6 @@
         ]
     },
     {
-        "description": "$ref to non-schema locations are allowed, even if a bad idea",
-        "schema": {
-            "default": {
-                "type": "string"
-            },
-            "properties": {
-                "foo": {
-                    "$ref": "#/default"
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "$ref to non-schema location, valid result",
-                "data": { "foo": "a string" },
-                "valid": true
-            },
-            {
-                "description": "$ref to non-schema location, invalid result",
-                "data": { "foo": 1 },
-                "valid": false
-            }
-        ]
-    },
-    {
         "description": "base URI change - change folder in subschema with path from root",
         "comment": "based on test suite draft7/refRemote.json 'base URI change - change folder in subschema'",
         "schema": {

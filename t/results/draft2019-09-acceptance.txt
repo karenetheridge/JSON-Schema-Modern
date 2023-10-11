@@ -62,6 +62,6 @@ optional/ecmascript-regex.json              60         14     0
 optional/float-overflow.json                 1          0     0
 optional/no-schema.json                      3          0     0
 optional/non-bmp-regex.json                 12          0     0
-optional/refOfUnknownKeyword.json            4          0     0
+optional/refOfUnknownKeyword.json            2          2     0
 ---------------------------------------------------------------
-TOTAL                                     1307         28     0
+TOTAL                                     1305         30     0

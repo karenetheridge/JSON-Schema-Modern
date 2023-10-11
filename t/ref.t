@@ -1132,4 +1132,151 @@ subtest 'anchors do not match' => sub {
   );
 };
 
+subtest 'reference to a non-schema location' => sub {
+  delete $js->{_resource_index};
+  my $schema = {
+    example => { not_a_schema => true },
+    '$defs' => {
+      anchor => {
+        '$dynamicAnchor' => 'my_anchor',
+        '$dynamicRef' => '#/example/not_a_schema',
+      },
+    },
+    type => 'object',
+    properties => {
+      '$ref' => {
+        '$ref' => '#/example/not_a_schema',
+      },
+      '$dynamicRef' => {
+        '$dynamicRef' => '#/example/not_a_schema',
+      },
+    },
+  };
+
+  cmp_deeply(
+    $js->evaluate({ '$ref' => 1 }, $schema)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/$ref',
+          keywordLocation => '/properties/$ref/$ref',
+          error => 'EXCEPTION: bad reference to #/example/not_a_schema: not a schema',
+        },
+      ],
+    },
+    '$ref to a non-schema is not permitted',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ '$dynamicRef' => 1 }, $schema)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/$dynamicRef',
+          keywordLocation => '/properties/$dynamicRef/$dynamicRef',
+          error => 'EXCEPTION: bad reference to #/example/not_a_schema: not a schema',
+        },
+      ],
+    },
+    '$dynamicRef to a non-schema is not permitted',
+  );
+
+  delete $js->{_resource_index};
+  $schema = {
+    '$id' => '/foo',
+    '$schema' => 'https://json-schema.org/draft/2019-09/schema',
+    '$recursiveAnchor' => true,
+    example => { not_a_schema => true },
+    type => 'object',
+    properties => {
+      '$recursiveRef' => {
+        '$recursiveRef' => '#/example/not_a_schema',
+      },
+    },
+  };
+
+  cmp_deeply(
+    $js->evaluate({ '$recursiveRef' => 1 }, $schema)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/$recursiveRef',
+          keywordLocation => '/properties/$recursiveRef/$recursiveRef',
+          absoluteKeywordLocation => '/foo#/properties/$recursiveRef/$recursiveRef',
+          error => 'EXCEPTION: bad reference to /foo#/example/not_a_schema: not a schema',
+        },
+      ],
+    },
+    '$recursiveRef to a non-schema is not permitted',
+  );
+
+  package MyDocument {
+    use strict; use warnings;
+    use Moo;
+    extends 'JSON::Schema::Modern::Document';
+
+    sub traverse ($self, @) {
+      return {
+        initial_schema_uri => $self->canonical_uri,
+        errors => [],
+        spec_version => 'draft2020-12',
+        vocabularies => [],
+        configs => {},
+      };
+    }
+  };
+
+  delete $js->{_resource_index};
+
+  my $doc = MyDocument->new(
+    schema => [ 'not a json schema' ],
+    canonical_uri => 'https://my_non_schema',
+  );
+  $js->add_schema($doc);
+
+  $schema = {
+    '$id' => '/foo',
+    '$schema' => 'https://my_non_schema',
+  };
+
+  cmp_deeply(
+    $js->evaluate(1, $schema)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          # we haven't processed $id yet, so we don't know the absolute location
+          error => 'EXCEPTION: bad reference to $schema https://my_non_schema: not a schema',
+        },
+      ],
+    },
+    '$schema to a non-schema is not permitted',
+  );
+};
+
+subtest 'evaluate at a non-schema location' => sub {
+  delete $js->{_resource_index};
+  $js->add_schema('http://my_schema', { example => { not_a_schema => true } });
+
+  cmp_deeply(
+    $js->evaluate(1, 'http://my_schema#/example/not_a_schema')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => 'EXCEPTION: http://my_schema#/example/not_a_schema is not a schema',
+        },
+      ],
+    },
+    'evaluating at a non-schema location is not permitted',
+  );
+};
+
 done_testing;
