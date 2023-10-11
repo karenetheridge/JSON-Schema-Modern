@@ -12,6 +12,8 @@ use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use JSON::Schema::Modern;
+use Sereal::Encoder;
+use Sereal::Decoder;
 use lib 't/lib';
 use Helper;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
@@ -63,7 +65,6 @@ my @serialized_attributes = sort qw(
 );
 
 my $frozen = $js->FREEZE(undef);
-
 cmp_deeply(
   [ sort keys %$frozen ],
   [ sort @serialized_attributes ],
@@ -71,13 +72,16 @@ cmp_deeply(
 );
 
 my $thawed = JSON::Schema::Modern->THAW(undef, $frozen);
-
 cmp_deeply(
   [ sort keys %$thawed ],
   [ sort @serialized_attributes ],
   'thawed object contains all the right keys',
 );
 
-ok($js->evaluate($schema, {}), 'evaluate again against an empty schema');
+ok($thawed->evaluate($schema, {}), 'evaluate again against an empty schema');
+
+$frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
+$thawed = Sereal::Decoder->new->decode($frozen);
+ok($thawed->evaluate($schema, {}), 'evaluate again against an empty schema');
 
 done_testing;

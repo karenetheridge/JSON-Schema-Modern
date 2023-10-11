@@ -995,7 +995,7 @@ has _encoding => (
   },
 );
 
-# callback hook for Sereal::Encode
+# callback hook for Sereal::Encoder
 sub FREEZE ($self, $serializer) {
   my $data = +{ %$self };
   # Cpanel::JSON::XS doesn't serialize: https://github.com/Sereal/Sereal/issues/266
@@ -1004,7 +1004,7 @@ sub FREEZE ($self, $serializer) {
   return $data;
 }
 
-# callback hook for Sereal::Decode
+# callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
   my $self = bless($data, $class);
 
