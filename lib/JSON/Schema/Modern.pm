@@ -237,6 +237,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     effective_base_uri => Mojo::URL->new(''),
     errors => [],
     identifiers => [],
+    subschemas => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
@@ -451,6 +452,8 @@ sub _traverse_subschema ($self, $schema, $state) {
 
   return E($state, 'EXCEPTION: maximum traversal depth (%d) exceeded', $self->max_traversal_depth)
     if $state->{depth}++ > $self->max_traversal_depth;
+
+  push $state->{subschemas}->@*, $state->{traversed_schema_path}.$state->{schema_path};
 
   my $schema_type = get_type($schema);
   return 1 if $schema_type eq 'boolean';

@@ -76,6 +76,22 @@ subtest 'traversal with callbacks' => sub {
     },
     'extracted all the real $refs out of the schema, with locations and canonical targets',
   );
+
+  cmp_deeply(
+    $state->{subschemas},
+    bag(
+      '',
+      '/$defs/bar',
+      '/$defs/bar/properties/description',
+      '/$defs/foo',
+      '/$defs/foo/additionalProperties',
+      '/allOf/0',
+      '/allOf/1',
+      '/allOf/2',
+      '/if',
+    ),
+    'identified all subschemas',
+  );
 };
 
 subtest 'vocabularies used during traversal' => sub {

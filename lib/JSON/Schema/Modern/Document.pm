@@ -22,6 +22,7 @@ use Ref::Util 0.100 'is_plain_hashref';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
 use Types::Standard 1.016003 qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef Slurpy);
+use Types::Common::Numeric 'PositiveOrZeroInt';
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer';
@@ -102,6 +103,32 @@ has errors => (
 sub errors { ($_[0]->{errors}//[])->@* }
 sub has_errors { scalar(($_[0]->{errors}//[])->@*) }
 
+# json pointer => entity name (indexed by integer)
+has _entities => (
+  is => 'ro',
+  isa => HashRef[PositiveOrZeroInt],
+  lazy => 1,
+  default => sub { {} },
+);
+
+# in this class, the only entity type is 'schema', but subclasses add more
+sub __entities ($) { qw(schema) }
+sub __entity_type { Enum[$_[0]->__entities] }
+sub __entity_index ($self, $entity) {
+  my @e = $self->__entities;
+  foreach my $i (0..$#e) { return $i if $e[$i] eq $entity; }
+  return undef;
+}
+
+sub _add_entity_location {
+  $_[0]->__entity_type->($_[2]); # verify string
+  $_[0]->_entities->{$_[1]} = $_[0]->__entity_index($_[2]); # store integer-mapped value
+}
+sub get_entity_at_location {
+  return '' if not exists $_[0]->_entities->{$_[1]};
+  ($_[0]->__entities)[ $_[0]->_entities->{$_[1]} ] // die "missing mapping for ", $_[0]->_entities->{$_[1]};
+}
+
 around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
@@ -162,6 +189,8 @@ sub BUILD ($self, $args) {
       or "$original_uri";
 
   $self->_add_resources($state->{identifiers}->@*);
+
+  $self->_add_entity_location($_, 'schema') foreach $state->{subschemas}->@*;
 }
 
 # a subclass's method will override this one
@@ -192,6 +221,15 @@ sub validate ($self) {
   my $js = $self->$_call_if_can('evaluator') // JSON::Schema::Modern->new;
 
   return $js->evaluate($self->schema, $self->metaschema_uri);
+}
+
+# callback hook for Sereal::Decoder
+sub THAW ($class, $serializer, $data) {
+  foreach my $attr (qw(schema _entities)) {
+    die "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
+      if not exists $class->{$attr};
+  }
+  bless($data, $class);
 }
 
 1;
@@ -270,7 +308,7 @@ errors halt the parsing process.) Documents with errors cannot be evaluated.
 
 =head1 METHODS
 
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD traverse has_errors path_to_resource resource_pairs
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location
 
 =head2 path_to_canonical_uri
 
