@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.571
+version 0.572
 
 =head1 SYNOPSIS
 
@@ -89,7 +89,7 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 =head2 validate_formats
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to true when specification_version is draft7, and false otherwise.
+to true when specification_version is draft7, and false for all other versions, but this may change in the future.
 
 =head2 format_validations
 
@@ -257,7 +257,7 @@ The return value is a L<JSON::Schema::Modern::Result> object, which can also be 
 Evaluates the provided instance data against the known schema document.
 
 The data is in the form of an unblessed nested Perl data structure representing any type that JSON
-allows: null, boolean, string, number, object, array. (See L</TYPES> below.)
+allows: null, boolean, string, number, object, array. (See L</Types> below.)
 
 The schema must be in one of these forms:
 
