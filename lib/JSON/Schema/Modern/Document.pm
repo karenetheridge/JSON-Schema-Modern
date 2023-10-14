@@ -142,9 +142,10 @@ sub FOREIGNBUILDARGS { () }
 # for JSON serializers
 sub TO_JSON { shift->schema }
 
+# note that this is always called, even in subclasses
 sub BUILD ($self, $args) {
   my $original_uri = $self->canonical_uri->clone;
-  my $state = $self->traverse($self->evaluator // JSON::Schema::Modern->new);
+  my $state = $self->traverse($self->evaluator // $self->_set_evaluator(JSON::Schema::Modern->new));
 
   # if the schema identified a canonical uri for itself, it overrides the initial value
   $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
@@ -172,6 +173,7 @@ sub BUILD ($self, $args) {
   $self->_add_resources($state->{identifiers}->@*);
 }
 
+# a subclass's method will override this one
 sub traverse ($self, $evaluator) {
   die 'wrong class - use JSON::Schema::Modern::Document::OpenAPI instead'
     if is_plain_hashref($self->schema) and exists $self->schema->{openapi};
