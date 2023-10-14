@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.572     2023-10-14 22:04:52Z
           - boost runtime performance by removing uses of MooX::HandlesVia
 
