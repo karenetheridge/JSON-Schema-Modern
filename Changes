@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - boost runtime performance by removing uses of MooX::HandlesVia
 
 0.571     2023-09-17 01:14:47Z
           - removed duration and uuid formats for draft7 (they were not

@@ -28,7 +28,6 @@ use Storable 'dclone';
 use File::ShareDir 'dist_dir';
 use Module::Runtime qw(use_module require_module);
 use MooX::TypeTiny 0.002002;
-use MooX::HandlesVia;
 use Types::Standard 1.016003 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional Slurpy ArrayRef Undef ClassName Tuple Map);
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
@@ -105,16 +104,16 @@ has _format_validations => (
     Slurpy[HashRef[Dict[type => Enum[qw(null object array boolean string number integer)], sub => CodeRef]]],
   ],
   init_arg => 'format_validations',
-  handles_via => 'Hash',
-  handles => {
-    _get_format_validation => 'get',
-    add_format_validation => 'set',
-  },
   lazy => 1,
   default => sub { {} },
 );
 
-before add_format_validation => sub ($self, @kvs) { $format_type->({ @$_ }) foreach pairs @kvs };
+sub _get_format_validation { $_[0]->{_format_validations}{$_[1]} }
+
+sub add_format_validation {
+  $format_type->({ @_[1..$#_] });
+  $_[0]->{_format_validations}{$_->[0]} = $_->[1] foreach pairs @_[1..$#_];
+}
 
 around BUILDARGS => sub ($orig, $class, @args) {
   my $args = $class->$orig(@args);
@@ -642,20 +641,19 @@ has _resource_index => (
       configs => HashRef,
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
-  handles_via => 'Hash',
-  handles => {
-    _add_resources => 'set',
-    _get_resource => 'get',
-    _remove_resource => 'delete',
-    _resource_index => 'elements',
-    _resource_keys => 'keys',
-    _add_resources_unsafe => 'set',
-    _canonical_resources => 'values',
-    _resource_exists => 'exists',
-  },
   lazy => 1,
   default => sub { {} },
 );
+
+sub _get_resource { $_[0]->{_resource_index}{$_[1]} }
+sub _add_resources {
+  $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
+}
+sub _add_resources_unsafe {
+  $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
+}
+sub _resource_index { $_[0]->{_resource_index}->%* }
+sub _canonical_resources { values $_[0]->{_resource_index}->%* }
 
 around _add_resources => sub {
   my ($orig, $self) = (shift, shift);
@@ -663,8 +661,6 @@ around _add_resources => sub {
   my @resources;
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
     my ($key, $value) = @$pair;
-
-    $resource_type->($value); # check type of hash value against Dict
 
     if (my $existing = $self->_get_resource($key)) {
       # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
@@ -696,18 +692,11 @@ around _add_resources => sub {
 has _vocabulary_classes => (
   is => 'bare',
   isa => HashRef[
-    Tuple[
+    my $vocabulary_type = Tuple[
       $spec_version_type,
       $vocabulary_class_type,
     ]
   ],
-  handles_via => 'Hash',
-  handles => {
-    _get_vocabulary_class => 'get',
-    _set_vocabulary_class => 'set',
-    _get_vocabulary_values => 'values',
-  },
-  lazy => 1,
   default => sub {
     +{
       map { my $class = $_; pairmap { $a => [ $b, $class ] } $class->vocabulary }
@@ -717,8 +706,10 @@ has _vocabulary_classes => (
   },
 );
 
+sub _get_vocabulary_class { $_[0]->{_vocabulary_classes}{$_[1]} }
+
 sub add_vocabulary ($self, $classname) {
-  return if grep $_->[1] eq $classname, $self->_get_vocabulary_values;
+  return if grep $_->[1] eq $classname, values $self->{_vocabulary_classes}->%*;
 
   $vocabulary_class_type->(use_module($classname));
 
@@ -727,7 +718,7 @@ sub add_vocabulary ($self, $classname) {
     my ($uri_string, $spec_version) = @$pair;
     Str->where(q{my $uri = Mojo::URL->new($_); $uri->is_abs && !defined $uri->fragment})->($uri_string);
     $spec_version_type->($spec_version);
-    $self->_set_vocabulary_class($uri_string => [ $spec_version, $classname ])
+    $self->{_vocabulary_classes}{$uri_string} = $vocabulary_type->([ $spec_version, $classname ]);
   }
 }
 
@@ -735,18 +726,11 @@ sub add_vocabulary ($self, $classname) {
 has _metaschema_vocabulary_classes => (
   is => 'bare',
   isa => HashRef[
-    Tuple[
+    my $mvc_type = Tuple[
       $spec_version_type,
       ArrayRef[$vocabulary_class_type],
     ]
   ],
-  handles_via => 'Hash',
-  handles => {
-    _get_metaschema_vocabulary_classes => 'get',
-    _set_metaschema_vocabulary_classes => 'set',
-    __all_metaschema_vocabulary_classes => 'values',
-  },
-  lazy => 1,
   default => sub {
     my @modules = map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
       qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated);
@@ -759,11 +743,15 @@ has _metaschema_vocabulary_classes => (
   },
 );
 
+sub _get_metaschema_vocabulary_classes { $_[0]->{_metaschema_vocabulary_classes}{$_[1]} }
+sub _set_metaschema_vocabulary_classes { $_[0]->{_metaschema_vocabulary_classes}{$_[1]} = $mvc_type->($_[2]) }
+sub __all_metaschema_vocabulary_classes { values $_[0]->{_metaschema_vocabulary_classes}->%* }
+
 # retrieves metaschema info either from cache or by parsing the schema for vocabularies
 # throws a JSON::Schema::Modern::Result on error
 sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
   # check the cache
-  my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
+  my $metaschema_info = $self->{_metaschema_vocabulary_classes}{$metaschema_uri};
   return @$metaschema_info if $metaschema_info;
 
   # otherwise, fetch the metaschema and parse its $vocabulary keyword.
@@ -921,13 +909,6 @@ has _json_decoder => (
 has _media_type => (
   is => 'bare',
   isa => my $media_type_type = Map[Str->where(q{$_ eq CORE::fc($_)}), CodeRef],
-  handles_via => 'Hash',
-  handles => {
-    get_media_type => 'get',
-    add_media_type => 'set',
-    _media_types => 'keys',
-  },
-  lazy => 1,
   default => sub ($self) {
     my $_json_media_type = sub ($content_ref) {
       # utf-8 decoding is always done, as per the JSON spec.
@@ -958,26 +939,23 @@ has _media_type => (
   },
 );
 
+sub add_media_type { $media_type_type->({ @_[1..2] }); $_[0]->{_media_type}{$_[1]} = $_[2]; }
+sub _media_types { keys $_[0]->{_media_type}->%* }
+
 # get_media_type('TExT/bloop') will fall through to matching an entry for 'text/*' or '*/*'
-around get_media_type => sub ($orig, $self, $type) {
-  my $mt = $self->$orig(fc $type);
+sub get_media_type ($self, $type) {
+  my $mt = $self->{_media_type}{fc $type};
   return $mt if $mt;
 
-  return $self->$orig((first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } $self->_media_types)
-    // '*/*');
-};
+  return $self->{_media_type}{(first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } $self->_media_types) // '*/*'};
 
-before add_media_type => sub ($self, $type, $sub) { $media_type_type->({ $type => $sub }) };
+  return $self->{_media_type}{(first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } $self->_media_types)
+    // '*/*'};
+};
 
 has _encoding => (
   is => 'bare',
   isa => HashRef[CodeRef],
-  handles_via => 'Hash',
-  handles => {
-    get_encoding => 'get',
-    add_encoding => 'set',
-  },
-  lazy => 1,
   default => sub ($self) {
     +{
       identity => sub ($content_ref) { $content_ref },
@@ -994,6 +972,9 @@ has _encoding => (
     };
   },
 );
+
+sub get_encoding { $_[0]->{_encoding}{$_[1]} }
+sub add_encoding { $_[0]->{_encoding}{$_[1]} = CodeRef->($_[2]) }
 
 # callback hook for Sereal::Encoder
 sub FREEZE ($self, $serializer) {

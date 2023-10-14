@@ -17,7 +17,6 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use MooX::TypeTiny;
 use Types::Standard qw(ArrayRef InstanceOf Enum Bool);
-use MooX::HandlesVia;
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
@@ -53,11 +52,6 @@ has $_.'s' => (
   isa => ArrayRef[InstanceOf['JSON::Schema::Modern::'.ucfirst]],
   lazy => 1,
   default => sub { [] },
-  handles_via => 'Array',
-  handles => {
-    $_.'s' => 'elements',
-    $_.'_count' => 'count',
-  },
   coerce => do {
     my $type = $_;
     sub ($arrayref) {
@@ -66,6 +60,11 @@ has $_.'s' => (
     },
   },
 ) foreach qw(error annotation);
+
+sub errors { ($_[0]->{errors}//[])->@* }
+sub error_count { scalar ($_[0]->{errors}//[])->@* }
+sub annotations { ($_[0]->{annotations}//[])->@* }
+sub annotation_count { scalar ($_[0]->{annotations}//[])->@* }
 
 # strict_basic can only be used with draft2019-09.
 use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse data_only)];
@@ -287,7 +286,7 @@ A boolean flag indicating whether L</format> should include annotations in the o
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD OUTPUT_FORMATS result stringify
+=for Pod::Coverage BUILD OUTPUT_FORMATS result stringify annotation_count error_count
 
 =head2 format
 

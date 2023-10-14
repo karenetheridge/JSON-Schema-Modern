@@ -21,7 +21,6 @@ use List::Util 1.29 'pairs';
 use Ref::Util 0.100 'is_plain_hashref';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
-use MooX::HandlesVia;
 use Types::Standard 1.016003 qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef Slurpy);
 use namespace::clean;
 
@@ -65,31 +64,25 @@ has resource_index => (
       configs => HashRef,
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
-  handles_via => 'Hash',
-  handles => {
-    resource_index => 'elements',
-    resource_pairs => 'kv',
-    _add_resources => 'set',
-    _get_resource => 'get',
-    _remove_resource => 'delete',
-    _canonical_resources => 'values',
-  },
   init_arg => undef,
-  lazy => 1,
   default => sub { {} },
 );
 
+sub resource_index { $_[0]->{resource_index}->%* }
+sub resource_pairs { pairs $_[0]->{resource_index}->%* }
+sub _add_resources { $_[0]->{resource_index}{$_[1]} = $resource_type->($_[2]) }
+sub _get_resource { $_[0]->{resource_index}{$_[1]} }
+sub _canonical_resources { values $_[0]->{resource_index}->%* }
+
 has _path_to_resource => (
-  is => 'bare',
+  is => 'ro',
   isa => HashRef[$resource_type],
-  handles_via => 'Hash',
-  handles => {
-    path_to_resource => 'get',
-  },
   init_arg => undef,
   lazy => 1,
   default => sub { +{ map +($_->{path} => $_), shift->_canonical_resources } },
 );
+
+sub path_to_resource { $_[0]->_path_to_resource; $_[0]->{_path_to_resource}{$_[1]} }
 
 # for internal use only
 has _serialized_schema => (
@@ -100,16 +93,14 @@ has _serialized_schema => (
 
 has errors => (
   is => 'bare',
-  handles_via => 'Array',
-  handles => {
-    errors => 'elements',
-    has_errors => 'count',
-  },
   writer => '_set_errors',
   isa => ArrayRef[InstanceOf['JSON::Schema::Modern::Error']],
   lazy => 1,
   default => sub { [] },
 );
+
+sub errors { ($_[0]->{errors}//[])->@* }
+sub has_errors { scalar ($_[0]->{errors}//[])->@* }
 
 around _add_resources => sub {
   my $orig = shift;
@@ -279,7 +270,7 @@ errors halt the parsing process.) Documents with errors cannot be evaluated.
 
 =head1 METHODS
 
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD traverse
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD traverse has_errors path_to_resource resource_pairs
 
 =head2 path_to_canonical_uri
 
