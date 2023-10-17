@@ -149,5 +149,43 @@
                 "valid": false
             }
         ]
-    }
+    },
+    {
+        "description": "base URI change - change folder in subschema with path from root",
+        "comment": "based on test suite draft7/refRemote.json 'base URI change - change folder in subschema'",
+        "schema": {
+            "$id": "http://localhost:1234/scope_change_defs.json",
+            "type" : "object",
+            "properties": {
+                "list": { "$ref": "#/definitions/baz/definitions/bar" }
+            },
+            "definitions": {
+                "folderInteger": {
+                    "$id": "baseUriChangeFolderInSubschema/folderInteger.json",
+                    "type": "integer"
+                },
+                "baz": {
+                    "$id": "baseUriChangeFolderInSubschema/",
+                    "definitions": {
+                        "bar": {
+                            "type": "array",
+                            "items": { "$ref": "folderInteger.json" }
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": {"list": [1]},
+                "valid": true
+            },
+            {
+                "description": "string is invalid",
+                "data": {"list": ["a"]},
+                "valid": false
+            }
+        ]
+     }
 ]
