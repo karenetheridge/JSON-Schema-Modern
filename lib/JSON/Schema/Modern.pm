@@ -697,6 +697,8 @@ has _vocabulary_classes => (
       $vocabulary_class_type,
     ]
   ],
+  reader => '__vocabulary_classes',
+  lazy => 1,
   default => sub {
     +{
       map { my $class = $_; pairmap { $a => [ $b, $class ] } $class->vocabulary }
@@ -706,10 +708,10 @@ has _vocabulary_classes => (
   },
 );
 
-sub _get_vocabulary_class { $_[0]->{_vocabulary_classes}{$_[1]} }
+sub _get_vocabulary_class { $_[0]->__vocabulary_classes->{$_[1]} }
 
 sub add_vocabulary ($self, $classname) {
-  return if grep $_->[1] eq $classname, values $self->{_vocabulary_classes}->%*;
+  return if grep $_->[1] eq $classname, values $self->__vocabulary_classes->%*;
 
   $vocabulary_class_type->(use_module($classname));
 
@@ -731,6 +733,8 @@ has _metaschema_vocabulary_classes => (
       ArrayRef[$vocabulary_class_type],
     ]
   ],
+  reader => '__metaschema_vocabulary_classes',
+  lazy => 1,
   default => sub {
     my @modules = map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
       qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated);
@@ -743,15 +747,15 @@ has _metaschema_vocabulary_classes => (
   },
 );
 
-sub _get_metaschema_vocabulary_classes { $_[0]->{_metaschema_vocabulary_classes}{$_[1]} }
-sub _set_metaschema_vocabulary_classes { $_[0]->{_metaschema_vocabulary_classes}{$_[1]} = $mvc_type->($_[2]) }
-sub __all_metaschema_vocabulary_classes { values $_[0]->{_metaschema_vocabulary_classes}->%* }
+sub _get_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1]} }
+sub _set_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1]} = $mvc_type->($_[2]) }
+sub __all_metaschema_vocabulary_classes { values $_[0]->__metaschema_vocabulary_classes->%* }
 
 # retrieves metaschema info either from cache or by parsing the schema for vocabularies
 # throws a JSON::Schema::Modern::Result on error
 sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
   # check the cache
-  my $metaschema_info = $self->{_metaschema_vocabulary_classes}{$metaschema_uri};
+  my $metaschema_info = $self->__metaschema_vocabulary_classes->{$metaschema_uri};
   return @$metaschema_info if $metaschema_info;
 
   # otherwise, fetch the metaschema and parse its $vocabulary keyword.
@@ -909,6 +913,8 @@ has _json_decoder => (
 has _media_type => (
   is => 'bare',
   isa => my $media_type_type = Map[Str->where(q{$_ eq CORE::fc($_)}), CodeRef],
+  reader => '__media_type',
+  lazy => 1,
   default => sub ($self) {
     my $_json_media_type = sub ($content_ref) {
       # utf-8 decoding is always done, as per the JSON spec.
@@ -939,23 +945,22 @@ has _media_type => (
   },
 );
 
-sub add_media_type { $media_type_type->({ @_[1..2] }); $_[0]->{_media_type}{$_[1]} = $_[2]; }
-sub _media_types { keys $_[0]->{_media_type}->%* }
+sub add_media_type { $media_type_type->({ @_[1..2] }); $_[0]->__media_type->{$_[1]} = $_[2]; }
 
 # get_media_type('TExT/bloop') will fall through to matching an entry for 'text/*' or '*/*'
 sub get_media_type ($self, $type) {
-  my $mt = $self->{_media_type}{fc $type};
+  my $types = $self->__media_type;
+  my $mt = $types->{fc $type};
   return $mt if $mt;
 
-  return $self->{_media_type}{(first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } $self->_media_types) // '*/*'};
-
-  return $self->{_media_type}{(first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } $self->_media_types)
-    // '*/*'};
+  return $types->{(first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } keys %$types) // '*/*'};
 };
 
 has _encoding => (
   is => 'bare',
   isa => HashRef[CodeRef],
+  reader => '__encoding',
+  lazy => 1,
   default => sub ($self) {
     +{
       identity => sub ($content_ref) { $content_ref },
@@ -973,8 +978,8 @@ has _encoding => (
   },
 );
 
-sub get_encoding { $_[0]->{_encoding}{$_[1]} }
-sub add_encoding { $_[0]->{_encoding}{$_[1]} = CodeRef->($_[2]) }
+sub get_encoding { $_[0]->__encoding->{$_[1]} }
+sub add_encoding { $_[0]->__encoding->{$_[1]} = CodeRef->($_[2]) }
 
 # callback hook for Sereal::Encoder
 sub FREEZE ($self, $serializer) {

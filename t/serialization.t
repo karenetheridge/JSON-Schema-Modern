@@ -84,4 +84,9 @@ $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
 $thawed = Sereal::Decoder->new->decode($frozen);
 ok($thawed->evaluate($schema, {}), 'evaluate again against an empty schema');
 
+ok($thawed->_get_vocabulary_class('https://json-schema.org/draft/2020-12/vocab/core'), 'vocabulary_class works in a thawed object');
+ok($thawed->_get_metaschema_vocabulary_classes('https://json-schema.org/draft/2020-12/schema'), 'metaschema_vocabulary_classes works in a thawed object');
+ok($thawed->get_media_type('application/json'), 'media_type works in a thawed object');
+ok($thawed->get_encoding('base64'), 'encoding works in a thawed object');
+
 done_testing;
