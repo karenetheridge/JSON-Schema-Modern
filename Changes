@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.573     2023-10-21 23:49:03Z
           - fix construction of default values of some attributes e.g.
             media_types, encodings
           - fix list context of has_errors, error_count, annotation_count
