@@ -100,7 +100,7 @@ has errors => (
 );
 
 sub errors { ($_[0]->{errors}//[])->@* }
-sub has_errors { scalar ($_[0]->{errors}//[])->@* }
+sub has_errors { scalar(($_[0]->{errors}//[])->@*) }
 
 around _add_resources => sub {
   my $orig = shift;

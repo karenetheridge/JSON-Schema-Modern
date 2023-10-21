@@ -62,9 +62,9 @@ has $_.'s' => (
 ) foreach qw(error annotation);
 
 sub errors { ($_[0]->{errors}//[])->@* }
-sub error_count { scalar ($_[0]->{errors}//[])->@* }
+sub error_count { scalar(($_[0]->{errors}//[])->@*) }
 sub annotations { ($_[0]->{annotations}//[])->@* }
-sub annotation_count { scalar ($_[0]->{annotations}//[])->@* }
+sub annotation_count { scalar(($_[0]->{annotations}//[])->@*) }
 
 # strict_basic can only be used with draft2019-09.
 use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse data_only)];

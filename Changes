@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - fix construction of default values of some attributes e.g.
             media_types, encodings
+          - fix list context of has_errors, error_count, annotation_count
+            methods
 
 0.572     2023-10-14 22:04:52Z
           - boost runtime performance by removing uses of MooX::HandlesVia
