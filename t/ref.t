@@ -887,7 +887,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
     'there is no outer $dynamicAnchor in scope to recurse to',
   );
 
-  # XXX one more:  change dynamicref back to ref, but use the fragment uri.
+  # change $dynamicRef back to $ref, but use the fragment uri.
   delete $js->{_resource_index};
   $schema->{additionalProperties}{additionalProperties}{'$ref'} =
     delete $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'}; # '#thingy'
