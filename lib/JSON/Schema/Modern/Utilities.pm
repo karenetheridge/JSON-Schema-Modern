@@ -205,6 +205,7 @@ sub canonical_uri ($state, @extra_path) {
 # - schema_path
 # - _schema_path_suffix
 # - errors
+# - exception
 sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
@@ -240,6 +241,8 @@ sub E ($state, $error_string, @args) {
 # - _schema_path_suffix
 # - annotations
 # - collect_annotations
+# - spec_version
+# - _unknown
 sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations} or $state->{spec_version} eq 'draft7';
 
