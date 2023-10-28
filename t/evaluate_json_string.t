@@ -9,11 +9,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use if "$]" >= 5.022, experimental => 're_strict';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::More 0.88;
-use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Fatal;
-use Test::Deep;
-use JSON::Schema::Modern;
 
 use lib 't/lib';
 use Helper;

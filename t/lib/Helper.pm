@@ -1,6 +1,11 @@
 use strictures 2;
 # no package, so things defined here appear in the namespace of the parent.
 
+use Test::More 0.96;
+use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
+use Test::Deep;
+use JSON::Schema::Modern;
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::PP ();
 use constant { true => JSON::PP::true, false => JSON::PP::false };
 

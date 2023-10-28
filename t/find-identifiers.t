@@ -9,10 +9,6 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::More 0.96;
-use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use Test::Deep;
-use JSON::Schema::Modern;
 use List::Util 'unpairs';
 use Scalar::Util 'refaddr';
 use lib 't/lib';

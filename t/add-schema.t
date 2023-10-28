@@ -7,17 +7,11 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::More 0.96;
-use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use Test::Deep;
 use Test::Fatal;
 use Test::Deep::UnorderedPairs;
-use JSON::Schema::Modern;
 use List::Util 'unpairs';
 use lib 't/lib';
 use Helper;
-
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 
 use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
 

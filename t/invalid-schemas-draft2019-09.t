@@ -9,8 +9,8 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::More;
 use lib 't/lib';
+use Helper;
 use Acceptance;
 
 my $version = 'draft2019-09';
