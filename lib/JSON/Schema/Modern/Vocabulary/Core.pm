@@ -135,7 +135,7 @@ sub _traverse_keyword_schema ($self, $schema, $state) {
 
   return E($state, '"%s" is not a valid metaschema', $schema->{'$schema'}) if not @$vocabularies;
 
-  # we special-case this because the check in _eval_subschema for older drafts + $ref has already happened
+  # we special-case this because the check in _traverse_subschema for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
     if exists $schema->{'$ref'} and $spec_version eq 'draft7';
 
