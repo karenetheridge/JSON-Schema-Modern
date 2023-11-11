@@ -174,18 +174,18 @@ sub keywords {
   $formats_by_spec_version{'draft2019-09'} =
   $formats_by_spec_version{'draft2020-12'} = [$formats_by_spec_version{draft7}->@*, qw(duration uuid)];
 
-  sub _get_default_format_validation ($self, $state, $format) {
+  sub _get_default_format_validation ($class, $state, $format) {
     return $formats->{$format}
       if grep $format eq $_, $formats_by_spec_version{$state->{spec_version}}->@*;
   }
 }
 
-sub _traverse_keyword_format ($self, $schema, $state) {
+sub _traverse_keyword_format ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
 
-sub _eval_keyword_format ($self, $data, $schema, $state) {
+sub _eval_keyword_format ($class, $data, $schema, $state) {
   abort($state, 'unimplemented format "%s"', $schema->{format})
     if $schema->{format} eq 'uri-template';
 
@@ -214,7 +214,7 @@ sub _eval_keyword_format ($self, $data, $schema, $state) {
   # first check the subrefs from JSON::Schema::Modern->new(format_validations => { ... })
   # and fall back to the default formats, which are all defined only for strings
   my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
-  my $default_spec = $self->_get_default_format_validation($state, $schema->{format});
+  my $default_spec = $class->_get_default_format_validation($state, $schema->{format});
 
   my $spec =
     $evaluator_spec ? ($default_spec ? +{ type => 'string', sub => $evaluator_spec } : $evaluator_spec)

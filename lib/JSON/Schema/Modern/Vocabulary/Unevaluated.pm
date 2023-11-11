@@ -28,16 +28,16 @@ sub vocabulary {
 sub evaluation_order { 7 }
 
 # This vocabulary should be evaluated after the Applicator vocabulary.
-sub keywords ($self, $spec_version) {
+sub keywords ($class, $spec_version) {
   die 'Unevaluated not implemented in '.$spec_version if $spec_version =~ /^draft[467]$/;
   qw(unevaluatedItems unevaluatedProperties);
 }
 
-sub _traverse_keyword_unevaluatedItems ($self, $schema, $state) {
-  $self->traverse_subschema($schema, $state);
+sub _traverse_keyword_unevaluatedItems ($class, $schema, $state) {
+  $class->traverse_subschema($schema, $state);
 }
 
-sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
+sub _eval_keyword_unevaluatedItems ($class, $data, $schema, $state) {
   # these should never happen
   die '"unevaluatedItems" keyword present, but annotation collection is disabled'
     if not $state->{collect_annotations};
@@ -77,7 +77,7 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
           'additional item not permitted')
     }
     else {
-      if ($self->eval($data->[$idx], $schema->{unevaluatedItems},
+      if ($class->eval($data->[$idx], $schema->{unevaluatedItems},
           +{ %$state, data_path => $state->{data_path}.'/'.$idx,
             schema_path => $state->{schema_path}.'/unevaluatedItems',
             collect_annotations => $state->{collect_annotations} & ~1 })) {
@@ -94,11 +94,11 @@ sub _eval_keyword_unevaluatedItems ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_unevaluatedProperties ($self, $schema, $state) {
-  $self->traverse_subschema($schema, $state);
+sub _traverse_keyword_unevaluatedProperties ($class, $schema, $state) {
+  $class->traverse_subschema($schema, $state);
 }
 
-sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
+sub _eval_keyword_unevaluatedProperties ($class, $data, $schema, $state) {
   # these should never happen
   die '"unevaluatedProperties" keyword present, but annotation collection is disabled'
     if not $state->{collect_annotations};
@@ -125,7 +125,7 @@ sub _eval_keyword_unevaluatedProperties ($self, $data, $schema, $state) {
         'additional property not permitted');
     }
     else {
-      if ($self->eval($data->{$property}, $schema->{unevaluatedProperties},
+      if ($class->eval($data->{$property}, $schema->{unevaluatedProperties},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
             schema_path => $state->{schema_path}.'/unevaluatedProperties',
             collect_annotations => $state->{collect_annotations} & ~1 })) {

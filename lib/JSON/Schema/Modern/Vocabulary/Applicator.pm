@@ -40,7 +40,7 @@ sub evaluation_order { 3 }
 # - in-place applicators and properties, patternProperties, additionalProperties must be evaluated
 #   before unevaluatedProperties (in the Unevaluated vocabulary)
 # - contains must be evaluated before maxContains, minContains (in the Validator vocabulary)
-sub keywords ($self, $spec_version) {
+sub keywords ($class, $spec_version) {
   return (
     qw(allOf anyOf oneOf not if then else),
     $spec_version eq 'draft7' ? 'dependencies' : 'dependentSchemas',
@@ -68,10 +68,10 @@ foreach my $phase (qw(traverse eval)) {
 
 sub _traverse_keyword_allOf { shift->traverse_array_schemas(@_) }
 
-sub _eval_keyword_allOf ($self, $data, $schema, $state) {
+sub _eval_keyword_allOf ($class, $data, $schema, $state) {
   my @invalid;
   foreach my $idx (0 .. $schema->{allOf}->$#*) {
-    if ($self->eval($data, $schema->{allOf}[$idx], +{ %$state,
+    if ($class->eval($data, $schema->{allOf}[$idx], +{ %$state,
         schema_path => $state->{schema_path}.'/allOf/'.$idx })) {
     }
     else {
@@ -88,11 +88,11 @@ sub _eval_keyword_allOf ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_anyOf { shift->traverse_array_schemas(@_) }
 
-sub _eval_keyword_anyOf ($self, $data, $schema, $state) {
+sub _eval_keyword_anyOf ($class, $data, $schema, $state) {
   my $valid = 0;
   my @errors;
   foreach my $idx (0 .. $schema->{anyOf}->$#*) {
-    next if not $self->eval($data, $schema->{anyOf}[$idx],
+    next if not $class->eval($data, $schema->{anyOf}[$idx],
       +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/anyOf/'.$idx });
     ++$valid;
     last if $state->{short_circuit};
@@ -105,10 +105,10 @@ sub _eval_keyword_anyOf ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_oneOf { shift->traverse_array_schemas(@_) }
 
-sub _eval_keyword_oneOf ($self, $data, $schema, $state) {
+sub _eval_keyword_oneOf ($class, $data, $schema, $state) {
   my (@valid, @errors);
   foreach my $idx (0 .. $schema->{oneOf}->$#*) {
-    next if not $self->eval($data, $schema->{oneOf}[$idx],
+    next if not $class->eval($data, $schema->{oneOf}[$idx],
       +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/oneOf/'.$idx });
     push @valid, $idx;
     last if @valid > 1 and $state->{short_circuit};
@@ -127,8 +127,8 @@ sub _eval_keyword_oneOf ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_not { shift->traverse_subschema(@_) }
 
-sub _eval_keyword_not ($self, $data, $schema, $state) {
-  return 1 if not $self->eval($data, $schema->{not},
+sub _eval_keyword_not ($class, $data, $schema, $state) {
+  return 1 if not $class->eval($data, $schema->{not},
     +{ %$state, schema_path => $state->{schema_path}.'/not',
       short_circuit_suggested => 1, # errors do not propagate upward from this subschema
       collect_annotations => 0,     # nor do annotations
@@ -141,10 +141,10 @@ sub _traverse_keyword_if { shift->traverse_subschema(@_) }
 sub _traverse_keyword_then { shift->traverse_subschema(@_) }
 sub _traverse_keyword_else { shift->traverse_subschema(@_) }
 
-sub _eval_keyword_if ($self, $data, $schema, $state) {
+sub _eval_keyword_if ($class, $data, $schema, $state) {
   return 1 if not exists $schema->{then} and not exists $schema->{else}
     and not $state->{collect_annotations};
-  my $keyword = $self->eval($data, $schema->{if},
+  my $keyword = $class->eval($data, $schema->{if},
      +{ %$state, schema_path => $state->{schema_path}.'/if',
         short_circuit_suggested => !$state->{collect_annotations},
         errors => [],
@@ -152,21 +152,21 @@ sub _eval_keyword_if ($self, $data, $schema, $state) {
     ? 'then' : 'else';
 
   return 1 if not exists $schema->{$keyword};
-  return 1 if $self->eval($data, $schema->{$keyword},
+  return 1 if $class->eval($data, $schema->{$keyword},
     +{ %$state, schema_path => $state->{schema_path}.'/'.$keyword });
   return E({ %$state, keyword => $keyword }, 'subschema is not valid');
 }
 
 sub _traverse_keyword_dependentSchemas { shift->traverse_object_schemas(@_) }
 
-sub _eval_keyword_dependentSchemas ($self, $data, $schema, $state) {
+sub _eval_keyword_dependentSchemas ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
   foreach my $property (sort keys $schema->{dependentSchemas}->%*) {
     next if not exists $data->{$property};
 
-    if ($self->eval($data, $schema->{dependentSchemas}{$property},
+    if ($class->eval($data, $schema->{dependentSchemas}{$property},
         +{ %$state, schema_path => jsonp($state->{schema_path}, 'dependentSchemas', $property) })) {
       next;
     }
@@ -179,7 +179,7 @@ sub _eval_keyword_dependentSchemas ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_dependencies ($self, $schema, $state) {
+sub _traverse_keyword_dependencies ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
@@ -197,13 +197,13 @@ sub _traverse_keyword_dependencies ($self, $schema, $state) {
     }
     else {
       # as in dependentSchemas
-      $valid = 0 if not $self->traverse_property_schema($schema, $state, $property);
+      $valid = 0 if not $class->traverse_property_schema($schema, $state, $property);
     }
   }
   return $valid;
 }
 
-sub _eval_keyword_dependencies ($self, $data, $schema, $state) {
+sub _eval_keyword_dependencies ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
@@ -219,7 +219,7 @@ sub _eval_keyword_dependencies ($self, $data, $schema, $state) {
     }
     else {
       # as in dependentSchemas
-      if ($self->eval($data, $schema->{dependencies}{$property},
+      if ($class->eval($data, $schema->{dependencies}{$property},
           +{ %$state, schema_path => jsonp($state->{schema_path}, 'dependencies', $property) })) {
         next;
       }
@@ -237,31 +237,31 @@ sub _traverse_keyword_prefixItems { shift->traverse_array_schemas(@_) }
 
 sub _eval_keyword_prefixItems { goto \&_eval_keyword__items_array_schemas }
 
-sub _traverse_keyword_items ($self, $schema, $state) {
+sub _traverse_keyword_items ($class, $schema, $state) {
   if (is_plain_arrayref($schema->{items})) {
     return E($state, 'array form of "items" not supported in %s', $state->{spec_version})
       if $state->{spec_version} !~ /^draft(?:7|2019-09)$/;
 
-    return $self->traverse_array_schemas($schema, $state);
+    return $class->traverse_array_schemas($schema, $state);
   }
 
-  $self->traverse_subschema($schema, $state);
+  $class->traverse_subschema($schema, $state);
 }
 
-sub _eval_keyword_items ($self, $data, $schema, $state) {
+sub _eval_keyword_items ($class, $data, $schema, $state) {
   goto \&_eval_keyword__items_array_schemas if is_plain_arrayref($schema->{items});
   goto \&_eval_keyword__items_schema;
 }
 
 sub _traverse_keyword_additionalItems { shift->traverse_subschema(@_) }
 
-sub _eval_keyword_additionalItems ($self, $data, $schema, $state) {
+sub _eval_keyword_additionalItems ($class, $data, $schema, $state) {
   return 1 if not exists $state->{_last_items_index};
   goto \&_eval_keyword__items_schema;
 }
 
 # prefixItems (draft 2020-12), array-based items (all drafts)
-sub _eval_keyword__items_array_schemas ($self, $data, $schema, $state) {
+sub _eval_keyword__items_array_schemas ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
   return 1 if ($state->{_last_items_index}//-1) == $data->$#*;
 
@@ -277,7 +277,7 @@ sub _eval_keyword__items_array_schemas ($self, $data, $schema, $state) {
         _schema_path_suffix => $idx, collect_annotations => $state->{collect_annotations} & ~1 },
         'item not permitted');
     }
-    elsif ($self->eval($data->[$idx], $schema->{$state->{keyword}}[$idx],
+    elsif ($class->eval($data->[$idx], $schema->{$state->{keyword}}[$idx],
         +{ %$state, data_path => $state->{data_path}.'/'.$idx,
           schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx,
           collect_annotations => $state->{collect_annotations} & ~1 })) {
@@ -297,7 +297,7 @@ sub _eval_keyword__items_array_schemas ($self, $data, $schema, $state) {
 }
 
 # schema-based items (all drafts), and additionalItems (up to and including draft2019-09)
-sub _eval_keyword__items_schema ($self, $data, $schema, $state) {
+sub _eval_keyword__items_schema ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
   return 1 if ($state->{_last_items_index}//-1) == $data->$#*;
 
@@ -311,7 +311,7 @@ sub _eval_keyword__items_schema ($self, $data, $schema, $state) {
         exists $schema->{prefixItems} || $state->{keyword} eq 'additionalItems' ? 'additional ' : '');
     }
     else {
-      if ($self->eval($data->[$idx], $schema->{$state->{keyword}},
+      if ($class->eval($data->[$idx], $schema->{$state->{keyword}},
         +{ %$state, data_path => $state->{data_path}.'/'.$idx,
           schema_path => $state->{schema_path}.'/'.$state->{keyword},
           collect_annotations => $state->{collect_annotations} & ~1 })) {
@@ -333,14 +333,14 @@ sub _eval_keyword__items_schema ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_contains { shift->traverse_subschema(@_) }
 
-sub _eval_keyword_contains ($self, $data, $schema, $state) {
+sub _eval_keyword_contains ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
 
   $state->{_num_contains} = 0;
   my (@errors, @valid);
 
   foreach my $idx (0 .. $data->$#*) {
-    if ($self->eval($data->[$idx], $schema->{contains},
+    if ($class->eval($data->[$idx], $schema->{contains},
         +{ %$state, errors => \@errors,
           data_path => $state->{data_path}.'/'.$idx,
           schema_path => $state->{schema_path}.'/contains',
@@ -367,7 +367,7 @@ sub _eval_keyword_contains ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_properties { shift->traverse_object_schemas(@_) }
 
-sub _eval_keyword_properties ($self, $data, $schema, $state) {
+sub _eval_keyword_properties ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
@@ -382,7 +382,7 @@ sub _eval_keyword_properties ($self, $data, $schema, $state) {
         _schema_path_suffix => $property }, 'property not permitted');
     }
     else {
-      if ($self->eval($data->{$property}, $schema->{properties}{$property},
+      if ($class->eval($data->{$property}, $schema->{properties}{$property},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
             schema_path => jsonp($state->{schema_path}, 'properties', $property),
             collect_annotations => $state->{collect_annotations} & ~1 })) {
@@ -399,18 +399,18 @@ sub _eval_keyword_properties ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_patternProperties ($self, $schema, $state) {
+sub _traverse_keyword_patternProperties ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   my $valid = 1;
   foreach my $property (sort keys $schema->{patternProperties}->%*) {
     $valid = 0 if not assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
-    $valid = 0 if not $self->traverse_property_schema($schema, $state, $property);
+    $valid = 0 if not $class->traverse_property_schema($schema, $state, $property);
   }
   return $valid;
 }
 
-sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
+sub _eval_keyword_patternProperties ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
@@ -424,7 +424,7 @@ sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
           _schema_path_suffix => $property_pattern }, 'property not permitted');
       }
       else {
-        if ($self->eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
+        if ($class->eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
             +{ %$state, data_path => jsonp($state->{data_path}, $property),
               schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern),
               collect_annotations => $state->{collect_annotations} & ~1 })) {
@@ -444,7 +444,7 @@ sub _eval_keyword_patternProperties ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_additionalProperties { shift->traverse_subschema(@_) }
 
-sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
+sub _eval_keyword_additionalProperties ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
@@ -461,7 +461,7 @@ sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
         'additional property not permitted');
     }
     else {
-      if ($self->eval($data->{$property}, $schema->{additionalProperties},
+      if ($class->eval($data->{$property}, $schema->{additionalProperties},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
             schema_path => $state->{schema_path}.'/additionalProperties',
             collect_annotations => $state->{collect_annotations} & ~1 })) {
@@ -480,12 +480,12 @@ sub _eval_keyword_additionalProperties ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_propertyNames { shift->traverse_subschema(@_) }
 
-sub _eval_keyword_propertyNames ($self, $data, $schema, $state) {
+sub _eval_keyword_propertyNames ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
 
   my $valid = 1;
   foreach my $property (sort keys %$data) {
-    if ($self->eval($property, $schema->{propertyNames},
+    if ($class->eval($property, $schema->{propertyNames},
         +{ %$state, data_path => jsonp($state->{data_path}, $property),
           schema_path => $state->{schema_path}.'/propertyNames',
           collect_annotations => $state->{collect_annotations} & ~1 })) {

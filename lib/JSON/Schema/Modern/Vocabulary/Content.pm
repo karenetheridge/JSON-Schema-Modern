@@ -29,19 +29,19 @@ sub vocabulary {
 
 sub evaluation_order { 4 }
 
-sub keywords ($self, $spec_version) {
+sub keywords ($class, $spec_version) {
   return (
     qw(contentEncoding contentMediaType),
     $spec_version ne 'draft7' ? 'contentSchema' : (),
   );
 }
 
-sub _traverse_keyword_contentEncoding ($self, $schema, $state) {
+sub _traverse_keyword_contentEncoding ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
 
-sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
+sub _eval_keyword_contentEncoding ($class, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
 
   A($state, $schema->{$state->{keyword}});
@@ -66,7 +66,7 @@ sub _eval_keyword_contentEncoding ($self, $data, $schema, $state) {
 
 sub _traverse_keyword_contentMediaType { goto \&_traverse_keyword_contentEncoding }
 
-sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
+sub _eval_keyword_contentMediaType ($class, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
 
   A($state, $schema->{$state->{keyword}});
@@ -93,14 +93,14 @@ sub _eval_keyword_contentMediaType ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_contentSchema ($self, $schema, $state) {
+sub _traverse_keyword_contentSchema ($class, $schema, $state) {
   # since contentSchema should never be assumed to be evaluated in the context of the containing
   # schema, it is not appropriate to gather identifiers found therein -- but we can still validate
   # the subschema.
-  $self->traverse_subschema($schema, +{ %$state, identifiers => [] });
+  $class->traverse_subschema($schema, +{ %$state, identifiers => [] });
 }
 
-sub _eval_keyword_contentSchema ($self, $data, $schema, $state) {
+sub _eval_keyword_contentSchema ($class, $data, $schema, $state) {
   return 1 if not exists $schema->{contentMediaType};
   return 1 if not is_type('string', $data);
 
@@ -109,7 +109,7 @@ sub _eval_keyword_contentSchema ($self, $data, $schema, $state) {
 
   return 1 if not exists $state->{_content_ref};  # contentMediaType failed to decode the content
 
-  return 1 if $self->eval($state->{_content_ref}->$*, $schema->{contentSchema},
+  return 1 if $class->eval($state->{_content_ref}->$*, $schema->{contentSchema},
     { %$state, schema_path => $state->{schema_path}.'/contentSchema' });
   return E($state, 'subschema is not valid');
 }

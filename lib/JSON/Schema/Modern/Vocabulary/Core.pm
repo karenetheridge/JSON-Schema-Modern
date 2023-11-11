@@ -27,7 +27,7 @@ sub vocabulary {
 
 sub evaluation_order { 0 }
 
-sub keywords ($self, $spec_version) {
+sub keywords ($class, $spec_version) {
   return (
     qw($id $schema),
     $spec_version ne 'draft7' ? '$anchor' : (),
@@ -45,7 +45,7 @@ sub keywords ($self, $spec_version) {
 #   $uri => { path => $path_to_identifier, canonical_uri => Mojo::URL (absolute when possible) }
 # this is used by the Document constructor to build its resource_index.
 
-sub _traverse_keyword_id ($self, $schema, $state) {
+sub _traverse_keyword_id ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string')
     or not assert_uri_reference($state, $schema);
 
@@ -56,7 +56,7 @@ sub _traverse_keyword_id ($self, $schema, $state) {
       return E($state, '$id cannot change the base uri at the same time as declaring an anchor')
         if length($uri->clone->fragment(undef));
 
-      return $self->_traverse_keyword_anchor({ %$schema, $state->{keyword} => $uri->fragment }, $state);
+      return $class->_traverse_keyword_anchor({ %$schema, $state->{keyword} => $uri->fragment }, $state);
     }
   }
   else {
@@ -83,7 +83,7 @@ sub _traverse_keyword_id ($self, $schema, $state) {
   return 1;
 }
 
-sub _eval_keyword_id ($self, $data, $schema, $state) {
+sub _eval_keyword_id ($class, $data, $schema, $state) {
   my $schema_info = $state->{document}->path_to_resource($state->{document_path}.$state->{schema_path});
   # this should never happen, if the pre-evaluation traversal was performed correctly
   abort($state, 'failed to resolve %s to canonical uri', $state->{keyword}) if not $schema_info;
@@ -108,7 +108,7 @@ sub _eval_keyword_id ($self, $data, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_schema ($self, $schema, $state) {
+sub _traverse_keyword_schema ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string') or not assert_uri($state, $schema);
 
   # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
@@ -127,7 +127,7 @@ sub _traverse_keyword_schema ($self, $schema, $state) {
     my $schema_info = $state->{evaluator}->_fetch_from_uri($schema->{'$schema'});
     return E($state, 'EXCEPTION: unable to find resource %s', $schema->{'$schema'}) if not $schema_info;
 
-    ($spec_version, $vocabularies) = $self->__fetch_vocabulary_data({ %$state,
+    ($spec_version, $vocabularies) = $class->__fetch_vocabulary_data({ %$state,
         keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
         traversed_schema_path => jsonp($state->{schema_path}, '$schema'),
       }, $schema_info);
@@ -149,7 +149,7 @@ sub _traverse_keyword_schema ($self, $schema, $state) {
   return 1;
 }
 
-sub _traverse_keyword_anchor ($self, $schema, $state) {
+sub _traverse_keyword_anchor ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
 
   return E($state, '%s value "%s" does not match required syntax',
@@ -175,7 +175,7 @@ sub _traverse_keyword_anchor ($self, $schema, $state) {
 # we already indexed the $anchor uri, so there is nothing more to do at evaluation time.
 # we explicitly do NOT set $state->{initial_schema_uri}.
 
-sub _traverse_keyword_recursiveAnchor ($self, $schema, $state) {
+sub _traverse_keyword_recursiveAnchor ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'boolean');
 
   # this is required because the location is used as the base URI for future resolution
@@ -185,7 +185,7 @@ sub _traverse_keyword_recursiveAnchor ($self, $schema, $state) {
   return 1;
 }
 
-sub _eval_keyword_recursiveAnchor ($self, $data, $schema, $state) {
+sub _eval_keyword_recursiveAnchor ($class, $data, $schema, $state) {
   return 1 if not $schema->{'$recursiveAnchor'} or exists $state->{recursive_anchor_uri};
 
   # record the canonical location of the current position, to be used against future resolution
@@ -199,20 +199,20 @@ sub _traverse_keyword_dynamicAnchor { goto \&_traverse_keyword_anchor }
 # we already indexed the $dynamicAnchor uri, so there is nothing more to do at evaluation time.
 # we explicitly do NOT set $state->{initial_schema_uri}.
 
-sub _traverse_keyword_ref ($self, $schema, $state) {
+sub _traverse_keyword_ref ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string')
     or not assert_uri_reference($state, $schema);
   return 1;
 }
 
-sub _eval_keyword_ref ($self, $data, $schema, $state) {
+sub _eval_keyword_ref ($class, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$ref'})->to_abs($state->{initial_schema_uri});
-  $self->eval_subschema_at_uri($data, $schema, $state, $uri);
+  $class->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
 sub _traverse_keyword_recursiveRef { goto \&_traverse_keyword_ref }
 
-sub _eval_keyword_recursiveRef ($self, $data, $schema, $state) {
+sub _eval_keyword_recursiveRef ($class, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$recursiveRef'})->to_abs($state->{initial_schema_uri});
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
@@ -222,12 +222,12 @@ sub _eval_keyword_recursiveRef ($self, $data, $schema, $state) {
       ->to_abs($state->{recursive_anchor_uri} // $state->{initial_schema_uri});
   }
 
-  return $self->eval_subschema_at_uri($data, $schema, $state, $uri);
+  return $class->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
 sub _traverse_keyword_dynamicRef { goto \&_traverse_keyword_ref }
 
-sub _eval_keyword_dynamicRef ($self, $data, $schema, $state) {
+sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
   my $uri = Mojo::URL->new($schema->{'$dynamicRef'})->to_abs($state->{initial_schema_uri});
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
@@ -249,10 +249,10 @@ sub _eval_keyword_dynamicRef ($self, $data, $schema, $state) {
     }
   }
 
-  return $self->eval_subschema_at_uri($data, $schema, $state, $uri);
+  return $class->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
-sub _traverse_keyword_vocabulary ($self, $schema, $state) {
+sub _traverse_keyword_vocabulary ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   return E($state, '$vocabulary can only appear at the schema resource root')
@@ -281,7 +281,7 @@ sub _traverse_keyword_vocabulary ($self, $schema, $state) {
 # we can scan the URIs included here and either abort if a vocabulary is enabled that we do not
 # understand, or turn on and off certain keyword behaviours based on the boolean values seen.
 
-sub _traverse_keyword_comment ($self, $schema, $state) {
+sub _traverse_keyword_comment ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
@@ -296,7 +296,7 @@ sub _traverse_keyword_defs { shift->traverse_object_schemas(@_) }
 
 
 # translate vocabulary URIs into classes, caching the results (if any)
-sub __fetch_vocabulary_data ($self, $state, $schema_info) {
+sub __fetch_vocabulary_data ($class, $state, $schema_info) {
   if (not exists $schema_info->{schema}{'$vocabulary'}) {
     # "If "$vocabulary" is absent, an implementation MAY determine behavior based on the meta-schema
     # if it is recognized from the URI value of the referring schema's "$schema" keyword."

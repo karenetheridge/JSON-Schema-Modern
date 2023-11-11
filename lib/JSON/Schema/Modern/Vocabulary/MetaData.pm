@@ -27,7 +27,7 @@ sub vocabulary {
 
 sub evaluation_order { 5 }
 
-sub keywords ($self, $spec_version) {
+sub keywords ($class, $spec_version) {
   return (
     qw(title description default),
     $spec_version ne 'draft7' ? 'deprecated' : (),
@@ -35,12 +35,12 @@ sub keywords ($self, $spec_version) {
   );
 }
 
-sub _traverse_keyword_title ($self, $schema, $state) {
+sub _traverse_keyword_title ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return 1;
 }
 
-sub _eval_keyword_title ($self, $data, $schema, $state) {
+sub _eval_keyword_title ($class, $data, $schema, $state) {
   annotate_self($state, $schema);
 }
 
@@ -52,7 +52,7 @@ sub _traverse_keyword_default { 1 }
 
 sub _eval_keyword_default { goto \&_eval_keyword_title }
 
-sub _traverse_keyword_deprecated ($self, $schema, $state) {
+sub _traverse_keyword_deprecated ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'boolean');
   return 1;
 }
@@ -67,7 +67,7 @@ sub _traverse_keyword_writeOnly { goto \&_traverse_keyword_deprecated }
 
 sub _eval_keyword_writeOnly { goto \&_eval_keyword_title }
 
-sub _traverse_keyword_examples ($self, $schema, $state) {
+sub _traverse_keyword_examples ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
   return 1;
 }
