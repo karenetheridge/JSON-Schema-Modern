@@ -745,20 +745,20 @@ has _metaschema_vocabulary_classes => (
       'https://json-schema.org/draft/2020-12/schema' => [ 'draft2020-12', [ @modules ] ],
       do { pop @modules; () },
       'https://json-schema.org/draft/2019-09/schema' => [ 'draft2019-09', \@modules ],
-      'http://json-schema.org/draft-07/schema#' => [ 'draft7', \@modules ],
+      'http://json-schema.org/draft-07/schema' => [ 'draft7', \@modules ],
     },
   },
 );
 
-sub _get_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1]} }
-sub _set_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1]} = $mvc_type->($_[2]) }
+sub _get_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#$//r} }
+sub _set_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#$//r} = $mvc_type->($_[2]) }
 sub __all_metaschema_vocabulary_classes { values $_[0]->__metaschema_vocabulary_classes->%* }
 
 # retrieves metaschema info either from cache or by parsing the schema for vocabularies
 # throws a JSON::Schema::Modern::Result on error
 sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
   # check the cache
-  my $metaschema_info = $self->__metaschema_vocabulary_classes->{$metaschema_uri};
+  my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
   return @$metaschema_info if $metaschema_info;
 
   # otherwise, fetch the metaschema and parse its $vocabulary keyword.
