@@ -276,15 +276,15 @@ subtest 'start traversing below the document root' => sub {
     [
       {
         instanceLocation => '',
-        keywordLocation => '/components/alpha/subid/properties/myprop/allOf/0/properties/foo',
-        absoluteKeywordLocation => 'dir/inner_document#/properties/foo',
-        error => 'invalid schema type: string',
-      },
-      {
-        instanceLocation => '',
         keywordLocation => '/components/alpha/subid/type',
         absoluteKeywordLocation => 'dir/my_subdocument#/subid/type',
         error => 'unrecognized type "not a valid type"',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/components/alpha/subid/properties/myprop/allOf/0/properties/foo',
+        absoluteKeywordLocation => 'dir/inner_document#/properties/foo',
+        error => 'invalid schema type: string',
       },
     ],
     'identified the overridden location of all errors during traverse',

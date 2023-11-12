@@ -727,7 +727,7 @@ sub add_vocabulary ($self, $classname) {
   }
 }
 
-# $schema uri => [ spec_version, [ vocab classes ] ].
+# $schema uri => [ spec_version, [ vocab classes, in evaluation order ] ].
 has _metaschema_vocabulary_classes => (
   is => 'bare',
   isa => HashRef[
@@ -740,7 +740,7 @@ has _metaschema_vocabulary_classes => (
   lazy => 1,
   default => sub {
     my @modules = map use_module('JSON::Schema::Modern::Vocabulary::'.$_),
-      qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated);
+      qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated);
     +{
       'https://json-schema.org/draft/2020-12/schema' => [ 'draft2020-12', [ @modules ] ],
       do { pop @modules; () },

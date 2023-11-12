@@ -39,7 +39,7 @@ sub evaluation_order { 3 }
 # - properties and patternProperties must be evaluated before additionalProperties
 # - in-place applicators and properties, patternProperties, additionalProperties must be evaluated
 #   before unevaluatedProperties (in the Unevaluated vocabulary)
-# - contains must be evaluated before maxContains, minContains (in the Validator vocabulary)
+# - contains must be evaluated before maxContains, minContains (implemented here, rather than in the Validation vocabulary)
 sub keywords ($class, $spec_version) {
   return (
     qw(allOf anyOf oneOf not if then else),
@@ -47,7 +47,8 @@ sub keywords ($class, $spec_version) {
     $spec_version !~ qr/^draft(7|2019-09)$/ ? 'prefixItems' : (),
     'items',
     $spec_version =~ qr/^draft(7|2019-09)$/ ? 'additionalItems' : (),
-    qw(contains properties patternProperties additionalProperties propertyNames),
+    'contains', $spec_version ne 'draft7' ? qw(maxContains minContains) : (),
+    qw(properties patternProperties additionalProperties propertyNames),
     $spec_version eq 'draft2019-09' ? qw(unevaluatedItems unevaluatedProperties) : (),
   );
 }
@@ -363,6 +364,40 @@ sub _eval_keyword_contains ($class, $data, $schema, $state) {
 
   return $state->{spec_version} =~ /^draft(?:7|2019-09)$/ ? 1
     : A($state, @valid == @$data ? true : \@valid);
+}
+
+# 'maxContains' and 'minContains' are owned by the Validation vocabulary, but do nothing if the
+# Applicator vocabulary is omitted and depend on the result of 'contains', so they are implemented
+# here, to be evaluated after 'contains'
+
+sub _traverse_keyword_maxContains { 1 }
+
+sub _eval_keyword_maxContains ($class, $data, $schema, $state) {
+  return 1 if not grep $_ eq 'JSON::Schema::Modern::Vocabulary::Validation',
+    $state->{vocabularies}->@*;
+
+  return 1 if not exists $state->{_num_contains};
+  return 1 if not is_type('array', $data);
+
+  return E($state, 'array contains more than %d matching items', $schema->{maxContains})
+    if $state->{_num_contains} > $schema->{maxContains};
+
+  return 1;
+}
+
+sub _traverse_keyword_minContains { 1 }
+
+sub _eval_keyword_minContains ($class, $data, $schema, $state) {
+  return 1 if not grep $_ eq 'JSON::Schema::Modern::Vocabulary::Validation',
+    $state->{vocabularies}->@*;
+
+  return 1 if not exists $state->{_num_contains};
+  return 1 if not is_type('array', $data);
+
+  return E($state, 'array contains fewer than %d matching items', $schema->{minContains})
+    if $state->{_num_contains} < $schema->{minContains};
+
+  return 1;
 }
 
 sub _traverse_keyword_properties { shift->traverse_object_schemas(@_) }

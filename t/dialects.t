@@ -134,7 +134,7 @@ subtest 'defaults without a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft2020-12',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
     }),
     'object schema: defaults to draft2020-12 without a $schema keyword',
   );
@@ -190,7 +190,7 @@ subtest 'defaults without a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft2020-12',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
     }),
     'named resource defaults to draft2020-12 without a $schema keyword',
   );
@@ -234,7 +234,7 @@ subtest 'defaults without a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'object schema: overridden to draft7',
   );
@@ -268,7 +268,7 @@ subtest 'defaults without a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'object schema: overridden to draft7 and other keywords are ignored',
   );
@@ -303,7 +303,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'semantics can be changed to another draft version',
   );
@@ -324,7 +324,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     '..and is still recognized as draft7',
   );
@@ -359,7 +359,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'named resource can be changed to another draft version and other keywords are ignored',
   );
@@ -395,7 +395,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'unnamed resource can be changed to another draft version',
   );
@@ -431,7 +431,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'unnamed resource can be changed to another draft version',
   );
@@ -545,7 +545,7 @@ subtest 'changing schema semantics across documents' => sub {
     superhashof({
       specification_version => 'draft2019-09',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'resources for top level schema',
   );
@@ -554,7 +554,7 @@ subtest 'changing schema semantics across documents' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'resources for subschema',
   );
@@ -653,7 +653,7 @@ subtest 'changing schema semantics across documents' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'resources for top level schema',
   );
@@ -662,7 +662,7 @@ subtest 'changing schema semantics across documents' => sub {
     superhashof({
       specification_version => 'draft2020-12',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
     }),
     'resources for subschema',
   );
@@ -755,7 +755,7 @@ subtest 'changing schema semantics within documents' => sub {
     superhashof({
       specification_version => 'draft2019-09',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'resources for top level schema',
   );
@@ -764,7 +764,7 @@ subtest 'changing schema semantics within documents' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'resources for subschema',
   );
@@ -855,7 +855,7 @@ subtest 'changing schema semantics within documents' => sub {
     superhashof({
       specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'resources for top level schema',
   );
@@ -864,7 +864,7 @@ subtest 'changing schema semantics within documents' => sub {
     superhashof({
       specification_version => 'draft2020-12',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
     }),
     'resources for subschema',
   );
@@ -968,7 +968,7 @@ subtest '$vocabulary' => sub {
       document => ignore,
       vocabularies => [
         map 'JSON::Schema::Modern::Vocabulary::'.$_,
-          qw(Core Applicator Validation FormatAnnotation Content MetaData Unevaluated),
+          qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated),
       ],
       configs => {},
     },
@@ -1118,7 +1118,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
     superhashof({
       specification_version => 'draft2019-09',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
-        qw(Core Applicator Validation FormatAnnotation Content MetaData) ],
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     '..and schema uses the correct spec version and vocabularies',
   );

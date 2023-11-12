@@ -230,29 +230,10 @@ sub _eval_keyword_uniqueItems ($class, $data, $schema, $state) {
 }
 
 # Note: no effort is made to check if the 'contains' keyword has been disabled via its vocabulary.
+# The evaluation implementation of maxContains and minContains are in the Applicator vocabulary
 sub _traverse_keyword_maxContains { goto \&_assert_non_negative_integer }
 
-sub _eval_keyword_maxContains ($class, $data, $schema, $state) {
-  return 1 if not exists $state->{_num_contains};
-  return 1 if not is_type('array', $data);
-
-  return E($state, 'array contains more than %d matching items', $schema->{maxContains})
-    if $state->{_num_contains} > $schema->{maxContains};
-
-  return 1;
-}
-
 sub _traverse_keyword_minContains { goto \&_assert_non_negative_integer }
-
-sub _eval_keyword_minContains ($class, $data, $schema, $state) {
-  return 1 if not exists $state->{_num_contains};
-  return 1 if not is_type('array', $data);
-
-  return E($state, 'array contains fewer than %d matching items', $schema->{minContains})
-    if $state->{_num_contains} < $schema->{minContains};
-
-  return 1;
-}
 
 sub _traverse_keyword_maxProperties { goto \&_assert_non_negative_integer }
 

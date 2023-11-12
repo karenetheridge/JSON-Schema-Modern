@@ -68,6 +68,11 @@ subtest 'strict booleans (default)' => sub {
       errors => [
         {
           instanceLocation => '',
+          keywordLocation => '/enum',
+          error => 'value does not match',
+        },
+        {
+          instanceLocation => '',
           keywordLocation => '/allOf/0/type',
           error => 'got '.$_->[0].', not boolean',
         },
@@ -95,11 +100,6 @@ subtest 'strict booleans (default)' => sub {
           instanceLocation => '',
           keywordLocation => '/anyOf',
           error => 'no subschemas are valid',
-        },
-        {
-          instanceLocation => '',
-          keywordLocation => '/enum',
-          error => 'value does not match',
         },
       ],
     },
