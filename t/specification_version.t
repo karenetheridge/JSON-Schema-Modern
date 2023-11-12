@@ -110,12 +110,12 @@ subtest '$ref adjacent to a path used in a $ref' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/allOf/$ref',
-          error => 'EXCEPTION: unable to find resource #/definitions/bar/anyOf/1',
+          keywordLocation => '/allOf/2/$ref',
+          error => 'EXCEPTION: bad reference to #/allOf/1/anyOf/1: not a schema',
         },
       ],
     },
-    'the presence of $ref also kills the use of other $refs to adjacent locations',
+    'the presence of $ref also blocks the use of other $refs to adjacent locations',
   );
 };
 
