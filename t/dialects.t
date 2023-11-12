@@ -1453,5 +1453,38 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
   );
 };
 
+subtest '$schema points to a boolean schema' => sub {
+  my $js = JSON::Schema::Modern->new;
+  $js->add_schema('https://my_boolean_schema' => true);
+
+  cmp_deeply(
+    my $result = $js->evaluate(
+      1,
+      {
+        '$id' => '/foo',
+        '$schema' => 'https://my_boolean_schema',
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          absoluteKeywordLocation => '/foo#/$schema',
+          error => 'metaschemas must be objects',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          absoluteKeywordLocation => '/foo#/$schema',
+          error => '"https://my_boolean_schema" is not a valid metaschema',
+        },
+      ],
+    },
+    '$schema cannot reference a boolean schema',
+  );
+};
+
 had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;

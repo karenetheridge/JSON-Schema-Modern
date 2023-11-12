@@ -128,13 +128,18 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     my $schema_info = $state->{evaluator}->_fetch_from_uri($schema->{'$schema'});
     return E($state, 'EXCEPTION: unable to find resource %s', $schema->{'$schema'}) if not $schema_info;
 
-    ($spec_version, $vocabularies) = $class->__fetch_vocabulary_data({ %$state,
-        keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
-        traversed_schema_path => jsonp($state->{schema_path}, '$schema'),
-      }, $schema_info);
+    if (not is_plain_hashref($schema_info->{schema})) {
+      ()= E($state, 'metaschemas must be objects');
+    }
+    else {
+      ($spec_version, $vocabularies) = $class->__fetch_vocabulary_data({ %$state,
+          keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
+          traversed_schema_path => jsonp($state->{schema_path}, '$schema'),
+        }, $schema_info);
+    }
   }
 
-  return E($state, '"%s" is not a valid metaschema', $schema->{'$schema'}) if not @$vocabularies;
+  return E($state, '"%s" is not a valid metaschema', $schema->{'$schema'}) if not $vocabularies or not @$vocabularies;
 
   # we special-case this because the check in _traverse_subschema for older drafts + $ref has already happened
   return E($state, '$schema and $ref cannot be used together in older drafts')
