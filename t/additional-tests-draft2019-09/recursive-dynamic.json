@@ -41,5 +41,32 @@
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "$recursiveRef points to a boolean schema",
+        "schema": {
+            "$defs": {
+                "boolean": true
+            },
+            "type": "object",
+            "properties": {
+                "true": {
+                    "$recursiveRef": "#/$defs/boolean"
+                },
+                "false": false
+            }
+        },
+        "tests": [
+            {
+                "description": "follow $recursiveRef to a true schema",
+                "data": { "true": 1 },
+                "valid": true
+            },
+            {
+                "description": "false schema",
+                "data": { "false": 1 },
+                "valid": false
+            }
+        ]
     }
 ]

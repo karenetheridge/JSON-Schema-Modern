@@ -86,5 +86,33 @@
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "$dynamicRef points to a boolean schema",
+        "schema": {
+            "$comment": "submitted as https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/701",
+            "$defs": {
+                "boolean": true
+            },
+            "type": "object",
+            "properties": {
+                "true": {
+                    "$dynamicRef": "#/$defs/boolean"
+                },
+                "false": false
+            }
+        },
+        "tests": [
+            {
+                "description": "follow $dynamicRef to a true schema",
+                "data": { "true": 1 },
+                "valid": true
+            },
+            {
+                "description": "false schema",
+                "data": { "false": 1 },
+                "valid": false
+            }
+        ]
     }
 ]

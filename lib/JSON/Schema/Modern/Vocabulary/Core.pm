@@ -15,6 +15,7 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
+use Ref::Util 'is_plain_hashref';
 use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_uri E assert_uri_reference assert_uri jsonp);
 use namespace::clean;
 
@@ -217,7 +218,9 @@ sub _eval_keyword_recursiveRef ($class, $data, $schema, $state) {
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
 
-  if (is_type('boolean', $schema_info->{schema}{'$recursiveAnchor'}) and $schema_info->{schema}{'$recursiveAnchor'}) {
+  if (is_plain_hashref($schema_info->{schema})
+      and is_type('boolean', $schema_info->{schema}{'$recursiveAnchor'})
+      and $schema_info->{schema}{'$recursiveAnchor'}) {
     $uri = Mojo::URL->new($schema->{'$recursiveRef'})
       ->to_abs($state->{recursive_anchor_uri} // $state->{initial_schema_uri});
   }
@@ -234,7 +237,9 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
 
   # If the initially resolved starting point URI includes a fragment that was created by the
   # "$dynamicAnchor" keyword, ...
-  if (length $uri->fragment and exists $schema_info->{schema}{'$dynamicAnchor'}
+  if (length $uri->fragment
+      and is_plain_hashref($schema_info->{schema})
+      and exists $schema_info->{schema}{'$dynamicAnchor'}
       and $uri->fragment eq (my $anchor = $schema_info->{schema}{'$dynamicAnchor'})) {
     # ...the initial URI MUST be replaced by the URI (including the fragment) for the outermost
     # schema resource in the dynamic scope that defines an identically named fragment with

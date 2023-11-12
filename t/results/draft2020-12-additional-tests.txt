@@ -8,7 +8,7 @@ filename                                  pass  todo-fail  fail
 anchor.json                                  2          0     0
 annotation-collection.json                  10          0     0
 badRef.json                                  3          0     0
-dynamicRef.json                              5          0     0
+dynamicRef.json                              7          0     0
 faux-buggy-schemas.json                      2          0     0
 format-date-time.json                        4          0     0
 format-date.json                             1          0     0
@@ -29,4 +29,4 @@ short-circuit.json                          20          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                             11          0     0
 ---------------------------------------------------------------
-TOTAL                                     1063          0     0
+TOTAL                                     1065          0     0

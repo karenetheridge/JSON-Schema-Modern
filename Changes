@@ -4,6 +4,8 @@ Revision history for JSON-Schema-Modern
           - better detection of schema locations, for use by Document
             subclasses
           - fixed vocabulary ordering (from v0.567)
+          - properly handle "$dynamicRef" and "$recursiveRef" referencing a
+            boolean schema
 
 0.573     2023-10-21 23:49:03Z
           - fix construction of default values of some attributes e.g.
