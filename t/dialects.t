@@ -8,7 +8,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Warnings qw(warnings :no_end_test had_no_warnings);
+use Test::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
 use Test::Fatal;
 use lib 't/lib';
 use Helper;
@@ -669,6 +669,7 @@ subtest 'changing schema semantics across documents' => sub {
 };
 
 subtest 'changing schema semantics within documents' => sub {
+  allow_warnings(1);
   cmp_deeply(
     $js->evaluate(
       { foo => 'hi' },
@@ -680,11 +681,12 @@ subtest 'changing schema semantics within documents' => sub {
             '$id' => 'https://iam.draft7-3.com',
             '$schema' => 'http://json-schema.org/draft-07/schema#',
             dependencies => { foo => false },
-            dependentSchemas => { foo => false }, # this should be ignored
+            dependentSchemas => 'blurp', # this should be ignored
             additionalProperties => { format => 'ipv4' },
-            unevaluatedProperties => false,       # this should be ignored
+            unevaluatedProperties => 'blurp',       # this should be ignored
           },
         ],
+        dependencies => 'blurp',  # this should be ignored
         dependentSchemas => { foo => false },
         additionalProperties => { format => 'ipv6' },
       },
@@ -750,6 +752,8 @@ subtest 'changing schema semantics within documents' => sub {
     },
     'switching between specification versions is acceptable within a document, draft2019-09 -> draft7',
   );
+  allow_warnings(0);
+
   cmp_deeply(
     $js->{_resource_index}{'https://iam.draft2019-09-3.com'},
     superhashof({
@@ -769,6 +773,7 @@ subtest 'changing schema semantics within documents' => sub {
     'resources for subschema',
   );
 
+  allow_warnings(1);
   cmp_deeply(
     $js->evaluate(
       { foo => 'hi' },
@@ -779,6 +784,7 @@ subtest 'changing schema semantics within documents' => sub {
           {
             '$id' => 'https://iam.draft2020-12-4.com',
             '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+            dependencies => { foo => false }, # this should be ignored
             dependentSchemas => { foo => false },
             additionalProperties => { format => 'ipv4' },
           },
@@ -850,6 +856,7 @@ subtest 'changing schema semantics within documents' => sub {
     },
     'switching between specification versions is acceptable within a document, draft7 -> draf2020-12',
   );
+  allow_warnings(0);
   cmp_deeply(
     $js->{_resource_index}{'https://iam.draft7-4.com'},
     superhashof({
