@@ -33,7 +33,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp assert_keyword_type assert_uri);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -464,10 +464,24 @@ sub _traverse_subschema ($self, $schema, $state) {
 
   my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
-  # we must check the array length on every iteration because some keywords can change it!
-  for (my $idx = 0; $idx <= $state->{vocabularies}->$#*; ++$idx) {
-    my $vocabulary = $state->{vocabularies}[$idx];
 
+  # First, we must determine the dialect to use. This is given to us in metaschema_uri
+  # and can also be indicated with the '$schema' keyword. We need to do this now, before iterating
+  # over vocabulary classes and keywords, because these can change depending on the dialect.
+  if (exists $schema->{'$schema'}) {
+    return if not $self->_parse_keyword_schema($state, $schema->{'$schema'});
+
+    # This is a bit of a chicken-and-egg situation. If we start off at draft2020-12, then all
+    # keywords are valid, so we inspect and process the $schema keyword; this switches us to draft7
+    # but now only the $ref keyword is respected and everything else should be ignored, so the
+    # $schema keyword never happened, so now we're back to draft2020-12 again, and...?!
+    # The only winning move is not to play.
+    return E($state, '$schema and $ref cannot be used together in older drafts')
+      if exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
+  }
+
+  ALL_KEYWORDS:
+  foreach my $vocabulary ($state->{vocabularies}->@*) {
     # [ [ $keyword => $subref ], [ ... ] ]
     my $keyword_list = $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
       map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
@@ -757,7 +771,7 @@ sub __all_metaschema_vocabulary_classes { values $_[0]->__metaschema_vocabulary_
 # retrieves metaschema info either from cache or by parsing the schema for vocabularies
 # throws a JSON::Schema::Modern::Result on error
 sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
-  # check the cache
+  # check the cache. specification metaschemas are already populated.
   my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
   return @$metaschema_info if $metaschema_info;
 
@@ -783,7 +797,91 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
       $state->{errors}->@* ],
     exception => 1,
   ) if $state->{errors}->@*;
+
   return ($state->{spec_version}, $state->{vocabularies});
+}
+
+# we can't do this work in the context of looping over vocabularies and keywords, because this
+# keyword changes which vocabularies and keywords we're going to use. Additionally we may need to
+# fetch and parse the referenced schema to discover what vocabularies it defines.
+sub _parse_keyword_schema ($self, $state, $metaschema_uri) {
+  $state->{keyword} = '$schema';
+
+  return if not assert_keyword_type($state, { '$schema' => $metaschema_uri }, 'string')
+    or not assert_uri($state, { '$schema' => $metaschema_uri });
+
+  my ($spec_version, $vocabularies);
+
+  if (my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri)) {
+    ($spec_version, $vocabularies) = @$metaschema_info;
+  }
+  else {
+    my $schema_info = $self->_fetch_from_uri($metaschema_uri);
+    return E($state, 'EXCEPTION: unable to find resource %s', $metaschema_uri) if not $schema_info;
+
+    if (not is_plain_hashref($schema_info->{schema})) {
+      ()= E($state, 'metaschemas must be objects');
+    }
+    else {
+      ($spec_version, $vocabularies) = $self->_fetch_vocabulary_data({ %$state,
+          keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($metaschema_uri),
+          traversed_schema_path => jsonp($state->{schema_path}, '$schema'),
+        }, $schema_info);
+    }
+  }
+
+  return E($state, '"%s" is not a valid metaschema', $metaschema_uri)
+    if not $vocabularies or not @$vocabularies;
+
+  $state->@{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
+  return 1;
+}
+
+# translate vocabulary URIs into classes, caching the results (if any)
+sub _fetch_vocabulary_data ($self, $state, $schema_info) {
+  if (not exists $schema_info->{schema}{'$vocabulary'}) {
+    # "If "$vocabulary" is absent, an implementation MAY determine behavior based on the meta-schema
+    # if it is recognized from the URI value of the referring schema's "$schema" keyword."
+    my $metaschema_uri = $self->METASCHEMA_URIS->{$schema_info->{specification_version}};
+    return $self->_get_metaschema_vocabulary_classes($metaschema_uri)->@*;
+  }
+
+  my $valid = 1;
+  $valid = E($state, '$vocabulary can only appear at the document root') if length $schema_info->{document_path};
+  $valid = E($state, 'metaschemas must have an $id') if not exists $schema_info->{schema}{'$id'};
+
+  return (undef, []) if not $valid;
+
+  my @vocabulary_classes;
+
+  foreach my $uri (sort keys $schema_info->{schema}{'$vocabulary'}->%*) {
+    my $class_info = $self->_get_vocabulary_class($uri);
+    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
+      if $schema_info->{schema}{'$vocabulary'}{$uri} and not $class_info;
+
+    next if not $class_info;  # vocabulary is not known, but marked as false in the metaschema
+
+    my ($spec_version, $class) = @$class_info;
+    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" uses %s, but the metaschema itself uses %s',
+        $uri, $spec_version, $schema_info->{specification_version}), next
+      if $spec_version ne $schema_info->{specification_version};
+
+    push @vocabulary_classes, $class;
+  }
+
+  @vocabulary_classes = sort {
+    $a->evaluation_order <=> $b->evaluation_order
+    || ($a->evaluation_order == 999 ? 0
+      : ($valid = E($state, '%s and %s have a conflicting evaluation_order', sort $a, $b)))
+  } @vocabulary_classes;
+
+  $valid = E($state, 'the first vocabulary (by evaluation_order) must be Core')
+    if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
+
+  $self->_set_metaschema_vocabulary_classes($schema_info->{canonical_uri},
+    [ $schema_info->{specification_version}, \@vocabulary_classes ]) if $valid;
+
+  return ($schema_info->{specification_version}, $valid ? \@vocabulary_classes : []);
 }
 
 # used for determining a default '$schema' keyword where there is none

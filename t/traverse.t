@@ -162,8 +162,6 @@ subtest 'default metaschema' => sub {
 };
 
 subtest 'traversing a dialect with different core keywords' => sub {
-  local $TODO = '$schema parsing is not yet done in time to switch Core vocabularies';
-
   my $js = JSON::Schema::Modern->new;
 
   my $state = $js->traverse(

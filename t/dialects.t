@@ -1471,13 +1471,12 @@ subtest '$schema points to a boolean schema' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$schema',
-          absoluteKeywordLocation => '/foo#/$schema',
+          # we haven't processed $id yet, so we don't know the absolute location
           error => 'metaschemas must be objects',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$schema',
-          absoluteKeywordLocation => '/foo#/$schema',
           error => '"https://my_boolean_schema" is not a valid metaschema',
         },
       ],
