@@ -6,6 +6,8 @@ Revision history for JSON-Schema-Modern
           - fixed vocabulary ordering (from v0.567)
           - properly handle "$dynamicRef", "$recursiveRef" and "$schema"
             referencing a boolean schema
+          - bundled metaschemas have been updated to their latest versions
+            from https://json-schema.org
 
 0.573     2023-10-21 23:49:03Z
           - fix construction of default values of some attributes e.g.
