@@ -912,7 +912,7 @@ has _json_decoder => (
   default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1, allow_bignum => 1, convert_blessed => 1) },
 );
 
-# since media types are case-insensitive, all type names must be foldcased on insertion.
+# since media types are case-insensitive, all type names must be casefolded on insertion.
 has _media_type => (
   is => 'bare',
   isa => my $media_type_type = Map[Str->where(q{$_ eq CORE::fc($_)}), CodeRef],
