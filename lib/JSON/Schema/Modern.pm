@@ -1131,7 +1131,7 @@ expressed as a string. This does B<not> apply to the C<const> or C<enum> keyword
 the following keywords:
 
 =for :list
-* C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid
+* C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid)
 * C<multipleOf>
 * C<maximum>
 * C<exclusiveMaximum>
@@ -1271,7 +1271,7 @@ applications that contain embedded JSON Schemas):
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 extracting data from within schemas and skipping properties that may look like keywords but actually
-are not (for example C<{"const":{"$ref": "this is not actually a $ref"}}>). This feature is highly
+are not (for example C<{"const": {"$ref": "this is not actually a $ref"}}>). This feature is highly
 experimental and is highly likely to change in the future.
 
 For example, to find the resolved targets of all C<$ref> keywords in a schema document:
@@ -1328,7 +1328,9 @@ L<"Meta-Schemas and Vocabularies"|https://json-schema.org/draft/2020-12/json-sch
 
 The class must compose the L<JSON::Schema::Modern::Vocabulary> role and implement the
 L<vocabulary|JSON::Schema::Modern::Vocabulary/vocabulary> and
-L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods.
+L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods, as well as
+C<< _traverse_keyword_<keyword name> >> methods for each keyword. C<< _eval_keyword_<keyword name> >>
+methods are optional; when not provided, evaluation will always return a true result.
 
 =head2 add_media_type
 
