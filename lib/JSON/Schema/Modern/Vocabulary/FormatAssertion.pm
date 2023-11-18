@@ -143,7 +143,7 @@ sub keywords {
     'relative-json-pointer' => sub { $_[0] =~ m{^(?:0|[1-9][0-9]*)(?:#$|$|/)} && $_[0] !~ m{~(?![01])} },
     regex => sub {
       local $SIG{__WARN__} = sub { die @_ };
-      eval { qr/$_[0]/; 1 ? 1 : 0 };
+      eval { qr/$_[0]/; 1 };
     },
 
     'iri-reference' => sub { 1 },
