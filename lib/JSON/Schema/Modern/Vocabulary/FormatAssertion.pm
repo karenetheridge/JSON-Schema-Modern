@@ -222,8 +222,8 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       : undef;
 
   A($state, $schema->{format});
-  return E($state, 'not a%s %s', $schema->{format} =~ /^[aeio]/ ? 'n' : '', $schema->{format})
-    if $spec and is_type($spec->{type}, $data) and not $spec->{sub}->($data);
+  return E($state, 'not a valid %s', $schema->{format}) if $spec and is_type($spec->{type}, $data)
+    and not $spec->{sub}->($data);
 
   return 1;
 }
