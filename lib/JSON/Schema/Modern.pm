@@ -1315,6 +1315,9 @@ Adds support for a custom format. The data type that this format applies to must
 values of any other type will automatically be deemed to be valid, and will not be passed to the
 subref.
 
+Be careful to not mutate the type of the value while checking it -- for example, if it is a string,
+do not apply arithmetic operators to it -- or subsequent type checks on this value may fail.
+
 =head2 add_vocabulary
 
   $js->add_vocabulary('My::Custom::Vocabulary::Class');
