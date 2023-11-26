@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.574
+version 0.575
 
 =head1 SYNOPSIS
 
@@ -143,7 +143,7 @@ the following keywords:
 
 =item *
 
-C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid
+C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid)
 
 =item *
 
@@ -361,7 +361,7 @@ C<metaschema_uri>: use the indicated URI as the metaschema
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 extracting data from within schemas and skipping properties that may look like keywords but actually
-are not (for example C<{"const":{"$ref": "this is not actually a $ref"}}>). This feature is highly
+are not (for example C<{"const": {"$ref": "this is not actually a $ref"}}>). This feature is highly
 experimental and is highly likely to change in the future.
 
 For example, to find the resolved targets of all C<$ref> keywords in a schema document:
@@ -405,6 +405,9 @@ Adds support for a custom format. The data type that this format applies to must
 values of any other type will automatically be deemed to be valid, and will not be passed to the
 subref.
 
+Be careful to not mutate the type of the value while checking it -- for example, if it is a string,
+do not apply arithmetic operators to it -- or subsequent type checks on this value may fail.
+
 =head2 add_vocabulary
 
   $js->add_vocabulary('My::Custom::Vocabulary::Class');
@@ -415,7 +418,9 @@ L<"Meta-Schemas and Vocabularies"|https://json-schema.org/draft/2020-12/json-sch
 
 The class must compose the L<JSON::Schema::Modern::Vocabulary> role and implement the
 L<vocabulary|JSON::Schema::Modern::Vocabulary/vocabulary> and
-L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods.
+L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods, as well as
+C<< _traverse_keyword_<keyword name> >> methods for each keyword. C<< _eval_keyword_<keyword name> >>
+methods are optional; when not provided, evaluation will always return a true result.
 
 =head2 add_media_type
 
