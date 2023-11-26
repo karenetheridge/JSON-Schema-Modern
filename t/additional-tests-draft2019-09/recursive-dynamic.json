@@ -45,15 +45,18 @@
     {
         "description": "$recursiveRef points to a boolean schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2019-09/schema",
             "$defs": {
-                "boolean": true
+                "true": true,
+                "false": false
             },
-            "type": "object",
             "properties": {
                 "true": {
-                    "$recursiveRef": "#/$defs/boolean"
+                    "$recursiveRef": "#/$defs/true"
                 },
-                "false": false
+                "false": {
+                    "$recursiveRef": "#/$defs/false"
+                }
             }
         },
         "tests": [
@@ -63,7 +66,7 @@
                 "valid": true
             },
             {
-                "description": "false schema",
+                "description": "follow $recursiveRef to a false schema",
                 "data": { "false": 1 },
                 "valid": false
             }
