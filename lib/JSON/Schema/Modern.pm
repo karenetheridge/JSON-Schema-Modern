@@ -33,7 +33,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp assert_keyword_type assert_uri);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -807,8 +807,8 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
 sub _parse_keyword_schema ($self, $state, $metaschema_uri) {
   $state->{keyword} = '$schema';
 
-  return if not assert_keyword_type($state, { '$schema' => $metaschema_uri }, 'string')
-    or not assert_uri($state, { '$schema' => $metaschema_uri });
+  return E($state, '$schema value is not a string') if not is_type('string', $metaschema_uri);
+  return if not assert_uri($state, { '$schema' => $metaschema_uri });
 
   my ($spec_version, $vocabularies);
 

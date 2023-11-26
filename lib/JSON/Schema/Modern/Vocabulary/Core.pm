@@ -238,8 +238,13 @@ sub _traverse_keyword_vocabulary ($class, $schema, $state) {
 
   my @vocabulary_classes;
   foreach my $uri (sort keys $schema->{'$vocabulary'}->%*) {
-    $valid = 0, next if not assert_keyword_type({ %$state, _schema_path_suffix => $uri }, $schema, 'boolean');
-    $valid = 0, next if not assert_uri({ %$state, _schema_path_suffix => $uri }, undef, $uri);
+    if (not is_type('boolean', $schema->{'$vocabulary'}{$uri})) {
+      ()= E({ %$state, _schema_path_suffix => $uri }, '$vocabulary value at "%s" is not a boolean', $uri);
+      $valid = 0;
+      next;
+    }
+
+    $valid = 0 if not assert_uri({ %$state, _schema_path_suffix => $uri }, undef, $uri);
   }
 
   # we cannot return an error here for invalid or incomplete vocabulary lists, because
