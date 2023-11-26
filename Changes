@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.575     2023-11-26 05:11:10Z
           - properly handle some edge cases where the "$schema" keyword can
             change the dialect to a different specification version with
