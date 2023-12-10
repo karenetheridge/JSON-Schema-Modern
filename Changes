@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.576     2023-12-10 06:10:57Z
           - the "stringy_numbers" feature now also applies to the "enum",
             "const", and "uniqueItems" keywords
 

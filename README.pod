@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.575
+version 0.576
 
 =head1 SYNOPSIS
 
@@ -136,14 +136,21 @@ Defaults to false.
 =head2 stringy_numbers
 
 When true, any value that is expected to be a number or integer B<in the instance data> may also be
-expressed as a string. This does B<not> apply to the C<const> or C<enum> keywords, but only
-the following keywords:
+expressed as a string. This applies only to the following keywords:
 
 =over 4
 
 =item *
 
 C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid)
+
+=item *
+
+C<const> and C<enum> (where the string C<"1"> will match with C<"const": 1>)
+
+=item *
+
+C<uniqueItems> (where strings and numbers are compared numerically to each other, if either or both are numeric)
 
 =item *
 
