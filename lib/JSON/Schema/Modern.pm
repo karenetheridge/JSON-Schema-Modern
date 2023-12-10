@@ -1571,6 +1571,8 @@ This implementation is now fully specification-compliant (for versions draft7, d
 draft2020-12), but until version 1.000 is released, it is
 still deemed to be missing some optional but quite useful features, such as:
 
+=for stopwords Mojolicious
+
 =for :list
 * loading schema documents from disk
 * loading schema documents from the network
@@ -1590,6 +1592,8 @@ UNTRUSTED SOURCES.>
 
 =head1 SEE ALSO
 
+=for stopwords OpenAPI
+
 =for :list
 * L<json-schema-eval>
 * L<https://json-schema.org>
@@ -1602,12 +1606,13 @@ UNTRUSTED SOURCES.>
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
 * L<https://json-schema.org/draft-07/json-schema-release-notes.html>
 * L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
+* L<OpenAPI::Modern>: a parser and evaluator for OpenAPI v3.1 documents
+* L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality
+* L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
 
 =head1 SUPPORT
 
 You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
 server|https://open-api.slack.com>, which are also great resources for finding help.
-
-=for stopwords OpenAPI
 
 =cut
