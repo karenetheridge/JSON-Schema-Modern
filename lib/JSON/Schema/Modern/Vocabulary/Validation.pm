@@ -88,7 +88,7 @@ sub _traverse_keyword_enum ($class, $schema, $state) {
 
 sub _eval_keyword_enum ($class, $data, $schema, $state) {
   my @s; my $idx = 0;
-  my %s = ( scalarref_booleans => $state->{scalarref_booleans} );
+  my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
   return 1 if any { is_equal($data, $_, $s[$idx++] = {%s}) } $schema->{enum}->@*;
   return E($state, 'value does not match'
     .(!(grep $_->{path}, @s) ? ''
@@ -98,10 +98,10 @@ sub _eval_keyword_enum ($class, $data, $schema, $state) {
 sub _traverse_keyword_const { 1 }
 
 sub _eval_keyword_const ($class, $data, $schema, $state) {
-  my %s = ( scalarref_booleans => $state->{scalarref_booleans} );
-  return 1 if is_equal($data, $schema->{const}, my $s = { scalarref_booleans => $state->{scalarref_booleans} });
+  my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
+  return 1 if is_equal($data, $schema->{const}, \%s);
   return E($state, 'value does not match'
-    .($s->{path} ? ' (differences start at "'.$s->{path}.'")' : ''));
+    .($s{path} ? ' (differences start at "'.$s{path}.'")' : ''));
 }
 
 sub _traverse_keyword_multipleOf ($class, $schema, $state) {
@@ -225,7 +225,7 @@ sub _traverse_keyword_uniqueItems ($class, $schema, $state) {
 sub _eval_keyword_uniqueItems ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
   return 1 if not $schema->{uniqueItems};
-  return 1 if is_elements_unique($data, my $equal_indices = []);
+  return 1 if is_elements_unique($data, my $equal_indices = [], $state);
   return E($state, 'items at indices %d and %d are not unique', @$equal_indices);
 }
 

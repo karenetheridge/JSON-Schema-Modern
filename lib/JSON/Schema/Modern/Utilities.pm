@@ -18,7 +18,7 @@ use B;
 use Carp 'croak';
 use JSON::MaybeXS 1.004004 'is_bool';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
-use Scalar::Util 'blessed';
+use Scalar::Util qw(blessed looks_like_number);
 use Storable 'dclone';
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
@@ -124,6 +124,13 @@ sub is_equal ($x, $y, $state = undef) {
     ($y, $types[1]) = (0+!!$$y, 'boolean') if $types[1] eq 'reference to SCALAR';
   }
 
+  if ($state->{stringy_numbers}) {
+    ($x, $types[0]) = (0+$x, int(0+$x) == $x ? 'integer' : 'number')
+      if $types[0] eq 'string' and looks_like_number($x);
+    ($y, $types[1]) = (0+$y, int(0+$y) == $y ? 'integer' : 'number')
+      if $types[1] eq 'string' and looks_like_number($y);
+  }
+
   return 0 if $types[0] ne $types[1];
   return 1 if $types[0] eq 'null';
   return $x eq $y if $types[0] eq 'string';
@@ -154,10 +161,11 @@ sub is_equal ($x, $y, $state = undef) {
 
 # checks array elements for uniqueness. short-circuits on first pair of matching elements
 # if second arrayref is provided, it is populated with the indices of identical items
-sub is_elements_unique ($array, $equal_indices = undef) {
+sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
+  my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
   foreach my $idx0 (0 .. $array->$#*-1) {
     foreach my $idx1 ($idx0+1 .. $array->$#*) {
-      if (is_equal($array->[$idx0], $array->[$idx1], { scalarref_booleans => 1 })) {
+      if (is_equal($array->[$idx0], $array->[$idx1], \%s)) {
         push @$equal_indices, $idx0, $idx1 if defined $equal_indices;
         return 0;
       }

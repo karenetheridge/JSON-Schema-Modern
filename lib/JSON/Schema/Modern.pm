@@ -1230,11 +1230,13 @@ Defaults to false.
 =head2 stringy_numbers
 
 When true, any value that is expected to be a number or integer B<in the instance data> may also be
-expressed as a string. This does B<not> apply to the C<const> or C<enum> keywords, but only
-the following keywords:
+expressed as a string. This applies only to the following keywords:
 
 =for :list
 * C<type> (where both C<string> and C<number> (and possibly C<integer>) are considered valid)
+* C<const> and C<enum> (where the string C<"1"> will match with C<"const": 1>)
+* C<uniqueItems> (where strings and numbers are compared numerically to each other, if either or
+  both are numeric)
 * C<multipleOf>
 * C<maximum>
 * C<exclusiveMaximum>

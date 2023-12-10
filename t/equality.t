@@ -109,4 +109,31 @@ subtest 'equality, using scalarref_booleans' => sub {
   }
 };
 
+subtest 'equality, using stringy_numbers' => sub {
+  foreach my $test (
+    [ 1, 1, true ],
+    [ 1, 1.0, true ],
+    [ 1, '1.0', true ],
+    [ '1.1', 1.1, true ],
+    [ '1', 1, true ],
+    [ '1.1', 1.1, true ],
+    [ '1', '1.00', true ],
+    [ '1.10', '1.1000', true ],
+    [ 'x', 'x', true ],
+    [ 'x', 'y', false ],
+  ) {
+    my ($x, $y, $expected, $diff_path) = @$test;
+    my @types = map get_type($_), $x, $y;
+    my $result = is_equal($x, $y, my $state = { stringy_numbers => 1 });
+
+    ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
+    is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
+
+    ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
+    ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
+
+    note '';
+  }
+};
+
 done_testing;
