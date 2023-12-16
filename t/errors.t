@@ -1468,4 +1468,61 @@ subtest 'effective_base_uri' => sub {
   );
 };
 
+subtest 'recommended_response' => sub {
+  cmp_deeply(
+    JSON::Schema::Modern::Result->new(valid => 1)->recommended_response,
+    undef,
+    'recommended_response is not defined when there are no errors',
+  );
+
+  my $result = $js->evaluate(
+    { foo => 3 },
+    {
+      type => 'object',
+      properties => {
+        foo => {
+          type => 'integer',
+          minimum => 5,
+        },
+      },
+    },
+  );
+
+  cmp_deeply(
+    $result->recommended_response,
+    [ 400, q{'/foo': value is smaller than 5} ],
+    'recommended_response uses the first error in the result',
+  );
+
+  my $result2 = $js->evaluate(1, { '$ref' => '#/$defs/does_not_exist' });
+
+  cmp_deeply(
+    $result2->recommended_response,
+    [ 500, 'Internal Server Error' ],
+    'recommended_response indicates an exception occurred',
+  );
+
+  my $result3 = JSON::Schema::Modern::Result->new(
+    valid => 0,
+    errors => [
+      $result->errors,
+      # TODO: I haven't implemented authentication in OpenAPI::Modern yet, so I'm not sure how
+      # exactly these errors are going to look
+      JSON::Schema::Modern::Error->new(
+        keyword => 'authentication',
+        instance_location => '/request/headers/Authentication',
+        keyword_location => '/paths/foo/get/security',
+        error => 'security check failed',
+        recommended_response => [ 401, 'Unauthorized' ],
+      ),
+    ],
+  );
+
+  cmp_deeply(
+    $result3->recommended_response,
+    [ 401, 'Unauthorized' ],
+    'recommended_response uses the one from the error that is explicitly set',
+  );
+};
+
 done_testing;

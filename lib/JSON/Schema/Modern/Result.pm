@@ -16,7 +16,8 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use MooX::TypeTiny;
-use Types::Standard qw(ArrayRef InstanceOf Enum Bool);
+use Types::Standard qw(ArrayRef InstanceOf Enum Bool Str Maybe Tuple);
+use Types::Common::Numeric 'PositiveInt';
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
@@ -67,6 +68,25 @@ sub errors { ($_[0]->{errors}//[])->@* }
 sub error_count { scalar(($_[0]->{errors}//[])->@*) }
 sub annotations { ($_[0]->{annotations}//[])->@* }
 sub annotation_count { scalar(($_[0]->{annotations}//[])->@*) }
+
+has recommended_response => (
+  is => 'rw',
+  isa => Maybe[Tuple[PositiveInt, Str]],
+  lazy => 1,
+  default => sub ($self) {
+    return if not $self->errors;
+
+    for my $error ($self->errors) {
+      my $pe = $error->recommended_response;
+      return $pe if $pe;
+    }
+
+    return [ 500, 'Internal Server Error' ]
+      if any { $_->exception or $_->error =~ /^EXCEPTION: / } $self->errors;
+
+    return [ 400, ($self->errors)[0]->stringify ];
+  },
+);
 
 # strict_basic can only be used with draft2019-09.
 use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse data_only)];
@@ -290,6 +310,22 @@ A boolean flag indicating whether L</format> should include annotations in the o
 
 Indicates that evaluation stopped due to a severe error.
 
+=head2 recommended_response
+
+=for stopwords OpenAPI
+
+A tuple, consisting of C<[ integer, string ]>, indicating the recommended HTTP response code and
+string to use for this result (if validating an HTTP request). This could exist for things like a
+failed authentication check in OpenAPI validation, in which case it would contain
+C<[ 401, 'Unauthorized' ]>.
+
+Only populated when there are errors; when not explicitly set by an evaluator, defaults to
+C<< [ 500, 'Internal Server Error' ] >> if any errors indicate an exception, and
+C<< [ 400, <first error string> ] >> otherwise. The exact error string is hidden in the case of 500
+errors because you should not leak internal issues with your application, but you may also wish to
+obfuscate normal validation errors, in which case you should check for C<400> and change the string
+to C<'Bad Request'>.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILD OUTPUT_FORMATS result stringify annotation_count error_count
@@ -340,7 +376,5 @@ If you are embedding the full result inside another data structure, perhaps to b
 
 You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
 server|https://open-api.slack.com>, which are also great resources for finding help.
-
-=for stopwords OpenAPI
 
 =cut

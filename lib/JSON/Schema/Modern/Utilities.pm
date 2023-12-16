@@ -214,6 +214,7 @@ sub canonical_uri ($state, @extra_path) {
 # - _schema_path_suffix
 # - errors
 # - exception (set by abort())
+# - recommended_response
 sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
@@ -234,6 +235,7 @@ sub E ($state, $error_string, @args) {
     defined $uri ? ( absolute_keyword_location => $uri ) : (),
     error => @args ? sprintf($error_string, @args) : $error_string,
     $state->{exception} ? ( exception => $state->{exception} ) : (),
+    $state->{recommended_response} ? ( recommended_response => $state->{recommended_response} ) : (),
   );
 
   return 0;

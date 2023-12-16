@@ -18,7 +18,8 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
 use JSON::PP ();
 use MooX::TypeTiny;
-use Types::Standard qw(Str Bool Undef InstanceOf Enum);
+use Types::Standard qw(Str Bool Undef InstanceOf Enum Tuple);
+use Types::Common::Numeric 'PositiveInt';
 use namespace::clean;
 
 use overload
@@ -56,6 +57,11 @@ has exception => (
 has mode => (
   is => 'rw',
   isa => Enum[qw(traverse evaluate)],
+);
+
+has recommended_response => (
+  is => 'ro',
+  isa => Tuple[PositiveInt, Str],
 );
 
 sub TO_JSON ($self) {
@@ -138,6 +144,15 @@ The actual error string.
 
 Indicates the error's severity is sufficient to stop evaluation.
 
+=head2 recommended_response
+
+=for stopwords OpenAPI
+
+A tuple, consisting of C<[ integer, string ]>, indicating the recommended HTTP response code and
+string to use for this error (if validating an HTTP request). This could exist for things like a
+failed authentication check in OpenAPI validation, in which case it would contain
+C<[ 401, 'Unauthorized' ]>.
+
 =head1 METHODS
 
 =for Pod::Coverage stringify mode
@@ -160,7 +175,5 @@ the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#
 
 You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
 server|https://open-api.slack.com>, which are also great resources for finding help.
-
-=for stopwords OpenAPI
 
 =cut
