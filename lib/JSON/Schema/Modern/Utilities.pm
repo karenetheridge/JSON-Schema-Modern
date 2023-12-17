@@ -213,7 +213,7 @@ sub canonical_uri ($state, @extra_path) {
 # - schema_path
 # - _schema_path_suffix
 # - errors
-# - exception
+# - exception (set by abort())
 sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 

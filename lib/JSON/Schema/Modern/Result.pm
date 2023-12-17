@@ -284,6 +284,10 @@ specification format and may change slightly over time, as it is tested in produ
 
 A boolean flag indicating whether L</format> should include annotations in the output. Defaults to true.
 
+=head2 exception
+
+Indicates that evaluation stopped due to a severe error.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILD OUTPUT_FORMATS result stringify annotation_count error_count
