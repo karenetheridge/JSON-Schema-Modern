@@ -32,17 +32,18 @@ use overload
   '""' => sub { $_[0]->stringify },
   fallback => 1;
 
+use constant { true => JSON::PP::true, false => JSON::PP::false };
+
 has valid => (
   is => 'ro',
-  isa => InstanceOf['JSON::PP::Boolean'],
-  coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
+  isa => Bool,
+  coerce => sub { !!$_[0] },
 );
 sub result { goto \&valid } # backcompat only
 
 has exception => (
   is => 'ro',
-  isa => InstanceOf['JSON::PP::Boolean'],
-  coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
+  isa => Bool,
   lazy => 1,
   default => sub { any { $_->exception } $_[0]->errors },
 );
@@ -89,11 +90,11 @@ sub format ($self, $style, $formatted_annotations = undef) {
   $formatted_annotations //= $self->formatted_annotations;
 
   if ($style eq 'flag') {
-    return +{ valid => $self->valid };
+    return +{ valid => $self->valid ? true : false };
   }
   elsif ($style eq 'basic') {
     return +{
-      valid => $self->valid,
+      valid => $self->valid ? true : false,
       $self->valid
         ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, $self->errors ]),
@@ -102,7 +103,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
   # note: strict_basic will NOT be supported after draft 2019-09!
   elsif ($style eq 'strict_basic') {
     return +{
-      valid => $self->valid,
+      valid => ($self->valid ? true : false),
       $self->valid
         ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map _map_uris($_->TO_JSON), $self->annotations ]) : ())
         : (errors => [ map _map_uris($_->TO_JSON), $self->errors ]),
@@ -138,7 +139,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
     die 'uh oh, have no errors left to report' if not $self->valid and not @errors;
 
     return +{
-      valid => $self->valid,
+      valid => $self->valid ? true : false,
       $self->valid
         ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, @errors ]),

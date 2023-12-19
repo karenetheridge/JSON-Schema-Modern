@@ -446,7 +446,7 @@ subtest 'AND two result objects together' => sub {
   cmp_deeply(
     (my $one_true = $results[0] & $results[1]),
     all(
-      methods(valid => false),
+      methods(valid => bool(0)),
       listmethods(
         errors => [
           map methods(TO_JSON => {
@@ -470,7 +470,7 @@ subtest 'AND two result objects together' => sub {
   cmp_deeply(
     (my $both_true = $results[1] & $results[3]),
     all(
-      methods(valid => true),
+      methods(valid => bool(1)),
       listmethods(
         annotations => [
           map {
@@ -490,7 +490,7 @@ subtest 'AND two result objects together' => sub {
   cmp_deeply(
     (my $both_false = $results[0] & $results[2]),
     all(
-      methods(valid => false),
+      methods(valid => bool(0)),
       listmethods(
         errors => [
           map {

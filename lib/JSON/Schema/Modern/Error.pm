@@ -18,7 +18,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
 use JSON::PP ();
 use MooX::TypeTiny;
-use Types::Standard qw(Str Undef InstanceOf Enum);
+use Types::Standard qw(Str Bool Undef InstanceOf Enum);
 use namespace::clean;
 
 use overload
@@ -50,8 +50,7 @@ has keyword => (
 
 has exception => (
   is => 'ro',
-  isa => InstanceOf['JSON::PP::Boolean'],
-  coerce => sub { $_[0] ? JSON::PP::true : JSON::PP::false },
+  isa => Bool,
 );
 
 has mode => (
