@@ -38,6 +38,7 @@ has valid => (
   is => 'ro',
   isa => Bool,
   coerce => sub { !!$_[0] },
+  required => 1,
 );
 sub result { goto \&valid } # backcompat only
 
