@@ -22,7 +22,9 @@ use Types::Standard qw(Str Undef InstanceOf Enum);
 use namespace::clean;
 
 use overload
-  '""' => sub { $_[0]->stringify };
+  '0+' => sub { Scalar::Util::refaddr($_[0]) },
+  '""' => sub { $_[0]->stringify },
+  fallback => 1;
 
 has [qw(
   instance_location
