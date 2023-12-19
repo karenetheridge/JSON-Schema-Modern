@@ -47,7 +47,7 @@ has exception => (
   is => 'ro',
   isa => Bool,
   lazy => 1,
-  default => sub { any { $_->exception } $_[0]->errors },
+  default => sub ($self) { any { $_->exception or $_->error =~ /^EXCEPTION: / } $self->errors },
 );
 
 has $_.'s' => (
@@ -81,9 +81,7 @@ has recommended_response => (
       return $pe if $pe;
     }
 
-    return [ 500, 'Internal Server Error' ]
-      if any { $_->exception or $_->error =~ /^EXCEPTION: / } $self->errors;
-
+    return [ 500, 'Internal Server Error' ] if $self->exception;
     return [ 400, ($self->errors)[0]->stringify ];
   },
 );
