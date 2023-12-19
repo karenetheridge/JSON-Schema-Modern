@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.576
+version 0.577
 
 =head1 SYNOPSIS
 
@@ -664,6 +664,8 @@ This implementation is now fully specification-compliant (for versions draft7, d
 draft2020-12), but until version 1.000 is released, it is
 still deemed to be missing some optional but quite useful features, such as:
 
+=for stopwords Mojolicious
+
 =over 4
 
 =item *
@@ -695,6 +697,8 @@ service or by allowing exposure to the internals of your application. B<DO NOT U
 UNTRUSTED SOURCES.>
 
 =head1 SEE ALSO
+
+=for stopwords OpenAPI
 
 =over 4
 
@@ -738,9 +742,19 @@ L<https://json-schema.org/draft-07/json-schema-release-notes.html>
 
 L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
 
-=back
+=item *
 
-=for stopwords OpenAPI
+L<OpenAPI::Modern>: a parser and evaluator for OpenAPI v3.1 documents
+
+=item *
+
+L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality
+
+=item *
+
+L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
+
+=back
 
 =head1 SUPPORT
 
