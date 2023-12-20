@@ -205,6 +205,7 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
       exception => 1,
       errors => [
         JSON::Schema::Modern::Error->new(
+          depth => 0,
           keyword => undef,
           instance_location => '',
           keyword_location => '',
@@ -302,6 +303,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     schema_path => '',                  # the rest of the path, since the start of evaluation, or last $id or $ref
     effective_base_uri => $effective_base_uri, # resolve locations against this for errors and annotations
     errors => [],
+    depth => 0,
   };
 
   exists $config_override->{$_} and die $_.' not supported as a config override'
@@ -336,7 +338,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
     $state = +{
       %$state,
-      depth => 0,
       initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start of evaluation, or last $id or $ref
       document => $schema_info->{document},   # the ::Document object containing this schema
       document_path => $schema_info->{document_path}, # the path within the document of this schema, as of the start of evaluation, or last $id or $ref
@@ -789,6 +790,7 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
         # absolute location is undef iff the location = '/$schema'
         my $absolute_location = $e->absolute_keyword_location // $for_canonical_uri;
         JSON::Schema::Modern::Error->new(
+          depth => $e->depth,
           keyword => $e->keyword eq '$schema' ? '' : $e->keyword,
           instance_location => $e->instance_location,
           keyword_location => ($for_canonical_uri->fragment//'').($e->keyword_location =~ s{^/\$schema\b}{}r),

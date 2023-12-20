@@ -18,6 +18,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
 use MooX::TypeTiny;
 use Types::Standard qw(Str InstanceOf Bool);
+use Types::Common::Numeric qw(PositiveOrZeroInt);
 use namespace::clean;
 
 has [qw(
@@ -46,6 +47,12 @@ has unknown => (
   is => 'ro',
   isa => Bool,
   default => 0,
+);
+
+has depth => (
+  is => 'ro',
+  isa => PositiveOrZeroInt,
+  required => 1,
 );
 
 around BUILDARGS => sub ($orig, $class, @args) {
@@ -85,7 +92,7 @@ __END__
 =pod
 
 =for :header
-=for stopwords schema fragmentless
+=for stopwords schema fragmentless subschemas
 
 =head1 SYNOPSIS
 
@@ -135,6 +142,11 @@ A boolean flag, indicating whether the keyword is a known vocabulary keyword or 
 =head2 annotation
 
 The actual annotation value (which may or may not be a string).
+
+=head2 depth
+
+An integer which indicates how many subschemas deep this annotation was generated from. Can be used
+to construct a tree-like structure of annotations.
 
 =head1 METHODS
 
