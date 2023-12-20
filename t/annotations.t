@@ -15,6 +15,7 @@ use Helper;
 my $js = JSON::Schema::Modern->new(collect_annotations => 1, short_circuit => 0);
 
 my $initial_state = {
+  depth => 0,
   short_circuit => 0,
   collect_annotations => 1<<8,
   initial_schema_uri => Mojo::URL->new,

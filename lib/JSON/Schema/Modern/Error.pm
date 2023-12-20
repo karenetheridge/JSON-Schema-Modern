@@ -19,7 +19,7 @@ use Safe::Isa;
 use JSON::PP ();
 use MooX::TypeTiny;
 use Types::Standard qw(Str Bool Undef InstanceOf Enum Tuple);
-use Types::Common::Numeric 'PositiveInt';
+use Types::Common::Numeric qw(PositiveInt PositiveOrZeroInt);
 use namespace::clean;
 
 use overload
@@ -62,6 +62,12 @@ has mode => (
 has recommended_response => (
   is => 'ro',
   isa => Tuple[PositiveInt, Str],
+);
+
+has depth => (
+  is => 'ro',
+  isa => PositiveOrZeroInt,
+  required => 1,
 );
 
 sub TO_JSON ($self) {
@@ -152,6 +158,11 @@ A tuple, consisting of C<[ integer, string ]>, indicating the recommended HTTP r
 string to use for this error (if validating an HTTP request). This could exist for things like a
 failed authentication check in OpenAPI validation, in which case it would contain
 C<[ 401, 'Unauthorized' ]>.
+
+=head2 depth
+
+An integer which indicates how many subschemas deep this error was generated from. Can be used to
+construct a tree-like structure of errors.
 
 =head1 METHODS
 

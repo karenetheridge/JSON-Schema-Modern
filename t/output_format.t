@@ -434,6 +434,7 @@ subtest 'AND two result objects together' => sub {
       valid => $valid,
       ($valid ? 'annotations' : 'errors') => [
         map ${\ ('JSON::Schema::Modern::'.($valid ? 'Annotation' : 'Error'))}->new(
+          depth => 0,
           keyword => 'keyword '.$count.'-'.$_,
           instance_location => 'instance location '.$count.'-'.$_,
           keyword_location => 'keyword location '.$count.'-'.$_,
@@ -525,6 +526,7 @@ subtest annotations => sub {
     valid => 1,
     annotations => [
       JSON::Schema::Modern::Annotation->new(
+        depth => 0,
         keyword => 'foo',
         instance_location => 'instance location',
         keyword_location => 'keyword location ',
@@ -560,18 +562,21 @@ subtest 'data_only' => sub {
     valid => 0,
     errors => [
       JSON::Schema::Modern::Error->new(
+        depth => 1,
         keyword => 'hello',
         instance_location => '/foo/bar',
         keyword_location => '/allOf/0/hello',
         error => 'schema is invalid',
       ),
       JSON::Schema::Modern::Error->new(
+        depth => 1,
         keyword => 'goodbye',
         instance_location => '/foo/bar',
         keyword_location => '/allOf/1/goodbye',
         error => 'schema is invalid',
       ),
       JSON::Schema::Modern::Error->new(
+        depth => 0,
         keyword => 'allOf',
         instance_location => '/foo/bar',
         keyword_location => '/allOf',

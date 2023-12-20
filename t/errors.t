@@ -1514,6 +1514,7 @@ subtest 'recommended_response' => sub {
         keyword_location => '/paths/foo/get/security',
         error => 'security check failed',
         recommended_response => [ 401, 'Unauthorized' ],
+        depth => 0,
       ),
     ],
   );

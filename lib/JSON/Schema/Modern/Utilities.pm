@@ -215,6 +215,7 @@ sub canonical_uri ($state, @extra_path) {
 # - errors
 # - exception (set by abort())
 # - recommended_response
+# - depth
 sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
@@ -229,6 +230,7 @@ sub E ($state, $error_string, @args) {
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
+    depth => $state->{depth},
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
@@ -253,6 +255,7 @@ sub E ($state, $error_string, @args) {
 # - collect_annotations
 # - spec_version
 # - _unknown
+# - depth
 sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations} or $state->{spec_version} eq 'draft7';
 
@@ -266,6 +269,7 @@ sub A ($state, $annotation) {
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
 
   push $state->{annotations}->@*, {
+    depth => $state->{depth},
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
