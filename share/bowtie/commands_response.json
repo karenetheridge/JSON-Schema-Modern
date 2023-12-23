@@ -34,7 +34,6 @@
             },
             "dialects": {
               "description": "A list of JSON Schema dialects (URIs) which the implementation understands. When running test cases, this list will be consulted before sending them to the implementation (and any unsupported dialects will be skipped).",
-
               "type": "array",
               "items": { "type": "string", "format": "uri" }
             },
@@ -109,6 +108,24 @@
           },
           "additionalProperties": true
         }
+      }
+    }
+  },
+  "skip_response": {
+    "description": "Signal that the implementation skipped the test case or test (typically because it is a known bug). Either an issue URL or a human-readable message is encouraged to explain the skip.",
+    "$anchor": "skipped",
+    "required": ["skipped"],
+    "properties": {
+      "skipped": { "const": true },
+      "message": {
+        "description": "A human-readable message passed back from the implementation explaining why the skip occurred.",
+        "type": "string"
+      },
+      "issue_url": {
+        "description": "An optional link to a relevant issue on the implementation's bug tracker.",
+
+        "type": "string",
+        "format": "url"
       }
     }
   },
