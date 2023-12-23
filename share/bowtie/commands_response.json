@@ -78,7 +78,17 @@
       "$comment": "????"
     },
     "dialect_response": {
-      "$comment": "????"
+      "$comment": "see https://github.com/bowtie-json-schema/bowtie/blob/main/bowtie/schemas/commands/dialect.json",
+      "oneOf": [
+        {
+          "description": "The implementation supports out-of-band indication of schema dialects and has configured itself for the dialect sent.",
+          "const": { "ok": true }
+        },
+        {
+          "description": "The implementation does not support out-of-band indication of schema dialects. Cases may proceed to be sent nevertheless.",
+          "const": { "ok": false }
+        }
+      ]
     },
     "stop_response": {
       "$comment": "????"
