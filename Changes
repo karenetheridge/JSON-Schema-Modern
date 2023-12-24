@@ -4,6 +4,7 @@ Revision history for JSON-Schema-Modern
           - remove use of JSON::MaybeXS, to avoid potential use of JSON::XS;
             now we use Cpanel::JSON::XS or JSON::PP directly, using the same
             environment variables as in Mojo::JSON for customization.
+          - new helper interface, get_document()
 
 0.577     2023-12-19 05:27:04Z
           - new attribute on Error and Result objects: "recommended_response",
