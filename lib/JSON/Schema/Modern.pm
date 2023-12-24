@@ -404,8 +404,8 @@ sub validate_schema ($self, $schema, $config_override = {}) {
   return $self->evaluate($schema, $metaschema_uri, $config_override);
 }
 
-sub get ($self, $uri) {
-  my $schema_info = $self->_fetch_from_uri($uri);
+sub get ($self, $uri_reference) {
+  my $schema_info = $self->_fetch_from_uri($uri_reference);
   return if not $schema_info;
   my $subschema = is_ref($schema_info->{schema}) ? dclone($schema_info->{schema}) : $schema_info->{schema};
   return wantarray ? ($subschema, $schema_info->{canonical_uri}) : $subschema;
@@ -956,7 +956,7 @@ sub _get_or_load_resource ($self, $uri) {
   return;
 };
 
-# returns information necessary to use a schema found at a particular URI:
+# returns information necessary to use a schema found at a particular URI or uri-reference:
 # - a schema (which may not be at a document root)
 # - the canonical uri for that schema,
 # - the JSON::Schema::Modern::Document object that holds that schema
@@ -965,12 +965,12 @@ sub _get_or_load_resource ($self, $uri) {
 # - the vocabularies to use when considering schema keywords
 # - the config overrides to set when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
-sub _fetch_from_uri ($self, $uri) {
-  $uri = Mojo::URL->new($uri) if not is_ref($uri);
-  my $fragment = $uri->fragment;
+sub _fetch_from_uri ($self, $uri_reference) {
+  $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
+  my $fragment = $uri_reference->fragment;
 
   if (not length($fragment) or $fragment =~ m{^/}) {
-    my $base = $uri->clone->fragment(undef);
+    my $base = $uri_reference->clone->fragment(undef);
     if (my $resource = $self->_get_or_load_resource($base)) {
       my $subschema = $resource->{document}->get(my $document_path = $resource->{path}.($fragment//''));
       return if not defined $subschema;
@@ -995,7 +995,7 @@ sub _fetch_from_uri ($self, $uri) {
     }
   }
   else {  # we are following a URI with a plain-name fragment
-    if (my $resource = $self->_get_resource($uri)) {
+    if (my $resource = $self->_get_resource($uri_reference)) {
       my $subschema = $resource->{document}->get($resource->{path});
       return if not defined $subschema;
       return {
@@ -1512,9 +1512,9 @@ You can use it thusly:
   my $schema = $js->get($uri);
   my ($schema, $canonical_uri) = $js->get($uri);
 
-Fetches the Perl data structure representing the JSON Schema at the indicated URI. When called in
-list context, the canonical URI of that location is also returned, as a L<Mojo::URL>. Returns
-C<undef> if the schema with that URI has not been loaded (or cached).
+Fetches the Perl data structure representing the JSON Schema at the indicated identifier (uri or
+uri-reference). When called in list context, the canonical URI of that location is also returned, as
+a L<Mojo::URL>. Returns C<undef> if the schema with that URI has not been loaded (or cached).
 
 =head1 LIMITATIONS
 
