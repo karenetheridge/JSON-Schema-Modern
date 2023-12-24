@@ -47,7 +47,7 @@ die '--validate-schema and --data should not be used together' if defined $data 
 die '--validate-schema and --schema should not be used together' if defined $schema and defined $validate_schema;
 
 my $js = JSON::Schema::Modern->new(%$opt);
-my $decoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0);
+my $decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0);
 
 if (defined $validate_schema) {
   if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename

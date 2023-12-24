@@ -9,8 +9,11 @@ use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' 
 use JSON::PP ();
 use constant { true => JSON::PP::true, false => JSON::PP::false };
 
-use JSON::MaybeXS;
-my $encoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0, allow_bignum => 1, convert_blessed => 1);
+my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
+  ->allow_nonref(1)
+  ->utf8(0)
+  ->allow_bignum(1)
+  ->convert_blessed(1);
 
 # like sprintf, but all list items are JSON-encoded. assumes placeholders are %s!
 sub json_sprintf {
