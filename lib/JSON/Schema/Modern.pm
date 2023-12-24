@@ -16,7 +16,7 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use JSON::MaybeXS;
+use Mojo::JSON ();  # for JSON_XS, MOJO_NO_JSON_XS environment variables
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap uniq any);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref);
@@ -1009,12 +1009,14 @@ sub _fetch_from_uri ($self, $uri) {
   }
 }
 
+use constant _JSON_BACKEND => Mojo::JSON::JSON_XS ? 'Cpanel::JSON::XS' : 'JSON::PP';
+
 # used for internal encoding as well (when caching serialized schemas)
 has _json_decoder => (
   is => 'ro',
   isa => HasMethods[qw(encode decode)],
   lazy => 1,
-  default => sub { JSON::MaybeXS->new(allow_nonref => 1, canonical => 1, utf8 => 1, allow_bignum => 1, convert_blessed => 1) },
+  default => sub { _JSON_BACKEND->new->allow_nonref(1)->canonical(1)->utf8(1)->allow_bignum(1)->convert_blessed(1) },
 );
 
 # since media types are case-insensitive, all type names must be casefolded on insertion.
@@ -1027,7 +1029,7 @@ has _media_type => (
     my $_json_media_type = sub ($content_ref) {
       # utf-8 decoding is always done, as per the JSON spec.
       # other charsets are not supported: see RFC8259 §11
-      \ JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1)->decode($content_ref->$*);
+      \ _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->decode($content_ref->$*);
     };
     +{
       (map +($_ => $_json_media_type),
@@ -1038,7 +1040,7 @@ has _media_type => (
         \ Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*)->to_hash;
       },
       'application/x-ndjson' => sub ($content_ref) {
-        my $decoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 1);
+        my $decoder = _JSON_BACKEND->new->allow_nonref(1)->utf8(1);
         my $line = 0; # line numbers start at 1
         \[ map {
             do {
@@ -1525,7 +1527,7 @@ string is used in an arithmetic operation), additional flags can be added onto t
 it to resemble the other type. This should not be an issue if data validation is occurring
 immediately after decoding a JSON payload, or if the JSON string itself is passed to this module.
 If you are still having difficulties, make sure you are using Perl's fastest and most trusted and
-reliable JSON decoder, L<Cpanel::JSON::XS> (or its proxy, useful for fatpacking, L<JSON::MaybeXS>).
+reliable JSON decoder, L<Cpanel::JSON::XS>.
 Other JSON decoders are known to produce data with incorrect data types.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.

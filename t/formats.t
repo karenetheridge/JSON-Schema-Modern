@@ -423,7 +423,7 @@ subtest 'format: pure_integer' => sub {
     },
   );
 
-  my $decoder = JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0);
+  my $decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0);
   cmp_deeply(
     $js->evaluate(
       [

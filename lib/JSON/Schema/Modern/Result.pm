@@ -208,7 +208,12 @@ sub TO_JSON ($self) {
 }
 
 sub dump ($self) {
-  my $encoder = JSON::MaybeXS->new(utf8 => 0, convert_blessed => 1, canonical => 1, indent => 1, space_after => 1);
+  my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
+    ->utf8(0)
+    ->convert_blessed(1)
+    ->canonical(1)
+    ->indent(1)
+    ->space_after(1);
   $encoder->indent_length(2) if $encoder->can('indent_length');
   $encoder->encode($self);
 }
