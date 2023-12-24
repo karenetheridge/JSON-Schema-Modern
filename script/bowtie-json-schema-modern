@@ -12,4 +12,49 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
+# XXX temporary, until first release.
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
+
+use File::ShareDir 'dist_dir';
+use Path::Tiny;
+use JSON::Schema::Modern;
+
+# cmd => canonical identifier
+use constant PROTOCOL_SCHEMAS => {
+  start => 'tag:bowtie.report,2023:ihop:command:start',
+  dialect => 'tag:bowtie.report,2023:ihop:command:dialect',
+  run => 'tag:bowtie.report,2023:ihop:command:run',
+  stop => 'tag:bowtie.report,2023:ihop:command:stop',
+};
+
+my $protocol_js = JSON::Schema::Modern->new;
+
+foreach my $filename (path(dist_dir('JSON-Schema-Modern'), 'bowtie')->children) {
+  next if $filename->basename eq 'LICENSE';
+  my $schema = $protocol_js->_json_decoder->decode($filename->slurp_raw);
+  $protocol_js->add_schema($schema);
+}
+
+
 print "Hello world\n";
+
+
+
+__END__
+
+- read input from stdin, line by line
+- parse line as json
+- validate request line against the schema
+- use "cmd" to determine what to do
+- formulate the response
+- validate the response against the relevant schema
+
+the four schemas have identifiers:
+"tag:bowtie.report,2023:ihop:command:start"
+"tag:bowtie.report,2023:ihop:command:dialect"
+"tag:bowtie.report,2023:ihop:command:run"
+"tag:bowtie.report,2023:ihop:command:stop"
+
+  and they each have anchors for #response
+
+
