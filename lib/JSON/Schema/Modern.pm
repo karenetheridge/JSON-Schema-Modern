@@ -1529,6 +1529,13 @@ a L<Mojo::URL>. Returns C<undef> if the schema with that URI has not been loaded
 Fetches the L<JSON::Schema::Modern::Document> object that contains the provided identifier (uri or
 uri-reference). C<undef> if the schema with that URI has not been loaded (or cached).
 
+=head2 get_document
+
+  my $document = $js->get_document($uri_reference);
+
+Fetches the L<JSON::Schema::Document> object that contains the provided identifier (uri or
+uri-reference). C<undef> if the schema with that URI has not been loaded (or cached).
+
 =head1 LIMITATIONS
 
 =head2 Types
