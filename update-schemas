@@ -37,6 +37,10 @@ my %files = (
   'draft7/schema.json' => 'http://json-schema.org/draft-07/schema#',
 
   'LICENSE' => 'https://raw.githubusercontent.com/json-schema-org/json-schema-spec/main/LICENSE',
+
+  # these aren't the canonical identifiers for these documents
+  'bowtie/LICENSE' => 'https://raw.githubusercontent.com/bowtie-json-schema/bowtie/main/LICENSE',
+  (map +('bowtie/'.$_.'.json' => 'https://raw.githubusercontent.com/bowtie-json-schema/bowtie/main/bowtie/schemas/commands/'.$_.'.json'), qw(dialect run start stop)),
 );
 
 my $js = JSON::Schema::Modern->new(validate_formats => 1);
@@ -53,7 +57,10 @@ foreach my $target (keys %files) {
 
   next if $target->basename eq 'LICENSE';
 
-  my $document = $js->get_document($source_uri);
+  my $document =
+      $source_uri =~ /\bbowtie\b/ ? $js->add_schema($js->_json_decoder->decode($response->{content}))
+    : $js->get_document($source_uri);
+
   print '# validating ', $document->canonical_uri, "\n" if $ENV{DEBUG};
   my $result = $document->validate;
   die $result->dump if not $result;
