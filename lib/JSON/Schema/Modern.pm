@@ -411,6 +411,12 @@ sub get ($self, $uri_reference) {
   return wantarray ? ($subschema, $schema_info->{canonical_uri}) : $subschema;
 }
 
+sub get_document ($self, $uri_reference) {
+  my $schema_info = $self->_fetch_from_uri($uri_reference);
+  return if not $schema_info;
+  return $schema_info->{document};
+}
+
 # defined lower down:
 # sub add_vocabulary { ... }
 # sub add_encoding { ... }
@@ -1515,6 +1521,13 @@ You can use it thusly:
 Fetches the Perl data structure representing the JSON Schema at the indicated identifier (uri or
 uri-reference). When called in list context, the canonical URI of that location is also returned, as
 a L<Mojo::URL>. Returns C<undef> if the schema with that URI has not been loaded (or cached).
+
+=head2 get_document
+
+  my $document = $js->get_document($uri_reference);
+
+Fetches the L<JSON::Schema::Modern::Document> object that contains the provided identifier (uri or
+uri-reference). C<undef> if the schema with that URI has not been loaded (or cached).
 
 =head1 LIMITATIONS
 

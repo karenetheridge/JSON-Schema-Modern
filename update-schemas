@@ -39,22 +39,22 @@ my %files = (
   'LICENSE' => 'https://raw.githubusercontent.com/json-schema-org/json-schema-spec/main/LICENSE',
 );
 
+my $js = JSON::Schema::Modern->new(validate_formats => 1);
+
 foreach my $target (keys %files) {
-  my $source = $files{$target};
+  my $source_uri = $files{$target};
   $target = path('share', $target);
   $target->parent->mkpath;
 
-  my $response = HTTP::Tiny->new->get($source);
-  die "Failed to fetch $source: $response->{status} $response->{reason}" if not $response->{success};
+  my $response = HTTP::Tiny->new->get($source_uri);
+  die "Failed to fetch $source_uri: $response->{status} $response->{reason}" if not $response->{success};
 
   $target->spew($response->{content});
-}
 
-my $js = JSON::Schema::Modern->new(validate_formats => 1);
-foreach my $uri (values %files) {
-  next if $uri =~ /LICENSE$/;
-  print "# validating $uri\n" if $ENV{DEBUG};
+  next if $target->basename eq 'LICENSE';
 
-  my $result = $js->_fetch_from_uri($uri)->{document}->validate;
+  my $document = $js->get_document($source_uri);
+  print '# validating ', $document->canonical_uri, "\n" if $ENV{DEBUG};
+  my $result = $document->validate;
   die $result->dump if not $result;
 }
