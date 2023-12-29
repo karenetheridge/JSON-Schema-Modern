@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.577
+version 0.578
 
 =head1 SYNOPSIS
 
@@ -534,9 +534,16 @@ You can use it thusly:
   my $schema = $js->get($uri);
   my ($schema, $canonical_uri) = $js->get($uri);
 
-Fetches the Perl data structure representing the JSON Schema at the indicated URI. When called in
-list context, the canonical URI of that location is also returned, as a L<Mojo::URL>. Returns
-C<undef> if the schema with that URI has not been loaded (or cached).
+Fetches the Perl data structure representing the JSON Schema at the indicated identifier (uri or
+uri-reference). When called in list context, the canonical URI of that location is also returned, as
+a L<Mojo::URL>. Returns C<undef> if the schema with that URI has not been loaded (or cached).
+
+=head2 get_document
+
+  my $document = $js->get_document($uri_reference);
+
+Fetches the L<JSON::Schema::Modern::Document> object that contains the provided identifier (uri or
+uri-reference). C<undef> if the schema with that URI has not been loaded (or cached).
 
 =head1 LIMITATIONS
 
@@ -549,7 +556,7 @@ string is used in an arithmetic operation), additional flags can be added onto t
 it to resemble the other type. This should not be an issue if data validation is occurring
 immediately after decoding a JSON payload, or if the JSON string itself is passed to this module.
 If you are still having difficulties, make sure you are using Perl's fastest and most trusted and
-reliable JSON decoder, L<Cpanel::JSON::XS> (or its proxy, useful for fatpacking, L<JSON::MaybeXS>).
+reliable JSON decoder, L<Cpanel::JSON::XS>.
 Other JSON decoders are known to produce data with incorrect data types.
 
 For more information, see L<Cpanel::JSON::XS/MAPPING>.
