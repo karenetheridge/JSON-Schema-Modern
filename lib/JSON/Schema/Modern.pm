@@ -1607,6 +1607,10 @@ detect potentially pathological constructs that may pose a security risk, either
 service or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM
 UNTRUSTED SOURCES.>
 
+(In particular, see vulnerability
+L<perl5363delta/CVE-2023-47038-Write-past-buffer-end-via-illegal-user-defined-Unicode-property>,
+which is closed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
+
 =head1 SEE ALSO
 
 =for stopwords OpenAPI
