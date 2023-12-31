@@ -237,7 +237,7 @@ sub E ($state, $error_string, @args) {
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
-    depth => $state->{depth},
+    depth => $state->{depth} // 0,
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
@@ -276,7 +276,7 @@ sub A ($state, $annotation) {
     .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
 
   push $state->{annotations}->@*, {
-    depth => $state->{depth},
+    depth => $state->{depth} // 0,
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
