@@ -132,13 +132,13 @@ subtest 'override a format sub' => sub {
     validate_formats => 1,
     format_validations => +{
       uuid => sub { $_[0] =~ /^[A-Z]+$/ },
-      mult_5 => +{ type => 'integer', sub => sub { ($_[0] % 5) == 0 } },
+      mult_5 => +{ type => 'number', sub => sub { ($_[0] % 5) == 0 } },
     },
   );
 
   like(
     exception { $js->add_format_validation(
-      mult_2 => +{ type => 'integer', sub => sub { ($_[0] % 2) == 0 } },
+      mult_2 => +{ type => 'number', sub => sub { ($_[0] % 2) == 0 } },
       uuid_bad => 1,
     ) },
     qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
@@ -211,7 +211,7 @@ subtest 'different formats after document creation' => sub {
   my $js2 = JSON::Schema::Modern->new(
     collect_annotations => 1,
     validate_formats => 1,
-    format_validations => +{ mult_5 => +{ type => 'integer', sub => sub { ($_[0] % 5) == 0 } } },
+    format_validations => +{ mult_5 => +{ type => 'number', sub => sub { ($_[0] % 5) == 0 } } },
   );
 
   cmp_deeply(
@@ -417,21 +417,24 @@ subtest 'format: pure_integer' => sub {
   my $js = JSON::Schema::Modern->new(
     validate_formats => 1,
     format_validations => +{
-      pure_integer => +{ type => 'integer', sub => sub ($value) {
-        !ref($value) && (B::svref_2object(\$value)->FLAGS & B::SVf_IOK)
+      pure_integer => +{ type => 'number', sub => sub ($value) {
+        B::svref_2object(\$value)->FLAGS & B::SVf_IOK
       } },
     },
   );
 
   my $decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0);
+  my $int = 5;
   cmp_deeply(
     $js->evaluate(
       [
-        map $decoder->decode($_),
+        (map $decoder->decode($_),
           '"hello"',
           '3.1',
           '3.0',
           '3',
+        ),
+        bless(\$int, 'Local::MyInteger'),
       ],
       {
         items => {
@@ -454,9 +457,19 @@ subtest 'format: pure_integer' => sub {
           error => 'got number, not integer',
         },
         {
+          instanceLocation => '/1',
+          keywordLocation => '/items/format',
+          error => 'not a valid pure_integer',
+        },
+        {
           instanceLocation => '/2',
           keywordLocation => '/items/format',
           error => 'not a valid pure_integer',
+        },
+        {
+          instanceLocation => '/4',
+          keywordLocation => '/items/type',
+          error => 'got Local::MyInteger, not integer',
         },
         {
           instanceLocation => '',
@@ -471,11 +484,13 @@ subtest 'format: pure_integer' => sub {
   cmp_deeply(
     $js->evaluate(
       [
-        map $decoder->decode($_),
-          '"hello"',
-          '3.1',
-          '3.0',
-          '3',
+        (map $decoder->decode($_),
+          '"hello"',  # string, will not apply format
+          '3.1',      # number, will apply format
+          '3.0',      # ""
+          '3',        # ""
+        ),
+        bless(\$int, 'Local::MyInteger'), # blessed type, will not apply format
       ],
       {
         items => {
@@ -486,6 +501,12 @@ subtest 'format: pure_integer' => sub {
     {
       valid => false,
       errors => [
+        # strings are not applied to the format
+        {
+          instanceLocation => '/1',
+          keywordLocation => '/items/format',
+          error => 'not a valid pure_integer',
+        },
         {
           instanceLocation => '/2',
           keywordLocation => '/items/format',
