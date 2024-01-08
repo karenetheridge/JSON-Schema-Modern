@@ -98,11 +98,12 @@ has [qw(collect_annotations scalarref_booleans stringy_numbers strict)] => (
   isa => Bool,
 );
 
+my $core_types = Enum[qw(null object array boolean string number)];
 has _format_validations => (
   is => 'bare',
   isa => my $format_type = Dict[
     (map +($_ => Optional[CodeRef]), qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex)),
-    Slurpy[HashRef[Dict[type => Enum[qw(null object array boolean string number)], sub => CodeRef]]],
+    Slurpy[HashRef[Dict[type => $core_types|ArrayRef[$core_types], sub => CodeRef]]],
   ],
   init_arg => 'format_validations',
   lazy => 1,

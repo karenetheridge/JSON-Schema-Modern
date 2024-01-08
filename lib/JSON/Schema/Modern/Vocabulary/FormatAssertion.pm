@@ -17,6 +17,8 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use JSON::Schema::Modern::Utilities qw(is_type E A assert_keyword_type abort);
 use Feature::Compat::Try;
+use List::Util 'any';
+use Ref::Util 0.100 'is_plain_arrayref';
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -222,8 +224,12 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       : undef;
 
   A($state, $schema->{format});
-  return E($state, 'not a valid %s', $schema->{format}) if $spec and is_type($spec->{type}, $data)
-    and not $spec->{sub}->($data);
+
+  return E($state, 'not a valid %s', $schema->{format})
+    if $spec and
+        is_plain_arrayref($spec->{type}) ? any { is_type($_, $data) } $spec->{type}->@*
+      : is_type($spec->{type}, $data)
+      and not $spec->{sub}->($data);
 
   return 1;
 }

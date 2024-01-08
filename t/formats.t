@@ -9,6 +9,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::Fatal;
+use JSON::Schema::Modern::Utilities qw(get_type);
 
 use lib 't/lib';
 use Helper;
@@ -537,6 +538,87 @@ subtest 'unsupported formats in draft7' => sub {
     { valid => true },
     'uuid is not implemented in draft7',
   );
+};
+
+subtest 'formats supporting multiple core types' => sub {
+  # this is int64 from the OAI format registry: https://spec.openapis.org/registry/format/
+  my $js = JSON::Schema::Modern->new(
+    validate_formats => 1,
+    format_validations => +{
+      # a signed 64-bit integer; see https://spec.openapis.org/api/format.json
+      int64 => +{ type => ['number', 'string'], sub => sub ($value) {
+        my $type = get_type($value);
+        return if not grep $type eq $_, qw(integer number string);
+        if ($type eq 'string') {
+          return if $value eq 'NaN';
+          $value = Math::BigFloat->new($value); # will become NaN if not an integer
+        }
+        # using the literal numbers rather than -2**63, 2**63 -1 to maintain precision
+        $value >= -9223372036854775808 && $value <= 9223372036854775807;
+      } },
+    },
+  );
+
+  my @values = (
+    '{}',     # object is valid
+    '[]',     # array is valid
+    'true',   # boolean is valid
+    'null',   # null is valid
+
+    # string
+    '"-9223372036854775809"', # 4: out of bounds
+    '"-9223372036854775808"', # minimum value
+    '"-9223372036854775807"', # within bounds
+    '"0"',
+    '"9223372036854775806"',  # within bounds
+    '"9223372036854775807"',  # maximum value
+    '"9223372036854775808"',  # out of bounds
+    '"Inf"',
+    '"NaN"',
+
+    # number
+    '-9223372036854775809',   # 13: out of bounds
+    '-9223372036854775808',   # minimum value; difficult to use on most architectures without Math::BigInt
+    '-9223372036854775807',   # within bounds
+    '0',
+    '9223372036854775806',    # within bounds
+    '9223372036854775807',    # maximum value
+    '9223372036854775808',    # 19: out of bounds
+    # numeric Inf and NaN are not valid JSON
+  );
+
+  # note: results may vary on 32-bit architectures when not using Math::BigFloat
+  foreach my $decoder (
+      JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0),
+      JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0)->allow_bignum(1)) {
+    cmp_deeply(
+      my $result = $js->evaluate(
+        [ map $decoder->decode($_), @values ],
+        {
+          items => {
+            format => 'int64',
+          },
+        },
+      )->TO_JSON,
+      {
+        valid => false,
+        errors => [
+          (map +{
+            instanceLocation => "/$_",
+            keywordLocation => '/items/format',
+            error => 'not a valid int64',
+          },
+          4, 10, 11, 12, 13, 19),
+          {
+            instanceLocation => '',
+            keywordLocation => '/items',
+            error => 'subschema is not valid against all items',
+          },
+        ],
+      },
+      'int64 format without type - accepts both numbers and strings',
+    );
+  }
 };
 
 done_testing;
