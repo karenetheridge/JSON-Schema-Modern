@@ -84,27 +84,6 @@ subtest 'simple validation' => sub {
   ok(!$js->validate_formats, '...but the value is still false on the object');
 };
 
-subtest 'unknown format attribute' => sub {
-  # see https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.3
-  # "An implementation MUST NOT fail validation or cease processing due to an unknown format
-  # attribute."
-  my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
-  cmp_deeply(
-    $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
-    {
-      valid => true,
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          annotation => 'whargarbl',
-        },
-      ],
-    },
-    'unrecognized format attributes do not cause validation failure; annotation is still produced',
-  );
-};
-
 subtest 'override a format sub' => sub {
   like(
     exception {
@@ -368,49 +347,88 @@ subtest 'custom metaschemas' => sub {
   );
 };
 
-subtest 'unimplemented formats' => sub {
-  my $js = JSON::Schema::Modern->new(validate_formats => 1);
+subtest 'core formats added after draft7' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft7', validate_formats => 1);
+
   cmp_deeply(
-    $js->evaluate(
-      'hello',
-      {
-        format => 'uri-template',
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          error => 'unimplemented format "uri-template"',
-        },
-      ],
-    },
-    'error when an unimplemented format is used',
+    $js->evaluate('123', { format => 'duration' })->TO_JSON,
+    { valid => true },
+    'duration is not implemented in draft7',
   );
 
   cmp_deeply(
-    $js->evaluate(
-      'hello',
+    $js->evaluate('123', { format => 'uuid' })->TO_JSON,
+    { valid => true },
+    'uuid is not implemented in draft7',
+  );
+};
+
+subtest 'unimplemented core formats' => sub {
+  foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
+    my $js = JSON::Schema::Modern->new(specification_version => $spec_version, validate_formats => 1);
+    cmp_deeply(
+      $js->evaluate(
+        'hello',
+        {
+          format => 'uri-template',
+        },
+      )->TO_JSON,
       {
-        anyOf => [
-          { minLength => 1 },
-          { format => 'uri-template' },
+        valid => false,
+        errors => [
+          {
+            instanceLocation => '',
+            keywordLocation => '/format',
+            error => 'unimplemented format "uri-template"',
+          },
         ],
       },
-    )->TO_JSON,
+      $spec_version . ': error when an unimplemented core format is used',
+    );
+
+    cmp_deeply(
+      $js->evaluate(
+        'hello',
+        {
+          anyOf => [
+            { minLength => 1 },
+            { format => 'uri-template' },
+          ],
+        },
+      )->TO_JSON,
+      {
+        valid => false,
+        errors => [
+          {
+            instanceLocation => '',
+            keywordLocation => '/anyOf/1/format',
+            error => 'unimplemented format "uri-template"',
+          },
+        ],
+      },
+      $spec_version . ': error is seen even when containing subschema would be true',
+    );
+  }
+};
+
+subtest 'unknown custom formats' => sub {
+  # see https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.3
+  # "An implementation MUST NOT fail validation or cease processing due to an unknown format
+  # attribute."
+  my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
+  cmp_deeply(
+    $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
     {
-      valid => false,
-      errors => [
+      valid => true,
+      annotations => [
         {
           instanceLocation => '',
-          keywordLocation => '/anyOf/1/format',
-          error => 'unimplemented format "uri-template"',
+          keywordLocation => '/format',
+          annotation => 'whargarbl',
         },
       ],
     },
-    'error is seen even when containing subschema would be true',
+    'unrecognized format attributes do not cause validation failure; annotation is still produced',
   );
 };
 
@@ -521,22 +539,6 @@ subtest 'format: pure_integer' => sub {
       ],
     },
     'pure_integer format without type',
-  );
-};
-
-subtest 'unsupported formats in draft7' => sub {
-  my $js = JSON::Schema::Modern->new(specification_version => 'draft7', validate_formats => 1);
-
-  cmp_deeply(
-    my $res = $js->evaluate('123', { format => 'duration' })->TO_JSON,
-    { valid => true },
-    'duration is not implemented in draft7',
-  );
-
-  cmp_deeply(
-    $js->evaluate('123', { format => 'uuid' })->TO_JSON,
-    { valid => true },
-    'uuid is not implemented in draft7',
   );
 };
 
