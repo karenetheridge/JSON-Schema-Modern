@@ -96,13 +96,6 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{spec_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
 
-  if ($state->{validate_formats}) {
-    $state->{vocabularies} = [
-      map s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/r, $state->{vocabularies}->@*
-    ];
-    require JSON::Schema::Modern::Vocabulary::FormatAssertion;
-  }
-
   $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
   push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
 

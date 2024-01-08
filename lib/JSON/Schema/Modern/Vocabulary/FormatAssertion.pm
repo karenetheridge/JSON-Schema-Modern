@@ -182,15 +182,8 @@ sub keywords {
   }
 }
 
-sub _traverse_keyword_format ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'string');
-  return 1;
-}
-
-sub _eval_keyword_format ($class, $data, $schema, $state) {
-  abort($state, 'unimplemented format "%s"', $schema->{format})
-    if $schema->{format} eq 'uri-template';
-
+# common code between FormatAnnotation+validate_formats and FormatAssertion paths
+sub _get_format_definition ($class, $schema, $state) {
   try {
     if ($schema->{format} eq 'date-time' or $schema->{format} eq 'date') {
       require Time::Moment;
@@ -223,11 +216,42 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       : $default_spec ? +{ type => 'string', sub => $default_spec }
       : undef;
 
+  return $spec;
+}
+
+sub _traverse_keyword_format ($class, $schema, $state) {
+  return if not assert_keyword_type($state, $schema, 'string');
+  return E($state, 'unimplemented format "%s"', $schema->{format})
+    if $schema->{format} eq 'uri-template';
+
+  return E($state, 'unimplemented custom format "%s"', $schema->{format})
+    if not grep $state->{spec_version} eq $_, qw(draft7 draft2019-09)
+      and not $class->_get_default_format_validation($state, $schema->{format})
+      and not $state->{evaluator}->_get_format_validation($schema->{format});
+
+  return 1;
+}
+
+# Note that this method is only callable in draft2020-12 and later, because this vocabulary does not
+# exist in previous versions
+sub _eval_keyword_format ($class, $data, $schema, $state) {
   A($state, $schema->{format});
 
+  # §7.2.2 (draft2020-12) "When the Format-Assertion vocabulary is declared with a value of true,
+  # implementations MUST provide full validation support for all of the formats defined by this
+  # specification. Implementations that cannot provide full validation support MUST refuse to
+  # process the schema."
+  abort($state, 'unimplemented format "%s"', $schema->{format})
+    if $schema->{format} eq 'uri-template';
+
+  my $spec = $class->_get_format_definition($schema, $state);
+
+  # §7.2.3 (draft2020-12) "When the Format-Assertion vocabulary is specified, implementations MUST
+  # fail upon encountering unknown formats."
+  abort($state, 'unimplemented custom format "%s"', $schema->{format}) if not $spec;
+
   return E($state, 'not a valid %s', $schema->{format})
-    if $spec and
-        is_plain_arrayref($spec->{type}) ? any { is_type($_, $data) } $spec->{type}->@*
+    if  is_plain_arrayref($spec->{type}) ? any { is_type($_, $data) } $spec->{type}->@*
       : is_type($spec->{type}, $data)
       and not $spec->{sub}->($data);
 

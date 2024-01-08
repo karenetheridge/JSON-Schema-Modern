@@ -360,13 +360,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict)),
     };
 
-    if ($state->{validate_formats}) {
-      $state->{vocabularies} = [
-        map s/^JSON::Schema::Modern::Vocabulary::Format\KAnnotation$/Assertion/r, $state->{vocabularies}->@*
-      ];
-      require JSON::Schema::Modern::Vocabulary::FormatAssertion;
-    }
-
     # we're going to set collect_annotations during evaluation when we see an unevaluated* keyword,
     # but after we pass to a new data scope we'll clear it again.. unless we've got the config set
     # globally for the entire evaluation, so we store that value in a high bit.
@@ -1202,6 +1195,12 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
 to true when specification_version is draft7, and false for all other versions, but this may change in the future.
+
+Note that the use of a format that does not have a defined handler will B<not> be interpreted as an
+error in this mode; instead, the undefined format will simply be ignored. If you instead want this
+to be treated as an evaluation error, you must define a custom schema dialect that uses the
+format-assertion vocabulary (available in specification version C<draft2020-12>) and reference it in
+your schema with the C<$schema> keyword.
 
 =head2 format_validations
 

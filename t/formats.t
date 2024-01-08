@@ -175,56 +175,6 @@ subtest 'override a format sub' => sub {
   );
 };
 
-subtest 'different formats after document creation' => sub {
-  # the default evaluator does not know the mult_5 format
-  my $document = JSON::Schema::Modern::Document->new(schema => { format => 'mult_5' });
-
-  my $js1 = JSON::Schema::Modern->new(validate_formats => 1, collect_annotations => 0);
-  cmp_deeply(
-    $js1->evaluate(3, $document)->TO_JSON,
-    {
-      valid => true,
-    },
-    'the default evaluator does not know the mult_5 format',
-  );
-
-  my $js2 = JSON::Schema::Modern->new(
-    collect_annotations => 1,
-    validate_formats => 1,
-    format_validations => +{ mult_5 => +{ type => 'number', sub => sub { ($_[0] % 5) == 0 } } },
-  );
-
-  cmp_deeply(
-    $js2->evaluate(5, $document)->TO_JSON,
-    {
-      valid => true,
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          annotation => 'mult_5',
-        },
-      ],
-    },
-    'the runtime evaluator is used for annotation configs',
-  );
-
-  cmp_deeply(
-    $js2->evaluate(3, $document)->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          error => 'not a valid mult_5',
-        },
-      ],
-    },
-    'the runtime evaluator is used to fetch the format implementations',
-  );
-};
-
 subtest 'toggle validate_formats after adding schema' => sub {
   my $js = JSON::Schema::Modern->new;
   my $document = $js->add_schema(my $uri = 'http://localhost:1234/ipv4', { format => 'ipv4' });
@@ -367,9 +317,36 @@ subtest 'unimplemented core formats' => sub {
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version, validate_formats => 1);
     cmp_deeply(
+      my $res = $js->evaluate(
+        'hello',
+        {
+          format => 'uri-template',
+        },
+      )->TO_JSON,
+      { valid => true },
+      $spec_version . ' with validate_formats = 1, no error when an unimplemented core format is used',
+    );
+  }
+
+  foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
+    next if $spec_version eq 'draft7' or $spec_version eq 'draft2019-09';
+    my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
+    $js->add_schema({
+      '$id' => 'https://my_metaschema',
+      '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+      '$vocabulary' => {
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+      },
+      '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+    });
+
+    cmp_deeply(
       $js->evaluate(
         'hello',
         {
+          '$schema' => 'https://my_metaschema',
           format => 'uri-template',
         },
       )->TO_JSON,
@@ -383,13 +360,14 @@ subtest 'unimplemented core formats' => sub {
           },
         ],
       },
-      $spec_version . ': error when an unimplemented core format is used',
+      $spec_version . ' with Format-Assertion vocabulary: error when an unimplemented core format is used',
     );
 
     cmp_deeply(
       $js->evaluate(
         'hello',
         {
+          '$schema' => 'https://my_metaschema',
           anyOf => [
             { minLength => 1 },
             { format => 'uri-template' },
@@ -406,7 +384,7 @@ subtest 'unimplemented core formats' => sub {
           },
         ],
       },
-      $spec_version . ': error is seen even when containing subschema would be true',
+      $spec_version . ' with Format-Assertion vocabulary: error is seen even when containing subschema would be true',
     );
   }
 };
@@ -415,21 +393,61 @@ subtest 'unknown custom formats' => sub {
   # see https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.2.3
   # "An implementation MUST NOT fail validation or cease processing due to an unknown format
   # attribute."
-  my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
-  cmp_deeply(
-    $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
-    {
-      valid => true,
-      annotations => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/format',
-          annotation => 'whargarbl',
-        },
-      ],
-    },
-    'unrecognized format attributes do not cause validation failure; annotation is still produced',
-  );
+  foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
+    my $js = JSON::Schema::Modern->new(
+      specification_version => $spec_version,
+      $spec_version ne 'draft7' ? ( collect_annotations => 1 ) : (),
+      validate_formats => 1,
+    );
+
+    cmp_deeply(
+      $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
+      {
+        valid => true,
+        $spec_version eq 'draft7' ? () : (annotations => [
+          {
+            instanceLocation => '',
+            keywordLocation => '/format',
+            annotation => 'whargarbl',
+          },
+        ]),
+      },
+      $spec_version . ': for format validation with the Format-Annotation vocabulary, unrecognized format attributes do not cause validation failure'
+        . ($spec_version ne 'draft7' ? '; annotation is still produced' : ''),
+    );
+  }
+
+  foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
+    next if $spec_version eq 'draft7' or $spec_version eq 'draft2019-09';
+
+    my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
+    $js->add_schema({
+      '$id' => 'https://my_metaschema',
+      '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+      '$vocabulary' => {
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+      },
+      '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+    });
+
+    cmp_deeply(
+      JSON::Schema::Modern::Document->new(
+        evaluator => $js,
+        schema => { '$schema' => 'https://my_metaschema', format => 'bloop' },
+      ),
+      listmethods(
+        errors => [
+          methods(TO_JSON => {
+            instanceLocation => '',
+            keywordLocation => '/format',
+            error => 'unimplemented custom format "bloop"',
+          }),
+        ],
+      ),
+      $spec_version . ': for format validation with the Format-Assertion vocabulary, unrecognized format attributes are detected at traverse time',
+    );
+  }
 };
 
 subtest 'format: pure_integer' => sub {

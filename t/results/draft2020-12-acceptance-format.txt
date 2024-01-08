@@ -24,8 +24,8 @@ relative-json-pointer.json                  18          0     0
 time.json                                   45          0     0
 unknown.json                                 7          0     0
 uri-reference.json                          13          0     0
-uri-template.json                            1          9     0
+uri-template.json                            9          1     0
 uri.json                                    25          1     0
 uuid.json                                   21          0     0
 ---------------------------------------------------------------
-TOTAL                                      437         41     0
+TOTAL                                      445         33     0
