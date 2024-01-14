@@ -1,0 +1,111 @@
+# vim: set ts=8 sts=2 sw=2 tw=100 et ft=perl :
+use strictures 2;
+use 5.020;
+use stable 0.031 'postderef';
+use experimental 'signatures';
+use if "$]" >= 5.022, experimental => 're_strict';
+no if "$]" >= 5.031009, feature => 'indirect';
+no if "$]" >= 5.033001, feature => 'multidimensional';
+no if "$]" >= 5.033006, feature => 'bareword_filehandles';
+# we do NOT mess with stdin here!
+
+use Test2::V0;
+use Test::Warnings qw(:no_end_test had_no_warnings);
+use Test::Deep qw(cmp_deeply ignore);
+use Sereal::Decoder;
+use JSON::Schema::Modern;
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
+use JSON::PP ();
+use constant { true => JSON::PP::true, false => JSON::PP::false };
+
+my $hub = Test2::API::test2_stack->top;
+$hub->set_count(13);
+
+# this is a test that is run from t/serialization.t, incorporating its results into that file.
+
+my @serialized_attributes = sort qw(
+  specification_version
+  output_format
+  short_circuit
+  max_traversal_depth
+  validate_formats
+  validate_content_schemas
+  collect_annotations
+  scalarref_booleans
+  stringy_numbers
+  _resource_index
+  _vocabulary_classes
+  _metaschema_vocabulary_classes
+);
+
+my $result = subtest 'thaw object in a separate process' => sub {
+  local $/;
+  my $thawed = Sereal::Decoder->new->decode(<>);
+
+  cmp_deeply(
+    [ sort keys %$thawed ],
+    [ sort @serialized_attributes ],
+    'thawed object in a new process contains all the right keys',
+  );
+
+  cmp_deeply(
+    $thawed->evaluate(1, 'https://my_schema')->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        map +{
+          instanceLocation => '',
+          keywordLocation => '/'.$_,
+          absoluteKeywordLocation => 'https://my_schema#/'.$_,
+          annotation => ignore,
+        }, 'format', sort qw(type unknown properties contentMediaType contentSchema),
+      ],
+    },
+    'in thawed object, evaluate data against schema with custom dialect; format and unknown keywords are collected as annotations',
+  );
+
+  my $strict_metaschema = {
+    '$id' => 'https://my_strict_metaschema',
+    '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/format-assertion' => true,
+    },
+  };
+
+  my $strict_schema = {
+    '$id' => 'https://my_strict_schema',
+    '$schema' => 'https://my_strict_metaschema',
+    type => 'number',
+    format => 'ipv4',
+    unknown => 1,
+    properties => { hello => false },
+    contentMediaType => 'application/json',
+    contentSchema => {},
+  };
+  $thawed->add_schema($strict_metaschema);
+  $thawed->add_schema($strict_schema);
+
+  cmp_deeply(
+    $thawed->evaluate('foo', 'https://my_strict_schema')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/format',
+          absoluteKeywordLocation => 'https://my_strict_schema#/format',
+          error => 'not a valid ipv4',
+        },
+      ],
+    },
+    'evaluate data against schema with custom dialect; format-assertion is used',
+  );
+};
+
+# skip the END block which would normally try to print a plan
+Test2::API::test2_stack->top->set_no_ending(1);
+
+had_no_warnings() if $ENV{AUTHOR_TESTING};
+
+exit($result ? 0 : -1);

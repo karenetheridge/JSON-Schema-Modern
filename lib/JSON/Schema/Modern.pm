@@ -1114,8 +1114,11 @@ sub FREEZE ($self, $serializer) {
 sub THAW ($class, $serializer, $data) {
   my $self = bless($data, $class);
 
-  # load all vocabulary classes
-  require_module($_) foreach uniq map $_->{vocabularies}->@*, $self->_canonical_resources;
+  # load all vocabulary classes, both those used by loaded schemas, as well as all the core modules
+  require_module($_)
+    foreach uniq(
+      (map $_->{vocabularies}->@*, $self->_canonical_resources),
+      (map $_->[1], values $self->__vocabulary_classes->%*));
 
   return $self;
 }
