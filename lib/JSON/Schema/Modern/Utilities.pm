@@ -52,6 +52,7 @@ our @EXPORT_OK = qw(
 use JSON::PP ();
 use constant { true => JSON::PP::true, false => JSON::PP::false };
 
+# supports the six core types, plus integer (which is also a number)
 sub is_type ($type, $value) {
   if ($type eq 'null') {
     return !(defined $value);
@@ -92,6 +93,7 @@ sub is_type ($type, $value) {
   return ref($value) eq $type;
 }
 
+# returns one of the six core types, plus integer
 sub get_type ($value) {
   return 'object' if is_plain_hashref($value);
   return 'boolean' if is_bool($value);
