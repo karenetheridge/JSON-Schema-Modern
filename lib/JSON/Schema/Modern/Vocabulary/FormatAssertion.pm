@@ -15,10 +15,11 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use JSON::Schema::Modern::Utilities qw(is_type E A assert_keyword_type abort);
+use JSON::Schema::Modern::Utilities qw(get_type E A assert_keyword_type abort);
 use Feature::Compat::Try;
 use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
+use Scalar::Util 'looks_like_number';
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -250,11 +251,16 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
   # fail upon encountering unknown formats."
   abort($state, 'unimplemented custom format "%s"', $schema->{format}) if not $spec;
 
-  return E($state, 'not a valid %s', $schema->{format})
-    if  is_plain_arrayref($spec->{type}) ? any { is_type($_, $data) } $spec->{type}->@*
-      : is_type($spec->{type}, $data)
-      and not $spec->{sub}->($data);
+  my $type = get_type($data);
+  $type = 'number' if $type eq 'integer';
 
+  return 1 if
+    not is_plain_arrayref($spec->{type}) ? any { $type eq $_ } $spec->{type}->@* : $type eq $spec->{type}
+    and not ($state->{stringy_numbers} and $type eq 'string'
+      and is_plain_arrayref($spec->{type}) ? any { $_ eq 'number' } $spec->{type}->@* : $spec->{type} eq 'number'
+      and looks_like_number($data));
+
+  return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
   return 1;
 }
 

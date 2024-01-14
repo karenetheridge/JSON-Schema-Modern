@@ -641,4 +641,103 @@ subtest 'formats supporting multiple core types' => sub {
   }
 };
 
+subtest 'stringy numbers with a numeric format' => sub {
+  my $js = JSON::Schema::Modern->new(
+    validate_formats => 1,
+    stringy_numbers => 1,
+    format_validations => +{
+      mult_5 => +{ type => 'number', sub => sub { ($_[0] % 5) == 0 } },
+    },
+  );
+
+  cmp_deeply(
+    my $res = $js->evaluate(
+      [
+        3,
+        '3',
+        5,
+        '5',
+        'abc',
+      ],
+      { items => { format => 'mult_5' } },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/0',
+          keywordLocation => '/items/format',
+          error => 'not a valid mult_5',
+        },
+        {
+          instanceLocation => '/1',
+          keywordLocation => '/items/format',
+          error => 'not a valid mult_5',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'FormatAnnotation+validate_formats: strings that look like numbers can be validated against a numeric format when stringy_numbers=1',
+  );
+
+  $js = JSON::Schema::Modern->new(
+    stringy_numbers => 1,
+    format_validations => +{
+      mult_5 => +{ type => 'number', sub => sub { ($_[0] % 5) == 0 } },
+    },
+  );
+  my $spec_version = $js->SPECIFICATION_VERSION_DEFAULT;
+  $js->add_schema({
+    '$id' => 'https://my_metaschema',
+    '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+    '$vocabulary' => {
+      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
+      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
+      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+    },
+    '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+  });
+
+  cmp_deeply(
+    $js->evaluate(
+      [
+        3,
+        '3',
+        5,
+        '5',
+        'abc',
+      ],
+      {
+        '$schema' => 'https://my_metaschema',
+        items => { format => 'mult_5' },
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/0',
+          keywordLocation => '/items/format',
+          error => 'not a valid mult_5',
+        },
+        {
+          instanceLocation => '/1',
+          keywordLocation => '/items/format',
+          error => 'not a valid mult_5',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'FormatAssertion: strings that look like numbers can be validated against a numeric format when stringy_numbers=1',
+  );
+};
+
 done_testing;

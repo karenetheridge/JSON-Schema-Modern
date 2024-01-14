@@ -1260,6 +1260,7 @@ expressed as a string. This applies only to the following keywords:
 * C<exclusiveMaximum>
 * C<minimum>
 * C<exclusiveMinimum>
+* C<format> (for formats defined to validate numbers)
 
 This allows you to write a schema like this (which validates a string representing an integer):
 

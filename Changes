@@ -12,6 +12,7 @@ Revision history for JSON-Schema-Modern
           - fixed handling of unrecognized formats in draft2020-12 and later
             (but only when the FormatAssertion vocabulary is explicitly
             requested, not with validate_formats=1)
+          - the format keyword now respects the "stringy_numbers" option
 
 0.578     2023-12-29 23:13:44Z
           - remove use of JSON::MaybeXS, to avoid potential use of JSON::XS;
