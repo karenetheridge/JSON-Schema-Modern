@@ -29,6 +29,7 @@ use File::ShareDir 'dist_dir';
 use Module::Runtime qw(use_module require_module);
 use MooX::TypeTiny 0.002002;
 use Types::Standard 1.016003 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional Slurpy ArrayRef Undef ClassName Tuple Map);
+use Digest::MD5 'md5';
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
@@ -159,13 +160,13 @@ sub add_schema {
   }
 
   if (not grep refaddr($_->{document}) == refaddr($document), $self->_canonical_resources) {
-    my $schema_content = $document->_serialized_schema
-      // $document->_serialized_schema($self->_json_decoder->encode($document->schema));
+    my $schema_checksum = $document->_checksum
+      // $document->_checksum(md5($self->_json_decoder->encode($document->schema)));
 
     if (my $existing_doc = first {
-          my $existing_content = $_->_serialized_schema
-            // $_->_serialized_schema($self->_json_decoder->encode($_->schema));
-          $existing_content eq $schema_content
+          my $existing_checksum = $_->_checksum
+            // $_->_checksum(md5($self->_json_decoder->encode($_->schema)));
+          $existing_checksum eq $schema_checksum
         } uniqint map $_->{document}, $self->_canonical_resources) {
       # we already have this schema content in another document object.
       $document = $existing_doc;

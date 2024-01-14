@@ -86,7 +86,7 @@ has _path_to_resource => (
 sub path_to_resource { $_[0]->_path_to_resource; $_[0]->{_path_to_resource}{$_[1]} }
 
 # for internal use only
-has _serialized_schema => (
+has _checksum => (
   is => 'rw',
   isa => Str,
   init_arg => undef,
@@ -225,7 +225,7 @@ sub validate ($self) {
 
 # callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
-  foreach my $attr (qw(schema _entities)) {
+  foreach my $attr (qw(schema _entities _checksum)) {
     die "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
       if not exists $class->{$attr};
   }
