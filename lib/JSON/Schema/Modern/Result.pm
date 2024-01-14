@@ -38,7 +38,7 @@ use constant { true => JSON::PP::true, false => JSON::PP::false };
 has valid => (
   is => 'ro',
   isa => Bool,
-  coerce => sub { !!$_[0] },
+  coerce => 1,
   required => 1,
 );
 sub result { goto \&valid } # backcompat only
