@@ -4,7 +4,7 @@ package JSON::Schema::Modern::Vocabulary::FormatAnnotation;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Implementation of the JSON Schema Format-Annotation vocabulary
 
-our $VERSION = '0.579';
+our $VERSION = '0.580';
 
 use 5.020;
 use Moo;
