@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema
 
 =head1 VERSION
 
-version 0.578
+version 0.579
 
 =head1 SYNOPSIS
 
@@ -91,6 +91,12 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
 to true when specification_version is draft7, and false for all other versions, but this may change in the future.
 
+Note that the use of a format that does not have a defined handler will B<not> be interpreted as an
+error in this mode; instead, the undefined format will simply be ignored. If you instead want this
+to be treated as an evaluation error, you must define a custom schema dialect that uses the
+format-assertion vocabulary (available in specification version C<draft2020-12>) and reference it in
+your schema with the C<$schema> keyword.
+
 =head2 format_validations
 
 =for stopwords subref
@@ -124,6 +130,7 @@ fixed for the next draft.
 
 When true, annotations are collected from keywords that produce them, when validation succeeds.
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
+Not operational when L</specification_version> is C<draft7>.
 Defaults to false.
 
 =head2 scalarref_booleans
@@ -171,6 +178,10 @@ C<minimum>
 =item *
 
 C<exclusiveMinimum>
+
+=item *
+
+C<format> (for formats defined to validate numbers)
 
 =back
 
@@ -404,13 +415,20 @@ otherwise returns the L<JSON::Schema::Modern::Document> that contains the added 
 
 =head2 add_format_validation
 
+  $js->add_format_validation(all_lc => sub ($value) { lc($value) eq $value });
+
 =for comment we are the nine Eleven Deniers
+
+or
 
   $js->add_format_validation(no_nines => { type => 'number', sub => sub ($value) { $value =~ m/^[0-8]$$/ });
 
-Adds support for a custom format. The data type that this format applies to must be supplied; all
-values of any other type will automatically be deemed to be valid, and will not be passed to the
-subref.
+Adds support for a custom format. If not supplied, the data type(s) that this format applies to
+defaults to string; all values of any other type will automatically be deemed to be valid, and will
+not be passed to the subref.
+
+Additionally, you can redefine the definition for any core format (see L</Format Validation>), but
+the data type(s) supported by that format may not be changed.
 
 Be careful to not mutate the type of the value while checking it -- for example, if it is a string,
 do not apply arithmetic operators to it -- or subsequent type checks on this value may fail.
@@ -702,6 +720,10 @@ No effort is taken (at this time) to sanitize the regular expressions for embedd
 detect potentially pathological constructs that may pose a security risk, either via denial of
 service or by allowing exposure to the internals of your application. B<DO NOT USE SCHEMAS FROM
 UNTRUSTED SOURCES.>
+
+(In particular, see vulnerability
+L<perl5363delta/CVE-2023-47038-Write-past-buffer-end-via-illegal-user-defined-Unicode-property>,
+which is closed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 
 =head1 SEE ALSO
 

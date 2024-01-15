@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.579     2024-01-15 03:32:27Z
           - improve performance by checking for duplicates by comparing the
             checksum of a schema rather than the content itself
           - fix error occurring when using the FormatAssertion vocabulary in
