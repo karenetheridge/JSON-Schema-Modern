@@ -68,7 +68,6 @@ subtest '<= draft7: $ref in combination with any other keyword causes the other 
   cmp_deeply(
     JSON::Schema::Modern->new(
       specification_version => 'draft7',
-      collect_annotations => 1,
     )->evaluate(
       1,
       {

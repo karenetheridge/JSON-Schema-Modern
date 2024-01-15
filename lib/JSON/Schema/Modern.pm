@@ -122,6 +122,9 @@ around BUILDARGS => sub ($orig, $class, @args) {
     if ($args->{output_format}//'') eq 'strict_basic'
       and ($args->{specification_version}//'') ne 'draft2019-09';
 
+  croak 'collect_annotations cannot be used with specification_version draft7'
+    if $args->{collect_annotations} and ($args->{specification_version}//'') eq 'draft7';
+
   return $args;
 };
 
@@ -1229,6 +1232,7 @@ fixed for the next draft.
 
 When true, annotations are collected from keywords that produce them, when validation succeeds.
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
+Not operational when L</specification_version> is C<draft7>.
 Defaults to false.
 
 =head2 scalarref_booleans
