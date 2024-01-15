@@ -92,8 +92,63 @@ subtest 'override a format sub' => sub {
         format_validations => +{ uuid => 1 },
       )
     },
-    qr/Value "1" did not pass type constraint "Optional\[CodeRef\]"/,
-    'check syntax of override to existing format',
+    qr/Reference .* did not pass type constraint /,
+    'check syntax of override to existing format via constructor',
+  );
+
+  my $js = JSON::Schema::Modern->new(validate_formats => 1);
+  like(
+    exception { $js->add_format_validation([] => 1) },
+    qr/Value .* did not pass type constraint /,
+    'check syntax of override format name to existing format via setter',
+  );
+  like(
+    exception { $js->add_format_validation(uuid => 1) },
+    qr/Value .* did not pass type constraint /,
+    'check syntax of override definition value to existing format via setter',
+  );
+
+  like(
+    exception { $js->add_format_validation(uuid => { sub => sub { 0 }}) },
+    qr/Reference .* did not pass type constraint /,
+    'type is required if passing a hashref',
+  );
+
+  like(
+    exception { $js->add_format_validation(uuid => { type => 'number', sub => sub { 0 }}) },
+    qr/Reference .* did not pass type constraint /,
+    'cannot override a core format to support a different data type',
+  );
+
+  $js->add_format_validation(uuid => sub { $_[0] =~ /^[a-z0-9-]+$/ });
+  cmp_deeply(
+    $js->evaluate(
+      [
+        0,
+        1,
+        [],
+        {},
+        'a',
+        'foobie!',
+      ],
+      { items => { format => 'uuid' } },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/5',
+          keywordLocation => '/items/format',
+          error => 'not a valid uuid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'can override a core format definition, as long as it uses the same type',
   );
 
   like(
@@ -107,7 +162,7 @@ subtest 'override a format sub' => sub {
     'check syntax of implementation for a new format',
   );
 
-  my $js = JSON::Schema::Modern->new(
+  $js = JSON::Schema::Modern->new(
     collect_annotations => 1,
     validate_formats => 1,
     format_validations => +{
@@ -117,10 +172,7 @@ subtest 'override a format sub' => sub {
   );
 
   like(
-    exception { $js->add_format_validation(
-      mult_2 => +{ type => 'number', sub => sub { ($_[0] % 2) == 0 } },
-      uuid_bad => 1,
-    ) },
+    exception { $js->add_format_validation(uuid_bad => 1) },
     qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
     'check syntax of implementation when adding an override to existing format',
   );
@@ -172,6 +224,39 @@ subtest 'override a format sub' => sub {
       ],
     },
     'swapping out format implementation turns success into failure; wrong types are still valid',
+  );
+
+  # do allow overriding mult_5 to support a different type than originally defined.
+  $js->add_format_validation(mult_5 => +{ type => 'object', sub => sub { keys($_[0]->%*) > 2 } });
+
+  cmp_deeply(
+    $js->evaluate(
+      [
+        {},
+        { a => 1 },
+        { a => 1, b => 2 },
+        { a => 1, b => 2, c => 3 },
+        [],
+        'a',
+      ],
+      { items => { format => 'mult_5' } },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        (map +{
+          instanceLocation => '/'.$_,
+          keywordLocation => '/items/format',
+          error => 'not a valid mult_5',
+        }, 0, 1, 2),
+        {
+          instanceLocation => '',
+          keywordLocation => '/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'can override a custom format definition to use a different type',
   );
 };
 
