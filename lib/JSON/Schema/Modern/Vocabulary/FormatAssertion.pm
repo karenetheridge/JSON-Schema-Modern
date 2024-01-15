@@ -178,7 +178,8 @@ sub keywords {
   $formats_by_spec_version{'draft2020-12'} = [$formats_by_spec_version{draft7}->@*, qw(duration uuid)];
 
   sub _get_default_format_validation ($class, $state, $format) {
-    return $formats->{$format}
+    # all core formats are of type string (so far)
+    return { type => 'string', sub => $formats->{$format} }
       if grep $format eq $_, $formats_by_spec_version{$state->{spec_version}}->@*;
   }
 }
@@ -207,17 +208,8 @@ sub _get_format_definition ($class, $schema, $state) {
     abort($state, 'EXCEPTION: cannot validate with format "%s": %s', $schema->{format}, $e);
   }
 
-  # first check the subrefs from JSON::Schema::Modern->new(format_validations => { ... })
-  # and fall back to the default formats, which are all defined only for strings
-  my $evaluator_spec = $state->{evaluator}->_get_format_validation($schema->{format});
-  my $default_spec = $class->_get_default_format_validation($state, $schema->{format});
-
-  my $spec =
-    $evaluator_spec ? ($default_spec ? +{ type => 'string', sub => $evaluator_spec } : $evaluator_spec)
-      : $default_spec ? +{ type => 'string', sub => $default_spec }
-      : undef;
-
-  return $spec;
+  return $state->{evaluator}->_get_format_validation($schema->{format})
+    // $class->_get_default_format_validation($state, $schema->{format});
 }
 
 sub _traverse_keyword_format ($class, $schema, $state) {

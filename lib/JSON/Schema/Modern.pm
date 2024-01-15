@@ -99,22 +99,31 @@ has [qw(collect_annotations scalarref_booleans stringy_numbers strict)] => (
 );
 
 my $core_types = Enum[qw(null object array boolean string number)];
+my @core_formats = qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex);
+
+# { $format_name => { type => ..., sub => ... }, ... }
 has _format_validations => (
   is => 'bare',
-  isa => my $format_type = Dict[
-    (map +($_ => Optional[CodeRef]), qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex)),
-    Slurpy[HashRef[Dict[type => $core_types|ArrayRef[$core_types], sub => CodeRef]]],
-  ],
+  isa => my $format_type = HashRef[Dict[
+      type => $core_types|ArrayRef[$core_types],
+      sub => CodeRef,
+    ]],
   init_arg => 'format_validations',
   lazy => 1,
   default => sub { {} },
 );
 
-sub _get_format_validation { $_[0]->{_format_validations}{$_[1]} }
+sub _get_format_validation ($self, $format) { $self->{_format_validations}{$format} }
 
-sub add_format_validation {
-  $format_type->({ @_[1..$#_] });
-  $_[0]->{_format_validations}{$_->[0]} = $_->[1] foreach pairs @_[1..$#_];
+sub add_format_validation ($self, $format, $definition) {
+  $definition = { type => 'string', sub => $definition } if not is_plain_hashref($definition);
+  $format_type->({ $format => $definition });
+
+  # all core formats are of type string (so far); changing type of custom format is permitted
+  croak "Type for override of format $format does not match original type"
+    if any { $format eq $_ } @core_formats and $definition->{type} ne 'string';
+
+  $self->{_format_validations}{$format} = $definition;
 }
 
 around BUILDARGS => sub ($orig, $class, @args) {
@@ -125,6 +134,11 @@ around BUILDARGS => sub ($orig, $class, @args) {
 
   croak 'collect_annotations cannot be used with specification_version draft7'
     if $args->{collect_annotations} and ($args->{specification_version}//'') eq 'draft7';
+
+  $args->{format_validations} = +{
+    map +($_->[0] => is_plain_hashref($_->[1]) ? $_->[1] : +{ type => 'string', sub => $_->[1] }),
+      pairs $args->{format_validations}->%*
+  } if $args->{format_validations};
 
   return $args;
 };
@@ -1431,13 +1445,20 @@ otherwise returns the L<JSON::Schema::Modern::Document> that contains the added 
 
 =head2 add_format_validation
 
+  $js->add_format_validation(all_lc => sub ($value) { lc($value) eq $value });
+
 =for comment we are the nine Eleven Deniers
+
+or
 
   $js->add_format_validation(no_nines => { type => 'number', sub => sub ($value) { $value =~ m/^[0-8]$$/ });
 
-Adds support for a custom format. The data type that this format applies to must be supplied; all
-values of any other type will automatically be deemed to be valid, and will not be passed to the
-subref.
+Adds support for a custom format. If not supplied, the data type(s) that this format applies to
+defaults to string; all values of any other type will automatically be deemed to be valid, and will
+not be passed to the subref.
+
+Additionally, you can redefine the definition for any core format (see L</Format Validation>), but
+the data type(s) supported by that format may not be changed.
 
 Be careful to not mutate the type of the value while checking it -- for example, if it is a string,
 do not apply arithmetic operators to it -- or subsequent type checks on this value may fail.

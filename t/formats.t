@@ -116,7 +116,7 @@ subtest 'override a format sub' => sub {
 
   like(
     exception { $js->add_format_validation(uuid => { type => 'number', sub => sub { 0 }}) },
-    qr/Reference .* did not pass type constraint /,
+    qr/Type for override of format uuid does not match original type/,
     'cannot override a core format to support a different data type',
   );
 

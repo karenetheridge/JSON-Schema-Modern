@@ -44,6 +44,7 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
   A($state, $schema->{format});
   return 1 if not $state->{validate_formats};
 
+  # { type => .., sub => .. }
   my $spec = JSON::Schema::Modern::Vocabulary::FormatAssertion->_get_format_definition($schema, $state);
 
   # §7.2.1 (draft2020-12) "Specifying the Format-Annotation vocabulary and enabling validation in an
