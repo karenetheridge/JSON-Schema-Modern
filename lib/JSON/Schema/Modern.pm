@@ -181,12 +181,14 @@ sub add_schema {
     my $schema_checksum = $document->_checksum
       // $document->_checksum(md5($self->_json_decoder->encode($document->schema)));
 
+print STDERR "### calling uniqint\n";
     if (my $existing_doc = first {
           my $existing_checksum = $_->_checksum
             // $_->_checksum(md5($self->_json_decoder->encode($_->schema)));
           $existing_checksum eq $schema_checksum
         } uniqint map $_->{document}, $self->_canonical_resources) {
       # we already have this schema content in another document object.
+print STDERR "### done calling uniqint\n";
       $document = $existing_doc;
     }
     else {
