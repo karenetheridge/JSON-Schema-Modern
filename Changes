@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - update a format test to be more amenable to 32-bit architectures
 
 0.579     2024-01-15 03:32:27Z
           - improve performance by checking for duplicates by comparing the

@@ -654,12 +654,10 @@ subtest 'formats supporting multiple core types' => sub {
       int64 => +{ type => ['number', 'string'], sub => sub ($value) {
         my $type = get_type($value);
         return if not grep $type eq $_, qw(integer number string);
-        if ($type eq 'string') {
-          return if $value eq 'NaN';
-          $value = Math::BigFloat->new($value); # will become NaN if not an integer
-        }
+        $value = Math::BigInt->new($value) if $type eq 'string';
+        return if $value eq 'NaN';
         # using the literal numbers rather than -2**63, 2**63 -1 to maintain precision
-        $value >= -9223372036854775808 && $value <= 9223372036854775807;
+        $value >= Math::BigInt->new('-9223372036854775808') && $value <= Math::BigInt->new('9223372036854775807');
       } },
     },
   );
