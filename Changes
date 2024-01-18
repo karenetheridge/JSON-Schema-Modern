@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.581     2024-01-18 05:35:16Z
           - make automated tests much quieter when some optional modules (e.g.
             used for format tests) are not installed
