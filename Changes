@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - make automated tests much quieter when some optional modules (e.g.
+            used for format tests) are not installed
 
 0.580     2024-01-18 04:38:33Z
           - update a format test to be more amenable to 32-bit architectures
