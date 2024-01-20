@@ -19,7 +19,7 @@ use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
 use Scalar::Util 'looks_like_number';
 use if "$]" >= 5.022, POSIX => 'isinf';
-use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
+use JSON::Schema::Modern::Utilities qw(is_type get_type is_bignum is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
 use Math::BigFloat;
 use namespace::clean;
 
@@ -116,11 +116,11 @@ sub _eval_keyword_multipleOf ($class, $data, $schema, $state) {
       and do { $data = 0+$data; 1 });
 
   # if either value is a float, use the bignum library for the calculation for an accurate remainder
-  if (ref($data) =~ /^Math::Big(?:Int|Float)$/
-      or ref($schema->{multipleOf}) =~ /^Math::Big(?:Int|Float)$/
+  if (is_bignum($data) or is_bignum($schema->{multipleOf})
       or get_type($data) eq 'number' or get_type($schema->{multipleOf}) eq 'number') {
-    $data = ref($data) =~ /^Math::Big(?:Int|Float)$/ ? $data->copy : Math::BigFloat->new($data);
-    my $divisor = ref($schema->{multipleOf}) =~ /^Math::Big(?:Int|Float)$/ ? $schema->{multipleOf} : Math::BigFloat->new($schema->{multipleOf});
+    $data = is_bignum($data) ? $data->copy : Math::BigFloat->new($data);
+    my $divisor = is_bignum($schema->{multipleOf}) ? $schema->{multipleOf} : Math::BigFloat->new($schema->{multipleOf});
+
     my ($quotient, $remainder) = $data->bdiv($divisor);
     return E($state, 'overflow while calculating quotient') if $quotient->is_inf;
     return 1 if $remainder == 0;

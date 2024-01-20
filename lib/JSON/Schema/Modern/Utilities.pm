@@ -29,6 +29,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw(
   is_type
   get_type
+  is_bignum
   is_equal
   is_elements_unique
   jsonp
@@ -76,12 +77,12 @@ sub is_type ($type, $value) {
     }
 
     if ($type eq 'number') {
-      return ref($value) =~ /^Math::Big(?:Int|Float)$/
+      return is_bignum($value)
         || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
     }
 
     if ($type eq 'integer') {
-      return ref($value) =~ /^Math::Big(?:Int|Float)$/ && $value->is_int
+      return is_bignum($value) && $value->is_int
         || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK)) && int($value) == $value;
     }
   }
@@ -100,7 +101,7 @@ sub get_type ($value) {
   return 'null' if not defined $value;
   return 'array' if is_plain_arrayref($value);
 
-  return ref($value) =~ /^Math::Big(?:Int|Float)$/ ? ($value->is_int ? 'integer' : 'number')
+  return is_bignum($value) ? ($value->is_int ? 'integer' : 'number')
       : (blessed($value) ? '' : 'reference to ').ref($value)
     if is_ref($value);
 
@@ -118,6 +119,10 @@ sub is_bool ($value) {
     and ($value->isa('JSON::PP::Boolean')
       or $value->isa('Cpanel::JSON::XS::Boolean')
       or $value->isa('JSON::XS::Boolean'));
+}
+
+sub is_bignum ($value) {
+  ref($value) =~ /^Math::Big(?:Int|Float)$/;
 }
 
 # compares two arbitrary data payloads for equality, as per
@@ -368,7 +373,7 @@ sub annotate_self ($state, $schema) {
 
 sub sprintf_num ($value) {
   # use original value as stored in the NV, without losing precision
-  ref($value) =~ /^Math::Big(?:Int|Float)$/ ? $value->bstr : sprintf('%s', $value);
+  is_bignum($value) ? $value->bstr : sprintf('%s', $value);
 }
 
 1;
@@ -384,7 +389,7 @@ __END__
 
 This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
-=for Pod::Coverage is_type get_type is_bool is_equal is_elements_unique jsonp unjsonp local_annotations
+=for Pod::Coverage is_type get_type is_bignum is_bool is_equal is_elements_unique jsonp unjsonp local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
 annotate_self sprintf_num
 
