@@ -189,7 +189,7 @@ sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
 }
 
 # shorthand for creating and appending json pointers
-# the first argument is a a json pointer; remaining arguments are path segments to be encoded and
+# the first argument is a json pointer; remaining arguments are path segments to be encoded and
 # appended
 sub jsonp {
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_plain_arrayref($_) ? @$_ : $_), grep defined, @_);
@@ -345,7 +345,8 @@ sub assert_uri_reference ($state, $schema) {
   return 1;
 }
 
-# this is only suitable for checking URIs within schemas themselves
+# this is only suitable for checking URIs within schemas themselves,
+# which have fragments consisting of plain names (anchors) or json pointers
 sub assert_uri ($state, $schema, $override = undef) {
   croak 'assert_uri called in void context' if not defined wantarray;
 
@@ -366,6 +367,7 @@ sub assert_uri ($state, $schema, $override = undef) {
 }
 
 # produces an annotation whose value is the same as that of the current keyword
+# makes a copy as this is passed back to the user, who cannot be trusted to not mutate it
 sub annotate_self ($state, $schema) {
   A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
     : $schema->{$state->{keyword}});

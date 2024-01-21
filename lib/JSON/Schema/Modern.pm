@@ -1296,6 +1296,8 @@ Defaults to false.
 When true, unrecognized keywords are disallowed in schemas (they will cause an immediate abort
 in L</traverse> or L</evaluate>).
 
+Defaults to false.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW
@@ -1385,6 +1387,7 @@ Callbacks are not compatible with L</short_circuit> mode.
 =head2 validate_schema
 
   $result = $js->validate_schema($schema);
+  $result = $js->validate_schema($schema, $config_override);
 
 Evaluates the provided schema as instance data against its metaschema. Accepts C<$schema> and
 C<$config_override> parameters in the same form as L</evaluate>.
