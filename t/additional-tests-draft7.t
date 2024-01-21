@@ -20,7 +20,6 @@ my @warnings = warnings {
   acceptance_tests(
     acceptance => {
       specification => $version,
-      include_optional => 0,
       test_dir => 't/additional-tests-'.$version,
     },
     evaluator => {
@@ -33,8 +32,8 @@ my @warnings = warnings {
       $ENV{NO_TODO} ? () : ( todo_tests => [
         { file => [
             # these all depend on optional prereqs
-            !eval { require Time::Moment; 1 } ? qw(format-date-time.json format-date.json format-time.json) : (),
-            !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
+            !eval { require Time::Moment; 1 } ? map "optional/format-$_.json", qw(date-time date time) : (),
+            !eval { require DateTime::Format::RFC3339; 1 } ? 'optional/format-date-time.json' : (),
           ] },
       ] ),
     },
