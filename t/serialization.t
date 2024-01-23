@@ -130,15 +130,16 @@ ok($thawed->get_media_type('application/json'), 'media_type works in a thawed ob
 ok($thawed->get_encoding('base64'), 'encoding works in a thawed object');
 
 # now try to thaw the file in a new process and run some more tests
-my $pid = open3(my $child_in, '>&STDOUT', '>&STDERR', $^X, (-d 'blib' ? '-Mblib' : '-Ilib'), 't/read_serialized_file');
-print $child_in $frozen;
-close $child_in;
-waitpid($pid, 0);
+if ("$]" >= '5.022' or $^O ne 'MSWin32') {
+  open my $child_in, '|-:raw', $^X, (-d 'blib' ? '-Mblib' : '-Ilib'), 't/read_serialized_file';
+  print $child_in $frozen;
+  close $child_in;
 
-my $hub = Test2::API::test2_stack->top;
-$hub->set_count($hub->count + ($ENV{AUTHOR_TESTING} ? 2 : 1));
+  my $hub = Test2::API::test2_stack->top;
+  $hub->set_count($hub->count + ($ENV{AUTHOR_TESTING} ? 2 : 1));
 
-is($? >> 8, 0, 'child process finished successfully');
+  is($? >> 8, 0, 'child process finished successfully');
+}
 
 had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;

@@ -3,6 +3,7 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - change the status of some format tests that rely on optional
             modules so they are not reported as specification failures
+          - fix forking test that failed on MSWin32
 
 0.581     2024-01-18 05:35:16Z
           - make automated tests much quieter when some optional modules (e.g.
