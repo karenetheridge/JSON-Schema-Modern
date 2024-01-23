@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.582     2024-01-23 03:18:31Z
           - change the status of some format tests that rely on optional
             modules so they are not reported as specification failures
           - fix forking test that failed on MSWin32
