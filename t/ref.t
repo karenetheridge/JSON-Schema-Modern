@@ -1217,6 +1217,7 @@ subtest 'reference to a non-schema location' => sub {
     use strict; use warnings;
     use Moo;
     extends 'JSON::Schema::Modern::Document';
+    use experimental 'signatures';
 
     sub traverse ($self, @) {
       return {
