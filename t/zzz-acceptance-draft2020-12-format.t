@@ -60,11 +60,11 @@ acceptance_tests(
           'iri-reference.json',                       # all strings are considered valid
           'uri-template.json',                        # not yet implemented
           # these all depend on optional prereqs
-          $ENV{AUTOMATED_TESTING} && !eval { require Time::Moment; 1 } ? qw(date-time.json date.json time.json) : (),
-          $ENV{AUTOMATED_TESTING} && !eval { require DateTime::Format::RFC3339; 1 } ? 'date-time.json' : (),
-          $ENV{AUTOMATED_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? qw(email.json idn-email.json) : (),
-          $ENV{AUTOMATED_TESTING} && !eval { require Data::Validate::Domain; 1 } ? 'hostname.json' : (),
-          $ENV{AUTOMATED_TESTING} && !eval { require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Time::Moment; 1 } ? qw(date-time.json date.json time.json) : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require DateTime::Format::RFC3339; 1 } ? 'date-time.json' : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? qw(email.json idn-email.json) : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; 1 } ? 'hostname.json' : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
       { file => 'email.json', group_description => 'validation of e-mail addresses', test_description => [ 'an invalid domain', 'an invalid IPv4-address-literal' ] },
