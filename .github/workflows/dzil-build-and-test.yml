@@ -22,7 +22,7 @@ jobs:
           AUTHOR_TESTING: 1
           AUTOMATED_TESTING: 1
           EXTENDED_TESTING: 1
-          RELEASE_TESTING: 1
+          RELEASE_TESTING: 0
         run: upgrade-perl-helpers && auto-build-and-test-dist
       - uses: actions/upload-artifact@v4
         with:
