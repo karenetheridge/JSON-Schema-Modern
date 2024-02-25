@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: perl -V
       - run: prove -lr t
 
@@ -65,7 +65,7 @@ jobs:
       image: perldocker/${{ matrix.perl-version }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: perl -V
       - name: Makefile.PL
         run: perl -I$(pwd) Makefile.PL
@@ -91,7 +91,7 @@ jobs:
         perl-version: [latest]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: perl -V
       - name: Makefile.PL
         run: perl -I$(pwd) Makefile.PL
@@ -106,7 +106,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Perl
         run: |
           choco install strawberryperl
@@ -149,7 +149,7 @@ jobs:
   #         # - "5.12.5"
   #         # - "5.10.1"
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - name: Set Up Perl
   #       uses: shogo82148/actions-setup-perl@v1.16.0
   #       with:
