@@ -24,11 +24,13 @@ BEGIN {
 }
 
 if ($ENV{EXTENDED_TESTING}) {
-  test_needs 'Time::Moment';
-  test_needs 'DateTime::Format::RFC3339';
-  test_needs 'Email::Address::XS', 1.04;
-  test_needs 'Data::Validate::Domain';
-  test_needs 'Net::IDN::Encode';
+  test_needs {
+    'Time::Moment' => 0,
+    'DateTime::Format::RFC3339' => 0,
+    'Email::Address::XS' => '1.04',
+    'Data::Validate::Domain' => 0,
+    'Net::IDN::Encode' => 0,
+  };
 }
 
 if (-d '.git' or $ENV{AUTHOR_TESTING}) {
