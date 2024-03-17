@@ -70,6 +70,20 @@ has depth => (
   required => 1,
 );
 
+around BUILDARGS => sub ($orig, $class, @args) {
+  my $args = $class->$orig(@args);
+
+  if (my $uri = delete $args->{_uri}) {
+    # as if we did canonical_uri(..)->to_abs($state->{effective_base_uri} in E(..)
+    $uri = $uri->[0]->to_abs($uri->[1]);
+    undef $uri if $uri eq '' and $args->{keyword_location} eq ''
+      or ($uri->fragment // '') eq $args->{keyword_location} and $uri->clone->fragment(undef) eq '';
+    $args->{absolute_keyword_location} = $uri if defined $uri;
+  }
+
+  return $args;
+};
+
 sub TO_JSON ($self) {
   return +{
     # note that locations are JSON pointers, not uri fragments!
@@ -171,7 +185,7 @@ construct a tree-like structure of errors.
 
 =head1 METHODS
 
-=for Pod::Coverage stringify mode
+=for Pod::Coverage stringify mode BUILDARGS
 
 =head2 TO_JSON
 

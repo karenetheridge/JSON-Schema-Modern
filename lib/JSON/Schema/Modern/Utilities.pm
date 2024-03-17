@@ -235,21 +235,21 @@ sub E ($state, $error_string, @args) {
   my $sps = delete $state->{_schema_path_suffix};
   my @schema_path_suffix = defined $sps && is_plain_arrayref($sps) ? $sps->@* : $sps//();
 
-  my $uri = canonical_uri($state, $state->{keyword}, @schema_path_suffix)
-    ->to_abs($state->{effective_base_uri});
+  # we store the absolute uri in unresolved form until needed,
+  # and perform the rest of the calculations later.
+  my $uri = [ canonical_uri($state, $state->{keyword}, @schema_path_suffix),
+    $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, @schema_path_suffix);
-
-  undef $uri if $uri eq '' and $keyword_location eq ''
-    or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
 
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
     depth => $state->{depth} // 0,
     keyword => $state->{keyword},
     instance_location => $state->{data_path},
     keyword_location => $keyword_location,
-    defined $uri ? ( absolute_keyword_location => $uri ) : (),
+    # we calculate absolute_keyword_location when instantiating the Error object for Result
+    _uri => $uri,
     error => @args ? sprintf($error_string, @args) : $error_string,
     $state->{exception} ? ( exception => $state->{exception} ) : (),
     $state->{recommended_response} ? ( recommended_response => $state->{recommended_response} ) : (),
