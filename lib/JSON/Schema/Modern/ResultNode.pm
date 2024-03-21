@@ -48,6 +48,7 @@ has depth => (
 );
 
 around BUILDARGS => sub ($orig, $class, @args) {
+  # TODO: maybe need to support being passed an already-blessed object
   my $args = $class->$orig(@args);
 
   if (my $uri = delete $args->{_uri}) {
