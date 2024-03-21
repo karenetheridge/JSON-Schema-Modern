@@ -8,6 +8,7 @@ our $VERSION = '0.583';
 
 use 5.020;
 use Moo;
+with 'JSON::Schema::Modern::ResultNode';
 use strictures 2;
 use stable 0.031 'postderef';
 use experimental 'signatures';
@@ -15,11 +16,9 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use Safe::Isa;
-use JSON::PP ();
 use MooX::TypeTiny;
-use Types::Standard qw(Str Bool Undef InstanceOf Enum Tuple);
-use Types::Common::Numeric qw(PositiveInt PositiveOrZeroInt);
+use Types::Standard qw(Str Bool Enum Tuple);
+use Types::Common::Numeric qw(PositiveInt);
 use namespace::clean;
 
 use overload
@@ -27,25 +26,9 @@ use overload
   '""' => sub { $_[0]->stringify },
   fallback => 1;
 
-has [qw(
-  instance_location
-  keyword_location
-  error
-)] => (
+has error => (
   is => 'ro',
   isa => Str,
-  required => 1,
-);
-
-has absolute_keyword_location => (
-  is => 'ro',
-  isa => InstanceOf['Mojo::URL'],
-  coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
-);
-
-has keyword => (
-  is => 'ro',
-  isa => Str|Undef,
   required => 1,
 );
 
@@ -64,52 +47,10 @@ has recommended_response => (
   isa => Tuple[PositiveInt, Str],
 );
 
-has depth => (
-  is => 'ro',
-  isa => PositiveOrZeroInt,
-  required => 1,
-);
-
-around BUILDARGS => sub ($orig, $class, @args) {
-  my $args = $class->$orig(@args);
-
-  if (my $uri = delete $args->{_uri}) {
-    # as if we did canonical_uri(..)->to_abs($state->{effective_base_uri} in E(..)
-    $uri = $uri->[0]->to_abs($uri->[1]);
-    undef $uri if $uri eq '' and $args->{keyword_location} eq ''
-      or ($uri->fragment // '') eq $args->{keyword_location} and $uri->clone->fragment(undef) eq '';
-    $args->{absolute_keyword_location} = $uri if defined $uri;
-  }
-
-  return $args;
-};
-
-sub TO_JSON ($self) {
-  return +{
-    # note that locations are JSON pointers, not uri fragments!
-    instanceLocation => $self->instance_location,
-    keywordLocation => $self->keyword_location,
-    !defined($self->absolute_keyword_location) ? ()
-      : ( absoluteKeywordLocation => $self->absolute_keyword_location->to_string ),
-    error => $self->error,  # TODO: allow localization
-  };
-}
-
 sub stringify ($self) {
   ($self->mode//'evaluate') eq 'traverse'
     ? '\''.$self->keyword_location.'\': '.$self->error
     : '\''.$self->instance_location.'\': '.$self->error;
-}
-
-sub dump ($self) {
-  my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
-    ->utf8(0)
-    ->convert_blessed(1)
-    ->canonical(1)
-    ->indent(1)
-    ->space_after(1);
-  $encoder->indent_length(2) if $encoder->can('indent_length');
-  $encoder->encode($self);
 }
 
 1;
