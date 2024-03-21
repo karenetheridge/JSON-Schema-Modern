@@ -1,6 +1,11 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - further optimization of error and annotation construction, which
+            should significantly improve evaluation performance of large
+            documents which heavily use the 'unevaluated*' keywords (such as a
+            schema evaluated against its metaschema, or an OpenAPI document
+            evaluated against its schema)
 
 0.582     2024-01-23 03:18:31Z
           - change the status of some format tests that rely on optional

@@ -18,6 +18,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Safe::Isa;
 use Types::Standard qw(Str Undef InstanceOf);
 use Types::Common::Numeric 'PositiveOrZeroInt';
+use JSON::Schema::Modern::Utilities 'jsonp';
 use namespace::clean;
 
 has [qw(
@@ -31,8 +32,32 @@ has [qw(
 
 has absolute_keyword_location => (
   is => 'ro',
-  isa => InstanceOf['Mojo::URL'],
-  coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
+  isa => InstanceOf['Mojo::URL']|Undef,
+  lazy => 1,
+  default => sub ($self) {
+    # _uri contains data as populated from A() and E():
+    # [ $state->{initial_schema_uri}, $state->{schema_path}, @extra_path, $state->{effective_base_uri} ]
+    # we do the equivalent of:
+    # canonical_uri($state, @extra_path)->to_abs($state->{effective_base_uri});
+    if (my $uri_bits = delete $self->{_uri}) {
+      my $effective_base_uri = pop @$uri_bits;
+      my ($initial_schema_uri, $schema_path, @extra_path) = @$uri_bits;
+
+      return $initial_schema_uri if not @extra_path and not length($schema_path);
+      my $uri = $initial_schema_uri->clone;
+      my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($schema_path, @extra_path) : $schema_path);
+      undef $fragment if not length($fragment);
+      $uri->fragment($fragment);
+
+      $uri = $uri->to_abs($effective_base_uri);
+
+      undef $uri if $uri eq '' and $self->{keyword_location} eq ''
+        or ($uri->fragment // '') eq $self->{keyword_location} and $uri->clone->fragment(undef) eq '';
+      return $uri if defined $uri;
+    }
+
+    return;
+  },
 );
 
 has keyword => (
@@ -47,20 +72,11 @@ has depth => (
   required => 1,
 );
 
-around BUILDARGS => sub ($orig, $class, @args) {
-  # TODO: maybe need to support being passed an already-blessed object
-  my $args = $class->$orig(@args);
+# TODO: maybe need to support being passed an already-blessed object
 
-  if (my $uri = delete $args->{_uri}) {
-    # as if we did canonical_uri(..)->to_abs($state->{effective_base_uri} in E(..) or A(..)
-    $uri = $uri->[0]->to_abs($uri->[1]);
-    undef $uri if $uri eq '' and $args->{keyword_location} eq ''
-      or ($uri->fragment // '') eq $args->{keyword_location} and $uri->clone->fragment(undef) eq '';
-    $args->{absolute_keyword_location} = $uri if defined $uri;
-  }
-
-  return $args;
-};
+sub BUILD ($self, $args) {
+  $self->{_uri} = $args->{_uri} if exists $args->{_uri};
+}
 
 sub TO_JSON ($self) {
   my $thing = lcfirst((reverse split /::/, ref $self)[0]);
@@ -95,7 +111,7 @@ __END__
   use Moo;
   with JSON::Schema::Modern::ResultNode;
 
-=for Pod::Coverage TO_JSON absolute_keyword_location depth dump instance_location keyword keyword_location
+=for Pod::Coverage BUILD TO_JSON absolute_keyword_location depth dump instance_location keyword keyword_location
 
 =head1 DESCRIPTION
 

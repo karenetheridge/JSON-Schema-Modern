@@ -50,24 +50,28 @@ has exception => (
   default => sub ($self) { any { $_->exception or $_->error =~ /^EXCEPTION: / } $self->errors },
 );
 
+# turn hashrefs in _errors or _annotations into blessed objects
 has $_.'s' => (
   is => 'bare',
+  reader => '__'.$_.'s',
   isa => ArrayRef[InstanceOf['JSON::Schema::Modern::'.ucfirst]],
   lazy => 1,
-  default => sub { [] },
-  coerce => do {
+  default => do {
     my $type = $_;
-    sub ($arrayref) {
-      return $arrayref if all { blessed $_ } $arrayref->@*;
-      return [ map +(('JSON::Schema::Modern::'.ucfirst $type)->new($_)), $arrayref->@* ];
-    },
+    sub ($self) {
+      return [] if not (($self->{'_'.$type.'s'}//[])->@*);
+
+      # E() and A() in ::Utilities returns an unblessed hashref, which is used to create a real object
+      # by its BUILDARGS sub
+      return [ map +(('JSON::Schema::Modern::'.ucfirst($type))->new($_)), $self->{'_'.$type.'s'}->@* ];
+    };
   },
 ) foreach qw(error annotation);
 
-sub errors { ($_[0]->{errors}//[])->@* }
-sub error_count { scalar(($_[0]->{errors}//[])->@*) }
-sub annotations { ($_[0]->{annotations}//[])->@* }
-sub annotation_count { scalar(($_[0]->{annotations}//[])->@*) }
+sub errors { $_[0]->__errors->@* }
+sub error_count { scalar(($_[0]->{errors}//[])->@*) || scalar(($_[0]->{_errors}//[])->@*) }
+sub annotations { $_[0]->__annotations->@* }
+sub annotation_count { scalar(($_[0]->{annotations}//[])->@*) || scalar(($_[0]->{_annotations}//[])->@*) }
 
 has recommended_response => (
   is => 'rw',
@@ -101,8 +105,23 @@ has formatted_annotations => (
   default => 1,
 );
 
-sub BUILD ($self, $) {
+around BUILDARGS => sub ($orig, $class, @args) {
+  my $args = $class->$orig(@args);
+
+  # set unblessed hashrefs aside, and defer creation of blessed objects until needed
+  $args->{_errors} = delete $args->{errors} if
+    exists $args->{errors} and any { !blessed($_) } $args->{errors}->@*;
+  $args->{_annotations} = delete $args->{annotations} if
+    exists $args->{annotations} and any { !blessed($_) } $args->{annotations}->@*;
+
+  return $args;
+};
+
+sub BUILD ($self, $args) {
   warn 'result is false but there are no errors' if not $self->valid and not $self->error_count;
+
+  $self->{_errors} = $args->{_errors} if exists $args->{_errors};
+  $self->{_annotations} = $args->{_annotations} if exists $args->{_annotations};
 }
 
 sub format ($self, $style, $formatted_annotations = undef) {
@@ -331,7 +350,7 @@ to C<'Bad Request'>.
 
 =head1 METHODS
 
-=for Pod::Coverage BUILD OUTPUT_FORMATS result stringify annotation_count error_count
+=for Pod::Coverage BUILD BUILDARGS OUTPUT_FORMATS result stringify annotation_count error_count
 
 =head2 format
 

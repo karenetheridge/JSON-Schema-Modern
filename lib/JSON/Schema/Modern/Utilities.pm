@@ -20,8 +20,6 @@ use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use Scalar::Util qw(blessed looks_like_number);
 use Storable 'dclone';
 use Feature::Compat::Try;
-use JSON::Schema::Modern::Error;
-use JSON::Schema::Modern::Annotation;
 use namespace::clean;
 
 use Exporter 'import';
@@ -207,6 +205,7 @@ sub local_annotations ($state) {
 }
 
 # shorthand for finding the canonical uri of the present schema location
+# ensure that this code is kept consistent with the absolute_keyword_location builder in ResultNode
 sub canonical_uri ($state, @extra_path) {
   return $state->{initial_schema_uri} if not @extra_path and not length($state->{schema_path});
   my $uri = $state->{initial_schema_uri}->clone;
@@ -237,12 +236,12 @@ sub E ($state, $error_string, @args) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ canonical_uri($state, $state->{keyword}, @schema_path_suffix),
-    $state->{effective_base_uri} ];
+  my $uri = [ $state->{initial_schema_uri}, $state->{schema_path}, $state->{keyword}, @schema_path_suffix, $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, @schema_path_suffix);
 
+  require JSON::Schema::Modern::Error;
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
     depth => $state->{depth} // 0,
     keyword => $state->{keyword},
@@ -276,8 +275,7 @@ sub A ($state, $annotation) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ canonical_uri($state, $state->{keyword}),
-    $state->{effective_base_uri} ];
+  my $uri = [ $state->{initial_schema_uri}, $state->{schema_path}, $state->{keyword}, $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword});
