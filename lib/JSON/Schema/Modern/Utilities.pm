@@ -192,7 +192,7 @@ sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
 # the first argument is a json pointer; remaining arguments are path segments to be encoded and
 # appended
 sub jsonp {
-  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, map +(is_plain_arrayref($_) ? @$_ : $_), grep defined, @_);
+  return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, grep defined, @_);
 }
 
 # splits a json pointer apart into its path segments
@@ -207,10 +207,8 @@ sub local_annotations ($state) {
 }
 
 # shorthand for finding the canonical uri of the present schema location
-# last argument can be an arrayref, usually coming from $state->{_schema_path_suffix}
 sub canonical_uri ($state, @extra_path) {
   return $state->{initial_schema_uri} if not @extra_path and not length($state->{schema_path});
-  splice(@extra_path, -1, 1, $extra_path[-1]->@*) if @extra_path and is_plain_arrayref($extra_path[-1]);
   my $uri = $state->{initial_schema_uri}->clone;
   my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($state->{schema_path}, @extra_path) : $state->{schema_path});
   undef $fragment if not length($fragment);
@@ -234,11 +232,14 @@ sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $uri = canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix})
+  my $sps = delete $state->{_schema_path_suffix};
+  my @schema_path_suffix = defined $sps && is_plain_arrayref($sps) ? $sps->@* : $sps//();
+
+  my $uri = canonical_uri($state, $state->{keyword}, @schema_path_suffix)
     ->to_abs($state->{effective_base_uri});
 
   my $keyword_location = $state->{traversed_schema_path}
-    .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
+    .jsonp($state->{schema_path}, $state->{keyword}, @schema_path_suffix);
 
   undef $uri if $uri eq '' and $keyword_location eq ''
     or ($uri->fragment // '') eq $keyword_location and $uri->clone->fragment(undef) eq '';
@@ -275,12 +276,11 @@ sub A ($state, $annotation) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-
-  my $uri = [ canonical_uri($state, $state->{keyword}, $state->{_schema_path_suffix}),
+  my $uri = [ canonical_uri($state, $state->{keyword}),
     $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
-    .jsonp($state->{schema_path}, $state->{keyword}, delete $state->{_schema_path_suffix});
+    .jsonp($state->{schema_path}, $state->{keyword});
 
   push $state->{annotations}->@*, {
     depth => $state->{depth} // 0,
