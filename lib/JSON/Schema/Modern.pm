@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package JSON::Schema::Modern;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
-# ABSTRACT: Validate data against a schema
+# ABSTRACT: Validate data against a schema using a JSON Schema
 # KEYWORDS: JSON Schema validator data validation structure specification
 
 our $VERSION = '0.583';
@@ -1250,6 +1250,7 @@ fixed for the next draft.
 When true, annotations are collected from keywords that produce them, when validation succeeds.
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
 Not operational when L</specification_version> is C<draft7>.
+
 Defaults to false.
 
 =head2 scalarref_booleans
