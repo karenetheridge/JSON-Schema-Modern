@@ -469,7 +469,7 @@ my %removed_keywords = (
 our $vocabulary_cache = {};
 
 sub _traverse_subschema ($self, $schema, $state) {
-  delete $state->{keyword};
+  delete $state->@{'keyword', grep /^_/, keys %$state};
 
   return E($state, 'EXCEPTION: maximum traversal depth (%d) exceeded', $self->max_traversal_depth)
     if $state->{depth}++ > $self->max_traversal_depth;
