@@ -117,11 +117,4 @@ __END__
 
 This module is for internal use only.
 
-=head1 SUPPORT
-
-You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
-server|https://open-api.slack.com>, which are also great resources for finding help.
-
-=for stopwords OpenAPI
-
 =pod

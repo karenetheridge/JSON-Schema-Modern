@@ -196,11 +196,6 @@ C<< --add-schema <filename> >>. The actual filename is insignificant: Make sure 
 keyword within that schema that matches the value you use in the C<$ref>. This option can be used
 more than once.
 
-=head1 SUPPORT
-
-You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
-server|https://open-api.slack.com>, which are also great resources for finding help.
-
 =for stopwords OpenAPI
 
 =cut

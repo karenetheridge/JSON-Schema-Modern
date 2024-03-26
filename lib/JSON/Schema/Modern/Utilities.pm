@@ -393,11 +393,4 @@ This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
 annotate_self sprintf_num
 
-=head1 SUPPORT
-
-You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
-server|https://open-api.slack.com>, which are also great resources for finding help.
-
-=for stopwords OpenAPI
-
 =cut

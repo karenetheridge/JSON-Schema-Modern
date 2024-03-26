@@ -1665,9 +1665,4 @@ which is closed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 * L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality
 * L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
 
-=head1 SUPPORT
-
-You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
-server|https://open-api.slack.com>, which are also great resources for finding help.
-
 =cut

@@ -142,9 +142,4 @@ if the distinction is important to you.)
 Returns a JSON string representing the error object, according to
 the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>.
 
-=head1 SUPPORT
-
-You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
-server|https://open-api.slack.com>, which are also great resources for finding help.
-
 =cut
