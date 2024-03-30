@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.583     2024-03-30 17:56:17Z
           - further optimization of error and annotation construction, which
             should significantly improve evaluation performance of large
