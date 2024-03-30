@@ -6,11 +6,11 @@
 
 =head1 NAME
 
-JSON::Schema::Modern - Validate data against a schema
+JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.582
+version 0.583
 
 =head1 SYNOPSIS
 
@@ -131,6 +131,7 @@ fixed for the next draft.
 When true, annotations are collected from keywords that produce them, when validation succeeds.
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
 Not operational when L</specification_version> is C<draft7>.
+
 Defaults to false.
 
 =head2 scalarref_booleans
@@ -793,6 +794,8 @@ L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAP
 Bugs may be submitted through L<https://github.com/karenetheridge/JSON-Schema-Modern/issues>.
 
 I am also usually active on irc, as 'ether' at C<irc.perl.org> and C<irc.libera.chat>.
+
+=for stopwords OpenAPI
 
 You can also find me on the L<JSON Schema Slack server|https://json-schema.slack.com> and L<OpenAPI Slack
 server|https://open-api.slack.com>, which are also great resources for finding help.
