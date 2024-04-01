@@ -81,6 +81,7 @@ sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
     +{
       $schema_info->{configs}->%*,
       %$state,
+      # keyword is assumed to be json pointer-encoded (if a suffix path is needed), so we just concat
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},
