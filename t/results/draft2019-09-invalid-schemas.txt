@@ -1,7 +1,8 @@
-Results using Test::JSON::Schema::Acceptance 1.022
-specification version: draft2019-09
+generated with:              Test::JSON::Schema::Acceptance 1.023
+specification version:       draft2019-09
 using custom test directory: t/invalid-schemas-draft2019-09
-optional tests included: no
+at ref:                      heads/master-0-ga18a9ce0
+optional tests included:     no
 
 filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
