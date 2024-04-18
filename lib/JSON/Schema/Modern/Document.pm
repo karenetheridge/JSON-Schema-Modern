@@ -120,13 +120,14 @@ sub __entity_index ($self, $entity) {
   return undef;
 }
 
-sub _add_entity_location {
-  $_[0]->__entity_type->($_[2]); # verify string
-  $_[0]->_entities->{$_[1]} = $_[0]->__entity_index($_[2]); # store integer-mapped value
+sub _add_entity_location ($self, $location, $entity) {
+  $self->__entity_type->($entity); # verify string
+  $self->_entities->{$location} = $self->__entity_index($entity); # store integer-mapped value
 }
-sub get_entity_at_location {
-  return '' if not exists $_[0]->_entities->{$_[1]};
-  ($_[0]->__entities)[ $_[0]->_entities->{$_[1]} ] // die "missing mapping for ", $_[0]->_entities->{$_[1]};
+
+sub get_entity_at_location ($self, $location) {
+  return '' if not exists $self->_entities->{$location};
+  ($self->__entities)[ $self->_entities->{$location} ] // die "missing mapping for ", $self->_entities->{$location};
 }
 
 around _add_resources => sub {
