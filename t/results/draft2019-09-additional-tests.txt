@@ -1,7 +1,6 @@
-generated with:              Test::JSON::Schema::Acceptance 1.023
+generated with:              Test::JSON::Schema::Acceptance 1.024
 specification version:       draft2019-09
 using custom test directory: t/additional-tests-draft2019-09
-at ref:                      heads/master-0-ga18a9ce0
 optional tests included:     yes
 
 filename                                  pass  todo-fail  fail
