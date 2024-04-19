@@ -525,20 +525,28 @@ subtest 'JSON pointer and URI escaping' => sub {
         },
       ),
       _entities => [ { map +($_ => 0),
-        '',
-        '/$defs/foo',
-        '/$defs/foo/patternProperties/~0',
-        '/$defs/foo/patternProperties/~0/properties/~0~1',
-        '/$defs/foo/patternProperties/~1',
-        '/$defs/foo/patternProperties/~1/properties/~0~1',
-        '/$defs/foo/patternProperties/[~0~1]',
-        '/$defs/foo/patternProperties/[~0~1]/properties/~0~1',
+        my @locations = (
+          '',
+          '/$defs/foo',
+          '/$defs/foo/patternProperties/~0',
+          '/$defs/foo/patternProperties/~0/properties/~0~1',
+          '/$defs/foo/patternProperties/~1',
+          '/$defs/foo/patternProperties/~1/properties/~0~1',
+          '/$defs/foo/patternProperties/[~0~1]',
+          '/$defs/foo/patternProperties/[~0~1]/properties/~0~1',
+        )
       }],
     ),
     'properly escaped special characters in JSON pointers and URIs',
   );
   is($doc->get_entity_at_location('/$defs/foo/patternProperties/~0'), 'schema', 'schema locations are tracked');
   is($doc->get_entity_at_location('/$defs/foo/patternProperties'), '', 'non-schema locations are also tracked');
+
+  cmp_deeply(
+    [ $doc->get_entity_locations('schema') ],
+    bag(@locations),
+    'schema locations can be queried',
+  );
 };
 
 subtest 'resource collisions' => sub {

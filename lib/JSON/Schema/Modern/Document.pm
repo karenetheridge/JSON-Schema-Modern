@@ -130,6 +130,13 @@ sub get_entity_at_location ($self, $location) {
   ($self->__entities)[ $self->_entities->{$location} ] // die "missing mapping for ", $self->_entities->{$location};
 }
 
+# note: not sorted
+sub get_entity_locations ($self, $entity) {
+  $self->__entity_type->($entity); # verify string
+  my $index = $self->__entity_index($entity);
+  grep $self->{_entities}{$_} == $index, keys $self->{_entities}->%*;
+}
+
 around _add_resources => sub {
   my $orig = shift;
   my $self = shift;
@@ -309,7 +316,7 @@ errors halt the parsing process.) Documents with errors cannot be evaluated.
 
 =head1 METHODS
 
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location get_entity_locations
 
 =head2 path_to_canonical_uri
 
