@@ -41,6 +41,7 @@ our @CARP_NOT = qw(
   JSON::Schema::Modern::Document
   JSON::Schema::Modern::Vocabulary
   JSON::Schema::Modern::Vocabulary::Applicator
+  JSON::Schema::Modern::Document::OpenAPI
   OpenAPI::Modern
 );
 
