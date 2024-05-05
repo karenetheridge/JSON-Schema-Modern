@@ -53,7 +53,7 @@ has absolute_keyword_location => (
 
       undef $uri if $uri eq '' and $self->{keyword_location} eq ''
         or ($uri->fragment // '') eq $self->{keyword_location} and $uri->clone->fragment(undef) eq '';
-      return $uri if defined $uri;
+      return $uri;
     }
 
     return;
