@@ -53,6 +53,8 @@ sub stringify ($self) {
     : '\''.$self->instance_location.'\': '.$self->error;
 }
 
+sub __thing { 'error' }
+
 1;
 __END__
 

@@ -41,6 +41,8 @@ around BUILDARGS => sub ($orig, $class, @args) {
   return $args;
 };
 
+sub __thing { 'annotation' }
+
 1;
 __END__
 

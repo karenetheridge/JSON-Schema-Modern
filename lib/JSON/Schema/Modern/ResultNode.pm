@@ -79,7 +79,8 @@ sub BUILD ($self, $args) {
 }
 
 sub TO_JSON ($self) {
-  my $thing = lcfirst((reverse split /::/, ref $self)[0]);
+  my $thing = $self->__thing;  # annotation or error
+
   return +{
     # note that locations are JSON pointers, not uri fragments!
     instanceLocation => $self->instance_location,
