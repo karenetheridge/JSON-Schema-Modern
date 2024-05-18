@@ -11,6 +11,7 @@ use Moo;
 use strictures 2;
 use stable 0.031 'postderef';
 use experimental 'signatures';
+no autovivification warn => qw(fetch store exists delete);
 use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
@@ -215,7 +216,7 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
     foreach my $base_scope ($state->{dynamic_scope}->@*) {
       my $test_uri = Mojo::URL->new($base_scope)->fragment($anchor);
       my $dynamic_anchor_subschema_info = $state->{evaluator}->_fetch_from_uri($test_uri);
-      if (($dynamic_anchor_subschema_info->{schema}->{'$dynamicAnchor'}//'') eq $anchor) {
+      if (defined $dynamic_anchor_subschema_info and ($dynamic_anchor_subschema_info->{schema}{'$dynamicAnchor'}//'') eq $anchor) {
         $uri = $test_uri;
         last;
       }

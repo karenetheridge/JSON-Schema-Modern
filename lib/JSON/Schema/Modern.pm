@@ -12,6 +12,7 @@ use Moo;
 use strictures 2;
 use stable 0.031 'postderef';
 use experimental 'signatures';
+no autovivification warn => qw(fetch store exists delete);
 use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
@@ -114,7 +115,7 @@ has _format_validations => (
   default => sub { {} },
 );
 
-sub _get_format_validation ($self, $format) { $self->{_format_validations}{$format} }
+sub _get_format_validation ($self, $format) { ($self->{_format_validations}//{})->{$format} }
 
 sub add_format_validation ($self, $format, $definition) {
   $definition = { type => 'string', sub => $definition } if not is_plain_hashref($definition);
@@ -124,6 +125,7 @@ sub add_format_validation ($self, $format, $definition) {
   croak "Type for override of format $format does not match original type"
     if any { $format eq $_ } @core_formats and $definition->{type} ne 'string';
 
+  use autovivification 'store';
   $self->{_format_validations}{$format} = $definition;
 }
 
@@ -324,6 +326,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     effective_base_uri => $effective_base_uri, # resolve locations against this for errors and annotations
     errors => [],
     depth => 0,
+    configs => {},
   };
 
   exists $config_override->{$_} and die $_.' not supported as a config override'
@@ -505,10 +508,13 @@ sub _traverse_subschema ($self, $schema, $state) {
   ALL_KEYWORDS:
   foreach my $vocabulary ($state->{vocabularies}->@*) {
     # [ [ $keyword => $subref ], [ ... ] ]
-    my $keyword_list = $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
-      map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
-        $vocabulary->keywords($state->{spec_version})
-    ];
+    my $keyword_list = do {
+      use autovivification qw(fetch store);
+      $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
+        map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
+          $vocabulary->keywords($state->{spec_version})
+      ];
+    };
 
     foreach my $keyword_tuple ($keyword_list->@*) {
       my ($keyword, $sub) = $keyword_tuple->@*;
@@ -583,10 +589,13 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   # if any of them are absolute prefix of this schema location, we are in a loop.
   my $canonical_uri = canonical_uri($state);
   my $schema_location = $state->{traversed_schema_path}.$state->{schema_path};
-  abort($state, 'EXCEPTION: infinite loop detected (same location evaluated twice)')
-    if grep substr($schema_location, 0, length) eq $_,
-      keys $state->{seen}{$state->{data_path}}{$canonical_uri}->%*;
-  $state->{seen}{$state->{data_path}}{$canonical_uri}{$schema_location}++;
+  {
+    use autovivification qw(fetch store);
+    abort($state, 'EXCEPTION: infinite loop detected (same location evaluated twice)')
+      if grep substr($schema_location, 0, length) eq $_,
+        keys $state->{seen}{$state->{data_path}}{$canonical_uri}->%*;
+    $state->{seen}{$state->{data_path}}{$canonical_uri}{$schema_location}++;
+  }
 
   my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
@@ -607,10 +616,13 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   ALL_KEYWORDS:
   foreach my $vocabulary ($state->{vocabularies}->@*) {
     # [ [ $keyword => $subref|undef ], [ ... ] ]
-    my $keyword_list = $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
-      map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
-        $vocabulary->keywords($state->{spec_version})
-    ];
+    my $keyword_list = do {
+      use autovivification qw(fetch store);
+      $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
+        map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
+          $vocabulary->keywords($state->{spec_version})
+      ];
+    };
 
     foreach my $keyword_tuple ($keyword_list->@*) {
       my ($keyword, $sub) = $keyword_tuple->@*;
@@ -635,7 +647,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
         }
       }
 
-      if (my $callback = $state->{callbacks}{$keyword}) {
+      if (my $callback = ($state->{callbacks}//{})->{$keyword}) {
         my $error_count = $state->{errors}->@*;
 
         if (not $callback->($data, $schema, $state)) {
@@ -684,15 +696,17 @@ has _resource_index => (
   default => sub { {} },
 );
 
-sub _get_resource { $_[0]->{_resource_index}{$_[1]} }
+sub _get_resource { ($_[0]->{_resource_index}//{})->{$_[1]} }
 sub _add_resources {
+  use autovivification 'store';
   $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
 }
 sub _add_resources_unsafe {
+  use autovivification 'store';
   $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
 }
 sub _resource_index { $_[0]->{_resource_index}->%* }
-sub _canonical_resources { values $_[0]->{_resource_index}->%* }
+sub _canonical_resources { values(($_[0]->{_resource_index}//{})->%*) }
 
 around _add_resources => sub {
   my ($orig, $self) = (shift, shift);

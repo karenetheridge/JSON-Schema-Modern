@@ -1,6 +1,7 @@
 use strictures 2;
 use stable 0.031 'postderef';
 use experimental 'signatures';
+no autovivification warn => qw(fetch store exists delete);
 use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
@@ -408,7 +409,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
 
   # now make the ref a recursiveRef, but still won't recurse to base because no recursiveanchor.
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$recursiveRef'} =
     delete $schema->{additionalProperties}{additionalProperties}{'$ref'};
 
@@ -429,7 +430,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
 
   # now we will recurse to the base.
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{'$recursiveAnchor'} = true;
 
   cmp_result(
@@ -842,7 +843,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
 
   # now make the ref a dynamicRef, but still won't recurse to base because no dynamicanchor.
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} =
     delete $schema->{additionalProperties}{additionalProperties}{'$ref'}; # '#'
   $errors->[0]{keywordLocation} =~ s/ref/dynamicRef/;
@@ -857,7 +858,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   );
 
   # we still won't recurse to the base because $dynamicRef doesn't use the anchor URI.
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{additionalProperties}{'$dynamicAnchor'} = 'thingy';
 
   cmp_result(
@@ -871,7 +872,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
 
   # use the anchor URI for $dynamicRef, but we still won't recurse to the base because there is no
   # outer $dynamicAnchor.
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#thingy';
 
   cmp_result(
@@ -884,7 +885,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   );
 
   # change $dynamicRef back to $ref, but use the fragment uri.
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$ref'} =
     delete $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'}; # '#thingy'
   $errors->[0]{keywordLocation} =~ s/dynamicRef/ref/;
@@ -900,7 +901,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
 
   # now add a $dynamicAnchor to base, but we still won't recurse to the base because $dynamicRef
   # doesn't use the anchor.
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   delete $schema->{additionalProperties}{additionalProperties}{'$ref'};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#';
   $schema->{'$dynamicAnchor'} = 'thingy';
@@ -915,7 +916,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
     'there is an outer $dynamicAnchor in scope to recurse to, but $dynamicRef must use a URI containing the dynamic anchor fragment',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#thingy';
 
   cmp_result(
@@ -926,7 +927,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
     'now everything is in place to recurse to the base',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   delete $schema->{additionalProperties}{'$dynamicAnchor'};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#';
   cmp_result(
@@ -940,7 +941,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
 };
 
 subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => sub {
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   my $schema = {
     '$id' => 'base',
     '$defs' => {
@@ -980,7 +981,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
     'second dynamic anchor is not in the evaluation path, but we found it via dynamic scope - type does not match',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{'$defs'}{override}{'$anchor'} = 'thingy';
 
   cmp_result(
@@ -992,7 +993,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
     'regular $anchor in dynamic scope should not be used by $dynamicRef',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   delete $schema->{'$defs'}{override}{'$anchor'};
   $schema->{'$defs'}{override}{'$dynamicAnchor'} = 'some_other_thingy';
 
@@ -1005,7 +1006,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
     'some other $dynamicAnchor in dynamic scope should not be used by $dynamicRef',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{'$defs'}{override}{'$dynamicAnchor'} = 'thingy';
 
   cmp_result(
@@ -1016,7 +1017,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
     'second dynamic anchor is not in the evaluation path, but we found it via dynamic scope - type matches',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   my $canonical_uri = delete $schema->{'$id'};
 
   $js->add_schema($canonical_uri => $schema);
@@ -1030,7 +1031,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
 };
 
 subtest 'after leaving a dynamic scope, it should not be used by a $dynamicRef' => sub {
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   my $schema = {
     '$id' => 'main',
     if => {
@@ -1079,7 +1080,7 @@ subtest 'after leaving a dynamic scope, it should not be used by a $dynamicRef' 
 };
 
 subtest 'anchors do not match' => sub {
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   my $schema = {
     '$defs' => {
       enhanced => {
@@ -1111,7 +1112,7 @@ subtest 'anchors do not match' => sub {
     '$dynamicRef goes to enhanced schema',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema->{'$defs'}{enhanced}{'$anchor'} = delete $schema->{'$defs'}{enhanced}{'$dynamicAnchor'};
   $schema->{'$defs'}{enhanced}{'$dynamicAnchor'} = 'somethingelse';
 
@@ -1133,7 +1134,7 @@ subtest 'anchors do not match' => sub {
 };
 
 subtest 'reference to a non-schema location' => sub {
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   my $schema = {
     example => { not_a_schema => true },
     '$defs' => {
@@ -1183,7 +1184,7 @@ subtest 'reference to a non-schema location' => sub {
     '$dynamicRef to a non-schema is not permitted',
   );
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $schema = {
     '$id' => '/foo',
     '$schema' => 'https://json-schema.org/draft/2019-09/schema',
@@ -1226,11 +1227,13 @@ subtest 'reference to a non-schema location' => sub {
         spec_version => 'draft2020-12',
         vocabularies => [],
         configs => {},
+        identifiers => [],
+        subschemas => [],
       };
     }
   };
 
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
 
   my $doc = MyDocument->new(
     schema => [ 'not a json schema' ],
@@ -1261,7 +1264,7 @@ subtest 'reference to a non-schema location' => sub {
 };
 
 subtest 'evaluate at a non-schema location' => sub {
-  delete $js->{_resource_index};
+  $js->{_resource_index} = {};
   $js->add_schema('http://my_schema', { example => { not_a_schema => true } });
 
   cmp_result(
