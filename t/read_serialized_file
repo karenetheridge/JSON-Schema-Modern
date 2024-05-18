@@ -30,6 +30,7 @@ my @serialized_attributes = sort qw(
   collect_annotations
   scalarref_booleans
   stringy_numbers
+  strict
   _resource_index
   _vocabulary_classes
   _metaschema_vocabulary_classes
