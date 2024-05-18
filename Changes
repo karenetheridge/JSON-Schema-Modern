@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.584     2024-05-18 21:06:35Z
           - add 'get_entity_locations' helper sub to ::Document
 
 0.583     2024-03-30 17:56:17Z
