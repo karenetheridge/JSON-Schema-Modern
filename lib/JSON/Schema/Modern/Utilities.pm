@@ -228,6 +228,8 @@ sub canonical_uri ($state, @extra_path) {
 # - exception (set by abort())
 # - recommended_response
 # - depth
+# returns defined-false, so callers can use 'return;' to differentiate between
+# failed-with-no-error from failed-with-error.
 sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
