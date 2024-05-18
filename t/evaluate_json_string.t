@@ -28,7 +28,7 @@ is(
 
 is(
   exception {
-    cmp_deeply(
+    cmp_result(
       $js->evaluate_json_string('blargh', {})->TO_JSON,
       {
         valid => false,
@@ -40,10 +40,8 @@ is(
           },
         ],
       },
-      'result object serializes correctly',
       'evaluating bad json data returns false, with error',
     );
-
   },
   undef,
   'no exceptions in evaluate_json_string on bad json',

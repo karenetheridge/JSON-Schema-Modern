@@ -15,7 +15,7 @@ foreach my $config (0, 1) {
   note 'stringy_numbers = '.$config;
   my $js = JSON::Schema::Modern->new(stringy_numbers => $config);
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, { $_ => '1' })->TO_JSON,
     {
       valid => false,
@@ -40,7 +40,7 @@ foreach my $config (0, 1) {
     ],
   };
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('blah', $schema)->TO_JSON,
     {
       valid => false,
@@ -75,7 +75,7 @@ foreach my $config (0, 1) {
     'strings that do not look like numbers are never valid as numbers',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('1.1', $schema)->TO_JSON,
     {
       valid => false,
@@ -84,7 +84,7 @@ foreach my $config (0, 1) {
     'by default "type": "string" does not accept numbers',
   ) if not $config;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('1.1', $schema)->TO_JSON,
     {
       valid => false,
@@ -161,7 +161,7 @@ foreach my $config (0, 1) {
 
   my $data = 11e0;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($data, $schema)->TO_JSON,
     {
       valid => false,
@@ -172,13 +172,13 @@ foreach my $config (0, 1) {
 
   $data = '11e0';
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($data, $schema)->TO_JSON,
     { valid => true },
     'by default, stringy numbers are not evaluated by numeric keywords',
   ) if $config == 0;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($data, $schema)->TO_JSON,
     {
       valid => false,
@@ -195,7 +195,7 @@ foreach my $config (0, 1) {
     const => 11,
   };
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($data, $schema)->TO_JSON,
     {
       valid => false,
@@ -215,7 +215,7 @@ foreach my $config (0, 1) {
     'by default, stringy numbers are not the same as numbers using comparison keywords',
   ) if $config == 0;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($data, $schema)->TO_JSON,
     { valid => true },
     'with the config enabled, stringy numbers are the same as numbers using comparison keywords',

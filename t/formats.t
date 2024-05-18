@@ -16,7 +16,7 @@ use Helper;
 
 my ($annotation_result, $validation_result);
 subtest 'no validation' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 0)
       ->evaluate('abc', { format => 'uuid' })->TO_JSON,
     $annotation_result = {
@@ -32,7 +32,7 @@ subtest 'no validation' => sub {
     'validate_formats=0 disables format assertion behaviour; annotation is still produced',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1)
       ->evaluate('abc', { format => 'uuid' }, { validate_formats => 0 })->TO_JSON,
     $annotation_result,
@@ -43,13 +43,13 @@ subtest 'no validation' => sub {
 subtest 'simple validation' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(123, { format => 'uuid' })->TO_JSON,
     $annotation_result,
     'non-string values are valid, and produce an annotation',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       '2eb8aa08-aa98-11ea-b4aa-73b441d16380',
       { format => 'uuid' },
@@ -58,7 +58,7 @@ subtest 'simple validation' => sub {
     'simple success',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('123', { format => 'uuid' })->TO_JSON,
     $validation_result = {
       valid => false,
@@ -75,7 +75,7 @@ subtest 'simple validation' => sub {
 
   $js = JSON::Schema::Modern->new(collect_annotations => 1);
   ok(!$js->validate_formats, 'format_validation defaults to false');
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('123', { format => 'uuid' }, { validate_formats => 1 })->TO_JSON,
     $validation_result,
     'format validation can be turned on in evaluate()',
@@ -121,7 +121,7 @@ subtest 'override a format sub' => sub {
   );
 
   $js->add_format_validation(uuid => sub { $_[0] =~ /^[a-z0-9-]+$/ });
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       [
         0,
@@ -183,7 +183,7 @@ subtest 'override a format sub' => sub {
     'check syntax of implementation when adding a new format',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       [
         { uuid => '2eb8aa08-aa98-11ea-b4aa-73b441d16380', mult_5 => 3 },
@@ -229,7 +229,7 @@ subtest 'override a format sub' => sub {
   # do allow overriding mult_5 to support a different type than originally defined.
   $js->add_format_validation(mult_5 => +{ type => 'object', sub => sub { keys($_[0]->%*) > 2 } });
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       [
         {},
@@ -264,13 +264,13 @@ subtest 'toggle validate_formats after adding schema' => sub {
   my $js = JSON::Schema::Modern->new;
   my $document = $js->add_schema(my $uri = 'http://localhost:1234/ipv4', { format => 'ipv4' });
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('hello', $uri)->TO_JSON,
     { valid => true },
     'assertion behaviour is off initially',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('hello', $uri, { validate_formats => 1 })->TO_JSON,
     {
       valid => false,
@@ -286,14 +286,14 @@ subtest 'toggle validate_formats after adding schema' => sub {
     'assertion behaviour can be enabled later with an already-loaded schema',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('127.0.0.1', $uri, { validate_formats => 1 })->TO_JSON,
     { valid => true },
     'valid assertion behaviour does not die',
   );
 
   my $js2 = JSON::Schema::Modern->new(validate_formats => 1);
-  cmp_deeply(
+  cmp_result(
     $js2->evaluate('hello', $document)->TO_JSON,
     {
       valid => false,
@@ -309,7 +309,7 @@ subtest 'toggle validate_formats after adding schema' => sub {
     'a schema document can be used with another evaluator with assertion behaviour',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js2->evaluate('127.0.0.1', $uri)->TO_JSON,
     { valid => true },
     'valid assertion behaviour does not die',
@@ -333,7 +333,7 @@ subtest 'custom metaschemas' => sub {
     },
   });
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       'not-an-ip',
       {
@@ -357,7 +357,7 @@ subtest 'custom metaschemas' => sub {
     'custom metaschema using format-assertion=true validates formats',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       'not-an-ip',
       {
@@ -385,13 +385,13 @@ subtest 'custom metaschemas' => sub {
 subtest 'core formats added after draft7' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft7', validate_formats => 1);
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('123', { format => 'duration' })->TO_JSON,
     { valid => true },
     'duration is not implemented in draft7',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('123', { format => 'uuid' })->TO_JSON,
     { valid => true },
     'uuid is not implemented in draft7',
@@ -401,7 +401,7 @@ subtest 'core formats added after draft7' => sub {
 subtest 'unimplemented core formats' => sub {
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version, validate_formats => 1);
-    cmp_deeply(
+    cmp_result(
       my $res = $js->evaluate(
         'hello',
         {
@@ -427,7 +427,7 @@ subtest 'unimplemented core formats' => sub {
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });
 
-    cmp_deeply(
+    cmp_result(
       $js->evaluate(
         'hello',
         {
@@ -448,7 +448,7 @@ subtest 'unimplemented core formats' => sub {
       $spec_version . ' with Format-Assertion vocabulary: error when an unimplemented core format is used',
     );
 
-    cmp_deeply(
+    cmp_result(
       $js->evaluate(
         'hello',
         {
@@ -485,7 +485,7 @@ subtest 'unknown custom formats' => sub {
       validate_formats => 1,
     );
 
-    cmp_deeply(
+    cmp_result(
       $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
       {
         valid => true,
@@ -516,7 +516,7 @@ subtest 'unknown custom formats' => sub {
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });
 
-    cmp_deeply(
+    cmp_result(
       JSON::Schema::Modern::Document->new(
         evaluator => $js,
         schema => { '$schema' => 'https://my_metaschema', format => 'bloop' },
@@ -547,7 +547,7 @@ subtest 'format: pure_integer' => sub {
 
   my $decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0);
   my $int = 5;
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       [
         (map $decoder->decode($_),
@@ -603,7 +603,7 @@ subtest 'format: pure_integer' => sub {
     'pure_integer format with type',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       [
         (map $decoder->decode($_),
@@ -694,7 +694,7 @@ subtest 'formats supporting multiple core types' => sub {
   foreach my $decoder (
       JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0),
       JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0)->allow_bignum(1)) {
-    cmp_deeply(
+    cmp_result(
       my $result = $js->evaluate(
         [ map $decoder->decode($_), @values ],
         {
@@ -733,7 +733,7 @@ subtest 'stringy numbers with a numeric format' => sub {
     },
   );
 
-  cmp_deeply(
+  cmp_result(
     my $res = $js->evaluate(
       [
         3,
@@ -785,7 +785,7 @@ subtest 'stringy numbers with a numeric format' => sub {
     '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
   });
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       [
         3,

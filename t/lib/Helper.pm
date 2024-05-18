@@ -21,11 +21,21 @@ my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
   ->allow_nonref(1)
   ->utf8(0)
   ->allow_bignum(1)
-  ->convert_blessed(1);
+  ->allow_blessed(1)
+  ->convert_blessed(1)
+  ->canonical(1)
+  ->pretty(1)
+  ->indent_length(2);
 
 # like sprintf, but all list items are JSON-encoded. assumes placeholders are %s!
 sub json_sprintf {
   sprintf(shift, map +(ref($_) =~ /^Math::Big(Int|Float)$/ ? ref($_).'->new(\''.$_.'\')' : $encoder->encode($_)), @_);
+}
+
+sub cmp_result ($got, $expected, $test_name) {
+  local $Test::Builder::Level = $Test::Builder::Level + 1;
+  my $ok = cmp_deeply($got, $expected, $test_name)
+    or diag 'got result:', "\n", $encoder->encode($got);
 }
 
 1;

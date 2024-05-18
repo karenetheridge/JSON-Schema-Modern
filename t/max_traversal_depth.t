@@ -13,7 +13,7 @@ use Helper;
 
 my $js = JSON::Schema::Modern->new(max_traversal_depth => 6);
 
-cmp_deeply(
+cmp_result(
   $js->evaluate(
     [ [ [ [ [ 1 ] ] ] ] ],
     {
@@ -34,7 +34,7 @@ cmp_deeply(
   'evaluation is halted when traversal gets too deep',
 );
 
-cmp_deeply(
+cmp_result(
   $js->evaluate(
     1,
     {
@@ -63,7 +63,7 @@ cmp_deeply(
   'evaluation is halted when an instance location is evaluated against the same schema location a second time',
 );
 
-cmp_deeply(
+cmp_result(
   $js->evaluate(
     { foo => 1 },
     {
@@ -79,7 +79,7 @@ cmp_deeply(
   'the seen counter does not confuse URI paths and fragments: /properties/foo vs #/properties/foo',
 );
 
-cmp_deeply(
+cmp_result(
   $js->evaluate(
     { foo => 1 },
     {

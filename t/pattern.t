@@ -15,7 +15,7 @@ use Helper;
 my $js = JSON::Schema::Modern->new;
 
 my $tests = sub ($char, $test_substr) {
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($char, { pattern => '[a-z]' })->TO_JSON,
     {
       valid => false,
@@ -30,7 +30,7 @@ my $tests = sub ($char, $test_substr) {
     $test_substr.' LATIN SMALL LETTER E WITH ACUTE does not match the ascii range [a-z]',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate($char, { pattern => '\w' })->TO_JSON,
     {
       valid => true,
@@ -53,7 +53,7 @@ subtest 'empty pattern' => sub {
   # create a "last successful match" in a containing scope
   my $str = "furble" =~ s/fur/meow/r;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('hello', { pattern => '' })->TO_JSON,
     { valid => true },
     'empty pattern in "pattern" will correctly match',
@@ -62,7 +62,7 @@ subtest 'empty pattern' => sub {
   # create a new "last successful match"
   $str = "furble" =~ s/fur/meow/r;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       { alpha => 'hello' },
       {

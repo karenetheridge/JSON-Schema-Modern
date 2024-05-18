@@ -42,7 +42,7 @@ my @warnings = warnings {
 
 my $test_sub = $ENV{AUTHOR_TESTING} ? sub { bag(@_) } : sub { superbagof(@_) };
 
-cmp_deeply(
+cmp_result(
   \@warnings,
   $test_sub->(
     # these are all in unknownKeyword.json

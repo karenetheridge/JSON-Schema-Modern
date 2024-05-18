@@ -26,7 +26,7 @@ subtest 'evaluate a document' => sub {
     });
 
   my $js = JSON::Schema::Modern->new;
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, $document)->TO_JSON,
     {
       valid => false,
@@ -48,7 +48,7 @@ subtest 'evaluate a document' => sub {
     'evaluate a Document object',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'https://foo.com' => {
@@ -63,7 +63,7 @@ subtest 'evaluate a document' => sub {
     'resource index from the document is copied to the main object',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, $document)->TO_JSON,
     {
       valid => false,
@@ -76,7 +76,7 @@ subtest 'evaluate a document' => sub {
 subtest 'evaluate a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
     {
       valid => false,
@@ -104,7 +104,7 @@ subtest 'evaluate a uri' => sub {
     'evaluate with a uri that is not yet loaded',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       map +(
@@ -125,7 +125,7 @@ subtest 'evaluate a uri' => sub {
   );
 
   # and again, we can use the same resource without reloading it
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
     {
       valid => false,
@@ -138,7 +138,7 @@ subtest 'evaluate a uri' => sub {
   # multiple things are being tested here:
   # - we can load a schema resource, or find an existing one, with a fragment
   # - the json path we used is saved in the state, for correct errors
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       'https://json-schema.org/draft/2019-09/meta/core#/properties/$schema',
@@ -157,7 +157,7 @@ subtest 'evaluate a uri' => sub {
     'evaluate against the a subschema of the metaschema',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       METASCHEMA.'#/does/not/exist',
@@ -175,7 +175,7 @@ subtest 'evaluate a uri' => sub {
     'evaluate against the a fragment of the metaschema that does not exist',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       METASCHEMA.'#does_not_exist',
@@ -196,7 +196,7 @@ subtest 'evaluate a uri' => sub {
 
 subtest 'add a uri resource' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_deeply(
+  cmp_result(
     $js->add_schema(METASCHEMA),
     all(
       isa('JSON::Schema::Modern::Document'),
@@ -222,7 +222,7 @@ subtest 'add a uri resource' => sub {
     'attempt to add a resource that does not exist',
   );
 
-  cmp_deeply(
+  cmp_result(
     my $get_metaschema = scalar $js->get(METASCHEMA),
     my $orig_metaschema = $js->_get_resource(METASCHEMA)->{document}->schema,
     '->get in scalar context on a URI to the head of a document',
@@ -230,19 +230,19 @@ subtest 'add a uri resource' => sub {
 
   ok($get_metaschema != $orig_metaschema, 'get() did not return a reference to the original data');
 
-  cmp_deeply(
+  cmp_result(
     [ $js->get(METASCHEMA) ],
     [ $js->_get_resource(METASCHEMA)->{document}->schema,
       all(isa('Mojo::URL'), str(METASCHEMA)) ],
     '->get in list context on a URI to the head of a document',
   );
 
-  cmp_deeply(
+  cmp_result(
     scalar $js->get(METASCHEMA.'#/properties/definitions/type'),
     'object', # $document->schema->{properties}{definitions}{type}
     '->get in scalar context on a URI to inside of a document',
   );
-  cmp_deeply(
+  cmp_result(
     [ $js->get(METASCHEMA.'#/properties/definitions/type') ],
     [ 'object', all(isa('Mojo::URL'), str(METASCHEMA.'#/properties/definitions/type')) ],
     '->get in list context on a URI to inside of a document',
@@ -258,7 +258,7 @@ subtest 'add a schema associated with a uri' => sub {
     'cannot use a uri with a fragment',
   );
 
-  cmp_deeply(
+  cmp_result(
     my $document = $js->add_schema(
       'https://foo.com',
       { '$id' => 'https://bar.com', allOf => [ false, true ] },
@@ -288,7 +288,7 @@ subtest 'add a schema associated with a uri' => sub {
     'added the schema data with an associated uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     my $result = $js->evaluate(1, 'https://bar.com#/allOf/0')->TO_JSON,
     {
       valid => false,
@@ -304,7 +304,7 @@ subtest 'add a schema associated with a uri' => sub {
     'can now evaluate using a uri to a subschema of a resource we loaded earlier',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, 'https://foo.com')->TO_JSON,
     {
       valid => false,
@@ -326,13 +326,13 @@ subtest 'add a schema associated with a uri' => sub {
     'can also evaluate using a non-canonical uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->add_schema('https://bloop.com', $document),
     shallow($document),
     'can add the same document and associate it with another schema',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       map +( $_ => {
@@ -351,7 +351,7 @@ subtest 'add a schema associated with a uri' => sub {
 subtest 'add a document without associating it with a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     $js->add_schema(
       my $document = JSON::Schema::Modern::Document->new(
         schema => { '$id' => 'https://bar.com', allOf => [ false, true ] },
@@ -374,7 +374,7 @@ subtest 'add a document without associating it with a uri' => sub {
     'added the document without an associated uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'https://bar.com' => {
@@ -393,7 +393,7 @@ subtest 'add a document without associating it with a uri' => sub {
 subtest 'add a schema without a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     my $document = $js->add_schema(
       { '$id' => 'https://bar.com', allOf => [ false, true ] },
     ),
@@ -415,7 +415,7 @@ subtest 'add a schema without a uri' => sub {
     'added the schema data without an associated uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'https://bar.com' => {
@@ -453,7 +453,7 @@ subtest '$ref to non-canonical uri' => sub {
   my $js = JSON::Schema::Modern->new;
   $js->add_schema('http://otherhost:4242/another_uri', $schema);
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ alpha => 1 }, 'http://otherhost:4242/another_uri')->TO_JSON,
     {
       valid => false,
@@ -475,7 +475,7 @@ subtest '$ref to non-canonical uri' => sub {
     'errors use the canonical uri, not the uri used to evaluate against',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ gamma => 1 }, 'http://otherhost:4242/beta')->TO_JSON,
     {
       valid => false,
@@ -490,7 +490,7 @@ subtest '$ref to non-canonical uri' => sub {
     'non-canonical uri is not used to resolve inner $id keywords',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ gamma => 1 }, 'http://localhost:4242/beta')->TO_JSON,
     {
       valid => false,
@@ -512,7 +512,7 @@ subtest '$ref to non-canonical uri' => sub {
     'the canonical uri is updated when use the canonical uri, not the uri used to evaluate against',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ delta => 1 }, 'http://otherhost:4242/another_uri')->TO_JSON,
     {
       valid => false,
@@ -534,7 +534,7 @@ subtest '$ref to non-canonical uri' => sub {
     'canonical_uri is not always what was in the $ref, even when no local $id is present',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, 'http://otherhost:4242/another_uri#/properties/alpha')->TO_JSON,
     {
       valid => false,
@@ -552,7 +552,7 @@ subtest '$ref to non-canonical uri' => sub {
 
   delete $schema->{properties}{beta}{'$id'};
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate({ gamma => 1 }, 'http://otherhost:4242/another_uri#/properties/beta')->TO_JSON,
     {
       valid => false,
@@ -590,7 +590,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     });
   $js->add_schema($document);
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'https://foo.com' => {
@@ -615,7 +615,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
 
   $js->add_schema('https://uri2.com', $document);
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     my $main_resource_index = {
       'https://foo.com' => {
@@ -646,7 +646,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     'add a secondary uri for the same document',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $document->resource_index },
     my $doc_resource_index = {
       'https://foo.com' => {
@@ -679,7 +679,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     'cannot reuse the same $id in another document',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     $main_resource_index,
     'resource index remains unchanged after erroneous add_schema calls',
@@ -691,13 +691,13 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     'adding the same schema *content* again does not fail, and returns the original document object',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $document->resource_index },
     $doc_resource_index,
     'original document remains unchanged - the new uri was not added to it',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'https://uri4.com' => {
@@ -713,12 +713,12 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     'new uri was added against the original document (no new document created)',
   );
 
-  cmp_deeply(
+  cmp_result(
     scalar $js->get('https://foo.com#fooanchor'),
     $js->_get_resource('https://foo.com#fooanchor')->{document}->schema->{'$defs'}{foo},
     '->get in scalar context on a secondary URI with a plain-name fragment',
   );
-  cmp_deeply(
+  cmp_result(
     [ $js->get('https://foo.com#fooanchor') ],
     [ $js->_get_resource('https://uri2.com')->{document}->schema->{'$defs'}{foo},
       all(isa('Mojo::URL'), str('https://foo.com#/$defs/foo')) ],
@@ -730,7 +730,7 @@ subtest 'register a document against multiple uris; do not allow duplicate uris'
     undef,
     '->get in scalar context for a nonexistent resource returns undef',
   );
-  cmp_deeply(
+  cmp_result(
     [ $js->get('https://foo.com#i_do_not_exist') ],
     [],
     '->get in list context for a nonexistent resource returns empty list',
@@ -751,7 +751,7 @@ subtest 'external resource with externally-supplied uri; main resource with mult
     },
   );
 
-  cmp_deeply(
+  cmp_result(
     my $result = $js->evaluate('string', 'https://secondary.com')->TO_JSON,
     {
       valid => false,
@@ -773,13 +773,13 @@ subtest 'external resource with externally-supplied uri; main resource with mult
     'all uris in result are correct, using secondary uri as the target',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('string', 'https://main.com')->TO_JSON,
     $result,
     'all uris in result are correct, using main uri as the target',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate('string', $schema)->TO_JSON,
     $result,
     'all uris in result are correct, using the literal schema as the target',
@@ -795,7 +795,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
     my $def_schema = { '$defs' => { integer => { type => 'integer' } } },
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       { foo => 'string' },
       my $schema = {
@@ -837,7 +837,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
     }),
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       { foo => 'string' },
       $schema,

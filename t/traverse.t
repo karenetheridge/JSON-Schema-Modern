@@ -50,7 +50,7 @@ subtest 'traversal with callbacks' => sub {
       if => sub { $if_callback_called = 1; },
     }});
 
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -65,7 +65,7 @@ subtest 'traversal with callbacks' => sub {
 
   ok(!$if_callback_called, 'callback for erroneous keyword was not called');
 
-  cmp_deeply(
+  cmp_result(
     \%refs,
     {
       '/$defs/foo/additionalProperties' => 'https://foo.com/recursive_subschema',
@@ -77,7 +77,7 @@ subtest 'traversal with callbacks' => sub {
     'extracted all the real $refs out of the schema, with locations and canonical targets',
   );
 
-  cmp_deeply(
+  cmp_result(
     $state->{subschemas},
     bag(
       '',
@@ -98,7 +98,7 @@ subtest 'errors when parsing $schema keyword' => sub {
   my $js = JSON::Schema::Modern->new;
 
   my $state = $js->traverse({ '$schema' => true });
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -111,7 +111,7 @@ subtest 'errors when parsing $schema keyword' => sub {
   );
 
   $state = $js->traverse({ '$schema' => 'whargarbl' });
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -136,7 +136,7 @@ subtest 'default metaschema' => sub {
     },
   );
 
-  cmp_deeply(
+  cmp_result(
     $state,
     superhashof({
       spec_version => 'draft2020-12',
@@ -148,7 +148,7 @@ subtest 'default metaschema' => sub {
     'dialect is properly determined',
   );
 
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -173,7 +173,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
       },
     },
   );
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -199,8 +199,8 @@ subtest 'traversing a dialect with different core keywords' => sub {
     },
   );
 
-  cmp_deeply($state->{errors}, [], 'no errors when parsing this schema');
-  cmp_deeply(
+  cmp_result($state->{errors}, [], 'no errors when parsing this schema');
+  cmp_result(
     $state->{identifiers},
     [
       str('#hello'), {
@@ -235,7 +235,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
       },
     },
   );
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -260,7 +260,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
       },
     },
   );
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -287,7 +287,7 @@ subtest '$schema without an $id, below the root' => sub {
       },
     },
   );
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -310,7 +310,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     },
   });
   my $state = $js->traverse(true, { metaschema_uri => 'https://metaschema/with/wrong/spec' });
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     my $errors = [
       {
@@ -337,7 +337,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
   $state = $js->traverse(
     { '$id' => 'https://my-poor-schema/foo.json' },
     { metaschema_uri => 'https://metaschema/with/wrong/spec' });
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       $errors->@[0..1],
@@ -356,7 +356,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
       metaschema_uri => 'https://metaschema/with/wrong/spec',
       initial_schema_uri => 'https://my-poor-schema/foo.json#/$my_dialect_is',
     });
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -395,7 +395,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     { metaschema_uri => 'https://my/first/metaschema' },
   );
 
-  cmp_deeply(
+  cmp_result(
     $state->{identifiers},
     [
       str($id),
@@ -452,7 +452,7 @@ subtest 'start traversing below the document root' => sub {
       traversed_schema_path => '/components/alpha/subid',
     },
   );
-  cmp_deeply(
+  cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -472,7 +472,7 @@ subtest 'start traversing below the document root' => sub {
   );
 
 
-  cmp_deeply(
+  cmp_result(
     my $identifiers = +{
       $js->traverse(
         {

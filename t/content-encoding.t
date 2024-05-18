@@ -15,7 +15,7 @@ use Helper;
 subtest 'unrecognized encoding formats do not result in errors, when not asserting' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);
 
-  cmp_deeply(
+  cmp_result(
     my $result = $js->evaluate(
       'hello',
       {
@@ -57,42 +57,42 @@ subtest 'media_type and encoding handlers' => sub {
     'upper-cased names are not accepted',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->get_media_type('application/json')->(\'{"alpha": "a string"}'),
     \ { alpha => 'a string' },
     'application/json media_type decoder',
   );
 
-  cmp_deeply($js->get_media_type('*/*'), undef, '*/* has no default match');
+  cmp_result($js->get_media_type('*/*'), undef, '*/* has no default match');
 
-  cmp_deeply($js->get_media_type('text/plain')->(\'foo'), \'foo', 'default text/plain media_type decoder');
+  cmp_result($js->get_media_type('text/plain')->(\'foo'), \'foo', 'default text/plain media_type decoder');
 
-  cmp_deeply($js->get_media_type('tExt/PLaIN')->(\'foo'), \'foo', 'getter uses the casefolded name');
+  cmp_result($js->get_media_type('tExt/PLaIN')->(\'foo'), \'foo', 'getter uses the casefolded name');
 
   $js->add_media_type('furble/*' => sub { \1 });
-  cmp_deeply($js->get_media_type('furble/bloop')->(\''), \'1', 'getter matches to wildcard entries');
+  cmp_result($js->get_media_type('furble/bloop')->(\''), \'1', 'getter matches to wildcard entries');
 
   $js->add_media_type('text/*' => sub { \'wildcard' });
-  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'wildcard', 'getter uses new override entry for wildcard');
+  cmp_result($js->get_media_type('TExT/plain')->(\'foo'), \'wildcard', 'getter uses new override entry for wildcard');
 
   $js->add_media_type('text/plain' => sub { \'plain' });
-  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter prefers case-insensitive matches to wildcard entries');
-  cmp_deeply($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'getter matches to wildcard entries');
-  cmp_deeply($js->get_media_type('TExT/*')->(\'foo'), \'wildcard', 'text/* matches itself');
+  cmp_result($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter prefers case-insensitive matches to wildcard entries');
+  cmp_result($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'getter matches to wildcard entries');
+  cmp_result($js->get_media_type('TExT/*')->(\'foo'), \'wildcard', 'text/* matches itself');
 
   $js->add_media_type('*/*' => sub { \'wildercard' });
-  cmp_deeply($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter still prefers case-insensitive matches to wildcard entries');
-  cmp_deeply($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'text/* is preferred to */*');
-  cmp_deeply($js->get_media_type('*/*')->(\'foo'), \'wildercard', '*/* matches */*, once defined');
-  cmp_deeply($js->get_media_type('fOO/bar')->(\'foo'), \'wildercard', '*/* is returned as a last resort');
+  cmp_result($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter still prefers case-insensitive matches to wildcard entries');
+  cmp_result($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'text/* is preferred to */*');
+  cmp_result($js->get_media_type('*/*')->(\'foo'), \'wildercard', '*/* matches */*, once defined');
+  cmp_result($js->get_media_type('fOO/bar')->(\'foo'), \'wildercard', '*/* is returned as a last resort');
 
-  cmp_deeply(
+  cmp_result(
     $js->get_media_type('application/x-www-form-urlencoded')->(\qq!\x{c3}\x{a9}clair=\x{e0}\x{b2}\x{a0}\x{5f}\x{e0}\x{b2}\x{a0}!),
     \ { 'éclair' => 'ಠ_ಠ' },
     'application/x-www-form-urlencoded happy path with unicode',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->get_media_type('application/x-ndjson')->(\qq!{"foo":1,"bar":2}\n["a","b",3]\r\n"\x{e0}\x{b2}\x{a0}\x{5f}\x{e0}\x{b2}\x{a0}"!),
     \ [ { foo => 1, bar => 2 }, [ 'a', 'b', 3 ], 'ಠ_ಠ' ],
     'application/x-ndjson happy path with unicode',
@@ -110,13 +110,13 @@ subtest 'media_type and encoding handlers' => sub {
   # MIME::Base64::decode("eyJmb28iOiAiYmFyIn0K") -> {"foo": "bar"}
   # JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode(q!{"foo": "bar"}!) -> { foo => 'bar' }
 
-  cmp_deeply(
+  cmp_result(
     $js->get_media_type('application/json')->($js->get_encoding('base64')->(\'eyJmb28iOiAiYmFyIn0K')),
     \ { foo => 'bar' },
     'base64 encoding decoder + application/json media_type decoder',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->get_media_type('application/json')->($js->get_encoding('base64url')->(\'eyJmb28iOiJiYXIifQ')),
     \ { foo => 'bar' },
     'base64url encoding decoder + application/json media_type decoder',
@@ -126,7 +126,7 @@ subtest 'media_type and encoding handlers' => sub {
 subtest 'draft2020-12 assertions' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       my $data = { encoded_object => 'eyJmb28iOiAiYmFyIn0K' },
       my $schema = {
@@ -149,7 +149,7 @@ subtest 'draft2020-12 assertions' => sub {
     'under the current spec version, content* keywords are not assertions',
   );
 
-  cmp_deeply(
+  cmp_result(
     my $result = $js->evaluate(
       { encoded_object => 'blur^p=' },  # invalid base64
       $schema,
@@ -173,7 +173,7 @@ subtest 'draft2020-12 assertions' => sub {
     'contentEncoding first decodes the string, erroring if it can\'t',
   );
 
-  cmp_deeply(
+  cmp_result(
     $result = $js->evaluate(
       { encoded_object => 'bm90IGpzb24=' }, # base64-encoded "not json"
       $schema,
@@ -197,7 +197,7 @@ subtest 'draft2020-12 assertions' => sub {
     'then contentMediaType parses the decoded string, erroring if it can\'t, and does not continue with the schema',
   );
 
-  cmp_deeply(
+  cmp_result(
     $result = $js->evaluate(
       { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
       $schema,
@@ -231,7 +231,7 @@ subtest 'draft2020-12 assertions' => sub {
     'contentSchema evaluates the decoded data',
   );
 
-  cmp_deeply(
+  cmp_result(
     $result = $js->evaluate(
       { encoded_object => 'bnVsbA==' }, # base64-encoded, json-encoded undef
       $schema,
@@ -260,7 +260,7 @@ subtest 'draft2020-12 assertions' => sub {
     'null data is handled properly',
   );
 
-  cmp_deeply(
+  cmp_result(
     $result = $js->evaluate(
       { encoded_object => 'eyJoaSI6IuCyoF/gsqAifQ==' }, # base64-encoded, json-encoded { hi => "ಠ_ಠ" }
       $schema,
@@ -274,7 +274,7 @@ subtest 'draft2020-12 assertions' => sub {
 subtest 'draft7 assertions' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
 
-  cmp_deeply(
+  cmp_result(
     my $result = $js->evaluate(
       { encoded_object => 'blur^p=' },  # invalid base64
       my $schema = {
@@ -311,7 +311,7 @@ subtest 'draft7 assertions' => sub {
     'in draft7, assertion behaviour is the default',
   );
 
-  cmp_deeply(
+  cmp_result(
     $result = $js->evaluate(
       { encoded_object => 'bm90IGpzb24=' }, # base64-encoded "not json"
       $schema,
@@ -334,7 +334,7 @@ subtest 'draft7 assertions' => sub {
     'in draft7, then contentMediaType parses the decoded string, erroring if it can\'t, and does not continue with the schema',
   );
 
-  cmp_deeply(
+  cmp_result(
     $result = $js->evaluate(
       { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
       $schema,
@@ -347,7 +347,7 @@ subtest 'draft7 assertions' => sub {
 subtest 'more assertions' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       'a string',
       {
@@ -372,7 +372,7 @@ subtest 'more assertions' => sub {
     'evaluation aborts with an unrecognized contentEncoding',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       'a string',
       {

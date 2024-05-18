@@ -19,7 +19,7 @@ my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabular
 
 subtest '$id sets canonical uri' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       my $schema = {
@@ -46,7 +46,7 @@ subtest '$id sets canonical uri' => sub {
     '$id was recognized - $ref was successfully traversed',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       '' => {
@@ -87,7 +87,7 @@ subtest '$id sets canonical uri' => sub {
 
 subtest 'anchors' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       my $schema = {
@@ -145,7 +145,7 @@ subtest 'anchors' => sub {
     '$id was recognized - absolute locations use json paths, not anchors',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'http://localhost:4242' => {
@@ -187,7 +187,7 @@ subtest 'anchors' => sub {
 
 subtest '$anchor at root without $id' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       {
@@ -215,7 +215,7 @@ subtest '$anchor at root without $id' => sub {
     '$id without anchor was recognized - absolute locations use json paths, not anchors',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       '' => {
@@ -243,7 +243,7 @@ subtest '$anchor at root without $id' => sub {
 
 subtest '$ids and $anchors in subschemas after $id changes' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       {
@@ -274,7 +274,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
     '$anchor is legal in a subschema',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       'https://foo.com/a/alpha' => {
@@ -319,7 +319,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
 subtest 'invalid $id and $anchor' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       {
@@ -360,7 +360,7 @@ subtest 'invalid $id and $anchor' => sub {
     'bad $id and $anchor are detected, even if bad definitions are not traversed',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       1,
       {
@@ -415,7 +415,7 @@ subtest 'nested $ids' => sub {
     },
   };
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(
       {
         alpha => {
@@ -470,7 +470,7 @@ subtest 'nested $ids' => sub {
     'errors have the correct location',
   );
 
-  cmp_deeply(
+  cmp_result(
     { $js->_resource_index },
     {
       '/foo/bar/baz.json' => {
@@ -525,7 +525,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
     ],
   };
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, $schema1)->TO_JSON,
     {
       valid => false,
@@ -549,7 +549,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
   my $resource_index1 = +{ $js->_resource_index };
   my $document1 = $resource_index1->{''}{document};
 
-  cmp_deeply(
+  cmp_result(
     $resource_index1,
     {
       '' => {
@@ -580,7 +580,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
     'resources in initial schema are indexed',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, $schema2)->TO_JSON,
     {
       valid => true,
@@ -591,7 +591,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
   my $resource_index2 = +{ $js->_resource_index };
   my $document2 = $resource_index2->{'subschema3.json'}{document};
 
-  cmp_deeply(
+  cmp_result(
     $resource_index2,
     {
       '' => {
@@ -654,7 +654,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
     ],
   };
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, $schema1)->TO_JSON,
     {
       valid => false,
@@ -678,7 +678,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
   my $resource_index1 = +{ $js->_resource_index };
   my $document1 = $resource_index1->{''}{document};
 
-  cmp_deeply(
+  cmp_result(
     $resource_index1,
     {
       '' => {
@@ -709,7 +709,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
     'resources in initial schema are indexed',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, $schema2)->TO_JSON,
     {
       valid => false,
@@ -729,7 +729,7 @@ subtest 'resource collisions in canonical uris' => sub {
   my $js = JSON::Schema::Modern->new;
   $js->add_schema({ '$id' => 'https://foo.com/x/y/z' });
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, { '$id' => 'https://foo.com', anyOf => [ { '$id' => '/x/y/z' } ] })->TO_JSON,
     {
       valid => false,
@@ -750,7 +750,7 @@ subtest 'resource collisions in canonical uris' => sub {
     anyOf => [ { '$id' => '/x/y/z' } ],
   });
 
-  cmp_deeply(
+  cmp_result(
     $js->evaluate(1, { allOf => [ { '$id' => 'https://foo.com/x/y/z' } ] })->TO_JSON,
     {
       valid => false,
@@ -767,7 +767,7 @@ subtest 'resource collisions in canonical uris' => sub {
 };
 
 subtest 'relative uri in $id' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern->new->evaluate(
       1,
       {
@@ -789,7 +789,7 @@ subtest 'relative uri in $id' => sub {
     'root schema location is correctly identified',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern->new->evaluate(
       [ 1, [ 2, 3 ] ],
       {

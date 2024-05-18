@@ -7,16 +7,13 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-# we do NOT mess with stdin here!
+use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::V0;
-use Test::Warnings qw(:no_end_test had_no_warnings);
-use Test::Deep qw(cmp_deeply ignore);
+use Test2::V0 ();
 use Sereal::Decoder;
-use JSON::Schema::Modern;
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
-use JSON::PP ();
-use constant { true => JSON::PP::true, false => JSON::PP::false };
+
+use lib 't/lib';
+use Helper;
 
 my $hub = Test2::API::test2_stack->top;
 $hub->set_count(13);
@@ -40,15 +37,16 @@ my @serialized_attributes = sort qw(
 
 my $result = subtest 'thaw object in a separate process' => sub {
   local $/;
+  binmode STDIN, ':raw';
   my $thawed = Sereal::Decoder->new->decode(<>);
 
-  cmp_deeply(
+  cmp_result(
     [ sort keys %$thawed ],
     [ sort @serialized_attributes ],
     'thawed object in a new process contains all the right keys',
   );
 
-  cmp_deeply(
+  cmp_result(
     $thawed->evaluate(1, 'https://my_schema')->TO_JSON,
     {
       valid => true,
@@ -57,7 +55,7 @@ my $result = subtest 'thaw object in a separate process' => sub {
           instanceLocation => '',
           keywordLocation => '/'.$_,
           absoluteKeywordLocation => 'https://my_schema#/'.$_,
-          annotation => ignore,
+          annotation => Test::Deep::ignore,
         }, 'format', sort qw(type unknown properties contentMediaType contentSchema),
       ],
     },
@@ -105,7 +103,5 @@ my $result = subtest 'thaw object in a separate process' => sub {
 
 # skip the END block which would normally try to print a plan
 Test2::API::test2_stack->top->set_no_ending(1);
-
-had_no_warnings() if $ENV{AUTHOR_TESTING};
 
 exit($result ? 0 : -1);
