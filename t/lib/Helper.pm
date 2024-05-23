@@ -12,7 +12,8 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::More 0.96;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use Test::Deep;
+use Test::Deep; # import symbols: ignore, re etc
+use Test2::API 'context_do';
 use JSON::Schema::Modern;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::PP ();
@@ -33,10 +34,23 @@ sub json_sprintf {
   sprintf(shift, map +(ref($_) =~ /^Math::Big(Int|Float)$/ ? ref($_).'->new(\''.$_.'\')' : $encoder->encode($_)), @_);
 }
 
+# deep comparison, with Test::Deep syntax sugar
 sub cmp_result ($got, $expected, $test_name) {
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-  my $ok = cmp_deeply($got, $expected, $test_name)
-    or diag 'got result:', "\n", $encoder->encode($got);
+  context_do {
+    my $ctx = shift;
+    my ($got, $expected, $test_name) = @_;
+    my ($equal, $stack) = Test::Deep::cmp_details($got, $expected);
+    if ($equal) {
+      $ctx->pass($test_name);
+    }
+    else {
+      $ctx->fail($test_name);
+      my $method = $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
+      $ctx->$method(Test::Deep::deep_diag($stack));
+      $ctx->$method("got result:\n".$encoder->encode($got));
+    }
+    return $equal;
+  } $got, $expected, $test_name;
 }
 
 1;
