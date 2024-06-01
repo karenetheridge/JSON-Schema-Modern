@@ -109,7 +109,9 @@ subtest 'ambiguous types' => sub {
 
     my $number = 5;
     ()= sprintf('%s', $number);
+
     is(get_type($number), 'ambiguous type', 'number that is later treated as a string results in an ambiguous type');
+    ok(!is_type($_, $number), "ambiguous types are not accepted by is_type('$_')") foreach qw(integer number string);
   }
 };
 
