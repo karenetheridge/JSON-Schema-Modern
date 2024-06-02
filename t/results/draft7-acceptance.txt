@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.024
-with commit:                 dd9599a5238abe76d13fab37857265a3be3a01ea (23.2.0-72-gdd9599a)
+generated with:              Test::JSON::Schema::Acceptance 1.025
+with commit:                 9fc880bfb6d8ccd093bc82431f17d13681ffae8e (23.2.0-117-g9fc880b)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft7
 optional tests included:     yes
