@@ -126,7 +126,9 @@ sub is_bignum ($value) {
 
 # compares two arbitrary data payloads for equality, as per
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.2
-# if provided with a state hashref with a 'path' key, any differences are recorded within
+# $state hashref supports the following fields:
+# - path: any differences are recorded within
+# - stringy_numbers: strings will be typed as numbers if looks_like_number() is true
 sub is_equal ($x, $y, $state = {}) {
   $state->{path} //= '';
 
@@ -174,6 +176,9 @@ sub is_equal ($x, $y, $state = {}) {
 
 # checks array elements for uniqueness. short-circuits on first pair of matching elements
 # if second arrayref is provided, it is populated with the indices of identical items
+# $state hashref supports the following fields:
+# - scalarref_booleans: treats \0 and \1 as boolean values
+# - stringy_numbers: strings will be typed as numbers if looks_like_number() is true
 sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
   my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
   foreach my $idx0 (0 .. $array->$#*-1) {
