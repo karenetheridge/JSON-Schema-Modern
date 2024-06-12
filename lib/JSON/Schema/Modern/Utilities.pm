@@ -53,6 +53,7 @@ use JSON::PP ();
 use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 # supports the six core types, plus integer (which is also a number)
+# we do NOT check stringy_numbers here -- you must do that in the caller
 sub is_type ($type, $value) {
   if ($type eq 'null') {
     return !(defined $value);
@@ -94,6 +95,7 @@ sub is_type ($type, $value) {
 }
 
 # returns one of the six core types, plus integer
+# we do NOT check stringy_numbers here -- you must do that in the caller
 sub get_type ($value) {
   return 'object' if is_plain_hashref($value);
   return 'boolean' if is_bool($value);
@@ -109,6 +111,7 @@ sub get_type ($value) {
   return int($value) == $value ? 'integer' : 'number'
     if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
 
+  # this might be a PVIV or PVNV
   return 'ambiguous type';
 }
 
@@ -141,9 +144,9 @@ sub is_equal ($x, $y, $state = {}) {
 
   if ($state->{stringy_numbers}) {
     ($x, $types[0]) = (0+$x, int(0+$x) == $x ? 'integer' : 'number')
-      if $types[0] eq 'string' and looks_like_number($x);
+      if ($types[0] eq 'string' or $types[0] eq 'ambiguous type') and looks_like_number($x);
     ($y, $types[1]) = (0+$y, int(0+$y) == $y ? 'integer' : 'number')
-      if $types[1] eq 'string' and looks_like_number($y);
+      if ($types[1] eq 'string' or $types[1] eq 'ambiguous type') and looks_like_number($y);
   }
 
   return 0 if $types[0] ne $types[1];

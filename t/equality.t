@@ -11,6 +11,7 @@ use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal);
+use Scalar::Util 'dualvar';
 use lib 't/lib';
 use Helper;
 
@@ -122,6 +123,10 @@ subtest 'equality, using stringy_numbers' => sub {
     [ '1.10', '1.1000', true ],
     [ 'x', 'x', true ],
     [ 'x', 'y', false ],
+    [ '5', dualvar(5, '5'), true ],
+    [ 5, dualvar(5, '5'), true ],
+    [ '5', dualvar(5, 'five'), false ],
+    [ 5, dualvar(5, 'five'), false ],
   ) {
     my ($x, $y, $expected, $diff_path) = @$test;
     my @types = map get_type($_), $x, $y;
@@ -130,8 +135,17 @@ subtest 'equality, using stringy_numbers' => sub {
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
 
-    ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
-    ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
+    is(get_type($x), $types[0], 'type of arg 0 was not mutated while making equality check (get_type returns '.$types[0].')');
+    is(get_type($y), $types[1], 'type of arg 1 was not mutated while making equality check (get_type returns '.$types[1].')');
+
+    ok(
+      is_type($types[0], $x),
+      "type of arg 0 was not mutated while making equality check (is_type('$types[0]') returns true)",
+    ) if $types[0] ne 'ambiguous type';
+    ok(
+      is_type($types[1], $y),
+      "type of arg 1 was not mutated while making equality check (is_type('$types[1]') returns true)",
+    ) if $types[1] ne 'ambiguous type';
 
     note '';
   }
