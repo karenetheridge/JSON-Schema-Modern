@@ -116,8 +116,12 @@ sub get_type ($value) {
 }
 
 # lifted from JSON::MaybeXS
+use constant HAVE_BUILTIN => $] ge '5.036';
+use if HAVE_BUILTIN, experimental => 'builtin';
 sub is_bool ($value) {
-  Scalar::Util::blessed($value)
+  HAVE_BUILTIN and builtin::is_bool($value)
+  or
+  !!Scalar::Util::blessed($value)
     and ($value->isa('JSON::PP::Boolean')
       or $value->isa('Cpanel::JSON::XS::Boolean')
       or $value->isa('JSON::XS::Boolean'));
