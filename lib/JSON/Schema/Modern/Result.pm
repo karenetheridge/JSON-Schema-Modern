@@ -310,20 +310,20 @@ One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>, C
 =for :list
 * C<flag> returns just the result of the evaluation: either C<{"valid": true}> or C<{"valid": false}>.
 * C<basic> adds the list of C<errors> or C<annotations> to the boolean evaluation result.
-C<instance_location> and C<keyword_location> are always included, as JSON pointers, describing the
-path to the evaluation location; C<absolute_keyword_location> is added (as a resolved URI) whenever
-it is known and different from C<keyword_location>.
+  C<instance_location> and C<keyword_location> are always included, as JSON pointers, describing the
+  path to the evaluation location; C<absolute_keyword_location> is added (as a resolved URI) whenever
+  it is known and different from C<keyword_location>.
 * C<strict_basic> is like C<basic> but follows the draft-2019-09 specification precisely, including
-replicating an error fixed in the next draft, in that C<instance_location> and C<keyword_location>
-values are provided as fragment-only URI references rather than JSON pointers.
+  replicating an error fixed in the next draft, in that C<instance_location> and C<keyword_location>
+  values are provided as fragment-only URI references rather than JSON pointers.
 * C<terse> is not described in any specification; it is like C<basic>, but omits some redundant
-errors (for example the one for the C<allOf> keyword that is added when any of the subschemas under
-C<allOf> failed evaluation).
+  errors (for example the one for the C<allOf> keyword that is added when any of the subschemas under
+  C<allOf> failed evaluation).
 * C<data_only> returns a string, not a data structure: it contains a list of errors identified only
-by their C<instance_location> and error message (or C<keyword_location>, when the error occurred
-while loading the schema itself). This format is suitable for generating errors when the schema is
-not published, or for describing errors with the schema itself. This is not an official
-specification format and may change slightly over time, as it is tested in production environments.
+  by their C<instance_location> and error message (or C<keyword_location>, when the error occurred
+  while loading the schema itself). This format is suitable for generating errors when the schema is
+  not published, or for describing errors with the schema itself. This is not an official
+  specification format and may change slightly over time, as it is tested in production environments.
 
 =head2 formatted_annotations
 
