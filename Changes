@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.585     2024-06-19 04:03:36Z
           - make use of core bool functionality where it exists (perl 5.36+)
 
 0.584     2024-05-18 21:06:35Z
