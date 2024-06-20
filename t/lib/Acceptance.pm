@@ -67,9 +67,14 @@ sub acceptance_tests (%options) {
     validate_data => sub ($schema, $instance_data) {
       my $result = $js->evaluate($instance_data, $schema);
       my $result_short = $ENV{NO_SHORT_CIRCUIT} || $js_short_circuit->evaluate($instance_data, $schema);
+      die 'result is not a JSON::Schema::Modern::Result object'
+        if not $result->isa('JSON::Schema::Modern::Result');
 
       note 'result: ', $result->dump;
+
       if (not $ENV{NO_SHORT_CIRCUIT}) {
+        die 'short-circuited result is not a JSON::Schema::Modern::Result object'
+          if not $result_short->isa('JSON::Schema::Modern::Result');
         note 'short-circuited result: ', $result_short->dump;
         die 'results inconsistent between short_circuit = false and true'
           if ($result xor $result_short);
