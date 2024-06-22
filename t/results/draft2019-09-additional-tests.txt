@@ -1,4 +1,4 @@
-generated with:              Test::JSON::Schema::Acceptance 1.025
+generated with:              Test::JSON::Schema::Acceptance 1.026
 specification version:       draft2019-09
 using custom test directory: t/additional-tests-draft2019-09
 optional tests included:     yes

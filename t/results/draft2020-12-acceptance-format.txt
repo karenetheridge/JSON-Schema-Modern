@@ -1,4 +1,4 @@
-generated with:              Test::JSON::Schema::Acceptance 1.025
+generated with:              Test::JSON::Schema::Acceptance 1.026
 with commit:                 9fc880bfb6d8ccd093bc82431f17d13681ffae8e (23.2.0-117-g9fc880b)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft2020-12
