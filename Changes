@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - simplification of calculation for "multipleOf" keyword
 
 0.585     2024-06-19 04:03:36Z
           - make use of core bool functionality where it exists (perl 5.36+)
