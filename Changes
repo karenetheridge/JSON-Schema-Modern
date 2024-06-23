@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.586     2024-06-23 18:46:01Z
           - simplification of calculation for "multipleOf" keyword
 
 0.585     2024-06-19 04:03:36Z
