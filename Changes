@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.587     2024-06-26 22:55:11Z
           - fix multipleOf test that fails on some peculiar architectures
           - document the use of Sereal for caching large evaluator objects
 
