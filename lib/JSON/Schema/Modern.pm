@@ -1593,10 +1593,11 @@ will need to be manually added after thawing.
 
   sub get_evaluator (...) {
     my $serialized_file = Path::Tiny::path($filename);
+    my $schema_file = Path::Tiny::path($schema_filename);
     my $js;
-    if (some condition that checks if the schemas have changed...) {
+    if ($serialized_file->stat->mtime < $schema_file->stat->mtime)) {
       $js = JSON::Schema::Modern->new;
-      $js->add_schema(decode_json(...));  # your application schema
+      $js->add_schema(decode_json($schema_file->slurp_raw));  # your application schema
       my $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
       $serialized_file->spew_raw($frozen);
     }
