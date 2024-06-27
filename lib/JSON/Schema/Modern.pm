@@ -1472,6 +1472,8 @@ or
 
   $js->add_format_validation(no_nines => { type => 'number', sub => sub ($value) { $value =~ m/^[0-8]+$/ });
 
+  $js->add_format_validation(8bits => { type => 'string', sub => sub ($value) { $value =~ m/^[\x00-\xFF]+$/ });
+
 Adds support for a custom format. If not supplied, the data type(s) that this format applies to
 defaults to string; all values of any other type will automatically be deemed to be valid, and will
 not be passed to the subref.
