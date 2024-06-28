@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.588     2024-06-28 17:14:22Z
           - bump required version of Math::BigInt for bdiv, bmod fixes
 
