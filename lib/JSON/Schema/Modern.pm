@@ -1484,6 +1484,9 @@ the data type(s) supported by that format may not be changed.
 Be careful to not mutate the type of the value while checking it -- for example, if it is a string,
 do not apply arithmetic operators to it -- or subsequent type checks on this value may fail.
 
+See L<https://spec.openapis.org/registry/format/> for a registry of known and useful formats; for
+compatibility reasons, avoid defining a format listed here with different semantics.
+
 =head2 add_vocabulary
 
   $js->add_vocabulary('My::Custom::Vocabulary::Class');
