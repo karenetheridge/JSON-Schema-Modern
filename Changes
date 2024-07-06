@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.589     2024-07-06 21:07:44Z
           - skip unpassable tests when ivsize < 8
 
 0.588     2024-06-28 17:14:22Z
