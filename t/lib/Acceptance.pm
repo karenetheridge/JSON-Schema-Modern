@@ -20,17 +20,15 @@ use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::Schema::Modern;
 
-my $note;
-BEGIN {
-  $note = $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? \&diag : \&note;
-  foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
-    $note->($env.': '.($ENV{$env} // ''));
-  }
-  $note->('');
-}
-
 sub acceptance_tests (%options) {
   local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+  my $note = $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? \&diag : \&note;
+  foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
+    $note->($env.': '.($ENV{$env} // '<undef>'));
+  }
+  $note->('');
+
   my $accepter = Test::JSON::Schema::Acceptance->new(
     include_optional => 1,
     verbose => 1,
