@@ -1042,6 +1042,10 @@ sub _fetch_from_uri ($self, $uri_reference) {
   }
 }
 
+# Mojo::JSON::JSON_XS is false when the environment variable $MOJO_NO_JSON_XS is set
+# and also checks if Cpanel::JSON::XS is installed.
+# Mojo::JSON falls back to its own pure-perl encoder/decoder but does not support all the options
+# that we require here.
 use constant _JSON_BACKEND => Mojo::JSON::JSON_XS ? 'Cpanel::JSON::XS' : 'JSON::PP';
 
 # used for internal encoding as well (when caching serialized schemas)
