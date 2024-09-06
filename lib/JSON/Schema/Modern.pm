@@ -1576,16 +1576,22 @@ You can use it thusly:
   my $schema = $js->get($uri);
   my ($schema, $canonical_uri) = $js->get($uri);
 
-Fetches the Perl data structure representing the JSON Schema at the indicated identifier (uri or
+Fetches the Perl data structure represented by the indicated identifier (uri or
 uri-reference). When called in list context, the canonical URI of that location is also returned, as
 a L<Mojo::URL>. Returns C<undef> if the schema with that URI has not been loaded (or cached).
+
+Note that the data so returned may not be a JSON Schema, if the document encapsulating this location
+is a subclass of L<JSON::Schema::Modern::Document> (for example
+L<JSON::Schema::Modern::Document::OpenAPI>, which contains addressable locations of various semantic
+types).
 
 =head2 get_document
 
   my $document = $js->get_document($uri_reference);
 
-Fetches the L<JSON::Schema::Modern::Document> object that contains the provided identifier (uri or
-uri-reference). C<undef> if the schema with that URI has not been loaded (or cached).
+Fetches the L<JSON::Schema::Modern::Document> object (or subclass) that contains the provided
+identifier (uri or uri-reference). C<undef> if the schema with that URI has not been loaded (or
+cached).
 
 =head1 CACHING
 
