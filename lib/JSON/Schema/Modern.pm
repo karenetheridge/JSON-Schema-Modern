@@ -1204,7 +1204,7 @@ specification version.
 
 =head2 output_format
 
-One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>. Defaults to C<basic>.
+One of: C<flag>, C<basic>, C<strict_basic>, C<terse>. Defaults to C<basic>.
 C<strict_basic> can only be used with C<specification_version = draft2019-09>.
 Passed to L<JSON::Schema::Modern::Result/output_format>.
 

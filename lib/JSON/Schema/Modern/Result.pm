@@ -92,7 +92,7 @@ has recommended_response => (
 );
 
 # strict_basic can only be used with draft2019-09.
-use constant OUTPUT_FORMATS => [qw(flag basic strict_basic detailed verbose terse data_only)];
+use constant OUTPUT_FORMATS => [qw(flag basic strict_basic terse data_only)];
 
 has output_format => (
   is => 'rw',
@@ -192,6 +192,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
     return join("\n", uniq(map $_->stringify, $self->errors));
   }
 
+  # TODO: support detailed, verbose ?
   die 'unsupported output format';
 }
 
@@ -305,7 +306,7 @@ Returns an array of L<JSON::Schema::Modern::Annotation> objects.
 
 =for stopwords subschemas
 
-One of: C<flag>, C<basic>, C<strict_basic>, C<detailed>, C<verbose>, C<terse>, C<data_only>. Defaults to C<basic>.
+One of: C<flag>, C<basic>, C<strict_basic>, C<terse>, C<data_only>. Defaults to C<basic>.
 
 =for :list
 * C<flag> returns just the result of the evaluation: either C<{"valid": true}> or C<{"valid": false}>.

@@ -25,7 +25,7 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['help|usage|?|h', 'print usage information and exit', { shortcircuit => 1 } ],
   [],
   ['specification_version|version=s', 'which version of the JSON Schema specification to use'],
-  ['output_format=s', 'output format (flag, basic, detailed, verbose, terse)'],
+  ['output_format=s', 'output format (flag, basic, terse)'],
   ['short_circuit', 'return early in any execution path as soon as the outcome can be determined'],
   ['max_traversal_depth=i', 'the maximum number of levels deep a schema traversal may go'],
   ['validate_formats', 'treat format as an assertion, not merely an annotation'],
