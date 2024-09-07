@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - "strict" mode is now recognized by validate_schema(), to report on
+            any unrecognized keywords used in the schema being validated
 
 0.589     2024-07-06 21:07:44Z
           - skip unpassable tests when ivsize < 8

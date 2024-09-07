@@ -20,18 +20,19 @@ my $schema = {
   type => 'object',
   properties => {
     foo => {
-      bloop => 'hi',
-      barf => 'no',
+      title => 'bloop', # produces an annotation for 'title' with value 'bloop'
+      bloop => 'hi',    # unknown keyword
+      barf => 'no',     # unknown keyword
     },
   },
 };
 
-my $document = $js->add_schema('my_loose_schema' => $schema);
+my $document = $js->add_schema($schema);
 
 cmp_result(
   $js->evaluate({ foo => 1 }, 'my_loose_schema')->TO_JSON,
   { valid => true },
-  'by default, unknown keywords are allowed',
+  'by default, unknown keywords are allowed in evaluate()',
 );
 
 cmp_result(
@@ -49,6 +50,35 @@ cmp_result(
   },
   'strict mode disallows unknown keywords during evaluation via a config override',
 );
+
+cmp_result(
+  $js->validate_schema($schema)->TO_JSON,
+  { valid => true },
+  'by default, unknown keywords are allowed in validate_schema()',
+);
+
+cmp_result(
+  $js->validate_schema($schema, { strict => 1 })->TO_JSON,
+  my $schema_result = {
+    valid => false,
+    errors => [
+      {
+        instanceLocation => '/properties/foo/barf',
+        keywordLocation => '',
+        absoluteKeywordLocation => 'https://json-schema.org/draft/2020-12/schema',
+        error => 'unknown keyword found in schema: barf',
+      },
+      {
+        instanceLocation => '/properties/foo/bloop',
+        keywordLocation => '',
+        absoluteKeywordLocation => 'https://json-schema.org/draft/2020-12/schema',
+        error => 'unknown keyword found in schema: bloop',
+      },
+    ],
+  },
+  'strict mode disallows unknown keywords in validate_schema() via a config override',
+);
+
 
 $js = JSON::Schema::Modern->new(strict => 1);
 $js->add_schema($document);
@@ -69,6 +99,12 @@ cmp_result(
   'strict mode disallows unknown keywords during evaluation, even if the document was already traversed',
 );
 
+cmp_result(
+  $js->validate_schema($schema)->TO_JSON,
+  $schema_result,
+  'strict mode disallows unknown keywords in the schema data passed to validate_schema()',
+);
+
 delete $schema->{'$id'};
 cmp_result(
   $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
@@ -83,6 +119,35 @@ cmp_result(
     ],
   },
   'strict mode disallows unknown keywords during traverse',
+);
+
+my $lax_metaschema = {
+  '$id' => 'my_lax_metaschema',
+  '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+  '$dynamicAnchor' => 'meta',
+  '$ref' => 'https://json-schema.org/draft/2020-12/schema',
+  properties => {
+    bloop => true,    # bloop is now a recognized property
+  },
+};
+
+$js->add_schema($lax_metaschema);
+$schema->{'$schema'} = 'my_lax_metaschema';
+
+cmp_result(
+  $js->validate_schema($schema)->TO_JSON,
+  {
+    valid => false,
+    errors => [
+      {
+        instanceLocation => '/properties/foo/barf',
+        keywordLocation => '',
+        absoluteKeywordLocation => 'my_lax_metaschema',
+        error => 'unknown keyword found in schema: barf',
+      },
+    ],
+  },
+  'strict mode only detected one property this time - bloop is evaluated',
 );
 
 done_testing;

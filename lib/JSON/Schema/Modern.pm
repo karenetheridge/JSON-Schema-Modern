@@ -35,7 +35,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -378,7 +378,11 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict)),
     };
 
-    # we're going to set collect_annotations during evaluation when we see an unevaluated* keyword,
+    # this hash will be added to at each level of schema evaluation
+    $state->{seen_data_properties} = {} if $config_override->{_strict_schema_data};
+
+    # we're going to set collect_annotations during evaluation when we see an unevaluated* keyword
+    # (or for object data when the _strict_schema_data configuration is set),
     # but after we pass to a new data scope we'll clear it again.. unless we've got the config set
     # globally for the entire evaluation, so we store that value in a high bit.
     $state->{collect_annotations} = ($state->{collect_annotations}//0) << 8;
@@ -395,6 +399,15 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     }
     else {
       $valid = E({ %$state, exception => 1 }, 'EXCEPTION: '.$e);
+    }
+  }
+
+  if ($state->{seen_data_properties}) {
+    my @unevaluated_properties = grep !$state->{seen_data_properties}{$_}, keys $state->{seen_data_properties}->%*;
+    $valid &&= !@unevaluated_properties;
+    foreach my $property (sort @unevaluated_properties) {
+      ()= E({ %$state, data_path => $property }, 'unknown keyword found in schema: %s',
+        $property =~ m{/([^/]+)$});
     }
   }
 
@@ -417,7 +430,8 @@ sub validate_schema ($self, $schema, $config_override = {}) {
   my $metaschema_uri = is_plain_hashref($schema) && $schema->{'$schema'} ? $schema->{'$schema'}
     : $self->METASCHEMA_URIS->{$self->specification_version // $self->SPECIFICATION_VERSION_DEFAULT};
 
-  return $self->evaluate($schema, $metaschema_uri, $config_override);
+  return $self->evaluate($schema, $metaschema_uri,
+    { %$config_override, $self->strict || $config_override->{strict} ? (_strict_schema_data => 1) : () });
 }
 
 sub get ($self, $uri_reference) {
@@ -606,7 +620,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   # in order to collect annotations from applicator keywords only when needed, we twiddle the low
   # bit if we see a local unevaluated* keyword, and clear it again as we move on to a new data path.
-  $state->{collect_annotations} |= 0+(exists $schema->{unevaluatedItems} || exists $schema->{unevaluatedProperties});
+  # We also set it when _strict_schema_data is set, but only for object data instances.
+  $state->{collect_annotations} |=
+    0+(exists $schema->{unevaluatedItems} || exists $schema->{unevaluatedProperties}
+      || !!$state->{seen_data_properties} && (my $is_object_data = is_plain_hashref($data)));
 
   # in order to collect annotations for unevaluated* keywords, we sometimes need to ignore the
   # suggestion to short_circuit evaluation at this scope (but lower scopes are still fine)
@@ -667,6 +684,22 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   if ($state->{strict} and keys %unknown_keywords) {
     abort($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
       join(', ', sort keys %unknown_keywords));
+  }
+
+  # Note: we can remove all of this entirely and just rely on strict mode when we (eventually!) remove
+  # the traverse phase and replace with evaluate-against-metaschema.
+  if ($state->{seen_data_properties} and $is_object_data) {
+    # record the locations of all local properties
+    $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 0 foreach keys %$data;
+
+    my @evaluated_properties = map {
+      my $keyword = $_->{keyword};
+      (grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties))
+        ? $_->{annotation}->@* : ();
+    } local_annotations($state);
+
+    # tick off properties that were recognized by this subschema
+    $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 1 foreach @evaluated_properties;
   }
 
   if ($valid and $state->{collect_annotations} and $state->{spec_version} !~ qr/^draft(7|2019-09)$/) {
