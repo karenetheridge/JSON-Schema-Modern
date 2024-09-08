@@ -404,9 +404,8 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
   if ($state->{seen_data_properties}) {
     my @unevaluated_properties = grep !$state->{seen_data_properties}{$_}, keys $state->{seen_data_properties}->%*;
-    $valid &&= !@unevaluated_properties;
     foreach my $property (sort @unevaluated_properties) {
-      ()= E({ %$state, data_path => $property }, 'unknown keyword found in schema: %s',
+      $valid = E({ %$state, data_path => $property }, 'unknown keyword found in schema: %s',
         $property =~ m{/([^/]+)$});
     }
   }
