@@ -348,6 +348,21 @@ checked that are not caught by document creation.
 
 Returns a data structure suitable for serialization. See L</schema>.
 
+=head1 SUBCLASSING
+
+=for stopwords OpenAPI referenceable
+
+This class can be subclassed to describe documents of other types, which follow the same basic model
+(has a document-level identifier and may contain internal referenceable identifiers). The overall
+document itself may not be a JSON Schema, but it may contain JSON Schemas internally. Referenceable
+entities may or may not be JSON Schemas. As long as the C<traverse> method is implemented and the
+C<$state> object is respected, any other functionality may be contained by this subclass.
+
+To date, there is one subclass of JSON::Schema::Modern::Document:
+L<JSON::Schema::Modern::Document::OpenAPI>, which contains entities of type C<schema> as well as
+others (e.g. C<request-body>, C<response>, C<path-item>, etc). An object of this class represents
+one OpenAPI document, used by L<OpenAPI::Modern> to specify application APIs.
+
 =head1 SEE ALSO
 
 =for :list
