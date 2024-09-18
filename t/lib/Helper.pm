@@ -45,7 +45,10 @@ sub cmp_result ($got, $expected, $test_name) {
     }
     else {
       $ctx->fail($test_name);
-      my $method = $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
+      my $method =
+        # be less noisy for expected failures
+        (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
+          : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
       $ctx->$method(Test::Deep::deep_diag($stack));
       $ctx->$method("got result:\n".$encoder->encode($got));
     }
