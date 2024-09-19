@@ -17,7 +17,6 @@ use Getopt::Long::Descriptive;
 use Path::Tiny;
 use Safe::Isa;
 use Feature::Compat::Try;
-use Ref::Util 'is_plain_hashref';
 use JSON::Schema::Modern;
 
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
