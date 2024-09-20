@@ -155,12 +155,7 @@ sub add_schema {
     : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
 
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
-
-  if (not @_) {
-    my $schema_info = $self->_fetch_from_uri($uri);
-    return if not $schema_info or not defined wantarray;
-    return $schema_info->{document};
-  }
+  croak 'insufficient arguments' if not @_;
 
   # document BUILD will trigger $self->traverse($schema)
   my $document = $_[0]->$_isa('JSON::Schema::Modern::Document') ? shift
@@ -1495,8 +1490,7 @@ You B<MUST> call C<add_schema> for any external resources that a schema may refe
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
 
-Returns C<undef> if the resource could not be found;
-if there were errors in the document, will die with these errors;
+If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
 
 =head2 add_format_validation

@@ -197,31 +197,6 @@ subtest 'evaluate a uri' => sub {
 
 subtest 'add a uri resource' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
-    $js->add_schema(METASCHEMA),
-    all(
-      isa('JSON::Schema::Modern::Document'),
-      listmethods(
-        resource_index => [
-          (METASCHEMA) => {
-            path => '',
-            canonical_uri => str(METASCHEMA),
-            specification_version => 'draft2019-09',
-            vocabularies => $vocabularies{'draft2019-09'},
-            configs => {},
-          },
-        ],
-        canonical_uri => [ str(METASCHEMA) ],
-      ),
-    ),
-    'added the metaschema by uri',
-  );
-
-  is(
-    $js->add_schema('http://httpbin.org/status/404'),
-    undef,
-    'attempt to add a resource that does not exist',
-  );
 
   cmp_result(
     my $get_metaschema = scalar $js->get(METASCHEMA),
