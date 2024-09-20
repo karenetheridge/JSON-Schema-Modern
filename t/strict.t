@@ -81,10 +81,10 @@ cmp_result(
 
 
 $js = JSON::Schema::Modern->new(strict => 1);
-$js->add_schema($document);
+$js->add_document($document);
 
 cmp_result(
-  $js->evaluate({ foo => 1 }, $document)->TO_JSON,
+  $js->evaluate({ foo => 1 }, $document->canonical_uri)->TO_JSON,
   {
     valid => false,
     errors => [

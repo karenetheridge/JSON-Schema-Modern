@@ -2,6 +2,8 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - new --dump-identifiers option in json-schema-eval executable
+          - the document form of 'add_schema' has been extracted out into
+            'add_document', with the old form deprecated
 
 0.590     2024-09-07 00:48:50Z
           - "strict" mode is now recognized by validate_schema(), to report on

@@ -294,8 +294,9 @@ subtest 'toggle validate_formats after adding schema' => sub {
   );
 
   my $js2 = JSON::Schema::Modern->new(validate_formats => 1);
+  $js2->add_document($document);
   cmp_result(
-    $js2->evaluate('hello', $document)->TO_JSON,
+    $js2->evaluate('hello', $document->canonical_uri)->TO_JSON,
     {
       valid => false,
       errors => [

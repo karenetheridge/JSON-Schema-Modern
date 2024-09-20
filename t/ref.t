@@ -1239,7 +1239,7 @@ subtest 'reference to a non-schema location' => sub {
     schema => [ 'not a json schema' ],
     canonical_uri => 'https://my_non_schema',
   );
-  $js->add_schema($doc);
+  $js->add_document($doc);
 
   $schema = {
     '$id' => '/foo',

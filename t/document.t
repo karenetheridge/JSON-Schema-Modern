@@ -683,7 +683,7 @@ subtest 'custom metaschema_uri' => sub {
     },
   });
 
-  my $doc = $js->add_schema(JSON::Schema::Modern::Document->new(
+  my $doc = $js->add_document(JSON::Schema::Modern::Document->new(
     schema => {
       '$id' => my $id = 'https://my/first/schema/with/custom/metaschema',
       # note: no $schema keyword!

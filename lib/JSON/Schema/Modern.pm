@@ -157,6 +157,9 @@ sub add_schema {
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
   croak 'insufficient arguments' if not @_;
 
+  Carp::carp('use of deprecated form of add_schema with document')
+    if $_[0]->$_isa('JSON::Schema::Modern::Document');
+
   # document BUILD will trigger $self->traverse($schema)
   my $document = $_[0]->$_isa('JSON::Schema::Modern::Document') ? shift
     : JSON::Schema::Modern::Document->new(
@@ -164,6 +167,22 @@ sub add_schema {
       $uri ? (canonical_uri => $uri) : (),
       evaluator => $self,  # used mainly for traversal during document construction
     );
+
+  $self->add_document($uri, $document);
+}
+
+sub add_document {
+  croak 'insufficient arguments' if @_ < 2;
+  my $self = shift;
+
+  # TODO: resolve $uri against $self->base_uri
+  my $uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
+    : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
+
+  croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
+
+  my $document = shift or croak 'insufficient arguments';
+  croak 'wrong document type' if not $document->$_isa('JSON::Schema::Modern::Document');
 
   if ($document->has_errors) {
     my $result = JSON::Schema::Modern::Result->new(
@@ -1478,20 +1497,31 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
 =head2 add_schema
 
   $js->add_schema($uri => $schema);
-  $js->add_schema($uri => $document);
   $js->add_schema($schema);
-  $js->add_schema($document);
 
-Introduces the (unblessed, nested) Perl data structure or L<JSON::Schema::Modern::Document>
-object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
-provided (and if not, C<''> will be used if no other identifier can be found within).
+Introduces the (unblessed, nested) Perl data structure
+representing a JSON Schema to the implementation, registering it under the indicated URI if
+provided, and all identifiers found within the document will be added as well (C<''> will be used if
+no other identifier can be found within).
 
-You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
+You B<MUST> call C<add_schema> or L</add_document> (below) for any external resources that a schema may reference via C<$ref>
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
 
 If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
+
+=head2 add_document
+
+  $js->add_document($uri => $document);
+  $js->add_document($document);
+
+Introduces the L<JSON::Schema::Modern::Document> (or subclass)
+object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
+provided (and all known identifiers within the document will be added as well).
+
+If there were errors in the document, will die with these errors;
+otherwise returns the L<JSON::Schema::Modern::Document> object.
 
 =head2 add_format_validation
 
