@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - new --dump-identifiers option in json-schema-eval executable
 
 0.590     2024-09-07 00:48:50Z
           - "strict" mode is now recognized by validate_schema(), to report on

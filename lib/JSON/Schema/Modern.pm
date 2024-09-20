@@ -739,6 +739,7 @@ sub _add_resources_unsafe {
 }
 sub _resource_index { $_[0]->{_resource_index}->%* }
 sub _canonical_resources { values(($_[0]->{_resource_index}//{})->%*) }
+sub _resource_pairs { pairs(($_[0]->{_resource_index}//{})->%*) }
 
 around _add_resources => sub {
   my ($orig, $self) = (shift, shift);
