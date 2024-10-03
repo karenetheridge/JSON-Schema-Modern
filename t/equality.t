@@ -18,33 +18,38 @@ use Helper;
 subtest 'equality, using inflated data' => sub {
   foreach my $test (
     [ undef, undef, true ],
-    [ undef, false, false ],
-    [ undef, true , false ],
-    [ undef, 1, false ],
-    [ undef, '1', false ],
+    [ undef, false, false, '', 'wrong type: null vs boolean' ],
+    [ undef, true , false, '', 'wrong type: null vs boolean' ],
+    [ undef, 1, false, '', 'wrong type: null vs integer' ],
+    [ undef, '1', false, '', 'wrong type: null vs string' ],
     [ [qw(a b c)], [qw(a b c)], true ],
-    [ [qw(a b c)], [qw(a b)], false ],
-    [ [qw(a b)], [qw(b a)], false, '/0' ],
+    [ [qw(a b c)], [qw(a b)], false, '', 'element count differs: 3 vs 2' ],
+    [ [qw(a b)], [qw(b a)], false, '/0', 'strings not equal' ],
     [ 1, 1, true ],
     [ 1, 1.0, true ],
-    [ 1, '1.0', false ],
-    [ '1.1', 1.1, false ],
-    [ '1', 1, false ],
-    [ '1.1', 1.1, false ],
-    [ [1,2], [2,1], false, '/0' ],
+    [ 1, '1.0', false, '', 'wrong type: integer vs string' ],
+    [ '1.1', 1.1, false, '', 'wrong type: string vs number' ],
+    [ '1', 1, false, '', 'wrong type: string vs integer' ],
+    [ '1.1', 1.1, false, '', 'wrong type: string vs number' ],
+    [ [1,2], [2,1], false, '/0', 'integers not equal' ],
     [ { a => 1, b => 2 }, { b => 2, a => 1 }, true ],
     [ { a => 1 }, { a => 1.0 }, true ],
     [ [qw(école ಠ_ಠ)], ["\x{e9}cole", "\x{0ca0}_\x{0ca0}"], true ],
-    [ { a => 1, b => 2 }, { a => 1, b => 3 }, false, '/b' ],
+    [ { a => 1, b => 2 }, { a => 1, b => 3 }, false, '/b', 'integers not equal' ],
     [ { a => { b => 1, c => 2 }, d => { e => 3, f => 4 } },
-      { a => { b => 1, c => 2 }, d => { e => 3, f => 5 } }, false, '/d/f' ],
+      { a => { b => 1, c => 2 }, d => { e => 3, f => 5 } }, false, '/d/f', 'integers not equal' ],
+    [ [ { a => 1 } ], [ { a => 1, b => 2 } ], false, '/0', 'property count differs: 1 vs 2' ],
+    [ [ { a => 1 } ], [ { b => 2 } ], false, '/0', 'property names differ starting at position 0 ("a" vs "b")' ],
+    [ { foo => [ [ 0 ] ] }, { foo => [ [ 0, 1 ] ] }, false, '/foo/0', 'element count differs: 1 vs 2' ],
   ) {
-    my ($x, $y, $expected, $diff_path) = @$test;
+    my ($x, $y, $expected, $diff_path, $error) = @$test;
     my @types = map get_type($_), $x, $y;
     my $result = is_equal($x, $y, my $state = {});
 
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
+    is($state->{error}, $error // '', 'error is correct') if not $expected;
+    is($state->{error}, undef, 'error is undefined') if $expected;
 
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');

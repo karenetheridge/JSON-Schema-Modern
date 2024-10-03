@@ -92,7 +92,7 @@ sub _eval_keyword_enum ($class, $data, $schema, $state) {
   return 1 if any { is_equal($data, $_, $s[$idx++] = {%s}) } $schema->{enum}->@*;
   return E($state, 'value does not match'
     .(!(grep $_->{path}, @s) ? ''
-      : ' (differences start '.join(', ', map 'from item #'.$_.' at "'.$s[$_]->{path}.'"', 0..$#s).')'));
+      : ' ('.join('; ', map "from enum $_ at '$s[$_]->{path}': $s[$_]->{error}", 0..$#s).')'));
 }
 
 sub _traverse_keyword_const ($class, $schema, $state) { 1 }
@@ -100,8 +100,7 @@ sub _traverse_keyword_const ($class, $schema, $state) { 1 }
 sub _eval_keyword_const ($class, $data, $schema, $state) {
   my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
   return 1 if is_equal($data, $schema->{const}, \%s);
-  return E($state, 'value does not match'
-    .($s{path} ? ' (differences start at "'.$s{path}.'")' : ''));
+  return E($state, 'value does not match'.($s{path} ? " (at '$s{path}': $s{error})" : ''));
 }
 
 sub _traverse_keyword_multipleOf ($class, $schema, $state) {

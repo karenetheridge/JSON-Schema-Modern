@@ -533,12 +533,12 @@ subtest 'const and enum' => sub {
         {
           instanceLocation => '/foo',
           keywordLocation => '/properties/foo/allOf/0/const',
-          error => 'value does not match (differences start at "/a/b/c/d")',
+          error => 'value does not match (at \'/a/b/c/d\': integers not equal)',
         },
         {
           instanceLocation => '/foo',
           keywordLocation => '/properties/foo/allOf/1/enum',
-          error => 'value does not match (differences start from item #0 at "", from item #1 at "", from item #2 at "/a/b/c/d")',
+          error => 'value does not match (from enum 0 at \'\': wrong type: object vs integer; from enum 1 at \'\': wrong type: object vs string; from enum 2 at \'/a/b/c/d\': integers not equal)',
         },
         {
           instanceLocation => '/foo',
