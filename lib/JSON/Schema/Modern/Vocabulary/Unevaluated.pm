@@ -22,11 +22,11 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary {
+sub vocabulary ($class) {
   'https://json-schema.org/draft/2020-12/vocab/unevaluated' => 'draft2020-12';
 }
 
-sub evaluation_order { 7 }
+sub evaluation_order ($class) { 7 }
 
 # This vocabulary should be evaluated after the Applicator vocabulary.
 sub keywords ($class, $spec_version) {

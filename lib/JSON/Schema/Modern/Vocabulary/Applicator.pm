@@ -25,12 +25,12 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary {
+sub vocabulary ($class) {
   'https://json-schema.org/draft/2019-09/vocab/applicator' => 'draft2019-09',
   'https://json-schema.org/draft/2020-12/vocab/applicator' => 'draft2020-12';
 }
 
-sub evaluation_order { 3 }
+sub evaluation_order ($class) { 3 }
 
 # the keyword order is arbitrary, except:
 # - if must be evaluated before then, else

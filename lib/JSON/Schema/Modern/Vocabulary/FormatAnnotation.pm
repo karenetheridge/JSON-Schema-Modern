@@ -25,14 +25,14 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary {
+sub vocabulary ($class) {
   'https://json-schema.org/draft/2019-09/vocab/format' => 'draft2019-09',
   'https://json-schema.org/draft/2020-12/vocab/format-annotation' => 'draft2020-12';
 }
 
-sub evaluation_order { 2 }
+sub evaluation_order ($class) { 2 }
 
-sub keywords {
+sub keywords ($class, $spec_version) {
   qw(format);
 }
 

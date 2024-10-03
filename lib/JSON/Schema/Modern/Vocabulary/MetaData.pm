@@ -21,12 +21,12 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary {
+sub vocabulary ($class) {
   'https://json-schema.org/draft/2019-09/vocab/meta-data' => 'draft2019-09',
   'https://json-schema.org/draft/2020-12/vocab/meta-data' => 'draft2020-12';
 }
 
-sub evaluation_order { 5 }
+sub evaluation_order ($class) { 5 }
 
 sub keywords ($class, $spec_version) {
   return (

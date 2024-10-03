@@ -22,12 +22,12 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary {
+sub vocabulary ($class) {
   'https://json-schema.org/draft/2019-09/vocab/core' => 'draft2019-09',
   'https://json-schema.org/draft/2020-12/vocab/core' => 'draft2020-12';
 }
 
-sub evaluation_order { 0 }
+sub evaluation_order ($class) { 0 }
 
 sub keywords ($class, $spec_version) {
   return (

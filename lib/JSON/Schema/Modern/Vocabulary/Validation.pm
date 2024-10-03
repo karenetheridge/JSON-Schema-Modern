@@ -25,12 +25,12 @@ use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
 
-sub vocabulary {
+sub vocabulary ($class) {
   'https://json-schema.org/draft/2019-09/vocab/validation' => 'draft2019-09',
   'https://json-schema.org/draft/2020-12/vocab/validation' => 'draft2020-12';
 }
 
-sub evaluation_order { 1 }
+sub evaluation_order ($class) { 1 }
 
 sub keywords ($class, $spec_version) {
   return (
@@ -95,7 +95,7 @@ sub _eval_keyword_enum ($class, $data, $schema, $state) {
       : ' (differences start '.join(', ', map 'from item #'.$_.' at "'.$s[$_]->{path}.'"', 0..$#s).')'));
 }
 
-sub _traverse_keyword_const { 1 }
+sub _traverse_keyword_const ($class, $schema, $state) { 1 }
 
 sub _eval_keyword_const ($class, $data, $schema, $state) {
   my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
