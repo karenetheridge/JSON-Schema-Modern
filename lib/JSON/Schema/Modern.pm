@@ -461,9 +461,11 @@ sub get_document ($self, $uri_reference) {
 }
 
 # defined lower down:
-# sub add_vocabulary { ... }
-# sub add_encoding { ... }
-# sub add_media_type { ... }
+# sub add_media_type ($self, $media_type, $sub) { ... }
+# sub get_media_type ($self, $media_type) { ... }
+# sub add_encoding ($self, $encoding, $sub) { ... }
+# sub get_encoding ($self, $encoding) { ... }
+# sub add_vocabulary ($self, $classname) { ... }
 
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
