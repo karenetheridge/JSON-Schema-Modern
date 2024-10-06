@@ -260,6 +260,10 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
 # embedded resources via $id and $anchor keywords within.
 # Returns the internal $state object accumulated during the traversal.
 sub traverse ($self, $schema_reference, $config_override = {}) {
+  my %overrides = %$config_override;
+  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_schema_path)};
+  croak $_.' not supported as a config override in traverse' foreach keys %overrides;
+
   # Note: the starting position is not guaranteed to be at the root of the $document.
   my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
   my $initial_path = $config_override->{traversed_schema_path} // '';
@@ -343,8 +347,10 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     configs => {},
   };
 
-  exists $config_override->{$_} and die $_.' not supported as a config override'
-    foreach qw(output_format specification_version);
+  # note this is not quite the same list as what we use when defining $state below
+  my %overrides = %$config_override;
+  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks initial_schema_uri effective_base_uri data_path traversed_schema_path _strict_schema_data)};
+  croak $_.' not supported as a config override in evaluate' foreach keys %overrides;
 
   my $valid;
   try {
@@ -392,6 +398,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
+        # note: this is a subset of the allowed overrides defined above
       } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict)),
     };
 
