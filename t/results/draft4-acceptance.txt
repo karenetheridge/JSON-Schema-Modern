@@ -1,0 +1,47 @@
+generated with:              Test::JSON::Schema::Acceptance 1.026
+with commit:                 9fc880bfb6d8ccd093bc82431f17d13681ffae8e (23.2.0-117-g9fc880b)
+from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
+specification version:       draft4
+optional tests included:     yes
+skipping directory:          optional/format
+
+filename                                  pass  todo-fail  fail
+---------------------------------------------------------------
+additionalItems.json                        18          0     0
+additionalProperties.json                   16          0     0
+allOf.json                                  27          0     0
+anyOf.json                                  15          0     0
+default.json                                 7          0     0
+definitions.json                             2          0     0
+dependencies.json                           29          0     0
+enum.json                                   45          0     0
+format.json                                 36          0     0
+infinite-loop-detection.json                 2          0     0
+items.json                                  21          0     0
+maxItems.json                                4          0     0
+maxLength.json                               5          0     0
+maxProperties.json                           8          0     0
+maximum.json                                14          0     0
+minItems.json                                4          0     0
+minLength.json                               5          0     0
+minProperties.json                           6          0     0
+minimum.json                                17          0     0
+multipleOf.json                             10          0     0
+not.json                                    20          0     0
+oneOf.json                                  23          0     0
+pattern.json                                 9          0     0
+patternProperties.json                      18          0     0
+properties.json                             24          0     0
+ref.json                                    45          0     0
+refRemote.json                              17          0     0
+required.json                               15          0     0
+type.json                                   79          0     0
+uniqueItems.json                            69          0     0
+optional/bignum.json                         7          2     0
+optional/ecmascript-regex.json              60         14     0
+optional/float-overflow.json                 1          0     0
+optional/id.json                             3          0     0
+optional/non-bmp-regex.json                 12          0     0
+optional/zeroTerminatedFloats.json           1          0     0
+---------------------------------------------------------------
+TOTAL                                      694         16     0

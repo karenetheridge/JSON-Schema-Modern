@@ -15,6 +15,104 @@ my $DUMP = shift;
 
 # regenerate this by running the test file with argument '1'
 use constant KEYWORDS => {
+  # draft4 -> http://json-schema.org/draft-04/schema#
+  'draft4' => {
+    Core => [qw(
+      id
+      $schema
+      $ref
+      definitions
+    )],
+    Validation => [qw(
+      type
+      enum
+      multipleOf
+      maximum
+      exclusiveMaximum
+      minimum
+      exclusiveMinimum
+      maxLength
+      minLength
+      pattern
+      maxItems
+      minItems
+      uniqueItems
+      maxProperties
+      minProperties
+      required
+    )],
+    FormatAnnotation => [qw(
+      format
+    )],
+    Applicator => [qw(
+      allOf
+      anyOf
+      oneOf
+      not
+      dependencies
+      items
+      additionalItems
+      properties
+      patternProperties
+      additionalProperties
+    )],
+    MetaData => [qw(
+      title
+      description
+      default
+    )],
+  },
+  # draft6 -> http://json-schema.org/draft-06/schema#
+  'draft6' => {
+    Core => [qw(
+      $id
+      $schema
+      $ref
+      definitions
+    )],
+    Validation => [qw(
+      type
+      enum
+      const
+      multipleOf
+      maximum
+      exclusiveMaximum
+      minimum
+      exclusiveMinimum
+      maxLength
+      minLength
+      pattern
+      maxItems
+      minItems
+      uniqueItems
+      maxProperties
+      minProperties
+      required
+    )],
+    FormatAnnotation => [qw(
+      format
+    )],
+    Applicator => [qw(
+      allOf
+      anyOf
+      oneOf
+      not
+      dependencies
+      items
+      additionalItems
+      contains
+      properties
+      patternProperties
+      additionalProperties
+      propertyNames
+    )],
+    MetaData => [qw(
+      title
+      description
+      default
+      examples
+    )],
+  },
   # draft7 -> http://json-schema.org/draft-07/schema#
   'draft7' => {
     Core => [qw(

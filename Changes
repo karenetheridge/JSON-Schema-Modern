@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - support added for the draft4, draft6 specifiction versions
 
 0.591     2024-10-06 21:06:15Z
           - new --dump-identifiers option in json-schema-eval executable

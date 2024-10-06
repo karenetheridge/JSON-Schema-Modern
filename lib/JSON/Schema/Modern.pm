@@ -47,7 +47,7 @@ our @CARP_NOT = qw(
 );
 
 use constant SPECIFICATION_VERSION_DEFAULT => 'draft2020-12';
-use constant SPECIFICATION_VERSIONS_SUPPORTED => [qw(draft7 draft2019-09 draft2020-12)];
+use constant SPECIFICATION_VERSIONS_SUPPORTED => [qw(draft4 draft6 draft7 draft2019-09 draft2020-12)];
 
 has specification_version => (
   is => 'ro',
@@ -83,7 +83,7 @@ has validate_formats => (
   isa => Bool,
   lazy => 1,
   # as specified by https://json-schema.org/draft/<version>/schema#/$vocabulary
-  default => sub { ($_[0]->specification_version//SPECIFICATION_VERSION_DEFAULT) eq 'draft7' ? 1 : 0 },
+  default => sub { ($_[0]->specification_version//SPECIFICATION_VERSION_DEFAULT) =~ /^draft[467]$/ ? 1 : 0 },
 );
 
 has validate_content_schemas => (
@@ -135,8 +135,8 @@ around BUILDARGS => sub ($orig, $class, @args) {
     if ($args->{output_format}//'') eq 'strict_basic'
       and ($args->{specification_version}//'') ne 'draft2019-09';
 
-  croak 'collect_annotations cannot be used with specification_version draft7'
-    if $args->{collect_annotations} and ($args->{specification_version}//'') eq 'draft7';
+  croak 'collect_annotations cannot be used with specification_version '.$args->{specification_version}
+    if $args->{collect_annotations} and ($args->{specification_version}//'') =~ /^draft[467]$/;
 
   $args->{format_validations} = +{
     map +($_->[0] => is_plain_hashref($_->[1]) ? $_->[1] : +{ type => 'string', sub => $_->[1] }),
@@ -376,8 +376,8 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       };
     }
 
-    abort($state, 'EXCEPTION: collect_annotations cannot be used with specification_version draft7')
-      if $config_override->{collect_annotations} and $schema_info->{specification_version} eq 'draft7';
+    abort($state, 'EXCEPTION: collect_annotations cannot be used with specification_version '.$schema_info->{specification_version})
+      if $config_override->{collect_annotations} and $schema_info->{specification_version} =~ /^draft[467]$/;
 
     abort($state, 'EXCEPTION: unable to find resource %s', $schema_reference)
       if not $schema_info;
@@ -483,6 +483,11 @@ sub get_document ($self, $uri_reference) {
 
 # current spec version => { keyword => undef, or arrayref of alternatives }
 my %removed_keywords = (
+  'draft4' => {
+  },
+  'draft6' => {
+    id => [ '$id' ],
+  },
   'draft7' => {
     id => [ '$id' ],
   },
@@ -543,7 +548,7 @@ sub _traverse_subschema ($self, $schema, $state) {
     # $schema keyword never happened, so now we're back to draft2020-12 again, and...?!
     # The only winning move is not to play.
     return E($state, '$schema and $ref cannot be used together in older drafts')
-      if exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
+      if exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
   }
 
   ALL_KEYWORDS:
@@ -562,7 +567,7 @@ sub _traverse_subschema ($self, $schema, $state) {
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
-      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
 
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
@@ -673,7 +678,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
-      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} eq 'draft7';
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
 
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
@@ -854,9 +859,12 @@ has _metaschema_vocabulary_classes => (
       qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated);
     +{
       'https://json-schema.org/draft/2020-12/schema' => [ 'draft2020-12', [ @modules ] ],
-      do { pop @modules; () },
-      'https://json-schema.org/draft/2019-09/schema' => [ 'draft2019-09', \@modules ],
-      'http://json-schema.org/draft-07/schema' => [ 'draft7', \@modules ],
+      do { pop @modules; () },  # remove Unevaluated
+      'https://json-schema.org/draft/2019-09/schema' => [ 'draft2019-09', [ @modules ] ],
+      'http://json-schema.org/draft-07/schema' => [ 'draft7', [ @modules ] ],
+      do { splice @modules, 4, 1; () }, # remove Content
+      'http://json-schema.org/draft-06/schema' => [ 'draft6', \@modules ],
+      'http://json-schema.org/draft-04/schema' => [ 'draft4', \@modules ],
     },
   },
 );
@@ -990,6 +998,8 @@ use constant METASCHEMA_URIS => {
   'draft2020-12' => 'https://json-schema.org/draft/2020-12/schema',
   'draft2019-09' => 'https://json-schema.org/draft/2019-09/schema',
   'draft7' => 'http://json-schema.org/draft-07/schema#',
+  'draft6' => 'http://json-schema.org/draft-06/schema#',
+  'draft4' => 'http://json-schema.org/draft-04/schema#',
 };
 
 use constant CACHED_METASCHEMAS => {
@@ -1015,6 +1025,8 @@ use constant CACHED_METASCHEMAS => {
 
   # trailing # is omitted because we always cache documents by its canonical (fragmentless) URI
   'http://json-schema.org/draft-07/schema' => 'draft7/schema.json',
+  'http://json-schema.org/draft-06/schema' => 'draft6/schema.json',
+  'http://json-schema.org/draft-04/schema' => 'draft4/schema.json',
 };
 
 # returns the same as _get_resource
@@ -1259,6 +1271,10 @@ May be one of:
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>
 * L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>,
   corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
+* L<C<draft6> or C<4>|https://json-schema.org/specification-links.html#draft-6>,
+  corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
+* L<C<draft4> or C<4>|https://json-schema.org/specification-links.html#draft-4>,
+  corresponding to metaschema C<http://json-schema.org/draft-04/schema#>
 
 Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
 specification version.
@@ -1288,7 +1304,7 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 =head2 validate_formats
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to true when specification_version is draft7, and false for all other versions, but this may change in the future.
+to true when specification_version is draft4, draft6 or draft7, and false for all other versions, but this may change in the future.
 
 Note that the use of a format that does not have a defined handler will B<not> be interpreted as an
 error in this mode; instead, the undefined format will simply be ignored. If you instead want this
@@ -1321,7 +1337,7 @@ See L</add_media_type> and L</add_encoding> for adding additional type support.
 
 =for stopwords shhh
 
-Technically only draft7 allows this and drafts 2019-09 and 2020-12 prohibit ever returning the
+Technically only draft4, draft6 and draft7 allow this and drafts 2019-09 and 2020-12 prohibit ever returning the
 subschema evaluation results together with their parent schema's results, so shhh. I'm trying to get this
 fixed for the next draft.
 
@@ -1329,7 +1345,7 @@ fixed for the next draft.
 
 When true, annotations are collected from keywords that produce them, when validation succeeds.
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
-Not operational when L</specification_version> is C<draft7>.
+Not operational when L</specification_version> is C<draft4>, C<draft6> or C<draft7>.
 
 Defaults to false.
 
@@ -1755,8 +1771,9 @@ validation will always succeed):
 
 =head2 Specification Compliance
 
-This implementation is now fully specification-compliant (for versions draft7, draft2019-09,
-draft2020-12), but until version 1.000 is released, it is
+This implementation is now fully specification-compliant (for versions
+draft4, draft6, draft7, draft2019-09, draft2020-12),
+but until version 1.000 is released, it is
 still deemed to be missing some optional but quite useful features, such as:
 
 =for stopwords Mojolicious
@@ -1797,6 +1814,8 @@ which is closed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 * L<https://json-schema.org/draft/2020-12/release-notes.html>
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
 * L<https://json-schema.org/draft-07/json-schema-release-notes.html>
+* L<https://json-schema.org/draft-06#draft-06-release-notes>
+* L<https://json-schema.org/draft-04/draft-zyp-json-schema-04>
 * L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
 * L<OpenAPI::Modern>: a parser and evaluator for OpenAPI v3.1 documents
 * L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality

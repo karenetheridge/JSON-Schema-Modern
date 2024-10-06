@@ -34,13 +34,13 @@ sub evaluation_order ($class) { 1 }
 
 sub keywords ($class, $spec_version) {
   return (
-    qw(type enum const
-      multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
-      maxLength minLength pattern
-      maxItems minItems uniqueItems),
-    $spec_version ne 'draft7' ? qw(maxContains minContains) : (),
+    qw(type enum),
+    $spec_version ne 'draft4' ? 'const' : (),
+    qw(multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
+      maxLength minLength pattern maxItems minItems uniqueItems),
+    $spec_version !~ /^draft[467]$/ ? qw(maxContains minContains) : (),
     qw(maxProperties minProperties required),
-    $spec_version ne 'draft7' ? 'dependentRequired' : (),
+    $spec_version !~ /^draft[467]$/ ? 'dependentRequired' : (),
   );
 }
 
@@ -62,7 +62,7 @@ sub _traverse_keyword_type ($class, $schema, $state) {
 }
 
 sub _eval_keyword_type ($class, $data, $schema, $state) {
-  my $type = get_type($data);
+  my $type = get_type($data, $state->{spec_version} eq 'draft4' ? { legacy_ints => 1 } : ());
   if (is_plain_arrayref($schema->{type})) {
     return 1 if any {
       $type eq $_ or ($_ eq 'number' and $type eq 'integer')
@@ -136,15 +136,33 @@ sub _traverse_keyword_maximum { goto \&_assert_number }
 sub _eval_keyword_maximum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
-  return 1 if 0+$data <= $schema->{maximum};
-  return E($state, 'value is greater than %s', sprintf_num($schema->{maximum}));
+
+  if ($state->{spec_version} eq 'draft4' and exists $schema->{exclusiveMaximum} and $schema->{exclusiveMaximum}) {
+    return 1 if 0+$data < $schema->{maximum};
+    return E($state, 'value is greater than or equal to %s', sprintf_num($schema->{maximum}));
+  }
+  else {
+    return 1 if 0+$data <= $schema->{maximum};
+    return E($state, 'value is greater than %s', sprintf_num($schema->{maximum}));
+  }
 }
 
-sub _traverse_keyword_exclusiveMaximum { goto \&_assert_number }
+sub _traverse_keyword_exclusiveMaximum ($class, $schema, $state) {
+  return _assert_number($class, $schema, $state) if $state->{spec_version} ne 'draft4';
+
+  return if not assert_keyword_type($state, $schema, 'boolean');
+  return E($state, 'use of exclusiveMaximum requires the presence of maximum')
+    if not exists $schema->{maximum};
+  return 1;
+}
 
 sub _eval_keyword_exclusiveMaximum ($class, $data, $schema, $state) {
+  # we do the work in maximum for draft4 so we don't generate multiple errors
+  return 1 if $state->{spec_version} eq 'draft4';
+
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
+
   return 1 if 0+$data < $schema->{exclusiveMaximum};
   return E($state, 'value is greater than or equal to %s', sprintf_num($schema->{exclusiveMaximum}));
 }
@@ -154,15 +172,33 @@ sub _traverse_keyword_minimum { goto \&_assert_number }
 sub _eval_keyword_minimum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
-  return 1 if 0+$data >= $schema->{minimum};
-  return E($state, 'value is less than %s', sprintf_num($schema->{minimum}));
+
+  if ($state->{spec_version} eq 'draft4' and exists $schema->{exclusiveMinimum} and $schema->{exclusiveMinimum}) {
+    return 1 if 0+$data > $schema->{minimum};
+    return E($state, 'value is less than or equal to %s', sprintf_num($schema->{minimum}));
+  }
+  else {
+    return 1 if 0+$data >= $schema->{minimum};
+    return E($state, 'value is less than %s', sprintf_num($schema->{minimum}));
+  }
 }
 
-sub _traverse_keyword_exclusiveMinimum { goto \&_assert_number }
+sub _traverse_keyword_exclusiveMinimum ($class, $schema, $state) {
+  return _assert_number($class, $schema, $state) if $state->{spec_version} ne 'draft4';
+
+  return if not assert_keyword_type($state, $schema, 'boolean');
+  return E($state, 'use of exclusiveMinimum requires the presence of minimum')
+    if not exists $schema->{minimum};
+  return 1;
+}
 
 sub _eval_keyword_exclusiveMinimum ($class, $data, $schema, $state) {
+  # we do the work in minimum for draft4 so we don't generate multiple errors
+  return 1 if $state->{spec_version} eq 'draft4';
+
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
+
   return 1 if 0+$data > $schema->{exclusiveMinimum};
   return E($state, 'value is less than or equal to %s', sprintf_num($schema->{exclusiveMinimum}));
 }
@@ -251,6 +287,7 @@ sub _eval_keyword_minProperties ($class, $data, $schema, $state) {
 
 sub _traverse_keyword_required ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
+  return E($state, '"required" array is empty') if $state->{spec_version} eq 'draft4' and not $schema->{required}->@*;
   return E($state, '"required" element is not a string')
     if any { !is_type('string', $_) } $schema->{required}->@*;
   return E($state, '"required" values are not unique') if not is_elements_unique($schema->{required});
@@ -336,5 +373,9 @@ Support is also provided for
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-6>.
 * the equivalent Draft 7 keywords that correspond to this vocabulary and are formally specified in
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6>.
+* the equivalent Draft 6 keywords that correspond to this vocabulary and are formally specified in
+  L<https://json-schema.org/draft-06/draft-wright-json-schema-validation-01#rfc.section.6>.
+* the equivalent Draft 4 keywords that correspond to this vocabulary and are formally specified in
+  L<https://json-schema.org/draft-04/draft-fge-json-schema-validation-00#rfc.section.5>.
 
 =cut

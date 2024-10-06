@@ -36,7 +36,7 @@ sub acceptance_tests (%options) {
     $options{acceptance}->%*,
     $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR})
       : $ENV{TEST_PREFIXDIR} ? (test_dir => path($ENV{TEST_PREFIXDIR}, 'tests', $options{acceptance}{specification})) : (),
-    supported_specifications => [ qw(draft7 draft2019-09 draft2020-12) ],
+    supported_specifications => [ qw(draft4 draft6 draft7 draft2019-09 draft2020-12) ],
   );
   $accepter = $accepter->new(%$accepter,
       test_dir => $accepter->test_dir->child($options{acceptance}{test_subdir}))
@@ -52,7 +52,8 @@ sub acceptance_tests (%options) {
       # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
       local $SIG{__WARN__} = sub {
         warn @_ if $_[0] !~ /^no-longer-supported "definitions" keyword present/;
-      } if $options{acceptance}{specification} ne 'draft7';
+      } if $options{acceptance}{specification} !~ /^draft[467]$/
+        and Test::JSON::Schema::Acceptance->VERSION < '1.027';
       $js->add_schema($uri => $schema);
       $js_short_circuit->add_schema($uri => $schema) if not $ENV{NO_SHORT_CIRCUIT};
     }

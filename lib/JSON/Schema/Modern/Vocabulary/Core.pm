@@ -31,15 +31,17 @@ sub evaluation_order ($class) { 0 }
 
 sub keywords ($class, $spec_version) {
   return (
-    qw($id $schema),
-    $spec_version ne 'draft7' ? '$anchor' : (),
+    $spec_version eq 'draft4' ? 'id' : '$id',
+    '$schema',
+    $spec_version !~ /^draft[467]$/ ? '$anchor' : (),
     $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
-    $spec_version eq 'draft2020-12' ? '$dynamicAnchor' : (),
+    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? '$dynamicAnchor' : (),
     '$ref',
     $spec_version eq 'draft2019-09' ? '$recursiveRef' : (),
-    $spec_version eq 'draft2020-12' ? '$dynamicRef' : (),
-    $spec_version eq 'draft7' ? 'definitions' : qw($vocabulary $defs),
-    '$comment',
+    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? '$dynamicRef' : (),
+    $spec_version !~ /^draft[467]$/ ? '$vocabulary' : (),
+    $spec_version =~ /^draft[467]$/ ? 'definitions' : '$defs',
+    $spec_version !~ /^draft[46]$/ ? '$comment' : (),
   );
 }
 
@@ -52,23 +54,23 @@ sub _traverse_keyword_id ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string')
     or not assert_uri_reference($state, $schema);
 
-  my $uri = Mojo::URL->new($schema->{'$id'});
+  my $uri = Mojo::URL->new($schema->{$state->{keyword}});
 
-  if ($state->{spec_version} eq 'draft7') {
+  if ($state->{spec_version} =~ /^draft[467]$/) {
     if (length($uri->fragment)) {
-      return E($state, '$id cannot change the base uri at the same time as declaring an anchor')
+      return E($state, '%s cannot change the base uri at the same time as declaring an anchor', $state->{keyword})
         if length($uri->clone->fragment(undef));
 
       return $class->_traverse_keyword_anchor({ %$schema, $state->{keyword} => $uri->fragment }, $state);
     }
   }
   else {
-    return E($state, '$id value "%s" cannot have a non-empty fragment', $schema->{'$id'})
+    return E($state, '%s value "%s" cannot have a non-empty fragment', $state->{keyword}, $schema->{$state->{keyword}})
       if length $uri->fragment;
   }
 
   $uri->fragment(undef);
-  return E($state, '$id cannot be empty') if not length $uri;
+  return E($state, '%s cannot be empty', $state->{keyword}) if not length $uri;
 
   $state->{initial_schema_uri} = $uri->is_abs ? $uri : $uri->to_abs($state->{initial_schema_uri});
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
@@ -120,7 +122,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
 
   return E($state, '%s value "%s" does not match required syntax',
-      $state->{keyword}, ($state->{keyword} eq '$id' ? '#' : '').$schema->{$state->{keyword}})
+      $state->{keyword}, ($state->{keyword} eq '$anchor' ? '' : '#').$schema->{$state->{keyword}})
     if $state->{spec_version} =~ /^draft(?:7|2019-09)$/
         and $schema->{$state->{keyword}} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
       or $state->{spec_version} eq 'draft2020-12'
@@ -297,5 +299,9 @@ Support is also provided for
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-02#section-8>.
 * the equivalent Draft 7 keywords that correspond to this vocabulary and are formally specified in
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-01>.
+* the equivalent Draft 6 keywords that correspond to this vocabulary and are formally specified in
+  L<https://json-schema.org/draft-06/draft-wright-json-schema-01>.
+* the equivalent Draft 4 keywords that correspond to this vocabulary and are formally specified in
+  L<https://json-schema.org/draft-04/draft-zyp-json-schema-04>.
 
 =cut

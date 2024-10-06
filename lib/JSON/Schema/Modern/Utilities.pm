@@ -54,7 +54,8 @@ use constant { true => JSON::PP::true, false => JSON::PP::false };
 
 # supports the six core types, plus integer (which is also a number)
 # we do NOT check stringy_numbers here -- you must do that in the caller
-sub is_type ($type, $value) {
+# pass { legacy_ints => 1 } in $config to use draft4 integer behaviour
+sub is_type ($type, $value, $config = {}) {
   if ($type eq 'null') {
     return !(defined $value);
   }
@@ -77,13 +78,20 @@ sub is_type ($type, $value) {
     }
 
     if ($type eq 'number') {
+      # floats in json will always be parsed into Math::BigFloat
       return is_bignum($value)
         || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
     }
 
     if ($type eq 'integer') {
-      return is_bignum($value) && $value->is_int
-        || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK)) && int($value) == $value;
+      if ($config->{legacy_ints}) {
+        return !is_bignum($value)
+          && !($flags & B::SVf_POK) && ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK);
+      }
+      else {
+        return is_bignum($value) && $value->is_int
+          || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK)) && int($value) == $value;
+      }
     }
   }
 
@@ -96,20 +104,29 @@ sub is_type ($type, $value) {
 
 # returns one of the six core types, plus integer
 # we do NOT check stringy_numbers here -- you must do that in the caller
-sub get_type ($value) {
+# pass { legacy_ints => 1 } in $config to use draft4 integer behaviour
+sub get_type ($value, $config = {}) {
   return 'object' if is_plain_hashref($value);
   return 'boolean' if is_bool($value);
   return 'null' if not defined $value;
   return 'array' if is_plain_arrayref($value);
 
-  return is_bignum($value) ? ($value->is_int ? 'integer' : 'number')
+  # floats in json will always be parsed into Math::BigFloat
+  return is_bignum($value) ? (!$config->{legacy_ints} && $value->is_int ? 'integer' : 'number')
       : (blessed($value) ? '' : 'reference to ').ref($value)
     if is_ref($value);
 
   my $flags = B::svref_2object(\$value)->FLAGS;
   return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
-  return int($value) == $value ? 'integer' : 'number'
-    if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+
+  if ($config->{legacy_ints}) {
+    return 'integer' if !($flags & B::SVf_POK) && ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK);
+    return 'number' if !($flags & B::SVf_POK) && !($flags & B::SVf_IOK) && ($flags & B::SVf_NOK);
+  }
+  else {
+    return int($value) == $value ? 'integer' : 'number'
+      if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+  }
 
   # this might be a PVIV or PVNV
   return 'ambiguous type';

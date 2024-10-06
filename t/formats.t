@@ -416,7 +416,7 @@ subtest 'unimplemented core formats' => sub {
   }
 
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
-    next if $spec_version eq 'draft7' or $spec_version eq 'draft2019-09';
+    next if $spec_version =~ /^draft(?:[467]|2019-09)$/;
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
     $js->add_schema({
       '$id' => 'https://my_metaschema',
@@ -483,7 +483,7 @@ subtest 'unknown custom formats' => sub {
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(
       specification_version => $spec_version,
-      $spec_version ne 'draft7' ? ( collect_annotations => 1 ) : (),
+      $spec_version !~ /^draft[467]$/ ? ( collect_annotations => 1 ) : (),
       validate_formats => 1,
     );
 
@@ -491,7 +491,7 @@ subtest 'unknown custom formats' => sub {
       $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
       {
         valid => true,
-        $spec_version eq 'draft7' ? () : (annotations => [
+        $spec_version =~ /^draft[467]$/ ? () : (annotations => [
           {
             instanceLocation => '',
             keywordLocation => '/format',
@@ -500,12 +500,12 @@ subtest 'unknown custom formats' => sub {
         ]),
       },
       $spec_version . ': for format validation with the Format-Annotation vocabulary, unrecognized format attributes do not cause validation failure'
-        . ($spec_version ne 'draft7' ? '; annotation is still produced' : ''),
+        . ($spec_version !~ /^draft[467]$/ ? '; annotation is still produced' : ''),
     );
   }
 
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
-    next if $spec_version eq 'draft7' or $spec_version eq 'draft2019-09';
+    next if $spec_version =~ /^draft[467]$/ or $spec_version eq 'draft2019-09';
 
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
     $js->add_schema({

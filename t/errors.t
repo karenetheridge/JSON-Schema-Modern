@@ -1527,4 +1527,94 @@ subtest 'recommended_response' => sub {
   );
 };
 
+subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
+  cmp_result(
+    $js->evaluate(4, { maximum => 4, exclusiveMaximum => 4 })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/exclusiveMaximum',
+          error => 'value is greater than or equal to 4',
+        },
+      ],
+    },
+    'later drafts; errors are produced separately from the keywords',
+  );
+
+  cmp_result(
+    $js->evaluate(5, { maximum => 4, exclusiveMaximum => 4 })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/maximum',
+          error => 'value is greater than 4',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/exclusiveMaximum',
+          error => 'value is greater than or equal to 4',
+        },
+      ],
+    },
+    'later drafts; two errors can result',
+  );
+
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft4');
+
+  cmp_result(
+    $js->evaluate(4, { maximum => 4, exclusiveMaximum => true })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/maximum',
+          error => 'value is greater than or equal to 4',
+        },
+      ],
+    },
+    'draft4: one error comes from maximum, but includes the exclusiveMaximum check',
+  );
+
+  cmp_result(
+    $js->evaluate(5, { maximum => 4, exclusiveMaximum => true })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/maximum',
+          error => 'value is greater than or equal to 4',
+        },
+      ],
+    },
+    'draft4: maximum + exclusiveMaximum checks are combined',
+  );
+
+  cmp_result(
+    $js->evaluate(4, { maximum => 4, exclusiveMaximum => false })->TO_JSON,
+    { valid => true },
+    'draft4: exclusive check uses the right boundary',
+  );
+
+  cmp_result(
+    $js->evaluate(5, { maximum => 4, exclusiveMaximum => false })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/maximum',
+          error => 'value is greater than 4',
+        },
+      ],
+    },
+    'draft4: maximum check is correct',
+  );
+};
+
 done_testing;

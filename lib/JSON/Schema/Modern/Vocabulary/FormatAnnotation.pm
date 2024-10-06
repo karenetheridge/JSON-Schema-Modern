@@ -92,6 +92,10 @@ Support is also provided for
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-7>.
 * the equivalent Draft 7 keyword, as formally specified in
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-7>.
+* the equivalent Draft 6 keyword, as formally specified in
+  L<https://json-schema.org/draft-06/draft-wright-json-schema-validation-01#rfc.section.8>.
+* the equivalent Draft 4 keyword, as formally specified in
+  L<https://json-schema.org/draft-04/draft-fge-json-schema-validation-00#rfc.section.7>.
 
 It also implements format assertion behaviour in a relaxed mode, meaning the
 L<JSON::Schema::Modern/validate_formats> option has been enabled, and unknown formats will not

@@ -155,26 +155,30 @@ sub keywords ($class, $spec_version) {
   };
 
   my %formats_by_spec_version = (
-    draft7 => [qw(
+    draft4 => [qw(
       date-time
-      date
-      time
       email
-      idn-email
       hostname
-      idn-hostname
       ipv4
       ipv6
       uri
-      uri-reference
-      iri
-      json-pointer
-      relative-json-pointer
-      regex
-      iri-reference
-      uri-template
     )],
   );
+  $formats_by_spec_version{draft6} = [$formats_by_spec_version{draft4}->@*, qw(
+      uri-reference
+      uri-template
+      json-pointer
+  )];
+  $formats_by_spec_version{draft7} = [$formats_by_spec_version{draft6}->@*, qw(
+      iri
+      iri-reference
+      idn-email
+      idn-hostname
+      relative-json-pointer
+      regex
+      date
+      time
+  )];
   $formats_by_spec_version{'draft2019-09'} =
   $formats_by_spec_version{'draft2020-12'} = [$formats_by_spec_version{draft7}->@*, qw(duration uuid)];
 
@@ -218,8 +222,9 @@ sub _traverse_keyword_format ($class, $schema, $state) {
   return E($state, 'unimplemented format "%s"', $schema->{format})
     if $schema->{format} eq 'uri-template';
 
+  # in the draft2020-12 (and later) FormatAssertion vocabulary, an unrecognized format is an error
   return E($state, 'unimplemented custom format "%s"', $schema->{format})
-    if not grep $state->{spec_version} eq $_, qw(draft7 draft2019-09)
+    if $state->{spec_version} !~ /^draft(?:[467]|2019-09)$/
       and not $class->_get_default_format_validation($state, $schema->{format})
       and not $state->{evaluator}->_get_format_validation($schema->{format});
 
@@ -280,6 +285,10 @@ Support is also provided for
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-7>.
 * the equivalent Draft 7 keyword, as formally specified in
   L<https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-7>.
+* the equivalent Draft 6 keyword, as formally specified in
+  L<https://json-schema.org/draft-06/draft-wright-json-schema-validation-01#rfc.section.8>.
+* the equivalent Draft 4 keyword, as formally specified in
+  L<https://json-schema.org/draft-04/draft-fge-json-schema-validation-00#rfc.section.7>.
 
 Assertion behaviour can be enabled by
 L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1.2/referencing this vocabulary explicitly>
