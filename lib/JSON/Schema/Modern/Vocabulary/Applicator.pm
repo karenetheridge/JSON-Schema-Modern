@@ -45,9 +45,9 @@ sub keywords ($class, $spec_version) {
   return (
     qw(allOf anyOf oneOf not if then else),
     $spec_version eq 'draft7' ? 'dependencies' : 'dependentSchemas',
-    $spec_version !~ qr/^draft(7|2019-09)$/ ? 'prefixItems' : (),
+    $spec_version !~ /^draft(?:7|2019-09)$/ ? 'prefixItems' : (),
     'items',
-    $spec_version =~ qr/^draft(7|2019-09)$/ ? 'additionalItems' : (),
+    $spec_version =~ /^draft(?:7|2019-09)$/ ? 'additionalItems' : (),
     'contains', $spec_version ne 'draft7' ? qw(maxContains minContains) : (),
     qw(properties patternProperties additionalProperties propertyNames),
     $spec_version eq 'draft2019-09' ? qw(unevaluatedItems unevaluatedProperties) : (),

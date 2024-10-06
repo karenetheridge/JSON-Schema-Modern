@@ -727,7 +727,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
     $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 1 foreach @evaluated_properties;
   }
 
-  if ($valid and $state->{collect_annotations} and $state->{spec_version} !~ qr/^draft(7|2019-09)$/) {
+  if ($valid and $state->{collect_annotations} and $state->{spec_version} !~ /^draft(?:7|2019-09)$/) {
     annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
       foreach sort keys %unknown_keywords;
   }
