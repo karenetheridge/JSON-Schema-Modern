@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.590
+version 0.591
 
 =head1 SYNOPSIS
 
@@ -401,21 +401,31 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
 =head2 add_schema
 
   $js->add_schema($uri => $schema);
-  $js->add_schema($uri => $document);
   $js->add_schema($schema);
-  $js->add_schema($document);
 
-Introduces the (unblessed, nested) Perl data structure or L<JSON::Schema::Modern::Document>
-object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
-provided (and if not, C<''> will be used if no other identifier can be found within).
+Introduces the (unblessed, nested) Perl data structure
+representing a JSON Schema to the implementation, registering it under the indicated URI if
+provided, and all identifiers found within the document will be added as well (C<''> will be used if
+no other identifier can be found within).
 
-You B<MUST> call C<add_schema> for any external resources that a schema may reference via C<$ref>
+You B<MUST> call C<add_schema> or L</add_document> (below) for any external resources that a schema may reference via C<$ref>
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
 
-Returns C<undef> if the resource could not be found;
-if there were errors in the document, will die with these errors;
+If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
+
+=head2 add_document
+
+  $js->add_document($uri => $document);
+  $js->add_document($document);
+
+Introduces the L<JSON::Schema::Modern::Document> (or subclass)
+object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
+provided (and all known identifiers within the document will be added as well).
+
+If there were errors in the document, will die with these errors;
+otherwise returns the L<JSON::Schema::Modern::Document> object.
 
 =head2 add_format_validation
 
