@@ -297,7 +297,7 @@ sub E ($state, $error_string, @args) {
 # - _unknown
 # - depth
 sub A ($state, $annotation) {
-  return 1 if not $state->{collect_annotations} or $state->{spec_version} eq 'draft7';
+  return 1 if not $state->{collect_annotations};
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.

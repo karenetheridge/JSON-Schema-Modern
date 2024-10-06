@@ -10,8 +10,34 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Module::Runtime 'use_module';
+use Test::Fatal;
 use lib 't/lib';
 use Helper;
+
+subtest 'draft7' => sub {
+  like(
+    exception {
+      JSON::Schema::Modern->new(collect_annotations => 1, specification_version => 'draft7');
+    },
+    qr/collect_annotations cannot be used with specification_version draft7/,
+    'user cannot enable annotations for draft7',
+  );
+
+  cmp_result(
+    JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(1, true, { collect_annotations => 1 })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => 'EXCEPTION: collect_annotations cannot be used with specification_version draft7',
+        },
+      ],
+    },
+    'user cannot enable annotations for draft7 even as an override',
+  );
+};
 
 my $js = JSON::Schema::Modern->new(collect_annotations => 1, short_circuit => 0);
 
