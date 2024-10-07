@@ -30,7 +30,7 @@ sub evaluation_order ($class) { 7 }
 
 # This vocabulary should be evaluated after the Applicator vocabulary.
 sub keywords ($class, $spec_version) {
-  die 'Unevaluated not implemented in '.$spec_version if $spec_version =~ /^draft[467]$/;
+  die 'Unevaluated not implemented in '.$spec_version if $spec_version =~ /^draft(?:[467]|2019-09)$/;
   qw(unevaluatedItems unevaluatedProperties);
 }
 

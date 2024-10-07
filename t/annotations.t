@@ -52,7 +52,7 @@ my $initial_state = {
   spec_version => 'draft2019-09',
   vocabularies => [
     (map use_module($_),
-      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator Validation MetaData Unevaluated)),
+      map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator Validation MetaData)),
   ],
   evaluator => $js,
 };
