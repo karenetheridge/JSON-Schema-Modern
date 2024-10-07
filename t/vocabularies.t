@@ -22,6 +22,7 @@ use constant KEYWORDS => {
       $schema
       $ref
       definitions
+      $comment
     )],
     Validation => [qw(
       type
@@ -85,8 +86,8 @@ use constant KEYWORDS => {
       $ref
       $recursiveRef
       $vocabulary
-      $comment
       $defs
+      $comment
     )],
     Validation => [qw(
       type
@@ -159,8 +160,8 @@ use constant KEYWORDS => {
       $ref
       $dynamicRef
       $vocabulary
-      $comment
       $defs
+      $comment
     )],
     Validation => [qw(
       type

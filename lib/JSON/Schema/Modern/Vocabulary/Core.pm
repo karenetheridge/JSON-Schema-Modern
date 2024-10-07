@@ -38,7 +38,8 @@ sub keywords ($class, $spec_version) {
     '$ref',
     $spec_version eq 'draft2019-09' ? '$recursiveRef' : (),
     $spec_version eq 'draft2020-12' ? '$dynamicRef' : (),
-    $spec_version eq 'draft7' ? 'definitions' : qw($vocabulary $comment $defs),
+    $spec_version eq 'draft7' ? 'definitions' : qw($vocabulary $defs),
+    '$comment',
   );
 }
 
