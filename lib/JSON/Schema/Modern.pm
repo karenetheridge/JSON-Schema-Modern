@@ -262,7 +262,8 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
 sub traverse ($self, $schema_reference, $config_override = {}) {
   my %overrides = %$config_override;
   delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_schema_path)};
-  croak $_.' not supported as a config override in traverse' foreach keys %overrides;
+  croak join(', ', sort keys %overrides), ' not supported as a config override in traverse'
+    if keys %overrides;
 
   # Note: the starting position is not guaranteed to be at the root of the $document.
   my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
@@ -350,7 +351,8 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   # note this is not quite the same list as what we use when defining $state below
   my %overrides = %$config_override;
   delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks initial_schema_uri effective_base_uri data_path traversed_schema_path _strict_schema_data)};
-  croak $_.' not supported as a config override in evaluate' foreach keys %overrides;
+  croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
+    if keys %overrides;
 
   my $valid;
   try {
