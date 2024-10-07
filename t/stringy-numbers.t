@@ -126,22 +126,22 @@ foreach my $config (0, 1) {
     {
       instanceLocation => '',
       keywordLocation => '/maximum',
-      error => 'value is larger than 5',
+      error => 'value is greater than 5',
     },
     {
       instanceLocation => '',
       keywordLocation => '/exclusiveMaximum',
-      error => 'value is equal to or larger than 5',
+      error => 'value is greater than or equal to 5',
     },
     {
       instanceLocation => '',
       keywordLocation => '/minimum',
-      error => 'value is smaller than 15',
+      error => 'value is less than 15',
     },
     {
       instanceLocation => '',
       keywordLocation => '/exclusiveMinimum',
-      error => 'value is equal to or smaller than 15',
+      error => 'value is less than or equal to 15',
     },
     {
       instanceLocation => '',

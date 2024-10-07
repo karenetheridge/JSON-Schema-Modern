@@ -389,19 +389,19 @@ subtest 'strict_basic' => sub {
           instanceLocation => '#/%7B%7D/my~0tilde~1slash-property',
           keywordLocation => '#/properties/%7B%7D/patternProperties/~1/minimum',  # /
           absoluteKeywordLocation => 'foo.json#/properties/%7B%7D/patternProperties/~1/minimum',  # /
-          error => 'value is smaller than 6',
+          error => 'value is less than 6',
         },
         {
           instanceLocation => '#/%7B%7D/my~0tilde~1slash-property',
           keywordLocation => '#/properties/%7B%7D/patternProperties/%5B~0~1%5D/minimum',  # [~/]
           absoluteKeywordLocation => 'foo.json#/properties/%7B%7D/patternProperties/%5B~0~1%5D/minimum',  # [~/]
-          error => 'value is smaller than 7',
+          error => 'value is less than 7',
         },
         {
           instanceLocation => '#/%7B%7D/my~0tilde~1slash-property',
           keywordLocation => '#/properties/%7B%7D/patternProperties/~0/minimum',  # ~
           absoluteKeywordLocation => 'foo.json#/properties/%7B%7D/patternProperties/~0/minimum',  # ~
-          error => 'value is smaller than 5',
+          error => 'value is less than 5',
         },
         {
           instanceLocation => '#/%7B%7D/my~0tilde~1slash-property',

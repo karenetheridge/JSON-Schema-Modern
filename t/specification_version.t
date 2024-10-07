@@ -344,7 +344,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
         {
           instanceLocation => '/0',
           keywordLocation => '/prefixItems/0/maximum',
-          error => 'value is larger than 0',
+          error => 'value is greater than 0',
         },
         {
           instanceLocation => '',
@@ -354,7 +354,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
         {
           instanceLocation => '/1',
           keywordLocation => '/items/maximum',
-          error => 'value is larger than 1',
+          error => 'value is greater than 1',
         },
         {
           instanceLocation => '',
@@ -447,7 +447,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
           {
             instanceLocation => '/0',
             keywordLocation => '/prefixItems/0/maximum',
-            error => 'value is larger than 0',
+            error => 'value is greater than 0',
           },
           {
             instanceLocation => '',
@@ -479,7 +479,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
         {
           instanceLocation => '/0',
           keywordLocation => '/prefixItems/0/maximum',
-          error => 'value is larger than 0',
+          error => 'value is greater than 0',
         },
         {
           instanceLocation => '',
@@ -489,12 +489,12 @@ subtest 'prefixItems, items and additionalItems' => sub {
         {
           instanceLocation => '/1',
           keywordLocation => '/items/maximum',
-          error => 'value is larger than 1',
+          error => 'value is greater than 1',
         },
         {
           instanceLocation => '/2',
           keywordLocation => '/items/maximum',
-          error => 'value is larger than 1',
+          error => 'value is greater than 1',
         },
         {
           instanceLocation => '',
@@ -521,7 +521,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
           (map +{
             instanceLocation => '/'.$_,
             keywordLocation => '/items/maximum',
-            error => 'value is larger than 0',
+            error => 'value is greater than 0',
           }, (0..2)),
           {
             instanceLocation => '',

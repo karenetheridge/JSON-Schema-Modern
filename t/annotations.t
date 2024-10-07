@@ -432,7 +432,7 @@ subtest 'prefixItems' => sub {
         methods(TO_JSON => {
           instanceLocation => '/1',
           keywordLocation => '/prefixItems/1/maximum',
-          error => 'value is larger than 3',
+          error => 'value is greater than 3',
         }),
         methods(TO_JSON => {
           instanceLocation => '',
@@ -534,7 +534,7 @@ subtest 'schema-items' => sub {
         methods(TO_JSON => {
           instanceLocation => '/1',
           keywordLocation => '/items/maximum',
-          error => 'value is larger than 3',
+          error => 'value is greater than 3',
         }),
         methods(TO_JSON => {
           instanceLocation => '',
@@ -694,7 +694,7 @@ subtest 'properties' => sub {
         methods(TO_JSON => {
           instanceLocation => '/bar',
           keywordLocation => '/properties/bar/maximum',
-          error => 'value is larger than 3',
+          error => 'value is greater than 3',
         }),
         methods(TO_JSON => {
           instanceLocation => '',
@@ -806,7 +806,7 @@ subtest 'patternProperties' => sub {
         methods(TO_JSON => {
           instanceLocation => '/bar',
           keywordLocation => '/patternProperties/bar/maximum',
-          error => 'value is larger than 3',
+          error => 'value is greater than 3',
         }),
         methods(TO_JSON => {
           instanceLocation => '',
@@ -911,7 +911,7 @@ subtest 'additionalProperties' => sub {
         methods(TO_JSON => {
           instanceLocation => '/baz',
           keywordLocation => '/additionalProperties/maximum',
-          error => 'value is larger than 3',
+          error => 'value is greater than 3',
         }),
         methods(TO_JSON => {
           instanceLocation => '',
@@ -1016,7 +1016,7 @@ subtest 'unevaluatedProperties' => sub {
         methods(TO_JSON => {
           instanceLocation => '/baz',
           keywordLocation => '/unevaluatedProperties/maximum',
-          error => 'value is larger than 3',
+          error => 'value is greater than 3',
         }),
         methods(TO_JSON => {
           instanceLocation => '',

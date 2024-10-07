@@ -137,7 +137,7 @@ sub _eval_keyword_maximum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
   return 1 if 0+$data <= $schema->{maximum};
-  return E($state, 'value is larger than %s', sprintf_num($schema->{maximum}));
+  return E($state, 'value is greater than %s', sprintf_num($schema->{maximum}));
 }
 
 sub _traverse_keyword_exclusiveMaximum { goto \&_assert_number }
@@ -146,7 +146,7 @@ sub _eval_keyword_exclusiveMaximum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
   return 1 if 0+$data < $schema->{exclusiveMaximum};
-  return E($state, 'value is equal to or larger than %s', sprintf_num($schema->{exclusiveMaximum}));
+  return E($state, 'value is greater than or equal to %s', sprintf_num($schema->{exclusiveMaximum}));
 }
 
 sub _traverse_keyword_minimum { goto \&_assert_number }
@@ -155,7 +155,7 @@ sub _eval_keyword_minimum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
   return 1 if 0+$data >= $schema->{minimum};
-  return E($state, 'value is smaller than %s', sprintf_num($schema->{minimum}));
+  return E($state, 'value is less than %s', sprintf_num($schema->{minimum}));
 }
 
 sub _traverse_keyword_exclusiveMinimum { goto \&_assert_number }
@@ -164,7 +164,7 @@ sub _eval_keyword_exclusiveMinimum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
   return 1 if 0+$data > $schema->{exclusiveMinimum};
-  return E($state, 'value is equal to or smaller than %s', sprintf_num($schema->{exclusiveMinimum}));
+  return E($state, 'value is less than or equal to %s', sprintf_num($schema->{exclusiveMinimum}));
 }
 
 sub _traverse_keyword_maxLength { goto \&_assert_non_negative_integer }

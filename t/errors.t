@@ -248,17 +248,17 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
         {
           instanceLocation => '/0',
           keywordLocation => '/items/anyOf/0/minimum',
-          error => 'value is smaller than 2',
+          error => 'value is less than 2',
         },
         {
           instanceLocation => '/0',
           keywordLocation => '/items/anyOf/1/allOf/0/maximum',
-          error => 'value is larger than -1',
+          error => 'value is greater than -1',
         },
         {
           instanceLocation => '/0',
           keywordLocation => '/items/anyOf/1/allOf/1/maximum',
-          error => 'value is larger than 0',
+          error => 'value is greater than 0',
         },
         {
           instanceLocation => '/0',
@@ -274,12 +274,12 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
         #{
         #  instanceLocation => '/1',
         #  keywordLocation => '/items/anyOf/1/allOf/0/maximum',
-        #  error => 'value is larger than -1',
+        #  error => 'value is greater than -1',
         #},
         #{
         #  instanceLocation => '/1',
         #  keywordLocation => '/items/anyOf/1/allOf/1/maximum',
-        #  error => 'value is larger than 0',
+        #  error => 'value is greater than 0',
         #},
         #{
         #  instanceLocation => '/1',
@@ -304,12 +304,12 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
         {
           instanceLocation => '/0',
           keywordLocation => '/items/anyOf/0/minimum',
-          error => 'value is smaller than 2'
+          error => 'value is less than 2'
         },
         {
           instanceLocation => '/0',
           keywordLocation => '/items/anyOf/1/allOf/0/maximum',
-          error => 'value is larger than -1',
+          error => 'value is greater than -1',
         },
         {
           instanceLocation => '/0',
@@ -455,7 +455,7 @@ subtest 'errors with $refs' => sub {
           instanceLocation => '/0/x',
           keywordLocation => '/items/properties/x/$ref/minimum',
           absoluteKeywordLocation => '#/$defs/mydef/minimum',
-          error => 'value is smaller than 5',
+          error => 'value is less than 5',
         },
         {
           instanceLocation => '/0',
@@ -472,7 +472,7 @@ subtest 'errors with $refs' => sub {
           instanceLocation => '/1/x',
           keywordLocation => '/items/properties/x/$ref/minimum',
           absoluteKeywordLocation => '#/$defs/mydef/minimum',
-          error => 'value is smaller than 5',
+          error => 'value is less than 5',
         },
         {
           instanceLocation => '/1',
@@ -489,12 +489,12 @@ subtest 'errors with $refs' => sub {
           instanceLocation => '/2/x',
           keywordLocation => '/items/properties/x/$ref/minimum',
           absoluteKeywordLocation => '#/$defs/mydef/minimum',
-          error => 'value is smaller than 5',
+          error => 'value is less than 5',
         },
         {
           instanceLocation => '/2/x',
           keywordLocation => '/items/properties/x/maximum',
-          error => 'value is larger than 2',
+          error => 'value is greater than 2',
         },
         {
           instanceLocation => '/2',
@@ -706,19 +706,19 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/exclusiveMaximum',
           absoluteKeywordLocation => 'def2.json#/exclusiveMaximum',
-          error => 'value is equal to or larger than 1',
+          error => 'value is greater than or equal to 1',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/maximum',
           absoluteKeywordLocation => 'def1.json#/maximum',
-          error => 'value is larger than -1',
+          error => 'value is greater than -1',
         },
         {
           instanceLocation => '',
           keywordLocation => '/$ref/minimum',
           absoluteKeywordLocation => 'def1.json#/minimum',
-          error => 'value is smaller than 5',
+          error => 'value is less than 5',
         },
       ],
     },
@@ -1051,19 +1051,19 @@ subtest 'JSON pointer escaping' => sub {
           instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/patternProperties/~1/minimum',
           absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~1/minimum',  # /
-          error => 'value is smaller than 6',
+          error => 'value is less than 6',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/patternProperties/[~0~1]/minimum',
           absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/%5B~0~1%5D/minimum',  # [~/]
-          error => 'value is smaller than 7',
+          error => 'value is less than 7',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
           keywordLocation => '/$ref/properties/{}/patternProperties/~0/minimum',
           absoluteKeywordLocation => '#/$defs/mydef/properties/%7B%7D/patternProperties/~0/minimum',  # ~
-          error => 'value is smaller than 5',
+          error => 'value is less than 5',
         },
         {
           instanceLocation => '/{}/my~0tilde~1slash-property',
@@ -1411,22 +1411,22 @@ subtest 'numbers in output' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/maximum',
-          error => 'value is larger than 4.23456789',
+          error => 'value is greater than 4.23456789',
         },
         {
           instanceLocation => '',
           keywordLocation => '/exclusiveMaximum',
-          error => 'value is equal to or larger than 4.23456789',
+          error => 'value is greater than or equal to 4.23456789',
         },
         {
           instanceLocation => '',
           keywordLocation => '/minimum',
-          error => 'value is smaller than 6.23456789',
+          error => 'value is less than 6.23456789',
         },
         {
           instanceLocation => '',
           keywordLocation => '/exclusiveMinimum',
-          error => 'value is equal to or smaller than 6.23456789',
+          error => 'value is less than or equal to 6.23456789',
         },
       ],
     },
@@ -1491,7 +1491,7 @@ subtest 'recommended_response' => sub {
 
   cmp_result(
     $result->recommended_response,
-    [ 400, q{'/foo': value is smaller than 5} ],
+    [ 400, q{'/foo': value is less than 5} ],
     'recommended_response uses the first error in the result',
   );
 

@@ -497,7 +497,7 @@ subtest '$ref to non-canonical uri' => sub {
           instanceLocation => '/gamma',
           keywordLocation => '/properties/gamma/minimum',
           absoluteKeywordLocation => 'http://localhost:4242/beta#/properties/gamma/minimum',
-          error => 'value is smaller than 2',
+          error => 'value is less than 2',
         },
         {
           instanceLocation => '',
@@ -559,7 +559,7 @@ subtest '$ref to non-canonical uri' => sub {
           instanceLocation => '/gamma',
           keywordLocation => '/properties/gamma/minimum',
           absoluteKeywordLocation => 'http://localhost:4242/beta#/properties/gamma/minimum',
-          error => 'value is smaller than 2',
+          error => 'value is less than 2',
         },
         {
           instanceLocation => '',
