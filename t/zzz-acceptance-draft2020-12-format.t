@@ -83,6 +83,8 @@ acceptance_tests(
       { file => 'uri.json',
         test_description => 'validation of URIs',
         test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate
+      # note this test was added in TJSA 1.027
+      { file => 'ecmascript-regex.json', group_description => '\a is not an ECMA 262 control escape', test_description => 'when used as a pattern' },
     ] ),
   },
 );
