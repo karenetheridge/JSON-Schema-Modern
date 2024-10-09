@@ -378,7 +378,8 @@ See C<&> at L</OVERLOADS>.
 =head2 dump
 
 Returns a JSON string representing the result object, using the requested L</format>, according to
-the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>.
+the L<draft2019-09 specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>
+and the L<draft2020-12 specification|https://json-schema.org/draft/2020-12/json-schema-core#section-12>.
 
 =head1 SERIALIZATION
 
