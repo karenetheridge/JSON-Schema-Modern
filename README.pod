@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.591
+version 0.592
 
 =head1 SYNOPSIS
 
@@ -59,6 +59,14 @@ L<C<draft2019-09> or C<2019-09>|https://json-schema.org/specification-links.html
 
 L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>, corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
 
+=item *
+
+L<C<draft6> or C<4>|https://json-schema.org/specification-links.html#draft-6>, corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
+
+=item *
+
+L<C<draft4> or C<4>|https://json-schema.org/specification-links.html#draft-4>, corresponding to metaschema C<http://json-schema.org/draft-04/schema#>
+
 =back
 
 Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
@@ -89,7 +97,7 @@ other, or badly-written schemas that could be optimized. Defaults to 50.
 =head2 validate_formats
 
 When true, the C<format> keyword will be treated as an assertion, not merely an annotation. Defaults
-to true when specification_version is draft7, and false for all other versions, but this may change in the future.
+to true when specification_version is draft4, draft6 or draft7, and false for all other versions, but this may change in the future.
 
 Note that the use of a format that does not have a defined handler will B<not> be interpreted as an
 error in this mode; instead, the undefined format will simply be ignored. If you instead want this
@@ -122,7 +130,7 @@ See L</add_media_type> and L</add_encoding> for adding additional type support.
 
 =for stopwords shhh
 
-Technically only draft7 allows this and drafts 2019-09 and 2020-12 prohibit ever returning the
+Technically only draft4, draft6 and draft7 allow this and drafts 2019-09 and 2020-12 prohibit ever returning the
 subschema evaluation results together with their parent schema's results, so shhh. I'm trying to get this
 fixed for the next draft.
 
@@ -130,7 +138,7 @@ fixed for the next draft.
 
 When true, annotations are collected from keywords that produce them, when validation succeeds.
 These annotations are available in the returned result (see L<JSON::Schema::Modern::Result>).
-Not operational when L</specification_version> is C<draft7>.
+Not operational when L</specification_version> is C<draft4>, C<draft6> or C<draft7>.
 
 Defaults to false.
 
@@ -746,8 +754,9 @@ C<idn-hostname> requires L<Net::IDN::Encode>
 
 =head2 Specification Compliance
 
-This implementation is now fully specification-compliant (for versions draft7, draft2019-09,
-draft2020-12), but until version 1.000 is released, it is
+This implementation is now fully specification-compliant (for versions
+draft4, draft6, draft7, draft2019-09, draft2020-12),
+but until version 1.000 is released, it is
 still deemed to be missing some optional but quite useful features, such as:
 
 =for stopwords Mojolicious
@@ -827,6 +836,14 @@ L<https://json-schema.org/draft/2019-09/release-notes.html>
 =item *
 
 L<https://json-schema.org/draft-07/json-schema-release-notes.html>
+
+=item *
+
+L<https://json-schema.org/draft-06#draft-06-release-notes>
+
+=item *
+
+L<https://json-schema.org/draft-04/draft-zyp-json-schema-04>
 
 =item *
 
