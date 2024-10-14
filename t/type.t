@@ -91,34 +91,34 @@ foreach my $type (sort keys %json_data) {
 }
 
 subtest 'type: integers and numbers' => sub {
-  my @ints = (1, -2.0, 9223372036854775800000008);
-  my @numbers = (-2.1);
+  my @ints = my @copied_ints = (1, -2.0, 9223372036854775800000008);
+  my @numbers = my @copied_numbers = (-2.1);
   ok(is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is true', $_))
-    foreach (@ints, map $decoder->decode("$_"), @ints);
+    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
   is(get_type($_), 'integer', json_sprintf('get_type(%s) is integer', $_))
-    foreach (@ints, map $decoder->decode("$_"), @ints);
+    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
   ok(is_type('number', $_), json_sprintf('is_type(\'number\', %s) is true', $_))
-    foreach (@ints, @numbers, map $decoder->decode("$_"), @ints, @numbers);
+    foreach (@ints, @numbers, map $decoder->decode("$_"), @copied_ints, @copied_numbers);
   is(get_type($_), 'number', json_sprintf('get_type(%s) is number', $_))
-    foreach (@numbers, map $decoder->decode("$_"), @numbers);
+    foreach (@numbers, map $decoder->decode("$_"), @copied_numbers);
 
-  my @not_ints = ('1', '2.0', 3.1, '4.2');
+  my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
   ok(!is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is false', $_))
-    foreach (@not_ints, $decoder->decode($decoder->encode($_)));
+    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
   isnt(get_type($_), 'integer', json_sprintf('get_type(%s) is not integer', $_))
-    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @not_ints);
+    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
 };
 
 subtest 'type: integers and numbers in draft4' => sub {
   # in draft4, an integer is "A JSON number without a fraction or exponent part."
   # Note that integers larger than $Config{ivsize} are stored as NV, not IV, so we are unable to
   # detect them. But coming from json, Math::BigFloat objects can make this distinction.
-  my @ints = (1);
-  my @numbers = (2.0, -2.1);
+  my @ints = my @copied_ints = (1);
+  my @numbers = my @copied_numbers = (2.0, -2.1);
   ok(is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is true', $_))
-    foreach (@ints, map $decoder->decode("$_"), @ints);
+    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
   is(get_type($_, { legacy_ints => 1 }), 'integer', json_sprintf('get_type(%s, { legacy_ints => 1 }) is integer', $_))
-    foreach (@ints, map $decoder->decode("$_"), @ints);
+    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
 
   # we provide the explicit strings here because an integer NV is not stringified with .0 intact
   ok(is_type('number', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'number\', %s, { legacy_ints => 1 }) is true', $_))
@@ -126,11 +126,11 @@ subtest 'type: integers and numbers in draft4' => sub {
   is(get_type($_, { legacy_ints => 1 }), 'number', json_sprintf('get_type(%s, { legacy_ints => 1 }) is number', $_))
     foreach (@numbers, map $decoder->decode($_), '2.0', '-2.1', '9223372036854775800000008');
 
-  my @not_ints = ('1', '2.0', 3.1, '4.2');
+  my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
   ok(!is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is false', $_))
-    foreach (@not_ints, $decoder->decode($decoder->encode($_)));
+    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
   isnt(get_type($_, { legacy_ints => 1 }), 'integer', json_sprintf('get_type(%s, { legacy_ints => 1 }) is not integer', $_))
-    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @not_ints);
+    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
 };
 
 ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception');

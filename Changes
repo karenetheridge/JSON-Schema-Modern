@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix new integer type tests that fail on perls < 5.35.9
 
 0.592     2024-10-13 19:43:20Z
           - support added for the draft4, draft6 specifiction versions
