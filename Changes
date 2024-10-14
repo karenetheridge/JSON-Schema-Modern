@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.593     2024-10-14 18:43:23Z
           - fix new integer type tests that fail on perls < 5.35.9
 
