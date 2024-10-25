@@ -110,9 +110,6 @@ subtest 'type: integers and numbers' => sub {
 };
 
 subtest 'type: integers and numbers in draft4' => sub {
-  # in draft4, an integer is "A JSON number without a fraction or exponent part."
-  # Note that integers larger than $Config{ivsize} are stored as NV, not IV, so we are unable to
-  # detect them. But coming from json, Math::BigFloat objects can make this distinction.
   my @ints = my @copied_ints = (1);
   my @numbers = my @copied_numbers = (2.0, -2.1);
   ok(is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is true', $_))
