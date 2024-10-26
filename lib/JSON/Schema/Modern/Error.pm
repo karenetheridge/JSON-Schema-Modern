@@ -20,10 +20,11 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use MooX::TypeTiny;
 use Types::Standard qw(Str Bool Enum Tuple);
 use Types::Common::Numeric qw(PositiveInt);
+use builtin::compat 'refaddr';
 use namespace::clean;
 
 use overload
-  '0+' => sub { Scalar::Util::refaddr($_[0]) },
+  '0+' => sub { refaddr($_[0]) },
   '""' => sub { $_[0]->stringify },
   fallback => 1;
 

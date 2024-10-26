@@ -18,7 +18,8 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use B;
 use Carp 'croak';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
-use Scalar::Util qw(blessed looks_like_number);
+use builtin::compat 'blessed';
+use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
 use Feature::Compat::Try;
 use namespace::clean;
@@ -138,7 +139,7 @@ use if HAVE_BUILTIN, experimental => 'builtin';
 sub is_bool ($value) {
   HAVE_BUILTIN and builtin::is_bool($value)
   or
-  !!Scalar::Util::blessed($value)
+  !!blessed($value)
     and ($value->isa('JSON::PP::Boolean')
       or $value->isa('Cpanel::JSON::XS::Boolean')
       or $value->isa('JSON::XS::Boolean'));

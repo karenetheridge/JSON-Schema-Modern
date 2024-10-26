@@ -8,6 +8,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
+use builtin::compat 'load_module';
 use lib 't/lib';
 use Helper;
 
@@ -354,7 +355,7 @@ subtest 'valid keywords' => sub {
   }
 
   my @classes =
-    grep Module::Runtime::use_module($_)->does('JSON::Schema::Modern::Vocabulary'),
+    grep load_module($_)->does('JSON::Schema::Modern::Vocabulary'),
     map 'JSON::Schema::Modern::Vocabulary::'.$_,
     map $_->basename =~ s/\.pm$//r,
     grep /\.pm$/,

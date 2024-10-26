@@ -11,7 +11,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::Without::Module 0.21 'Time::Moment';
 use Test::Fatal;
-use Scalar::Util 'refaddr';
+use builtin::compat 'refaddr';
 use lib 't/lib';
 use Helper;
 
