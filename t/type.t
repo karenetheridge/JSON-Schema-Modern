@@ -90,7 +90,7 @@ foreach my $type (sort keys %json_data) {
   };
 }
 
-subtest 'type: integers and numbers' => sub {
+subtest 'integers and numbers' => sub {
   my @ints = my @copied_ints = (1, -2.0, 9223372036854775800000008);
   my @numbers = my @copied_numbers = (-2.1);
   ok(is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is true', $_))
@@ -109,7 +109,7 @@ subtest 'type: integers and numbers' => sub {
     foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
 };
 
-subtest 'type: integers and numbers in draft4' => sub {
+subtest 'integers and numbers in draft4' => sub {
   my @ints = my @copied_ints = (1);
   ok(is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is true', $_))
     foreach (@ints, map $decoder->decode("$_"), @copied_ints);
