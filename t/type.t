@@ -159,8 +159,10 @@ subtest 'ambiguous types' => sub {
       skip 'on perls < 5.35.9, reading the string form of an integer value sets the flag SVf_POK', 1
         if "$]" >= 5.035009;
 
-      is(get_type($integer), 'ambiguous type', 'integer that is later used as a string results in an ambiguous type');
-      ok(!is_type($_, $integer), "ambiguous types are not accepted by is_type('$_')") foreach qw(integer number string);
+      is(get_type($integer), 'string', 'older perls only: integer that is later used as a string is now identified as a string');
+      ok(is_type('integer', $integer), 'integer that is later used as a string is still an integer');
+      ok(is_type('number', $integer), 'integer that is later used as a string is still a number');
+      ok(is_type('string', $integer), 'older perls only: integer that is later used as a string is now a string');
     }
 
     # modern behaviour
@@ -197,14 +199,47 @@ subtest 'ambiguous types' => sub {
     $string = '5';
     ()= 0+$string;
 
-    is(get_type($string), 'ambiguous type', 'string that is later used as an integer results in an ambiguous type');
-    ok(!is_type($_, $string), "ambiguous types are not accepted by is_type('$_')") foreach qw(integer number string);
+    is(get_type($string), 'string', 'string that is later used as an integer is still identified as a string');
+
+    # legacy behaviour
+    SKIP: {
+      skip 'on perls < 5.35.9, reading the string form of an integer value sets the flag SVf_POK', 1
+        if "$]" >= 5.035009;
+      ok(is_type('integer', $string), 'older perls only: string that is later used as an integer becomes an integer');
+      ok(is_type('number', $string), 'older perls only: string that is later used as an integer becomes a number');
+    }
+
+    # modern behaviour
+    SKIP: {
+      skip 'on perls < 5.35.9, reading the integer form of a string value sets the flag SVf_IOK', 1
+        if "$]" < 5.035009;
+      ok(!is_type('integer', $string), 'string that is later used as an integer is not an integer');
+      ok(!is_type('number', $string), 'string that is later used as an integer is not a number');
+    }
+
+    ok(is_type('string', $string), 'string that is later used as an integer is still a string');
 
     $string = '5.1';
     ()= 0+$string;
 
-    is(get_type($string), 'ambiguous type', 'string that is later used as a number results in an ambiguous type');
-    ok(!is_type($_, $string), "ambiguous types are not accepted by is_type('$_')") foreach qw(integer number string);
+    is(get_type($string), 'string', 'string that is later used as a number is still identified as a string');
+    ok(!is_type('integer', $string), 'string that is later used as a number is not an integer');
+
+    # legacy behaviour
+    SKIP: {
+      skip 'on perls < 5.35.9, reading the string form of an integer value sets the flag SVf_POK', 1
+        if "$]" >= 5.035009;
+      ok(is_type('number', $string), 'older perls only: string that is later used as a number becomes a number');
+    }
+
+    # modern behaviour
+    SKIP: {
+      skip 'on perls < 5.35.9, reading the numeric form of a string value sets the flag SVf_NOK', 1
+        if "$]" < 5.035009;
+      ok(!is_type('number', $string), 'string that is later used as a number is not a number');
+    }
+
+    ok(is_type('string', $string), 'string that is later used as a number is still a string');
   };
 };
 

@@ -131,10 +131,13 @@ subtest 'equality, using stringy_numbers' => sub {
     [ '1.10', '1.1000', true ],
     [ 'x', 'x', true ],
     [ 'x', 'y', false ],
+    [ 'x', 0, false ],
+    [ 0, 'y', false ],
     [ '5', dualvar(5, '5'), true ],
     [ 5, dualvar(5, '5'), true ],
     [ '5', dualvar(5, 'five'), false ],
     [ 5, dualvar(5, 'five'), false ],
+    [ dualvar(5, 'five'), dualvar(5, 'five'), false ],
   ) {
     my ($x, $y, $expected, $diff_path) = @$test;
     my @types = map get_type($_), $x, $y;
