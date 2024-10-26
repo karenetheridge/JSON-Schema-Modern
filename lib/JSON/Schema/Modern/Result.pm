@@ -23,14 +23,14 @@ use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::PP ();
 use List::Util 1.50 qw(any uniq all);
-use Scalar::Util qw(refaddr blessed);
+use builtin::compat qw(refaddr blessed);
 use Safe::Isa;
 use namespace::clean;
 
 use overload
   'bool'  => sub { $_[0]->valid },
   '&'     => \&combine,
-  '0+'    => sub { Scalar::Util::refaddr($_[0]) },
+  '0+'    => sub { refaddr($_[0]) },
   '""' => sub { $_[0]->stringify },
   fallback => 1;
 

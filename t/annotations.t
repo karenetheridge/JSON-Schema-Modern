@@ -9,7 +9,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Module::Runtime 'use_module';
+use builtin::compat 'load_module';
 use Test::Fatal;
 use lib 't/lib';
 use Helper;
@@ -51,7 +51,7 @@ my $initial_state = {
   traversed_schema_path => '',
   spec_version => 'draft2019-09',
   vocabularies => [
-    (map use_module($_),
+    (map load_module($_),
       map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Applicator Validation MetaData)),
   ],
   evaluator => $js,
