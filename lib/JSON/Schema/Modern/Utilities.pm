@@ -88,8 +88,8 @@ sub is_type ($type, $value, $config = {}) {
       if ($config->{legacy_ints}) {
         # in draft4, an integer is "A JSON number without a fraction or exponent part.",
         # therefore 2.0 is NOT an integer
-        return !is_bignum($value)
-          && !($flags & B::SVf_POK) && ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK);
+        return ref($value) eq 'Math::BigInt'
+          || !($flags & B::SVf_POK) && ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK);
       }
       else {
         # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
@@ -117,7 +117,9 @@ sub get_type ($value, $config = {}) {
   return 'array' if is_plain_arrayref($value);
 
   # floats in json will always be parsed into Math::BigFloat, when allow_bignum is enabled
-  return is_bignum($value) ? (!$config->{legacy_ints} && $value->is_int ? 'integer' : 'number')
+  return ref($value) eq 'Math::BigInt' ? 'integer'
+      # note: this will be wrong for Math::BigFloat->new('1.0') in draft4
+      : ref($value) eq 'Math::BigFloat' ? ($value->is_int ? 'integer' : 'number')
       : (blessed($value) ? '' : 'reference to ').ref($value)
     if is_ref($value);
 

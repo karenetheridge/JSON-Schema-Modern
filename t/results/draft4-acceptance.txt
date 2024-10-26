@@ -37,11 +37,11 @@ refRemote.json                              17          0     0
 required.json                               15          0     0
 type.json                                   79          0     0
 uniqueItems.json                            69          0     0
-optional/bignum.json                         7          2     0
+optional/bignum.json                         9          0     0
 optional/ecmascript-regex.json              60         14     0
 optional/float-overflow.json                 1          0     0
 optional/id.json                             3          0     0
 optional/non-bmp-regex.json                 12          0     0
-optional/zeroTerminatedFloats.json           1          0     0
+optional/zeroTerminatedFloats.json           0          1     0
 ---------------------------------------------------------------
-TOTAL                                      694         16     0
+TOTAL                                      695         15     0
