@@ -92,50 +92,55 @@ foreach my $type (sort keys %json_data) {
   };
 }
 
-subtest 'integers and numbers' => sub {
-  my @ints = my @copied_ints = (1, -2.0, 9223372036854775800000008);
-  my @big_ints = (Math::BigInt->new('2'), Math::BigInt->new('2.0'));
-  my @numbers = my @copied_numbers = (-2.1);
-  my @big_numbers = (Math::BigFloat->new('2.1'));
-  ok(is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is true', $_))
-    foreach (@ints, @big_ints, map $decoder->decode("$_"), @copied_ints);
-  is(get_type($_), 'integer', json_sprintf('get_type(%s) is integer', $_))
-    foreach (@ints, @big_ints, map $decoder->decode("$_"), @copied_ints);
-  ok(is_type('number', $_), json_sprintf('is_type(\'number\', %s) is true', $_))
-    foreach (@ints, @big_ints, @numbers, map $decoder->decode("$_"), @copied_ints, @copied_numbers);
-  is(get_type($_), 'number', json_sprintf('get_type(%s) is number', $_))
-    foreach (@numbers, @big_numbers, map $decoder->decode("$_"), @copied_numbers);
+my %draft4_inflated_data = (
+  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), 2.0, Math::BigFloat->new('1.0'), Math::BigInt->new('1.0') ],
+  integer => [ 0, -1, 2 ],
+);
 
-  my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
-  ok(!is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is false', $_))
-    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
-  isnt(get_type($_), 'integer', json_sprintf('get_type(%s) is not integer', $_))
-    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
-};
+my %draft4_json_data = (
+  number => [ '3.1', '1.23456789012e10', '2.0' ],
+  integer => [ '0', '-1', '3' ],
+);
 
 subtest 'integers and numbers in draft4' => sub {
-  my @ints = my @copied_ints = (1);
-  my @big_ints = (Math::BigInt->new('2'));
-  ok(is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is true', $_))
-    foreach (@ints, @big_ints, map $decoder->decode("$_"), @copied_ints);
-  is(get_type($_, { legacy_ints => 1 }), 'integer', json_sprintf('get_type(%s, { legacy_ints => 1 }) is integer', $_))
-    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
+  foreach my $type (sort keys %draft4_inflated_data) {
+    foreach my $value ($draft4_inflated_data{$type}->@*) {
+      my $value_copy = $value;
+      ok(is_type($type, $value, { legacy_ints => 1 }), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
+      ok(is_type('number', $value, { legacy_ints => 1 }), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
+        if $type eq 'integer';
+      is(get_type($value, { legacy_ints => 1 }), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
 
+      foreach my $other_type (qw(null boolean object array string), sort keys %draft4_inflated_data) {
+        next if $other_type eq $type;
+        next if $type eq 'integer' and $other_type eq 'number';
 
-  # we provide the explicit strings here because an integer NV is not stringified with .0 intact
-  my @numbers = (2.0, -2.1);
-  my @json_numbers = ('2.0', '-2.1', '9223372036854775800000008');
-  my @big_numbers = (Math::BigInt->new('2.0'), Math::BigFloat->new('2.1'));
-  ok(is_type('number', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'number\', %s, { legacy_ints => 1 }) is true', $_))
-    foreach (@ints, @numbers, @big_numbers, map $decoder->decode($_), '1', @json_numbers);
-  is(get_type($_, { legacy_ints => 1 }), 'number', json_sprintf('get_type(%s, { legacy_ints => 1 }) is number', $_))
-    foreach (@numbers, @big_numbers, map $decoder->decode($_), @json_numbers);
+        ok(!is_type($other_type, $value, { legacy_ints => 1 }),
+          json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
+      }
 
-  my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
-  ok(!is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is false', $_))
-    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
-  isnt(get_type($_, { legacy_ints => 1 }), 'integer', json_sprintf('get_type(%s, { legacy_ints => 1 }) is not integer', $_))
-    foreach (@not_ints, map $decoder->decode($decoder->encode($_)), @copied_not_ints);
+      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
+    }
+
+    foreach my $value ($draft4_json_data{$type}->@*) {
+      $value = $decoder->decode($value);
+      my $value_copy = $value;
+      ok(is_type($type, $value, { legacy_ints => 1 }), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
+      ok(is_type('number', $value, { legacy_ints => 1 }), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
+        if $type eq 'integer';
+      is(get_type($value, { legacy_ints => 1 }), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+
+      foreach my $other_type (qw(null boolean object array string), sort keys %draft4_json_data) {
+        next if $other_type eq $type;
+        next if $type eq 'integer' and $other_type eq 'number';
+
+        ok(!is_type($other_type, $value, { legacy_ints => 1 }),
+          json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
+      }
+
+      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
+    }
+  }
 };
 
 ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception');
