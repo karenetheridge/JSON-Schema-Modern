@@ -22,6 +22,7 @@ use builtin::compat 'blessed';
 use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
 use Feature::Compat::Try;
+use builtin::compat qw(created_as_number created_as_string);
 use namespace::clean;
 
 use Exporter 'import';
@@ -75,15 +76,12 @@ sub is_type ($type, $value, $config = {}) {
     my $flags = B::svref_2object(\$value)->FLAGS;
 
     if ($type eq 'string') {
-      return !is_ref($value) && $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
+      return !is_ref($value) && created_as_string($value);
     }
 
     if ($type eq 'number') {
       # floats in json will always be parsed into Math::BigFloat, when allow_bignum is enabled
-      return is_bignum($value)
-        || ($flags & (B::SVf_IOK | B::SVf_NOK)
-          # if dualvar, PV and stringified NV/IV must be identical
-          && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value));
+      return is_bignum($value) || created_as_number($value);
     }
 
     if ($type eq 'integer') {
@@ -91,17 +89,14 @@ sub is_type ($type, $value, $config = {}) {
         # in draft4, an integer is "A JSON number without a fraction or exponent part.",
         # therefore 2.0 is NOT an integer
         return ref($value) eq 'Math::BigInt'
-          || ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK)
-            && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
+          || ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK) && created_as_number($value);
       }
       else {
         # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
         # therefore they will fail this check
         return is_bignum($value) && $value->is_int
           # if dualvar, PV and stringified NV/IV must be identical
-          || ($flags & (B::SVf_IOK | B::SVf_NOK))
-            && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value)
-            && int($value) == $value;
+          || created_as_number($value) && int($value) == $value;
       }
     }
   }
@@ -136,19 +131,14 @@ sub get_type ($value, $config = {}) {
     # in draft4, an integer is "A JSON number without a fraction or exponent part.",
     # therefore 2.0 is NOT an integer
     return 'integer'
-      if ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK)
-        && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
+      if ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK) && created_as_number($value);
 
-    return 'number'
-      if !($flags & B::SVf_IOK) && ($flags & B::SVf_NOK)
-        && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
+    return 'number' if created_as_number($value);
   }
   else {
     # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
     # therefore they will fail this check
-    return int($value) == $value ? 'integer' : 'number'
-      if ($flags & (B::SVf_IOK | B::SVf_NOK))
-        && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
+    return int($value) == $value ? 'integer' : 'number' if created_as_number($value);
   }
 
   # this might be a PVIV or PVNV
