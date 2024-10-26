@@ -148,15 +148,27 @@ ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception
 subtest 'ambiguous types' => sub {
   is(get_type(dualvar(5, 'five')), 'ambiguous type', 'dualvars are ambiguous');
 
+  my $number = 5;
+  ()= sprintf('%s', $number);
+
+  # legacy behaviour
   SKIP: {
     skip 'on perls >= 5.35.9, reading the string form of an integer value no longer sets the flag SVf_POK', 1
       if "$]" >= 5.035009;
 
-    my $number = 5;
-    ()= sprintf('%s', $number);
-
     is(get_type($number), 'ambiguous type', 'number that is later treated as a string results in an ambiguous type');
     ok(!is_type($_, $number), "ambiguous types are not accepted by is_type('$_')") foreach qw(integer number string);
+  }
+
+  # modern behaviour
+  SKIP: {
+    skip 'on perls < 5.35.9, reading the string form of an integer value sets the flag SVf_POK', 1
+      if "$]" < 5.035009;
+
+    is(get_type($number), 'integer', 'integer that is later treated as a string is still identified as a integer');
+    ok(is_type('integer', $number), 'integer that is later treated as a string is still an integer');
+    ok(is_type('number', $number), 'number that is later treated as a string is still a number');
+    ok(!is_type('string', $number), 'number that is later treated as a string is not a string');
   }
 };
 
