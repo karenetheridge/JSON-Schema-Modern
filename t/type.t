@@ -24,7 +24,9 @@ my %inflated_data = (
   object => [ {}, { a => 1 } ],
   array => [ [], [ 1 ] ],
   number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123') ],
-  integer => [ 0, -1, 2, 2.0, 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65, 1000000000000000, Math::BigInt->new('1e20') ],
+  integer => [ 0, -1, 2, 2.0, 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65, 1000000000000000,
+    Math::BigInt->new('1e20'), Math::BigInt->new('1'), Math::BigInt->new('1.0'),
+    Math::BigFloat->new('2e1'), Math::BigFloat->new('1'), Math::BigFloat->new('1.0') ],
   string => [ '', '0', '-1', '2', '2.0', '3.1', 'école', 'ಠ_ಠ' ],
 );
 
@@ -34,7 +36,7 @@ my %json_data = (
   object => [ '{}', '{"a":1}' ],
   array => [ '[]', '[1]' ],
   number => [ '3.1', '1.23456789012e10' ],
-  integer => [ '0', '-1', '2.0', (map $_.'', 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65), '1000000000000000' ],
+  integer => [ '0', '-1', '2.0', (map $_.'', 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65), '1000000000000000', '2e1' ],
   string => [ '""', '"0"', '"-1"', '"2.0"', '"3.1"',
     qq{"\x{c3}\x{a9}cole"}, qq{"\x{e0}\x{b2}\x{a0}_\x{e0}\x{b2}\x{a0}"} ],
 );
@@ -92,15 +94,17 @@ foreach my $type (sort keys %json_data) {
 
 subtest 'integers and numbers' => sub {
   my @ints = my @copied_ints = (1, -2.0, 9223372036854775800000008);
+  my @big_ints = (Math::BigInt->new('2'), Math::BigInt->new('2.0'));
   my @numbers = my @copied_numbers = (-2.1);
+  my @big_numbers = (Math::BigFloat->new('2.1'));
   ok(is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is true', $_))
-    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
+    foreach (@ints, @big_ints, map $decoder->decode("$_"), @copied_ints);
   is(get_type($_), 'integer', json_sprintf('get_type(%s) is integer', $_))
-    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
+    foreach (@ints, @big_ints, map $decoder->decode("$_"), @copied_ints);
   ok(is_type('number', $_), json_sprintf('is_type(\'number\', %s) is true', $_))
-    foreach (@ints, @numbers, map $decoder->decode("$_"), @copied_ints, @copied_numbers);
+    foreach (@ints, @big_ints, @numbers, map $decoder->decode("$_"), @copied_ints, @copied_numbers);
   is(get_type($_), 'number', json_sprintf('get_type(%s) is number', $_))
-    foreach (@numbers, map $decoder->decode("$_"), @copied_numbers);
+    foreach (@numbers, @big_numbers, map $decoder->decode("$_"), @copied_numbers);
 
   my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
   ok(!is_type('integer', $_), json_sprintf('is_type(\'integer\', %s) is false', $_))
@@ -111,8 +115,9 @@ subtest 'integers and numbers' => sub {
 
 subtest 'integers and numbers in draft4' => sub {
   my @ints = my @copied_ints = (1);
+  my @big_ints = (Math::BigInt->new('2'));
   ok(is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is true', $_))
-    foreach (@ints, map $decoder->decode("$_"), @copied_ints);
+    foreach (@ints, @big_ints, map $decoder->decode("$_"), @copied_ints);
   is(get_type($_, { legacy_ints => 1 }), 'integer', json_sprintf('get_type(%s, { legacy_ints => 1 }) is integer', $_))
     foreach (@ints, map $decoder->decode("$_"), @copied_ints);
 
@@ -120,10 +125,11 @@ subtest 'integers and numbers in draft4' => sub {
   # we provide the explicit strings here because an integer NV is not stringified with .0 intact
   my @numbers = (2.0, -2.1);
   my @json_numbers = ('2.0', '-2.1', '9223372036854775800000008');
+  my @big_numbers = (Math::BigInt->new('2.0'), Math::BigFloat->new('2.1'));
   ok(is_type('number', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'number\', %s, { legacy_ints => 1 }) is true', $_))
-    foreach (@ints, @numbers, map $decoder->decode($_), '1', @json_numbers);
+    foreach (@ints, @numbers, @big_numbers, map $decoder->decode($_), '1', @json_numbers);
   is(get_type($_, { legacy_ints => 1 }), 'number', json_sprintf('get_type(%s, { legacy_ints => 1 }) is number', $_))
-    foreach (@numbers, map $decoder->decode($_), @json_numbers);
+    foreach (@numbers, @big_numbers, map $decoder->decode($_), @json_numbers);
 
   my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
   ok(!is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is false', $_))
