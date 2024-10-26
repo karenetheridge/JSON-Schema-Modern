@@ -146,30 +146,33 @@ subtest 'integers and numbers in draft4' => sub {
 ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception');
 
 subtest 'ambiguous types' => sub {
-  is(get_type(dualvar(5, 'five')), 'ambiguous type', 'dualvars are ambiguous');
+  is(get_type(dualvar(5, 'five')), 'ambiguous type', 'dualvar integers with different values are ambiguous');
+  is(get_type(dualvar(5.1, 'five')), 'ambiguous type', 'dualvar numbers with different values are ambiguous');
+
+  # numbers parsed by YAML::XS are PVNV or PVIV
+  foreach my $legacy_ints (0, 1) {
+    is(get_type(dualvar(5, '5'), { legacy_ints => $legacy_ints }), 'integer',
+      'get_type'.($legacy_ints ? ' in draft4' : '') .': dualvar integers with the same stringified value are treated as integers');
+    ok(is_type('integer', dualvar(5, '5'), { legacy_ints => $legacy_ints }),
+      'is_type'.($legacy_ints ? ' in draft4' : '') .': dualvar integers with the same stringified value are treated as integers');
+    ok(!is_type('string', dualvar(5, '5'), { legacy_ints => $legacy_ints }),
+      'is_type'.($legacy_ints ? ' in draft4' : '') .': dualvar integers with the same stringified value are not treated as strings');
+
+    is(get_type(dualvar(5.1, '5.1'), { legacy_ints => $legacy_ints }), 'number',
+      'is_type'.($legacy_ints ? ' in draft4' : '') .': dualvar numbers with the same stringified value are treated as numbers');
+    ok(is_type('number', dualvar(5.1, '5.1'), { legacy_ints => $legacy_ints }),
+      'is_type'.($legacy_ints ? ' in draft4' : '') .': dualvar numbers with the same stringified value are treated as numbers');
+    ok(!is_type('string', dualvar(5.1, '5.1'), { legacy_ints => $legacy_ints }),
+      'is_type'.($legacy_ints ? ' in draft4' : '') .': dualvar numbers with the same stringified value are not treated as strings');
+  }
 
   my $number = 5;
   ()= sprintf('%s', $number);
 
-  # legacy behaviour
-  SKIP: {
-    skip 'on perls >= 5.35.9, reading the string form of an integer value no longer sets the flag SVf_POK', 1
-      if "$]" >= 5.035009;
-
-    is(get_type($number), 'ambiguous type', 'number that is later treated as a string results in an ambiguous type');
-    ok(!is_type($_, $number), "ambiguous types are not accepted by is_type('$_')") foreach qw(integer number string);
-  }
-
-  # modern behaviour
-  SKIP: {
-    skip 'on perls < 5.35.9, reading the string form of an integer value sets the flag SVf_POK', 1
-      if "$]" < 5.035009;
-
-    is(get_type($number), 'integer', 'integer that is later treated as a string is still identified as a integer');
-    ok(is_type('integer', $number), 'integer that is later treated as a string is still an integer');
-    ok(is_type('number', $number), 'number that is later treated as a string is still a number');
-    ok(!is_type('string', $number), 'number that is later treated as a string is not a string');
-  }
+  is(get_type($number), 'integer', 'integer that is later treated as a string is still identified as a integer');
+  ok(is_type('integer', $number), 'integer that is later treated as a string is still an integer');
+  ok(is_type('number', $number), 'number that is later treated as a string is still a number');
+  ok(!is_type('string', $number), 'number that is later treated as a string is not a string');
 };
 
 subtest 'is_type and get_type for references' => sub {

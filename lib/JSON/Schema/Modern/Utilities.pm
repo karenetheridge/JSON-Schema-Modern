@@ -81,7 +81,9 @@ sub is_type ($type, $value, $config = {}) {
     if ($type eq 'number') {
       # floats in json will always be parsed into Math::BigFloat, when allow_bignum is enabled
       return is_bignum($value)
-        || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+        || ($flags & (B::SVf_IOK | B::SVf_NOK)
+          # if dualvar, PV and stringified NV/IV must be identical
+          && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value));
     }
 
     if ($type eq 'integer') {
@@ -89,13 +91,17 @@ sub is_type ($type, $value, $config = {}) {
         # in draft4, an integer is "A JSON number without a fraction or exponent part.",
         # therefore 2.0 is NOT an integer
         return ref($value) eq 'Math::BigInt'
-          || !($flags & B::SVf_POK) && ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK);
+          || ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK)
+            && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
       }
       else {
         # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
         # therefore they will fail this check
         return is_bignum($value) && $value->is_int
-          || !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK)) && int($value) == $value;
+          # if dualvar, PV and stringified NV/IV must be identical
+          || ($flags & (B::SVf_IOK | B::SVf_NOK))
+            && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value)
+            && int($value) == $value;
       }
     }
   }
@@ -129,14 +135,20 @@ sub get_type ($value, $config = {}) {
   if ($config->{legacy_ints}) {
     # in draft4, an integer is "A JSON number without a fraction or exponent part.",
     # therefore 2.0 is NOT an integer
-    return 'integer' if !($flags & B::SVf_POK) && ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK);
-    return 'number' if !($flags & B::SVf_POK) && !($flags & B::SVf_IOK) && ($flags & B::SVf_NOK);
+    return 'integer'
+      if ($flags & B::SVf_IOK) && !($flags & B::SVf_NOK)
+        && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
+
+    return 'number'
+      if !($flags & B::SVf_IOK) && ($flags & B::SVf_NOK)
+        && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
   }
   else {
     # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
     # therefore they will fail this check
     return int($value) == $value ? 'integer' : 'number'
-      if !($flags & B::SVf_POK) && ($flags & (B::SVf_IOK | B::SVf_NOK));
+      if ($flags & (B::SVf_IOK | B::SVf_NOK))
+        && (!($flags & B::SVf_POK) || looks_like_number($value) && (0+$value).'' eq $value);
   }
 
   # this might be a PVIV or PVNV
