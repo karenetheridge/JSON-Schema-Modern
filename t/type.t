@@ -93,12 +93,12 @@ foreach my $type (sort keys %json_data) {
 }
 
 my %draft4_inflated_data = (
-  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), 2.0, Math::BigFloat->new('1.0'), Math::BigInt->new('1.0') ],
-  integer => [ 0, -1, 2 ],
+  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), 2.0 ],
+  integer => [ 0, -1, 2, Math::BigInt->new('2'), Math::BigInt->new('1.0') ],
 );
 
 my %draft4_json_data = (
-  number => [ '3.1', '1.23456789012e10', '2.0' ],
+  number => [ '3.1', '1.23456789012e10' ],
   integer => [ '0', '-1', '3' ],
 );
 

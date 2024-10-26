@@ -55,9 +55,8 @@ acceptance_tests(
       { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # TODO, see test suite PR#505
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'zero-width whitespace matches' },
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' },
-      # in draft4, all bignums are interpreted as numbers, not integers
-      # because we can't tell the difference between 1.0 and 1
-      { file => 'optional/bignum.json', group_description => 'integer', test_description => [ 'a bignum is an integer', 'a negative bignum is an integer' ] },
+      # bignums are parsed into Math::BigFloat objects, which lose the distinction between 1.0 and 1
+      { file => 'optional/zeroTerminatedFloats.json', group_description => 'some languages do not distinguish between different types of numeric value', test_description => 'a float is not an integer even without fractional part' },
     ] ),
   },
 );
