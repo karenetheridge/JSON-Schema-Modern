@@ -111,17 +111,19 @@ subtest 'type: integers and numbers' => sub {
 
 subtest 'type: integers and numbers in draft4' => sub {
   my @ints = my @copied_ints = (1);
-  my @numbers = my @copied_numbers = (2.0, -2.1);
   ok(is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is true', $_))
     foreach (@ints, map $decoder->decode("$_"), @copied_ints);
   is(get_type($_, { legacy_ints => 1 }), 'integer', json_sprintf('get_type(%s, { legacy_ints => 1 }) is integer', $_))
     foreach (@ints, map $decoder->decode("$_"), @copied_ints);
 
+
   # we provide the explicit strings here because an integer NV is not stringified with .0 intact
+  my @numbers = (2.0, -2.1);
+  my @json_numbers = ('2.0', '-2.1', '9223372036854775800000008');
   ok(is_type('number', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'number\', %s, { legacy_ints => 1 }) is true', $_))
-    foreach (@ints, @numbers, map $decoder->decode($_), '1', '2.0', '-2.1', '9223372036854775800000008');
+    foreach (@ints, @numbers, map $decoder->decode($_), '1', @json_numbers);
   is(get_type($_, { legacy_ints => 1 }), 'number', json_sprintf('get_type(%s, { legacy_ints => 1 }) is number', $_))
-    foreach (@numbers, map $decoder->decode($_), '2.0', '-2.1', '9223372036854775800000008');
+    foreach (@numbers, map $decoder->decode($_), @json_numbers);
 
   my @not_ints = my @copied_not_ints = ('1', '2.0', 3.1, '4.2');
   ok(!is_type('integer', $_, { legacy_ints => 1 }), json_sprintf('is_type(\'integer\', %s, { legacy_ints => 1 }) is false', $_))
