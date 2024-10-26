@@ -29,7 +29,7 @@ my %inflated_data = (
 );
 
 my %json_data = (
-  null => [ 'null'],
+  null => [ 'null' ],
   boolean => [ 'false', 'true' ],
   object => [ '{}', '{"a":1}' ],
   array => [ '[]', '[1]' ],
