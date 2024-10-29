@@ -122,7 +122,7 @@ sub get_type ($value, $config = {}) {
     return $ref eq 'Math::BigInt' ? 'integer'
       # note: this will be wrong for Math::BigFloat->new('1.0') in draft4
       : $ref eq 'Math::BigFloat' ? ($value->is_int ? 'integer' : 'number')
-      : (blessed($value) ? '' : 'reference to ').$ref;
+      : (defined blessed($value) ? '' : 'reference to ').$ref;
   }
 
   my $flags = B::svref_2object(\$value)->FLAGS;

@@ -219,6 +219,7 @@ subtest 'is_type and get_type for references' => sub {
     [ qr/foo/, 'Regexp' ],
     [ *STDIN{IO}, 'IO::File' ],
     [ bless({}, 'Foo'), 'Foo' ],
+    [ bless({}, '0'), '0' ],
   ) {
     is(get_type($test->[0]), $test->[1], $test->[1].' type is reported without exception');
     ok(is_type($test->[1], $test->[0]), 'value is a '.$test->[1]);
