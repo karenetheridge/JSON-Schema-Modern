@@ -117,11 +117,13 @@ sub get_type ($value, $config = {}) {
   return 'array' if is_plain_arrayref($value);
 
   # floats in json will always be parsed into Math::BigFloat, when allow_bignum is enabled
-  return ref($value) eq 'Math::BigInt' ? 'integer'
+  if (is_ref($value)) {
+    my $ref = ref($value);
+    return $ref eq 'Math::BigInt' ? 'integer'
       # note: this will be wrong for Math::BigFloat->new('1.0') in draft4
-      : ref($value) eq 'Math::BigFloat' ? ($value->is_int ? 'integer' : 'number')
-      : (blessed($value) ? '' : 'reference to ').ref($value)
-    if is_ref($value);
+      : $ref eq 'Math::BigFloat' ? ($value->is_int ? 'integer' : 'number')
+      : (blessed($value) ? '' : 'reference to ').$ref;
+  }
 
   my $flags = B::svref_2object(\$value)->FLAGS;
   return 'string' if $flags & B::SVf_POK && !($flags & (B::SVf_IOK | B::SVf_NOK));
