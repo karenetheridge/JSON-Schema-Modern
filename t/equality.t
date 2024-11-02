@@ -50,6 +50,7 @@ subtest 'equality, using inflated data' => sub {
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
     is($state->{error}, $error // '', 'error is correct') if not $expected;
     is($state->{error}, undef, 'error is undefined') if $expected;
+    isnt($state->{error}, 'uh oh', 'no unexpected error encountered');
 
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
@@ -85,6 +86,7 @@ subtest 'equality, using JSON strings' => sub {
     my $result = is_equal($x, $y, my $state = {});
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
+    isnt($state->{error}, 'uh oh', 'no unexpected error encountered');
 
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
@@ -108,6 +110,7 @@ subtest 'equality, using scalarref_booleans' => sub {
 
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
+    isnt($state->{error}, 'uh oh', 'no unexpected error encountered');
 
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
@@ -140,6 +143,7 @@ subtest 'equality, using stringy_numbers' => sub {
     ok(!($result xor $expected), json_sprintf('%s == %s is %s', $x, $y, $expected));
     is($state->{path}, $diff_path // '', 'two instances differ at the expected place') if not $expected;
 
+    isnt($state->{error}, 'uh oh', 'no unexpected error encountered');
     is(get_type($x), $types[0], 'type of arg 0 was not mutated while making equality check (get_type returns '.$types[0].')');
     is(get_type($y), $types[1], 'type of arg 1 was not mutated while making equality check (get_type returns '.$types[1].')');
 
