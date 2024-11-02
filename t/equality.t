@@ -11,7 +11,7 @@ use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal);
-use Scalar::Util 'dualvar';
+use Scalar::Util qw(dualvar isdual);
 use lib 't/lib';
 use Helper;
 
@@ -55,6 +55,14 @@ subtest 'equality, using inflated data' => sub {
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
+    foreach my $idx (0, 1) {
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+        if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
+
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
+        if $types[$idx] eq 'string';
+    }
+
     note '';
   }
 };
@@ -91,6 +99,14 @@ subtest 'equality, using JSON strings' => sub {
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
+    foreach my $idx (0, 1) {
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+        if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
+
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
+        if $types[$idx] eq 'string';
+    }
+
     note '';
   }
 };
@@ -114,6 +130,14 @@ subtest 'equality, using scalarref_booleans' => sub {
 
     ok(is_type($types[0], $x), 'type of arg 0 was not mutated while making equality check');
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
+
+    foreach my $idx (0, 1) {
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+        if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
+
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
+        if $types[$idx] eq 'string';
+    }
 
     note '';
   }
@@ -158,6 +182,14 @@ subtest 'equality, using stringy_numbers' => sub {
       is_type($types[1], $y),
       "type of arg 1 was not mutated while making equality check (is_type('$types[1]') returns true)",
     ) if $types[1] ne 'ambiguous type';
+
+    foreach my $idx (0, 1) {
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+        if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
+
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
+        if not ($idx == 1 and isdual($y) and $types[1] ne'ambiguous type') and $types[$idx] eq 'string';
+    }
 
     note '';
   }
