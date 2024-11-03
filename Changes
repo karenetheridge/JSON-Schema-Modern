@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.594     2024-11-03 17:01:42Z
           - improved handling of numeric type checking in draft4
           - numeric type checking is relaxed, now allowing for dualvars
