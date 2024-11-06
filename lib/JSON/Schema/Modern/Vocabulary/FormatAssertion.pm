@@ -203,10 +203,7 @@ sub _get_format_definition ($class, $schema, $state) {
     # draft2019-09+ hostname uses RFC1123
     elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
       require Data::Validate::Domain;
-    }
-
-    if ($schema->{format} eq 'idn-hostname') {
-      require Net::IDN::Encode;
+      require Net::IDN::Encode if $schema->{format} eq 'idn-hostname';
     }
   }
   catch ($e) {
