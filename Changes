@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.595     2024-11-07 18:57:16Z
           - bump required version of builtin::compat
 
