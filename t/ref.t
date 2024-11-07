@@ -16,11 +16,17 @@ use Helper;
 my $js = JSON::Schema::Modern->new;
 
 subtest 'local JSON pointer' => sub {
-  ok($js->evaluate(true, { '$defs' => { true => true }, '$ref' => '#/$defs/true' }),
-    'can follow local $ref to a true schema');
+  cmp_result(
+    $js->evaluate(true, { '$defs' => { true => true }, '$ref' => '#/$defs/true' })->TO_JSON,
+    { valid => true },
+    'can follow local $ref to a true schema',
+  );
 
-  ok(!$js->evaluate(true, { '$defs' => { false => false }, '$ref' => '#/$defs/false' }),
-    'can follow local $ref to a false schema');
+  cmp_result(
+    $js->evaluate(true, { '$defs' => { false => false }, '$ref' => '#/$defs/false' })->TO_JSON,
+    superhashof({ valid => false }),
+    'can follow local $ref to a false schema',
+  );
 
   is(
     exception {
@@ -37,20 +43,21 @@ subtest 'local JSON pointer' => sub {
 };
 
 subtest 'fragment with URI-escaped and JSON Pointer-escaped characters' => sub {
-  ok(
+  cmp_result(
     $js->evaluate(
       1,
       {
         '$defs' => { 'foo-bar-tilde~-slash/-braces{}-def' => true },
         '$ref' => '#/$defs/foo-bar-tilde~0-slash~1-braces%7B%7D-def',
       },
-    ),
+    )->TO_JSON,
+    { valid => true },
     'can follow $ref with escaped components',
   );
 };
 
 subtest 'local anchor' => sub {
-  ok(
+  cmp_result(
     $js->evaluate(
       true,
       {
@@ -61,12 +68,13 @@ subtest 'local anchor' => sub {
         },
         '$ref' => '#true',
       },
-    ),
+    )->TO_JSON,
+    { valid => true },
     'can follow local $ref to an $anchor to a true schema',
   );
 
-  ok(
-    !$js->evaluate(
+  cmp_result(
+    $js->evaluate(
       true,
       {
         '$defs' => {
@@ -77,7 +85,8 @@ subtest 'local anchor' => sub {
         },
         '$ref' => '#false',
       },
-    ),
+    )->TO_JSON,
+    superhashof({ valid => false }),
     'can follow local $ref to an $anchor to a false schema',
   );
 

@@ -1,5 +1,4 @@
 use strictures 2;
-use 5.020;
 use stable 0.031 'postderef';
 use experimental 'signatures';
 no autovivification warn => qw(fetch store exists delete);
@@ -9,15 +8,10 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::V0;
 use Test::Needs qw(Sereal::Encoder Sereal::Decoder);
 use Test::Warnings qw(:no_end_test had_no_warnings);
-use Test::Deep qw(cmp_deeply);
-use IPC::Open3;
-use JSON::Schema::Modern;
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
-use JSON::PP ();
-use constant { true => JSON::PP::true, false => JSON::PP::false };
+use lib 't/lib';
+use Helper;
 
 my $js = JSON::Schema::Modern->new(
   collect_annotations => 1,
@@ -49,7 +43,11 @@ my $schema = {
 
 $js->add_schema($metaschema);
 $js->add_schema($schema);
-ok($js->evaluate($schema, {}), 'evaluated against an empty schema');
+cmp_result(
+  $js->evaluate($schema, {})->TO_JSON,
+  { valid => true },
+  'evaluated against an empty schema',
+);
 
 cmp_deeply(
   $js->evaluate(1, 'https://my_schema')->TO_JSON,
@@ -103,7 +101,11 @@ cmp_deeply(
   'thawed object contains all the right keys',
 );
 
-ok($thawed->evaluate($schema, {}), 'evaluate again against an empty schema');
+cmp_result(
+  $thawed->evaluate($schema, {})->TO_JSON,
+  { valid => true },
+  'evaluate again against an empty schema',
+);
 
 cmp_deeply(
   $js->evaluate('hi', 'https://my_schema')->TO_JSON,
@@ -124,7 +126,11 @@ cmp_deeply(
 
 $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
 $thawed = Sereal::Decoder->new->decode($frozen);
-ok($thawed->evaluate($schema, {}), 'evaluate again against an empty schema');
+cmp_result(
+  $thawed->evaluate($schema, {})->TO_JSON,
+  { valid => true },
+  'evaluate again against an empty schema',
+);
 
 ok($thawed->_get_vocabulary_class('https://json-schema.org/draft/2020-12/vocab/core'), 'core vocabulary_class for a different spec version works in a thawed object');
 ok($thawed->_get_vocabulary_class('https://json-schema.org/draft/2020-12/vocab/format-assertion'), 'format-assertion vocabulary_class works in a thawed object');

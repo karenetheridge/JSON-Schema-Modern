@@ -983,7 +983,11 @@ subtest '$vocabulary' => sub {
     'metaschemas are not saved on the resource',
   );
 
-  ok($js->evaluate(1, { '$schema' => 'http://mymetaschema' }), '..but once we use the schema as a metaschema,');
+  cmp_result(
+    $js->evaluate(1, { '$schema' => 'http://mymetaschema' })->TO_JSON,
+    { valid => true },
+    '..but once we use the schema as a metaschema,',
+  );
 
   cmp_result(
     $js->{_metaschema_vocabulary_classes}{'http://mymetaschema'},
