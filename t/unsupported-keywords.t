@@ -26,6 +26,7 @@ my %schemas = (
 );
 
 my @warnings = (
+  [ draft6 => [ qw(id) ] ],
   [ draft7 => [ qw(id) ] ],
   [ 'draft2019-09' => [ qw(id definitions dependencies) ] ],
 );
