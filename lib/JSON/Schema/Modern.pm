@@ -1270,7 +1270,7 @@ May be one of:
   corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>
 * L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>,
   corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
-* L<C<draft6> or C<4>|https://json-schema.org/specification-links.html#draft-6>,
+* L<C<draft6> or C<6>|https://json-schema.org/specification-links.html#draft-6>,
   corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
 * L<C<draft4> or C<4>|https://json-schema.org/specification-links.html#draft-4>,
   corresponding to metaschema C<http://json-schema.org/draft-04/schema#>
