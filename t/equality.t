@@ -188,7 +188,7 @@ subtest 'equality, using stringy_numbers' => sub {
         if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
 
       ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
-        if not ($idx == 1 and isdual($y) and $types[1] ne'ambiguous type') and $types[$idx] eq 'string';
+        if not ($idx == 1 and isdual($y) and $types[1] ne 'ambiguous type') and $types[$idx] eq 'string';
     }
 
     note '';
