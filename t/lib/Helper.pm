@@ -1,3 +1,4 @@
+# vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
 # no package, so things defined here appear in the namespace of the parent.
 use strictures 2;
 use 5.020;

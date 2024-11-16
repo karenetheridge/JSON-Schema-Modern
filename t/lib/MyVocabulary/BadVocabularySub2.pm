@@ -1,3 +1,4 @@
+# vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
 package MyVocabulary::BadVocabularySub2;
 use Moo;
 with 'JSON::Schema::Modern::Vocabulary';
