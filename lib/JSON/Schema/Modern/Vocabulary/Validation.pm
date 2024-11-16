@@ -138,7 +138,7 @@ sub _eval_keyword_maximum ($class, $data, $schema, $state) {
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
 
   return 1 if 0+$data < $schema->{maximum};
-  if ($state->{spec_version} eq 'draft4' and exists $schema->{exclusiveMaximum} and $schema->{exclusiveMaximum}) {
+  if ($state->{spec_version} eq 'draft4' and $schema->{exclusiveMaximum}) {
     return E($state, 'value is greater than or equal to %s', sprintf_num($schema->{maximum}));
   }
   else {
@@ -174,7 +174,7 @@ sub _eval_keyword_minimum ($class, $data, $schema, $state) {
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
 
   return 1 if 0+$data > $schema->{minimum};
-  if ($state->{spec_version} eq 'draft4' and exists $schema->{exclusiveMinimum} and $schema->{exclusiveMinimum}) {
+  if ($state->{spec_version} eq 'draft4' and $schema->{exclusiveMinimum}) {
     return E($state, 'value is less than or equal to %s', sprintf_num($schema->{minimum}));
   }
   else {
