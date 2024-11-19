@@ -167,7 +167,7 @@ sub get_type ($value, $config = {}) {
 }
 
 # lifted from JSON::MaybeXS
-# note: unlike builtin::compat on older perls, we do not accept
+# note: unlike builtin::compat::is_bool on older perls, we do not accept
 # dualvar(0,"") or dualvar(1,"1") because JSON::PP and Cpanel::JSON::XS
 # do not encode these as booleans.
 use constant HAVE_BUILTIN => "$]" >= 5.035010;
