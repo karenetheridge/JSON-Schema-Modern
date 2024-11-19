@@ -170,7 +170,7 @@ sub get_type ($value, $config = {}) {
 # note: unlike builtin::compat on older perls, we do not accept
 # dualvar(0,"") or dualvar(1,"1") because JSON::PP and Cpanel::JSON::XS
 # do not encode these as booleans.
-use constant HAVE_BUILTIN => $] ge '5.036';
+use constant HAVE_BUILTIN => "$]" >= 5.035010;
 use if HAVE_BUILTIN, experimental => 'builtin';
 sub is_bool ($value) {
   HAVE_BUILTIN and builtin::is_bool($value)
