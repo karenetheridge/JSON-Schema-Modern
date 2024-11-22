@@ -662,7 +662,12 @@ sub _eval_subschema ($self, $data, $schema, $state) {
     && !exists($schema->{unevaluatedItems}) && !exists($schema->{unevaluatedProperties});
 
   ALL_KEYWORDS:
-  foreach my $vocabulary ($state->{vocabularies}->@*) {
+  for (my $vocab_index = 0; $vocab_index < $state->{vocabularies}->@*; $vocab_index++) {
+    # we use an index rather than iterating through the list directly because the list of
+    # vocabularies can change after we have started. However, only the Core vocabulary can make this
+    # change, and it always comes first, therefore a simple index into the list is sufficient.
+    my $vocabulary = $state->{vocabularies}[$vocab_index];
+
     # [ [ $keyword => $subref|undef ], [ ... ] ]
     my $keyword_list = do {
       use autovivification qw(fetch store);

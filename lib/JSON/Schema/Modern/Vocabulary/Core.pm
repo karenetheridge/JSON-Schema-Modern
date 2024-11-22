@@ -77,6 +77,10 @@ sub _traverse_keyword_id ($class, $schema, $state) {
   # we don't set or update document_path because it is identical to traversed_schema_path
   $state->{schema_path} = '';
 
+  # Note that even though '$id' is considered ahead of '$schema' in the keyword list, we have
+  # already parsed the '$schema' keyword (before we even started looping through all vocabularies)
+  # and therefore this data (specification_version and vocabularies) is known to be correct.
+
   push $state->{identifiers}->@*,
     $state->{initial_schema_uri} => {
       path => $state->{traversed_schema_path},

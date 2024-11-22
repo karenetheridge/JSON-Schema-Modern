@@ -439,7 +439,7 @@ subtest 'behaviour with a $schema keyword' => sub {
   );
 };
 
-subtest 'setting or changing schema semantics in a single document' => sub {
+subtest 'setting or changing specification versions in a single document' => sub {
   cmp_result(
     $js->evaluate(
       1,
@@ -459,7 +459,7 @@ subtest 'setting or changing schema semantics in a single document' => sub {
   );
 };
 
-subtest 'changing schema semantics across documents' => sub {
+subtest 'changing specification versions across documents' => sub {
   my $expected = [ re(qr!^\Qno-longer-supported "dependencies" keyword present (at location "https://iam.draft2019-09.com")!) ];
   $expected = superbagof(@$expected) if not $ENV{AUTHOR_TESTING};
   cmp_result(
@@ -670,7 +670,7 @@ subtest 'changing schema semantics across documents' => sub {
   );
 };
 
-subtest 'changing schema semantics within documents' => sub {
+subtest 'changing specification versions within documents' => sub {
   allow_warnings(1);
   cmp_result(
     $js->evaluate(
@@ -881,7 +881,7 @@ subtest 'changing schema semantics within documents' => sub {
 
 undef $js;
 
-subtest '$vocabulary' => sub {
+subtest '$vocabulary syntax' => sub {
   cmp_result(
     JSON::Schema::Modern->new->evaluate(
       1,
@@ -1000,6 +1000,163 @@ subtest '$vocabulary' => sub {
       ],
     ],
     '... the vocabulary information is now cached in the evaluator',
+  );
+};
+
+subtest 'changing dialects (same specification version)' => sub {
+  my $js = JSON::Schema::Modern->new(collect_annotations => 1);
+
+  $js->add_schema({
+    '$id' => 'https://my_metaschema',
+    '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/validation' => true,
+      # no applicator!
+    },
+  });
+
+  $js->add_schema({
+    '$id' => 'https://my_other_schema',
+    '$schema' => 'https://my_metaschema',
+    type => 'object',
+    properties => { bar => false }, # this keyword should only annotate
+    zeta => 1,
+  });
+
+  cmp_result(
+    $js->evaluate(
+      { foo => { bar => 1 } },
+      {
+        '$id' => 'https://example.com',
+        additionalProperties => {
+          '$ref' => 'https://my_other_schema',
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/properties',
+          absoluteKeywordLocation => 'https://my_other_schema#/properties',
+          annotation => { bar => false },
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/zeta',
+          absoluteKeywordLocation => 'https://my_other_schema#/zeta',
+          annotation => 1,
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          absoluteKeywordLocation => 'https://example.com#/additionalProperties',
+          annotation => ['foo'],
+        },
+      ],
+    },
+    'evaluation of the subschema in another document correctly uses the new $id and $schema',
+  );
+
+  cmp_result(
+    $js->evaluate(
+      { foo => { bar => 1 } },
+      {
+        '$id' => 'https://example2.com',
+        '$defs' => {
+          'my_def' => {
+            '$id' => 'https://my_other_schema2',
+            '$schema' => 'https://my_metaschema',
+            type => 'object',
+            properties => { bar => false }, # this keyword should only annotate
+            zeta => 1,
+          },
+        },
+        additionalProperties => {
+          '$ref' => 'https://my_other_schema2',
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/properties',
+          absoluteKeywordLocation => 'https://my_other_schema2#/properties',
+          annotation => { bar => false },
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/zeta',
+          absoluteKeywordLocation => 'https://my_other_schema2#/zeta',
+          annotation => 1,
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          absoluteKeywordLocation => 'https://example2.com#/additionalProperties',
+          annotation => ['foo'],
+        },
+      ],
+    },
+    'evaluation of the subschema in the same document via a $ref correctly uses the new $id and $schema',
+  );
+
+  cmp_result(
+    $js->evaluate(
+      { foo => { bar => 1 } },
+      {
+        '$id' => 'https://example3.com',
+        additionalProperties => {
+          '$id' => 'https://my_other_schema3',
+          '$schema' => 'https://my_metaschema',
+          type => 'object',
+          properties => { bar => false }, # this keyword should only annotate
+          zeta => 1,
+        },
+      },
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/properties',
+          absoluteKeywordLocation => 'https://my_other_schema3#/properties',
+          annotation => { bar => false },
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/zeta',
+          absoluteKeywordLocation => 'https://my_other_schema3#/zeta',
+          annotation => 1,
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          absoluteKeywordLocation => 'https://example3.com#/additionalProperties',
+          annotation => ['foo'],
+        },
+      ],
+    },
+    'evaluation of the subschema in the same document with no $ref correctly uses the new $id and $schema',
+  );
+
+  cmp_result(
+    $js->traverse({
+      '$id' => 'https://example4.com',
+      additionalProperties => {
+        '$id' => 'https://my_other_schema4',
+        '$schema' => 'https://my_metaschema',
+        type => 'object',
+        properties => 1,  # this is not a real keyword as the assertion vocabulary is not present
+      },
+    }),
+    superhashof({ errors => [] }),
+    'no errors found when traversing a document with a malformed keyword outside the dialect',
   );
 };
 
