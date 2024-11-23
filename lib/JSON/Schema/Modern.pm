@@ -1795,7 +1795,7 @@ UNTRUSTED SOURCES.>
 
 (In particular, see vulnerability
 L<perl5363delta/CVE-2023-47038-Write-past-buffer-end-via-illegal-user-defined-Unicode-property>,
-which is closed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
+which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 
 =head1 SEE ALSO
 
