@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - properly handle changing of dialects (including swapping out
             vocabularies) when evaluating a local subschema (without a $ref)
+          - now collecting identifiers within contentSchema keywords as we do
+            for any other subschema
 
 0.595     2024-11-07 18:57:16Z
           - bump required version of builtin::compat

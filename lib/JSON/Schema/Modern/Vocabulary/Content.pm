@@ -93,10 +93,7 @@ sub _eval_keyword_contentMediaType ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_contentSchema ($class, $schema, $state) {
-  # since contentSchema should never be assumed to be evaluated in the context of the containing
-  # schema, it is not appropriate to gather identifiers found therein -- but we can still validate
-  # the subschema.
-  $class->traverse_subschema($schema, +{ %$state, identifiers => [] });
+  $class->traverse_subschema($schema, $state);
 }
 
 sub _eval_keyword_contentSchema ($class, $data, $schema, $state) {
