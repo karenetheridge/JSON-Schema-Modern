@@ -946,6 +946,7 @@ sub _parse_keyword_schema ($self, $state, $metaschema_uri) {
   return E($state, '"%s" is not a valid metaschema', $metaschema_uri)
     if not $vocabularies or not @$vocabularies;
 
+  $self->_set_metaschema_vocabulary_classes($metaschema_uri, [ $spec_version, $vocabularies ]);
   $state->@{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
   return 1;
 }
@@ -990,9 +991,6 @@ sub _fetch_vocabulary_data ($self, $state, $schema_info) {
 
   $valid = E($state, 'the first vocabulary (by evaluation_order) must be Core')
     if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
-
-  $self->_set_metaschema_vocabulary_classes($schema_info->{canonical_uri},
-    [ $schema_info->{specification_version}, \@vocabulary_classes ]) if $valid;
 
   return ($schema_info->{specification_version}, $valid ? \@vocabulary_classes : []);
 }
