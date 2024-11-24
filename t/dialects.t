@@ -977,7 +977,24 @@ subtest 'changing specification versions within documents' => sub {
   );
   allow_warnings(0);
 
-  # XXX check resources here too
+  cmp_result(
+    $js->{_resource_index}{'https://iam.draft2020-12-5.com'},
+    superhashof({
+      specification_version => 'draft2020-12',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
+    }),
+    'resources for top level schema',
+  );
+  cmp_result(
+    $js->{_resource_index}{'https://iam.draft4-5.com'},
+    superhashof({
+      specification_version => 'draft4',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator MetaData) ],
+    }),
+    'resources for subschema',
+  );
 };
 
 undef $js;
