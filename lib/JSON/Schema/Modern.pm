@@ -535,21 +535,6 @@ sub _traverse_subschema ($self, $schema, $state) {
   my $valid = 1;
   my %unknown_keywords = map +($_ => undef), keys %$schema;
 
-  # First, we must determine the dialect to use. This is given to us in metaschema_uri
-  # and can also be indicated with the '$schema' keyword. We need to do this now, before iterating
-  # over vocabulary classes and keywords, because these can change depending on the dialect.
-  if (exists $schema->{'$schema'}) {
-    return if not $self->_parse_keyword_schema($state, $schema->{'$schema'});
-
-    # This is a bit of a chicken-and-egg situation. If we start off at draft2020-12, then all
-    # keywords are valid, so we inspect and process the $schema keyword; this switches us to draft7
-    # but now only the $ref keyword is respected and everything else should be ignored, so the
-    # $schema keyword never happened, so now we're back to draft2020-12 again, and...?!
-    # The only winning move is not to play.
-    return E($state, '$schema and $ref cannot be used together in older drafts')
-      if exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
-  }
-
   # we use an index rather than iterating through the lists directly because the lists of
   # vocabularies and keywords can change after we have started. However, only the Core vocabulary
   # and $schema keyword can make this change, and they both come first, therefore a simple index
@@ -926,46 +911,6 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
   ) if $state->{errors}->@*;
 
   return ($state->{spec_version}, $state->{vocabularies});
-}
-
-# we can't do this work in the context of looping over vocabularies and keywords, because this
-# keyword changes which vocabularies and keywords we're going to use. Additionally we may need to
-# fetch and parse the referenced schema to discover what vocabularies it defines.
-sub _parse_keyword_schema ($self, $state, $metaschema_uri) {
-  $state->{keyword} = '$schema';
-
-  return E($state, '$schema value is not a string') if not is_type('string', $metaschema_uri);
-  return if not assert_uri($state, { '$schema' => $metaschema_uri });
-
-  my ($spec_version, $vocabularies);
-
-  if (my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri)) {
-    ($spec_version, $vocabularies) = @$metaschema_info;
-  }
-  else {
-    my $schema_info = $self->_fetch_from_uri($metaschema_uri);
-    return E($state, 'EXCEPTION: unable to find resource %s', $metaschema_uri) if not $schema_info;
-    # this cannot happen unless there are other entity types in the index
-    return E($state, 'EXCEPTION: bad reference to $schema %s: not a schema', $schema_info->{canonical_uri})
-      if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
-
-    if (not is_plain_hashref($schema_info->{schema})) {
-      ()= E($state, 'metaschemas must be objects');
-    }
-    else {
-      ($spec_version, $vocabularies) = $self->_fetch_vocabulary_data({ %$state,
-          keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($metaschema_uri),
-          traversed_schema_path => jsonp($state->{schema_path}, '$schema'),
-        }, $schema_info);
-    }
-  }
-
-  return E($state, '"%s" is not a valid metaschema', $metaschema_uri)
-    if not $vocabularies or not @$vocabularies;
-
-  $self->_set_metaschema_vocabulary_classes($metaschema_uri, [ $spec_version, $vocabularies ]);
-  $state->@{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
-  return 1;
 }
 
 # translate vocabulary URIs into classes, caching the results (if any)
