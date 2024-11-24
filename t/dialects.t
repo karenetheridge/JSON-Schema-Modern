@@ -877,6 +877,107 @@ subtest 'changing specification versions within documents' => sub {
     }),
     'resources for subschema',
   );
+
+  allow_warnings(1);
+  cmp_result(
+    $js->evaluate(
+      { foo => 'hi' },
+      {
+        '$id' => 'https://iam.draft2020-12-5.com',
+        '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+        allOf => [
+          {
+            id => 'https://iam.draft4-5.com',
+            '$schema' => 'http://json-schema.org/draft-04/schema#',
+            definitions => { blah => false },
+            dependencies => { foo => false },
+            dependentSchemas => { foo => false }, # this should be ignored
+            allOf => [ { '$ref' => '#/definitions/blah' } ],
+            additionalProperties => { format => 'ipv4' },
+          },
+        ],
+        dependencies => { foo => false },         # this should be ignored
+        dependentSchemas => { foo => false },
+        additionalProperties => { format => 'ipv6' },
+        unevaluatedProperties => false,
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/allOf/0/$ref',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/definitions/blah',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/allOf',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/allOf',
+          error => 'subschema 0 is not valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/dependencies/foo',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/dependencies/foo',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/dependencies',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/dependencies',
+          error => 'not all dependencies are satisfied',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/allOf/0/additionalProperties/format',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/additionalProperties/format',
+          error => 'not a valid ipv4',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/additionalProperties',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          absoluteKeywordLocation => 'https://iam.draft2020-12-5.com#/allOf',
+          error => 'subschema 0 is not valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/dependentSchemas/foo',
+          absoluteKeywordLocation => 'https://iam.draft2020-12-5.com#/dependentSchemas/foo',
+          error => 'subschema is false',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/dependentSchemas',
+          absoluteKeywordLocation => 'https://iam.draft2020-12-5.com#/dependentSchemas',
+          error => 'not all dependencies are satisfied',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/format',
+          absoluteKeywordLocation => 'https://iam.draft2020-12-5.com#/additionalProperties/format',
+          error => 'not a valid ipv6',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          absoluteKeywordLocation => 'https://iam.draft2020-12-5.com#/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+      ],
+    },
+    'switching between specification versions is acceptable within a document, draft2020-12 -> draft4',
+  );
+  allow_warnings(0);
+
+  # XXX check resources here too
 };
 
 undef $js;

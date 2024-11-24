@@ -2,7 +2,8 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - properly handle changing of dialects (including swapping out
-            vocabularies) when evaluating a local subschema (without a $ref)
+            vocabularies and keywords) when evaluating a local subschema
+            (without a $ref)
           - now collecting identifiers within contentSchema keywords as we do
             for any other subschema
 

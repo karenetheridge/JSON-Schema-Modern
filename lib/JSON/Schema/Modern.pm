@@ -550,19 +550,25 @@ sub _traverse_subschema ($self, $schema, $state) {
       if exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
   }
 
+  # we use an index rather than iterating through the lists directly because the lists of
+  # vocabularies and keywords can change after we have started. However, only the Core vocabulary
+  # and $schema keyword can make this change, and they both come first, therefore a simple index
+  # into the list is sufficient.
   ALL_KEYWORDS:
-  foreach my $vocabulary ($state->{vocabularies}->@*) {
-    # [ [ $keyword => $subref ], [ ... ] ]
-    my $keyword_list = do {
-      use autovivification qw(fetch store);
-      $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
-        map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
-          $vocabulary->keywords($state->{spec_version})
-      ];
-    };
+  for (my $vocab_index = 0; $vocab_index < $state->{vocabularies}->@*; $vocab_index++) {
+    my $vocabulary = $state->{vocabularies}[$vocab_index];
+    my $keyword_list;
 
-    foreach my $keyword_tuple ($keyword_list->@*) {
-      my ($keyword, $sub) = $keyword_tuple->@*;
+    for (my $keyword_index = 0;
+        $keyword_index < ($keyword_list //= do {
+          use autovivification qw(fetch store);
+          $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
+            map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
+              $vocabulary->keywords($state->{spec_version})
+          ];
+        })->@*;
+        $keyword_index++) {
+      my ($keyword, $sub) = $keyword_list->[$keyword_index]->@*;
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
@@ -571,11 +577,16 @@ sub _traverse_subschema ($self, $schema, $state) {
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
 
+      my $old_spec_version = $state->{spec_version};
+
       if (not $sub->($vocabulary, $schema, $state)) {
         die 'traverse result is false but there are no errors (keyword: '.$keyword.')' if not $state->{errors}->@*;
         $valid = 0;
         next;
       }
+
+      # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing
+      undef $keyword_list if $state->{spec_version} ne $old_spec_version;
 
       if (my $callback = $state->{callbacks}{$keyword}) {
         if (not $callback->($schema, $state)) {
@@ -661,24 +672,26 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   $state->{short_circuit} = ($state->{short_circuit} || delete($state->{short_circuit_suggested}))
     && !exists($schema->{unevaluatedItems}) && !exists($schema->{unevaluatedProperties});
 
+  # we use an index rather than iterating through the lists directly because the lists of
+  # vocabularies and keywords can change after we have started. However, only the Core vocabulary
+  # and $schema keyword can make this change, and they both come first, therefore a simple index
+  # into the list is sufficient.
+
   ALL_KEYWORDS:
   for (my $vocab_index = 0; $vocab_index < $state->{vocabularies}->@*; $vocab_index++) {
-    # we use an index rather than iterating through the list directly because the list of
-    # vocabularies can change after we have started. However, only the Core vocabulary can make this
-    # change, and it always comes first, therefore a simple index into the list is sufficient.
     my $vocabulary = $state->{vocabularies}[$vocab_index];
+    my $keyword_list;
 
-    # [ [ $keyword => $subref|undef ], [ ... ] ]
-    my $keyword_list = do {
-      use autovivification qw(fetch store);
-      $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
-        map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
-          $vocabulary->keywords($state->{spec_version})
-      ];
-    };
-
-    foreach my $keyword_tuple ($keyword_list->@*) {
-      my ($keyword, $sub) = $keyword_tuple->@*;
+    for (my $keyword_index = 0;
+        $keyword_index < ($keyword_list //= do {
+          use autovivification qw(fetch store);
+          $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
+            map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
+              $vocabulary->keywords($state->{spec_version})
+          ];
+        })->@*;
+        $keyword_index++) {
+      my ($keyword, $sub) = $keyword_list->[$keyword_index]->@*;
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
@@ -688,6 +701,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       $state->{keyword} = $keyword;
 
       if ($sub) {
+        my $old_spec_version = $state->{spec_version};
         my $error_count = $state->{errors}->@*;
 
         if (not $sub->($vocabulary, $data, $schema, $state)) {
@@ -698,6 +712,9 @@ sub _eval_subschema ($self, $data, $schema, $state) {
           last ALL_KEYWORDS if $state->{short_circuit};
           next;
         }
+
+        # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing
+        undef $keyword_list if $state->{spec_version} ne $old_spec_version;
       }
 
       if (my $callback = ($state->{callbacks}//{})->{$keyword}) {

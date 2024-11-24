@@ -31,8 +31,8 @@ sub evaluation_order ($class) { 0 }
 
 sub keywords ($class, $spec_version) {
   return (
-    $spec_version eq 'draft4' ? 'id' : '$id',
     '$schema',
+    $spec_version eq 'draft4' ? 'id' : '$id',
     $spec_version !~ /^draft[467]$/ ? '$anchor' : (),
     $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
     $spec_version !~ /^draft(?:[467]|2019-09)$/ ? '$dynamicAnchor' : (),
@@ -101,6 +101,7 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{document_path} = $state->{document_path}.$state->{schema_path};
   $state->{schema_path} = '';
+  # these will already be set if there is an adjacent $schema keyword
   $state->{spec_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
 
@@ -111,14 +112,23 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_schema ($class, $schema, $state) {
-  # This is now safe to check, as by now we will have processed any adjacent '$id' keyword.
   # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
   # "A resource's root schema is its top-level schema object."
   # note: we need not be at the document root, but simply adjacent to an $id (or be the at the
   # document root)
   return E($state, '$schema can only appear at the schema resource root')
-    if length($state->{schema_path});
+    if not exists $schema->{$state->{spec_version} eq 'draft4' ? 'id' : '$id'}
+      and length($state->{schema_path});
 
+  return 1;
+}
+
+sub _eval_keyword_schema ($class, $data, $schema, $state) {
+  # we can't always rely on metaschema information being set in $state (if we recursed into this
+  # subschema from a parent, where the data is not already set via $ref), and we need to do it now
+  # so the evaluator knows whether to look for an 'id' or an '$id' keyword next (which sets up the
+  # remaining data in $state).
+  $state->@{qw(spec_version vocabularies)} = $state->{evaluator}->_get_metaschema_vocabulary_classes($schema->{'$schema'})->@*;
   return 1;
 }
 
