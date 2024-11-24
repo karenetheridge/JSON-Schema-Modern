@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.596     2024-11-24 00:57:13Z
           - properly handle changing of dialects (including swapping out
             vocabularies and keywords) when evaluating a local subschema
             (without a $ref)

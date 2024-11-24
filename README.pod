@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.595
+version 0.596
 
 =head1 SYNOPSIS
 
@@ -61,7 +61,7 @@ L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>, c
 
 =item *
 
-L<C<draft6> or C<4>|https://json-schema.org/specification-links.html#draft-6>, corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
+L<C<draft6> or C<6>|https://json-schema.org/specification-links.html#draft-6>, corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
 
 =item *
 
@@ -792,7 +792,7 @@ UNTRUSTED SOURCES.>
 
 (In particular, see vulnerability
 L<perl5363delta/CVE-2023-47038-Write-past-buffer-end-via-illegal-user-defined-Unicode-property>,
-which is closed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
+which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 
 =head1 SEE ALSO
 
