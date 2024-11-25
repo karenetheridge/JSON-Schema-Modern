@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - report installed version of builtin
 
 0.596     2024-11-24 00:57:13Z
           - properly handle changing of dialects (including swapping out
