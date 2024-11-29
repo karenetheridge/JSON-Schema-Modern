@@ -82,8 +82,7 @@ sub _eval_keyword_type ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_enum ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'array');
-  return 1;
+  return assert_keyword_type($state, $schema, 'array');
 }
 
 sub _eval_keyword_enum ($class, $data, $schema, $state) {
@@ -250,8 +249,7 @@ sub _eval_keyword_minItems ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_uniqueItems ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'boolean');
-  return 1;
+  return assert_keyword_type($state, $schema, 'boolean');
 }
 
 sub _eval_keyword_uniqueItems ($class, $data, $schema, $state) {
@@ -339,8 +337,7 @@ sub _eval_keyword_dependentRequired ($class, $data, $schema, $state) {
 }
 
 sub _assert_number ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'number');
-  return 1;
+  return assert_keyword_type($state, $schema, 'number');
 }
 
 sub _assert_non_negative_integer ($class, $schema, $state) {

@@ -55,8 +55,7 @@ sub _traverse_keyword_default { 1 }
 *_eval_keyword_default = \&_eval_keyword_title;
 
 sub _traverse_keyword_deprecated ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'boolean');
-  return 1;
+  return assert_keyword_type($state, $schema, 'boolean');
 }
 
 *_eval_keyword_deprecated = \&_eval_keyword_title;
@@ -70,8 +69,7 @@ sub _traverse_keyword_deprecated ($class, $schema, $state) {
 *_eval_keyword_writeOnly = \&_eval_keyword_title;
 
 sub _traverse_keyword_examples ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'array');
-  return 1;
+  return assert_keyword_type($state, $schema, 'array');
 }
 
 *_eval_keyword_examples = \&_eval_keyword_title;

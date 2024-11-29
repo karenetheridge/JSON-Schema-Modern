@@ -38,8 +38,7 @@ sub keywords ($class, $spec_version) {
 }
 
 sub _traverse_keyword_contentEncoding ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'string');
-  return 1;
+  return assert_keyword_type($state, $schema, 'string');
 }
 
 sub _eval_keyword_contentEncoding ($class, $data, $schema, $state) {
@@ -60,8 +59,7 @@ sub _eval_keyword_contentEncoding ($class, $data, $schema, $state) {
     };
   }
 
-  A($state, $schema->{$state->{keyword}});
-  return 1;
+  return A($state, $schema->{$state->{keyword}});
 }
 
 *_traverse_keyword_contentMediaType = \&_traverse_keyword_contentEncoding;
@@ -88,8 +86,7 @@ sub _eval_keyword_contentMediaType ($class, $data, $schema, $state) {
     }
   }
 
-  A($state, $schema->{$state->{keyword}});
-  return 1;
+  return A($state, $schema->{$state->{keyword}});
 }
 
 sub _traverse_keyword_contentSchema ($class, $schema, $state) {
@@ -107,8 +104,7 @@ sub _eval_keyword_contentSchema ($class, $data, $schema, $state) {
         { %$state, schema_path => $state->{schema_path}.'/contentSchema' });
   }
 
-  A($state, dclone($schema->{contentSchema}));
-  return 1;
+  return A($state, dclone($schema->{contentSchema}));
 }
 
 1;
