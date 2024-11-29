@@ -131,7 +131,7 @@ sub _eval_keyword_multipleOf ($class, $data, $schema, $state) {
   return E($state, 'value is not a multiple of %s', sprintf_num($schema->{multipleOf}));
 }
 
-sub _traverse_keyword_maximum { goto \&_assert_number }
+*_traverse_keyword_maximum = \&_assert_number;
 
 sub _eval_keyword_maximum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
@@ -167,7 +167,7 @@ sub _eval_keyword_exclusiveMaximum ($class, $data, $schema, $state) {
   return E($state, 'value is greater than or equal to %s', sprintf_num($schema->{exclusiveMaximum}));
 }
 
-sub _traverse_keyword_minimum { goto \&_assert_number }
+*_traverse_keyword_minimum = \&_assert_number;
 
 sub _eval_keyword_minimum ($class, $data, $schema, $state) {
   return 1 if not is_type('number', $data)
@@ -203,7 +203,7 @@ sub _eval_keyword_exclusiveMinimum ($class, $data, $schema, $state) {
   return E($state, 'value is less than or equal to %s', sprintf_num($schema->{exclusiveMinimum}));
 }
 
-sub _traverse_keyword_maxLength { goto \&_assert_non_negative_integer }
+*_traverse_keyword_maxLength = \&_assert_non_negative_integer;
 
 sub _eval_keyword_maxLength ($class, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
@@ -211,7 +211,7 @@ sub _eval_keyword_maxLength ($class, $data, $schema, $state) {
   return E($state, 'length is greater than %d', $schema->{maxLength});
 }
 
-sub _traverse_keyword_minLength { goto \&_assert_non_negative_integer }
+*_traverse_keyword_minLength = \&_assert_non_negative_integer;
 
 sub _eval_keyword_minLength ($class, $data, $schema, $state) {
 
@@ -233,7 +233,7 @@ sub _eval_keyword_pattern ($class, $data, $schema, $state) {
   return E($state, 'pattern does not match');
 }
 
-sub _traverse_keyword_maxItems { goto \&_assert_non_negative_integer }
+*_traverse_keyword_maxItems = \&_assert_non_negative_integer;
 
 sub _eval_keyword_maxItems ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
@@ -241,7 +241,7 @@ sub _eval_keyword_maxItems ($class, $data, $schema, $state) {
   return E($state, 'array has more than %d item%s', $schema->{maxItems}, $schema->{maxItems} > 1 ? 's' : '');
 }
 
-sub _traverse_keyword_minItems { goto \&_assert_non_negative_integer }
+*_traverse_keyword_minItems = \&_assert_non_negative_integer;
 
 sub _eval_keyword_minItems ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
@@ -263,11 +263,11 @@ sub _eval_keyword_uniqueItems ($class, $data, $schema, $state) {
 
 # Note: no effort is made to check if the 'contains' keyword has been disabled via its vocabulary.
 # The evaluation implementation of maxContains and minContains are in the Applicator vocabulary
-sub _traverse_keyword_maxContains { goto \&_assert_non_negative_integer }
+*_traverse_keyword_maxContains = \&_assert_non_negative_integer;
 
-sub _traverse_keyword_minContains { goto \&_assert_non_negative_integer }
+*_traverse_keyword_minContains = \&_assert_non_negative_integer;
 
-sub _traverse_keyword_maxProperties { goto \&_assert_non_negative_integer }
+*_traverse_keyword_maxProperties = \&_assert_non_negative_integer;
 
 sub _eval_keyword_maxProperties ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
@@ -276,7 +276,7 @@ sub _eval_keyword_maxProperties ($class, $data, $schema, $state) {
     $schema->{maxProperties} > 1 ? 'ies' : 'y');
 }
 
-sub _traverse_keyword_minProperties { goto \&_assert_non_negative_integer }
+*_traverse_keyword_minProperties = \&_assert_non_negative_integer;
 
 sub _eval_keyword_minProperties ($class, $data, $schema, $state) {
   return 1 if not is_type('object', $data);
