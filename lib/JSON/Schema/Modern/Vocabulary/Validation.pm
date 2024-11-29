@@ -213,7 +213,6 @@ sub _eval_keyword_maxLength ($class, $data, $schema, $state) {
 *_traverse_keyword_minLength = \&_assert_non_negative_integer;
 
 sub _eval_keyword_minLength ($class, $data, $schema, $state) {
-
   return 1 if not is_type('string', $data);
   return 1 if length($data) >= $schema->{minLength};
   return E($state, 'length is less than %d', $schema->{minLength});
