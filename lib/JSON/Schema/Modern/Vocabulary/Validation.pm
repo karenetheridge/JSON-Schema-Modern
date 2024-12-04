@@ -46,7 +46,9 @@ sub keywords ($class, $spec_version) {
 
 sub _traverse_keyword_type ($class, $schema, $state) {
   if (is_plain_arrayref($schema->{type})) {
+    # Note: this is not actually in the spec, but the restriction exists in the metaschema
     return E($state, 'type array is empty') if not $schema->{type}->@*;
+
     foreach my $type ($schema->{type}->@*) {
       return E($state, 'unrecognized type "%s"', $type//'<null>')
         if not any { ($type//'') eq $_ } qw(null boolean object array string number integer);
