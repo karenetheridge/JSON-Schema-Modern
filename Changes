@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.597     2024-12-07 23:30:38Z
           - report installed version of builtin
 
