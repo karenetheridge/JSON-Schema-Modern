@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.596
+version 0.597
 
 =head1 SYNOPSIS
 
