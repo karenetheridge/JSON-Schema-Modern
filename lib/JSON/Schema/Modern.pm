@@ -1784,4 +1784,9 @@ which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 * L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality
 * L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
 
+=head1 AVAILABILITY
+
+This distribution and executable is available on modern Debian versions (via C<apt-get>) as the
+C<libjson-schema-modern-perl> package.
+
 =cut

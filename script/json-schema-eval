@@ -223,4 +223,9 @@ more than once.
 
 =for stopwords OpenAPI
 
+=head1 AVAILABILITY
+
+This executable is available on modern Debian versions (via C<apt-get>) as the
+C<libjson-schema-modern-perl> package.
+
 =cut
