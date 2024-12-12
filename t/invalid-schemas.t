@@ -14,23 +14,25 @@ use lib 't/lib';
 use Helper;
 use Acceptance;
 
-my $version = 'draft2019-09';
-
-acceptance_tests(
-  acceptance => {
-    specification => $version,
-    test_dir => 't/invalid-schemas-'.$version,
-    include_optional => 0,
-    test_schemas => 0,
-  },
-  evaluator => {
-    specification_version => $version,
-    validate_formats => 1,
-    collect_annotations => 0,
-  },
-  output_file => $version.'-invalid-schemas.txt',
-);
+foreach my $version (qw(draft2019-09 draft2020-12)) {
+  acceptance_tests(
+    acceptance => {
+      specification => $version,
+      test_dir => 't/invalid-schemas',
+      include_optional => 0,
+      test_schemas => 0,
+    },
+    evaluator => {
+      specification_version => $version,
+      validate_formats => 1,
+      collect_annotations => 0,
+    },
+    output_file => $version.'-invalid-schemas.txt',
+  );
+}
 
 done_testing;
 __END__
-see t/results/draft2019-09-invalid-schemas.txt for test results
+see results in
+t/results/draft2019-09-invalid-schemas.txt
+t/results/draft2020-12-invalid-schemas.txt
