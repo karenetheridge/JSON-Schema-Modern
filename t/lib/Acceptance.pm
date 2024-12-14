@@ -20,6 +20,11 @@ use Test::Memory::Cycle;
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::Schema::Modern;
 
+# supports options:
+# - acceptance: options passed to Test::JSON::Schema::Acceptance constructor
+# - evaluator: options passed to JSON::Schema::Modern constructor
+# - tests: options passed to Test::JSON::Schema::Acceptance::acceptance method
+# - output_file: filename to print results to (default: none)
 sub acceptance_tests (%options) {
   local $Test::Builder::Level = $Test::Builder::Level + 1;
 
