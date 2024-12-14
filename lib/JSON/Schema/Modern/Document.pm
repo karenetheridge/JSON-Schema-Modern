@@ -210,7 +210,7 @@ sub traverse ($self, $evaluator) {
   my $state = $evaluator->traverse($self->schema,
     {
       initial_schema_uri => $self->canonical_uri->clone,
-      $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri) : (),
+      $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri ) : (),
     }
   );
 

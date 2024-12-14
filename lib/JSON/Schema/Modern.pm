@@ -1366,7 +1366,7 @@ Defaults to false.
 =head2 evaluate_json_string
 
   $result = $js->evaluate_json_string($data_as_json_string, $schema);
-  $result = $js->evaluate_json_string($data_as_json_string, $schema, { collect_annotations => 1});
+  $result = $js->evaluate_json_string($data_as_json_string, $schema, { collect_annotations => 1 });
 
 Evaluates the provided instance data against the known schema document.
 

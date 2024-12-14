@@ -58,7 +58,7 @@ sub acceptance_tests (%options) {
       local $SIG{__WARN__} = sub {
         warn @_ if $_[0] !~ /^no-longer-supported "definitions" keyword present/;
       } if $options{acceptance}{specification} !~ /^draft[467]$/
-        and Test::JSON::Schema::Acceptance->VERSION < '1.027';
+          and Test::JSON::Schema::Acceptance->VERSION < '1.027';
       $js->add_schema($uri => $schema);
       $js_short_circuit->add_schema($uri => $schema) if not $ENV{NO_SHORT_CIRCUIT};
     }
