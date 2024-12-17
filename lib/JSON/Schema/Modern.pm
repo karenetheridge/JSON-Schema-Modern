@@ -789,12 +789,13 @@ sub _add_resources ($self, @kvs) {
       croak 'uri "'.$key.'" conflicts with an existing meta-schema resource';
     }
 
-    my $fragment = $value->{canonical_uri}->fragment;
-    croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
-      if defined $fragment and $fragment eq '';
+    if (defined(my $fragment = $value->{canonical_uri}->fragment)) {
+      croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
+        if $fragment eq '';
 
-    croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
-      if ($fragment // '') =~ m{^[^/]};
+      croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
+        if $fragment =~ m{^[^/]};
+    }
 
     use autovivification 'store';
     $self->{_resource_index}{$key} = $resource_type->($value);
