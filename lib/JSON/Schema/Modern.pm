@@ -760,10 +760,8 @@ has _resource_index => (
 );
 
 sub _get_resource { ($_[0]->{_resource_index}//{})->{$_[1]} }
-sub _add_resources {
-  use autovivification 'store';
-  $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
-}
+
+# does not check for duplicate entries, or for malformed uris
 sub _add_resources_unsafe {
   use autovivification 'store';
   $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
@@ -772,11 +770,8 @@ sub _resource_index { $_[0]->{_resource_index}->%* }
 sub _canonical_resources { values(($_[0]->{_resource_index}//{})->%*) }
 sub _resource_pairs { pairs(($_[0]->{_resource_index}//{})->%*) }
 
-around _add_resources => sub {
-  my ($orig, $self) = (shift, shift);
-
-  my @resources;
-  foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @_) {
+sub _add_resources ($self, @kvs) {
+  foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @kvs) {
     my ($key, $value) = @$pair;
 
     if (my $existing = $self->_get_resource($key)) {
@@ -801,9 +796,10 @@ around _add_resources => sub {
     croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
       if ($fragment // '') =~ m{^[^/]};
 
-    $self->$orig($key, $value);
+    use autovivification 'store';
+    $self->{_resource_index}{$key} = $resource_type->($value);
   }
-};
+}
 
 # $vocabulary uri (not its $id!) => [ spec_version, class ]
 has _vocabulary_classes => (

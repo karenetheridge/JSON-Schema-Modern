@@ -72,7 +72,6 @@ has resource_index => (
 
 sub resource_index { $_[0]->{resource_index}->%* }
 sub resource_pairs { pairs $_[0]->{resource_index}->%* }
-sub _add_resources { $_[0]->{resource_index}{$_[1]} = $resource_type->($_[2]) }
 sub _get_resource { $_[0]->{resource_index}{$_[1]} }
 sub _canonical_resources { values $_[0]->{resource_index}->%* }
 
@@ -138,11 +137,8 @@ sub get_entity_locations ($self, $entity) {
   grep $self->{_entities}{$_} == $index, keys $self->{_entities}->%*;
 }
 
-around _add_resources => sub {
-  my $orig = shift;
-  my $self = shift;
-
-  foreach my $pair (pairs @_) {
+sub _add_resources ($self, @kvs) {
+  foreach my $pair (pairs @kvs) {
     my ($key, $value) = @$pair;
 
     $resource_type->($value); # check type of hash value against Dict
@@ -158,9 +154,9 @@ around _add_resources => sub {
     croak sprintf('a resource canonical uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
       if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
 
-    $self->$orig($key, $value);
+    $self->{resource_index}{$key} = $value;
   }
-};
+}
 
 # shims for Mojo::JSON::Pointer
 sub data { shift->schema(@_) }
