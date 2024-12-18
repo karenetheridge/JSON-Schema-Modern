@@ -73,22 +73,26 @@ subtest 'boolean document' => sub {
 
 subtest 'object document' => sub {
   cmp_deeply(
-    JSON::Schema::Modern::Document->new(schema => {}),
+    JSON::Schema::Modern::Document->new(
+      defined $_ ? ( canonical_uri => $_ ) : (),
+      schema => {},
+    ),
     listmethods(
       resource_index => [
-        '' => {
+        str($_//'') => {
           path => '',
-          canonical_uri => str(''),
+          canonical_uri => str($_//''),
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
       ],
-      canonical_uri => [ str('') ],
+      canonical_uri => [ str($_//'') ],
       _entities => [ { '' => 0 } ],
     ),
-    'object schema with no canonical_uri, no root $id',
-  );
+    'object schema with originally provided uri = \''.($_//'<undef>').'\' and no root $id',
+  )
+  foreach (undef, '', '0', Mojo::URL->new(''), Mojo::URL->new('0'));
 
   cmp_deeply(
     JSON::Schema::Modern::Document->new(
@@ -115,11 +119,34 @@ subtest 'object document' => sub {
   cmp_deeply(
     JSON::Schema::Modern::Document->new(
       defined $_ ? ( canonical_uri => $_ ) : (),
+      schema => { '$id' => 'https://foo.com' },
+    ),
+    listmethods(
+      resource_index => unordered_pairs(
+        # note: no '' entry
+        'https://foo.com' => {
+          path => '',
+          canonical_uri => str('https://foo.com'),
+          specification_version => 'draft2020-12',
+          vocabularies => $vocabularies{'draft2020-12'},
+          configs => {},
+        },
+      ),
+      canonical_uri => [ str('https://foo.com') ], # note canonical_uri has been overwritten
+      _entities => [ { '' => 0 } ],
+    ),
+    'object schema with originally provided uri = \''.($_//'<undef>').'\' and absolute root $id',
+  )
+  foreach (undef, '', Mojo::URL->new);
+
+  cmp_deeply(
+    JSON::Schema::Modern::Document->new(
+      canonical_uri => $_,
       schema => { '$id' => 'https://bar.com' },
     ),
     listmethods(
-      resource_index => [
-        # note: no '' entry!
+      resource_index => unordered_pairs(
+        # note: no '' entry
         'https://bar.com' => {
           path => '',
           canonical_uri => str('https://bar.com'),
@@ -127,13 +154,41 @@ subtest 'object document' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
-      ],
+        str($_) => {
+          path => '',
+          canonical_uri => str('https://bar.com'),
+          specification_version => 'draft2020-12',
+          vocabularies => $vocabularies{'draft2020-12'},
+          configs => {},
+        },
+      ),
       canonical_uri => [ str('https://bar.com') ], # note canonical_uri has been overwritten
       _entities => [ { '' => 0 } ],
     ),
-    'object schema with no canonical_uri, and absolute root $id',
+    'object schema with originally provided uri = \''.$_.'\' and absolute root $id',
   )
-  foreach (undef, '', Mojo::URL->new);
+  foreach ('0', Mojo::URL->new('0'), 'https://foo.com');
+
+  cmp_deeply(
+    JSON::Schema::Modern::Document->new(
+      canonical_uri => Mojo::URL->new('https://foo.com'),
+      schema => { '$id' => 'https://foo.com' },
+    ),
+    listmethods(
+      resource_index => unordered_pairs(
+        'https://foo.com' => {
+          path => '',
+          canonical_uri => str('https://foo.com'),
+          specification_version => 'draft2020-12',
+          vocabularies => $vocabularies{'draft2020-12'},
+          configs => {},
+        },
+      ),
+      canonical_uri => [ str('https://foo.com') ],
+      _entities => [ { '' => 0 } ],
+    ),
+    'object schema with originally provided uri equal to root $id',
+  );
 
   cmp_deeply(
     JSON::Schema::Modern::Document->new(

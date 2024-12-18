@@ -186,8 +186,7 @@ sub BUILD ($self, $args) {
       vocabularies => $state->{vocabularies},
       configs => $state->{configs},
     })
-    if (not "$original_uri" and $original_uri eq $self->canonical_uri)
-      or "$original_uri";
+    if $original_uri ne '' or $self->canonical_uri eq '';
 
   $self->_add_resources($state->{identifiers}->@*);
 
