@@ -110,8 +110,6 @@ has _format_validations => (
       sub => CodeRef,
     ]],
   init_arg => 'format_validations',
-  lazy => 1,
-  default => sub { {} },
 );
 
 sub _get_format_validation ($self, $format) { ($self->{_format_validations}//{})->{$format} }
@@ -756,8 +754,6 @@ has _resource_index => (
       configs => HashRef,
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
-  lazy => 1,
-  default => sub { {} },
 );
 
 sub _get_resource { ($_[0]->{_resource_index}//{})->{$_[1]} }
@@ -768,7 +764,7 @@ sub _add_resources_unsafe {
   $_[0]->{_resource_index}{$resource_key_type->($_->[0])} = $resource_type->($_->[1])
     foreach pairs @_[1..$#_];
 }
-sub _resource_index { $_[0]->{_resource_index}->%* }
+sub _resource_index { ($_[0]->{_resource_index}//{})->%* }
 sub _canonical_resources { values(($_[0]->{_resource_index}//{})->%*) }
 sub _resource_pairs { pairs(($_[0]->{_resource_index}//{})->%*) }
 
