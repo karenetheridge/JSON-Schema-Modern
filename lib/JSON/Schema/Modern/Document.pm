@@ -75,6 +75,7 @@ sub resource_index { $_[0]->{resource_index}->%* }
 sub resource_pairs { pairs $_[0]->{resource_index}->%* }
 sub _get_resource { $_[0]->{resource_index}{$_[1]} }
 sub _canonical_resources { values $_[0]->{resource_index}->%* }
+sub _add_resource { $_[0]->{resource_index}{$resource_key_type->($_[1])} = $resource_type->($_[2]) }
 
 has _path_to_resource => (
   is => 'ro',
@@ -138,25 +139,6 @@ sub get_entity_locations ($self, $entity) {
   grep $self->{_entities}{$_} == $index, keys $self->{_entities}->%*;
 }
 
-sub _add_resources ($self, @kvs) {
-  foreach my $pair (pairs @kvs) {
-    my ($key, $value) = @$pair;
-
-    $key = $key.'';
-    $resource_key_type->($key);
-    $resource_type->($value);
-
-    if (my $existing = $self->_get_resource($key)) {
-      croak 'uri "'.$key.'" conflicts with an existing schema resource'
-        if $existing->{path} ne $value->{path}
-          or $existing->{canonical_uri} ne $value->{canonical_uri}
-          or $existing->{specification_version} ne $value->{specification_version};
-    }
-
-    $self->{resource_index}{$key} = $value;
-  }
-}
-
 # shims for Mojo::JSON::Pointer
 sub data { shift->schema(@_) }
 sub FOREIGNBUILDARGS { () }
@@ -178,7 +160,7 @@ sub BUILD ($self, $args) {
   }
 
   # make sure the root schema is always indexed against *something*.
-  $self->_add_resources($original_uri => {
+  $self->_add_resource($original_uri.'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
       specification_version => $state->{spec_version},
@@ -187,7 +169,14 @@ sub BUILD ($self, $args) {
     })
     if $original_uri ne '' or $self->canonical_uri eq '';
 
-  $self->_add_resources($state->{identifiers}->@*);
+  foreach my $pair (pairs $state->{identifiers}->@*) {
+    my ($key, $value) = @$pair;
+    if (my $existing = $self->_get_resource($key)) {
+      next if $key eq $original_uri and $value->{path} eq '';
+      croak 'uri "'.$key.'" conflicts with an existing schema resource';
+    }
+    $self->_add_resource($key.'' => $value);
+  }
 
   $self->_add_entity_location($_, 'schema') foreach $state->{subschemas}->@*;
 }

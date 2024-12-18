@@ -607,6 +607,17 @@ subtest 'JSON pointer and URI escaping' => sub {
 };
 
 subtest 'resource collisions' => sub {
+  is(
+    exception {
+      JSON::Schema::Modern::Document->new(
+        canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
+        schema => { '$id' => '/x/y/z' },
+      );
+    },
+    undef,
+    'no collision when adding an identical resource (after resolving with base uri)',
+  );
+
   like(
     exception {
       JSON::Schema::Modern::Document->new(
