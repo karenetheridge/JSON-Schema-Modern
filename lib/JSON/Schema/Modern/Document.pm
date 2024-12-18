@@ -22,7 +22,7 @@ use List::Util 1.29 'pairs';
 use Ref::Util 0.100 'is_plain_hashref';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
-use Types::Standard 1.016003 qw(InstanceOf HashRef Str Dict ArrayRef Enum ClassName Undef Slurpy);
+use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy);
 use Types::Common::Numeric 'PositiveOrZeroInt';
 use namespace::clean;
 
@@ -43,7 +43,7 @@ has canonical_uri => (
 
 has metaschema_uri => (
   is => 'rwp',
-  isa => InstanceOf['Mojo::URL'],
+  isa => (InstanceOf['Mojo::URL'])->where(q{not length $_->fragment}), # allow for .../draft-07/schema#
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
 );
 
@@ -57,10 +57,11 @@ has evaluator => (
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 has resource_index => (
   is => 'bare',
-  isa => HashRef[my $resource_type = Dict[
-      canonical_uri => InstanceOf['Mojo::URL'],
-      path => Str,  # always a JSON pointer, relative to the document root
-      specification_version => Str, # not an Enum due to module load ordering
+  isa => Map[my $resource_key_type = Str->where('!m{#(?:/|$)}') => my $resource_type = Dict[
+      canonical_uri => (InstanceOf['Mojo::URL'])
+        ->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
+      path => Str->where('m{^(?:/|$)}'),  # JSON pointer relative to the document root
+      specification_version => Enum[qw(draft4 draft6 draft7 draft2019-09 draft2020-12)],
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       configs => HashRef,
@@ -141,7 +142,9 @@ sub _add_resources ($self, @kvs) {
   foreach my $pair (pairs @kvs) {
     my ($key, $value) = @$pair;
 
-    $resource_type->($value); # check type of hash value against Dict
+    $key = $key.'';
+    $resource_key_type->($key);
+    $resource_type->($value);
 
     if (my $existing = $self->_get_resource($key)) {
       croak 'uri "'.$key.'" conflicts with an existing schema resource'
@@ -149,10 +152,6 @@ sub _add_resources ($self, @kvs) {
           or $existing->{canonical_uri} ne $value->{canonical_uri}
           or $existing->{specification_version} ne $value->{specification_version};
     }
-
-    # this will never happen, if we parsed $id correctly
-    croak sprintf('a resource canonical uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
-      if ($value->{canonical_uri}->fragment // '') =~ m{^[^/]};
 
     $self->{resource_index}{$key} = $value;
   }

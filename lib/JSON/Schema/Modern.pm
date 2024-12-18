@@ -210,7 +210,7 @@ sub add_document {
 
   if ("$uri") {
     my $resource = $document->_get_resource($document->canonical_uri);
-    $self->_add_resources($uri => {
+    $self->_add_resources($uri.'' => {
         path => '',
         canonical_uri => $document->canonical_uri,
         specification_version => $resource->{specification_version},
@@ -745,9 +745,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
 has _resource_index => (
   is => 'bare',
-  isa => HashRef[my $resource_type = Dict[
-      canonical_uri => InstanceOf['Mojo::URL'],
-      path => Str,
+  isa => Map[my $resource_key_type = Str->where('!m{#(?:/|$)}') => my $resource_type = Dict[
+      canonical_uri => (InstanceOf['Mojo::URL'])
+        ->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
+      path => Str->where('m{^(?:/|$)}'),  # JSON pointer relative to the document root
       specification_version => my $spec_version_type = Enum(SPECIFICATION_VERSIONS_SUPPORTED),
       document => InstanceOf['JSON::Schema::Modern::Document'],
       # the vocabularies used when evaluating instance data against schema
@@ -764,7 +765,8 @@ sub _get_resource { ($_[0]->{_resource_index}//{})->{$_[1]} }
 # does not check for duplicate entries, or for malformed uris
 sub _add_resources_unsafe {
   use autovivification 'store';
-  $_[0]->{_resource_index}{$_->[0]} = $resource_type->($_->[1]) foreach pairs @_[1..$#_];
+  $_[0]->{_resource_index}{$resource_key_type->($_->[0])} = $resource_type->($_->[1])
+    foreach pairs @_[1..$#_];
 }
 sub _resource_index { $_[0]->{_resource_index}->%* }
 sub _canonical_resources { values(($_[0]->{_resource_index}//{})->%*) }
@@ -789,16 +791,8 @@ sub _add_resources ($self, @kvs) {
       croak 'uri "'.$key.'" conflicts with an existing meta-schema resource';
     }
 
-    if (defined(my $fragment = $value->{canonical_uri}->fragment)) {
-      croak sprintf('canonical_uri cannot contain an empty fragment (%s)', $value->{canonical_uri})
-        if $fragment eq '';
-
-      croak sprintf('canonical_uri cannot contain a plain-name fragment (%s)', $value->{canonical_uri})
-        if $fragment =~ m{^[^/]};
-    }
-
     use autovivification 'store';
-    $self->{_resource_index}{$key} = $resource_type->($value);
+    $self->{_resource_index}{$resource_key_type->($key)} = $resource_type->($value);
   }
 }
 
