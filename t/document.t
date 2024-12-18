@@ -20,7 +20,7 @@ use Helper;
 my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabulary_classes);
 
 subtest 'boolean document' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(schema => false),
     listmethods(
       resource_index => [
@@ -49,7 +49,7 @@ subtest 'boolean document' => sub {
     'boolean schema with invalid canonical_uri (fragment)',
   );
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => false,
@@ -72,7 +72,7 @@ subtest 'boolean document' => sub {
 };
 
 subtest 'object document' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(schema => {}),
     listmethods(
       resource_index => [
@@ -90,7 +90,7 @@ subtest 'object document' => sub {
     'object schema with no canonical_uri, no root $id',
   );
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {},
@@ -112,7 +112,7 @@ subtest 'object document' => sub {
     'object schema with valid canonical_uri, no root $id',
   );
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       defined $_ ? ( canonical_uri => $_ ) : (),
       schema => { '$id' => 'https://bar.com' },
@@ -135,7 +135,7 @@ subtest 'object document' => sub {
   )
   foreach (undef, '', Mojo::URL->new);
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
@@ -183,7 +183,7 @@ subtest 'object document' => sub {
     'object schema with canonical_uri and root $id, and additional resource schemas as well',
   );
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -215,7 +215,7 @@ subtest 'object document' => sub {
     'relative uri for root $id',
   );
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -248,7 +248,7 @@ subtest 'object document' => sub {
 };
 
 subtest '$id and $anchor as properties' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => {
         type => 'object',
@@ -273,7 +273,7 @@ subtest '$id and $anchor as properties' => sub {
 };
 
 subtest '$id with an empty fragment' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -306,7 +306,7 @@ subtest '$id with an empty fragment' => sub {
 };
 
 subtest '$id with a non-empty fragment' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$id' => 'http://main.com',
@@ -341,7 +341,7 @@ subtest '$id with a non-empty fragment' => sub {
 };
 
 subtest '$anchor not conforming to syntax' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -366,7 +366,7 @@ subtest '$anchor not conforming to syntax' => sub {
 };
 
 subtest '$schema not conforming to syntax' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       schema => { '$schema' => 'foo' },
     ),
@@ -385,7 +385,7 @@ subtest '$schema not conforming to syntax' => sub {
 };
 
 subtest '$anchor and $id below an $id that is not at the document root' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
@@ -441,7 +441,7 @@ subtest '$anchor and $id below an $id that is not at the document root' => sub {
 };
 
 subtest 'JSON pointer and URI escaping' => sub {
-  cmp_result(
+  cmp_deeply(
     my $doc = JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -544,7 +544,7 @@ subtest 'JSON pointer and URI escaping' => sub {
   is($doc->get_entity_at_location('/$defs/foo/patternProperties/~0'), 'schema', 'schema locations are tracked');
   is($doc->get_entity_at_location('/$defs/foo/patternProperties'), '', 'non-schema locations are also tracked');
 
-  cmp_result(
+  cmp_deeply(
     [ $doc->get_entity_locations('schema') ],
     bag(@locations),
     'schema locations can be queried',
@@ -606,7 +606,7 @@ subtest 'resource collisions' => sub {
     'ignored "duplicate" uris embedded in non-schemas',
   );
 
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
       schema => {
@@ -620,7 +620,7 @@ subtest 'resource collisions' => sub {
 };
 
 subtest 'create document with explicit canonical_uri set to the same as root $id' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://foo.com/x/y/z',
       schema => { '$id' => 'https://foo.com/x/y/z' },
@@ -642,7 +642,7 @@ subtest 'create document with explicit canonical_uri set to the same as root $id
 };
 
 subtest 'canonical_uri identification from a document with errors' => sub {
-  cmp_result(
+  cmp_deeply(
     JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://foo.com/x/y/z',
       schema => {
