@@ -74,7 +74,13 @@ sub _traverse_keyword_id ($class, $schema, $state) {
   $uri->fragment(undef);
   return E($state, '%s cannot be empty', $state->{keyword}) if not length $uri;
 
-  $state->{initial_schema_uri} = $uri->is_abs ? $uri : $uri->to_abs($state->{initial_schema_uri});
+  $uri = $uri->to_abs($state->{initial_schema_uri}) if not $uri->is_abs;
+
+  return E($state, 'duplicate canonical uri "%s" found (original at path "%s")',
+      $uri, $state->{identifiers}{$uri}{path})
+    if exists $state->{identifiers}{$uri};
+
+  $state->{initial_schema_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   # we don't set or update document_path because it is identical to traversed_schema_path
   $state->{schema_path} = '';
@@ -83,14 +89,13 @@ sub _traverse_keyword_id ($class, $schema, $state) {
   # already parsed the '$schema' keyword (before we even started looping through all vocabularies)
   # and therefore this data (specification_version and vocabularies) is known to be correct.
 
-  push $state->{identifiers}->@*,
-    $state->{initial_schema_uri} => {
-      path => $state->{traversed_schema_path},
-      canonical_uri => $state->{initial_schema_uri}->clone,
-      specification_version => $state->{spec_version}, # note! $schema keyword can change this
-      vocabularies => $state->{vocabularies}, # reference, not copy
-      configs => $state->{configs},
-    };
+  $state->{identifiers}{$uri} = {
+    path => $state->{traversed_schema_path},
+    canonical_uri => $uri,
+    specification_version => $state->{spec_version}, # note! $schema keyword can change this
+    vocabularies => $state->{vocabularies}, # reference, not copy
+    configs => $state->{configs},
+  };
   return 1;
 }
 
@@ -189,15 +194,20 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
         and $schema->{$state->{keyword}} !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 
   my $canonical_uri = canonical_uri($state);
+  my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}});
 
-  push $state->{identifiers}->@*,
-    Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}}) => {
-      path => $state->{traversed_schema_path}.$state->{schema_path},
-      canonical_uri => $canonical_uri,
-      specification_version => $state->{spec_version},
-      vocabularies => $state->{vocabularies}, # reference, not copy
-      configs => $state->{configs},
-    };
+  return E($state, 'duplicate anchor uri "%s" found (original at path "%s")',
+      $uri, $state->{identifiers}{$uri}->{path})
+    if exists $state->{identifiers}{$uri};
+
+  $state->{identifiers}{$uri} = {
+    path => $state->{traversed_schema_path}.$state->{schema_path},
+    canonical_uri => $canonical_uri,
+    specification_version => $state->{spec_version},
+    vocabularies => $state->{vocabularies}, # reference, not copy
+    configs => $state->{configs},
+  };
+
   return 1;
 }
 

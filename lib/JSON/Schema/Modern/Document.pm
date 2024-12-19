@@ -172,8 +172,8 @@ sub BUILD ($self, $args) {
     })
     if $original_uri ne '' or $self->canonical_uri eq '';
 
-  foreach my $pair (pairs $state->{identifiers}->@*) {
-    my ($key, $value) = @$pair;
+  foreach my $key (keys $state->{identifiers}->%*) {
+    my $value = $state->{identifiers}{$key};
     if (my $existing = $self->_get_resource($key)) {
       next if $key eq $original_uri and $value->{path} eq '';
       croak 'uri "'.$key.'" conflicts with an existing schema resource';

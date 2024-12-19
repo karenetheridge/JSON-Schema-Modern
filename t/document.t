@@ -698,19 +698,29 @@ subtest 'resource collisions' => sub {
     'detected collision between document\'s initial uri and a subschema\'s uri',
   );
 
-  like(
-    exception {
-      JSON::Schema::Modern::Document->new(
-        canonical_uri => Mojo::URL->new('https://foo.com'),
-        schema => {
-          allOf => [
-            { '$id' => '/x/y/z' },
-            { '$id' => '/x/y/z' },
-          ],
-        },
-      );
-    },
-    qr{^\Quri "https://foo.com/x/y/z" conflicts with an existing schema resource\E},
+  cmp_deeply(
+    JSON::Schema::Modern::Document->new(
+      canonical_uri => Mojo::URL->new('https://foo.com'),
+      schema => {
+        allOf => [
+          { '$id' => '/x/y/z' },
+          { '$id' => '/x/y/z' },
+        ],
+      },
+    ),
+    all(
+      listmethods(
+        resource_index => [],
+        errors => [
+          methods(TO_JSON => {
+            instanceLocation => '',
+            keywordLocation => '/allOf/1/$id',
+            absoluteKeywordLocation => 'https://foo.com#/allOf/1/$id',
+            error => 'duplicate canonical uri "https://foo.com/x/y/z" found (original at path "/allOf/0")',
+          }),
+        ],
+      ),
+    ),
     'detected collision between two subschema uris in a document',
   );
 

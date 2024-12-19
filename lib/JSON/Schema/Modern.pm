@@ -201,6 +201,7 @@ sub add_document {
       $document = $existing_doc;
     }
     else {
+      # this might croak if there are duplicates or malformed entries
       $self->_add_resources(map +($_->[0] => +{ $_->[1]->%*, document => $document }),
         $document->resource_pairs);
     }
@@ -273,7 +274,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     schema_path => '',                      # the rest of the path, since the start of this method or last $id
     effective_base_uri => Mojo::URL->new(''),
     errors => [],
-    identifiers => [],
+    identifiers => {},
     subschemas => [],
     configs => {},
     callbacks => $config_override->{callbacks} // {},

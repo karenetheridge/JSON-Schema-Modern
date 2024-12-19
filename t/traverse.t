@@ -204,8 +204,8 @@ subtest 'traversing a dialect with different core keywords' => sub {
   cmp_result($state->{errors}, [], 'no errors when parsing this schema');
   cmp_result(
     $state->{identifiers},
-    [
-      str('#hello'), {
+    {
+      '#hello' => {
         path => '',
         canonical_uri => str(''),
         specification_version => 'draft7',
@@ -215,7 +215,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
             qw(Core Validation FormatAnnotation Applicator Content MetaData),
         ],
       },
-      str('/bloop'), {
+      '/bloop' => {
         path => '/definitions/bloop',
         canonical_uri => str('/bloop'),
         specification_version => 'draft7',
@@ -225,7 +225,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
             qw(Core Validation FormatAnnotation Applicator Content MetaData),
         ],
       },
-    ],
+    },
     'switched dialect in time to extract all identifiers, from root and definition',
   );
 
@@ -299,6 +299,63 @@ subtest '$schema without an $id, below the root' => sub {
       },
     ],
     '$schema cannot exist without an $id, or at the root',
+  );
+};
+
+subtest 'duplicate identifiers' => sub {
+  my $js = JSON::Schema::Modern->new;
+  my $state = $js->traverse({
+    '$id' => 'https://base.com',
+    allOf => [
+      { '$id' => 'https://foo.com' },
+      { '$id' => 'https://foo.com' },
+    ],
+  });
+
+  cmp_result(
+    [ map $_->TO_JSON, $state->{errors}->@* ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/1/$id',
+        absoluteKeywordLocation => 'https://base.com#/allOf/1/$id',
+        error => 'duplicate canonical uri "https://foo.com" found (original at path "/allOf/0")',
+      },
+    ],
+    'detected colliding $ids within a single schema',
+  );
+
+  $state = $js->traverse({
+    '$id' => 'https://base.com',
+    allOf => [
+      { '$id' => 'dir1', '$anchor' => 'foo' },
+      { '$id' => 'dir2', '$anchor' => 'foo' },
+    ],
+  });
+  cmp_result(
+    [ map $_->TO_JSON, $state->{errors}->@* ],
+    [],
+    'two anchors with different base uris are acceptable',
+  );
+
+  $state = $js->traverse({
+    '$id' => 'https://base.com',
+    allOf => [
+      { '$anchor' => 'foo' },
+      { '$anchor' => 'foo' },
+    ],
+  });
+  cmp_result(
+    [ map $_->TO_JSON, $state->{errors}->@* ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/allOf/1/$anchor',
+        absoluteKeywordLocation => 'https://base.com#/allOf/1/$anchor',
+        error => 'duplicate anchor uri "https://base.com#foo" found (original at path "/allOf/0")',
+      },
+    ],
+    'detected colliding $anchors within a single schema',
   );
 };
 
@@ -399,9 +456,8 @@ subtest 'traverse with overridden metaschema_uri' => sub {
 
   cmp_result(
     $state->{identifiers},
-    [
-      str($id),
-      {
+    {
+      $id => {
         canonical_uri => str($id),
         path => '',
         specification_version => 'draft2020-12',
@@ -411,7 +467,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
         ],
         configs => {},
       }
-    ],
+    },
     'determined vocabularies to use for this schema',
   );
 };
@@ -475,32 +531,30 @@ subtest 'start traversing below the document root' => sub {
 
 
   cmp_result(
-    my $identifiers = +{
-      $js->traverse(
-        {
-          properties => {
-            alpha => {
-              '$id' => 'alpha_id',
-              properties => {
-                alpha_one => {
-                  '$id' => 'alpha_one_id',
-                },
-                alpha_two => {
-                  '$anchor' => 'alpha_two_anchor',
-                },
+    $js->traverse(
+      {
+        properties => {
+          alpha => {
+            '$id' => 'alpha_id',
+            properties => {
+              alpha_one => {
+                '$id' => 'alpha_one_id',
+              },
+              alpha_two => {
+                '$anchor' => 'alpha_two_anchor',
               },
             },
-            beta => {
-              '$anchor' => 'beta_anchor',
-            },
+          },
+          beta => {
+            '$anchor' => 'beta_anchor',
           },
         },
-        {
-          initial_schema_uri => 'dir/my_subdocument#/subid',
-          traversed_schema_path => '/components/alpha/subid',
-        },
-      )->{identifiers}->@*
-    },
+      },
+      {
+        initial_schema_uri => 'dir/my_subdocument#/subid',
+        traversed_schema_path => '/components/alpha/subid',
+      },
+    )->{identifiers},
     {
       'dir/alpha_id' => {
         canonical_uri => str('dir/alpha_id'),
