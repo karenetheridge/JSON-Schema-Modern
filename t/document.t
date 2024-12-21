@@ -418,6 +418,26 @@ subtest '$anchor not conforming to syntax' => sub {
     ),
     'did not index an $anchor with invalid characters',
   );
+
+  cmp_deeply(
+    JSON::Schema::Modern::Document->new(
+      specification_version => 'draft7',
+      schema => {
+        '$id' => 'https://foo.com#my_bad_id',
+      },
+    ),
+    listmethods(
+      resource_index => [],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/$id',
+          error => '$id cannot change the base uri at the same time as declaring an anchor',
+        }),
+      ],
+    ),
+    'did not index a draft7 non-fragment-only $id',
+  );
 };
 
 subtest '$schema not conforming to syntax' => sub {

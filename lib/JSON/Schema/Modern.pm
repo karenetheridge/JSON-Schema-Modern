@@ -256,14 +256,14 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
 # Returns the internal $state object accumulated during the traversal.
 sub traverse ($self, $schema_reference, $config_override = {}) {
   my %overrides = %$config_override;
-  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_schema_path)};
+  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_schema_path specification_version)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in traverse'
     if keys %overrides;
 
   # Note: the starting position is not guaranteed to be at the root of the $document.
   my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
   my $initial_path = $config_override->{traversed_schema_path} // '';
-  my $spec_version = $self->specification_version//SPECIFICATION_VERSION_DEFAULT;
+  my $spec_version = $config_override->{specification_version} // $self->specification_version // SPECIFICATION_VERSION_DEFAULT;
 
   my $state = {
     depth => 0,

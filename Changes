@@ -1,6 +1,11 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          BREAKING CHANGES: OpenAPI::Modern must be updated to 0.079 after
+          installing this version.
+          - the specification version can now be overridden when constructing
+            Documents directly (rather than via the evaluator), if not
+            specified by the "$schema" keyword
 
 0.599     2025-01-26 22:54:02Z
           - the boolean overload in JSON::Schema::Modern::Result is now

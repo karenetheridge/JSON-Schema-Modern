@@ -149,7 +149,10 @@ sub TO_JSON { shift->schema }
 # note that this is always called, even in subclasses
 sub BUILD ($self, $args) {
   my $original_uri = $self->canonical_uri->clone;
-  my $state = $self->traverse($self->evaluator // $self->_set_evaluator(JSON::Schema::Modern->new));
+  my $state = $self->traverse(
+    $self->evaluator // $self->_set_evaluator(JSON::Schema::Modern->new),
+    $args->{specification_version} ? +{ $args->%{specification_version} } : (),
+  );
 
   # if the schema identified a canonical uri for itself, it overrides the initial value
   $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
@@ -182,7 +185,7 @@ sub BUILD ($self, $args) {
 }
 
 # a subclass's method will override this one
-sub traverse ($self, $evaluator) {
+sub traverse ($self, $evaluator, $config_override = {}) {
   die 'wrong class - use JSON::Schema::Modern::Document::OpenAPI instead'
     if is_plain_hashref($self->schema) and exists $self->schema->{openapi};
 
@@ -190,6 +193,7 @@ sub traverse ($self, $evaluator) {
     {
       initial_schema_uri => $self->canonical_uri->clone,
       $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri ) : (),
+      %$config_override,
     }
   );
 
@@ -266,6 +270,29 @@ Sets the metaschema that is used to describe the document (or more specifically,
 contained within the document), which determines the
 specification version and vocabularies used during evaluation. Does not override any
 C<$schema> keyword actually present in the schema document.
+
+=head2 specification version
+
+Indicates which version of the JSON Schema specification is used during evaluation. This value is
+overridden by the value determined from the C<$schema> keyword in the schema used in evaluation
+(when present), or defaults to the latest version (currently C<draft2020-12>).
+
+The use of the C<$schema> keyword in your schema is I<HIGHLY> encouraged to ensure continued correct
+operation of your schema. The current default value will not stay the same over time.
+
+May be one of:
+
+=for :list
+* L<C<draft2020-12> or C<2020-12>|https://json-schema.org/specification-links.html#2020-12>,
+  corresponding to metaschema C<https://json-schema.org/draft/2020-12/schema>
+* L<C<draft2019-09> or C<2019-09>|https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8>,
+  corresponding to metaschema C<https://json-schema.org/draft/2019-09/schema>
+* L<C<draft7> or C<7>|https://json-schema.org/specification-links.html#draft-7>,
+  corresponding to metaschema C<http://json-schema.org/draft-07/schema#>
+* L<C<draft6> or C<6>|https://json-schema.org/specification-links.html#draft-6>,
+  corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
+* L<C<draft4> or C<4>|https://json-schema.org/specification-links.html#draft-4>,
+  corresponding to metaschema C<http://json-schema.org/draft-04/schema#>
 
 =head2 evaluator
 
