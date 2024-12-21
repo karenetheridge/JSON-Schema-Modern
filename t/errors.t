@@ -1252,7 +1252,7 @@ subtest 'absoluteKeywordLocation' => sub {
     'absoluteKeywordLocation reflects the canonical schema uri as it changes when passing through $id',
   );
 
-  $schema->{'$id'} = '#my_anchor';
+  $schema->{'$id'} = 'https://example.com';
   $schema->{allOf}[2]{'$id'} = '#my_anchor2';
   cmp_result(
     JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(1, $schema)->TO_JSON,
@@ -1262,29 +1262,31 @@ subtest 'absoluteKeywordLocation' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/type',
-          absoluteKeywordLocation => 'foo.json#/type',
+          absoluteKeywordLocation => 'https://example.com/foo.json#/type',
           error => 'got integer, not object',
         },
         {
           instanceLocation => '',
           keywordLocation => '/allOf/1/allOf/0/type',
-          absoluteKeywordLocation => 'bar/alpha#/type',
+          absoluteKeywordLocation => 'https://example.com/bar/alpha#/type',
           error => 'got integer, not object',
         },
         {
           instanceLocation => '',
           keywordLocation => '/allOf/1/allOf',
-          absoluteKeywordLocation => 'bar/#/allOf',
+          absoluteKeywordLocation => 'https://example.com/bar/#/allOf',
           error => 'subschema 0 is not valid',
         },
         {
           instanceLocation => '',
           keywordLocation => '/allOf/2/type',
+          absoluteKeywordLocation => 'https://example.com#/allOf/2/type',
           error => 'got integer, not object',
         },
         {
           instanceLocation => '',
           keywordLocation => '/allOf',
+          absoluteKeywordLocation => 'https://example.com#/allOf',
           error => 'subschemas 0, 1, 2 are not valid',
         },
       ],

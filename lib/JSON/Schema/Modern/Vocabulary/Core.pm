@@ -95,15 +95,21 @@ sub _traverse_keyword_id ($class, $schema, $state) {
 }
 
 sub _eval_keyword_id ($class, $data, $schema, $state) {
+  # we already indexed the anchor uri, so there is nothing more to do at evaluation time.
+  # we explicitly do NOT set $state->{initial_schema_uri} or change any other $state values.
+  return 1
+    if $state->{spec_version} =~ /^draft[467]$/ and $schema->{$state->{keyword}} =~ /^#/;
+
   my $schema_info = $state->{document}->path_to_resource($state->{document_path}.$state->{schema_path});
   # this should never happen, if the pre-evaluation traversal was performed correctly
   abort($state, 'failed to resolve "%s" to canonical uri', $state->{keyword}) if not $schema_info;
 
   $state->{initial_schema_uri} = $schema_info->{canonical_uri}->clone;
+  # these will already be set in all cases: at document root, or if we are here via a $ref
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{document_path} = $state->{document_path}.$state->{schema_path};
   $state->{schema_path} = '';
-  # these will already be set if there is an adjacent $schema keyword
+  # these will already be set if there is an adjacent $schema keyword, or if we are here via a $ref
   $state->{spec_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
 
