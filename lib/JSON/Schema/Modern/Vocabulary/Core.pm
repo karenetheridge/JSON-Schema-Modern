@@ -61,7 +61,7 @@ sub _traverse_keyword_id ($class, $schema, $state) {
       return E($state, '%s cannot change the base uri at the same time as declaring an anchor', $state->{keyword})
         if length($uri->clone->fragment(undef));
 
-      return $class->_traverse_keyword_anchor({ %$schema, $state->{keyword} => $uri->fragment }, $state);
+      return $class->_traverse_keyword_anchor($schema, $state);
     }
   }
   else {
@@ -186,15 +186,15 @@ sub _eval_keyword_schema ($class, $data, $schema, $state) {
 sub _traverse_keyword_anchor ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
 
-  return E($state, '%s value "%s" does not match required syntax',
-      $state->{keyword}, ($state->{keyword} eq '$anchor' ? '' : '#').$schema->{$state->{keyword}})
-    if $state->{spec_version} =~ /^draft(?:[467]|2019-09)$/
-        and $schema->{$state->{keyword}} !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
-      or $state->{spec_version} eq 'draft2020-12'
-        and $schema->{$state->{keyword}} !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
+  my $anchor = $schema->{$state->{keyword}};
+  return E($state, '%s value "%s" does not match required syntax', $state->{keyword}, $anchor)
+    if $state->{spec_version} =~ /^draft[467]$/ and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*$/
+      or $state->{spec_version} eq 'draft2019-09' and $anchor !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
+      or $state->{spec_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 
   my $canonical_uri = canonical_uri($state);
-  my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($schema->{$state->{keyword}});
+  $anchor =~ s/^#// if $state->{spec_version} =~ /^draft[467]$/;
+  my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($anchor);
 
   return E($state, 'duplicate anchor uri "%s" found (original at path "%s")',
       $uri, $state->{identifiers}{$uri}->{path})
