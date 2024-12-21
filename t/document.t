@@ -423,7 +423,14 @@ subtest '$anchor not conforming to syntax' => sub {
     JSON::Schema::Modern::Document->new(
       specification_version => 'draft7',
       schema => {
-        '$id' => 'https://foo.com#my_bad_id',
+        definitions => {
+          foo => {
+            '$id' => '#my_$bad_anchor',
+          },
+          qux => {
+            '$id' => 'https://foo.com#my_bad_id',
+          },
+        },
       },
     ),
     listmethods(
@@ -431,12 +438,49 @@ subtest '$anchor not conforming to syntax' => sub {
       errors => [
         methods(TO_JSON => {
           instanceLocation => '',
-          keywordLocation => '/$id',
+          keywordLocation => '/definitions/foo/$id',
+          error => '$id value "#my_$bad_anchor" does not match required syntax',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/definitions/qux/$id',
           error => '$id cannot change the base uri at the same time as declaring an anchor',
         }),
       ],
     ),
-    'did not index a draft7 non-fragment-only $id',
+    'did not index a draft7 fragment-only $id with invalid characters, or non-fragment-only $id',
+  );
+
+  cmp_deeply(
+    JSON::Schema::Modern::Document->new(
+      specification_version => 'draft4',
+      schema => {
+        definitions => {
+          foo => {
+            id => '#my_$bad_anchor',
+          },
+          qux => {
+            id => 'https://foo.com#my_bad_id',
+          },
+        },
+      },
+    ),
+    listmethods(
+      resource_index => [],
+      errors => [
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/definitions/foo/id',
+          error => 'id value "#my_$bad_anchor" does not match required syntax',
+        }),
+        methods(TO_JSON => {
+          instanceLocation => '',
+          keywordLocation => '/definitions/qux/id',
+          error => 'id cannot change the base uri at the same time as declaring an anchor',
+        }),
+      ],
+    ),
+    'did not index a draft4 fragment-only $id with invalid characters, or non-fragment-only id',
   );
 };
 
