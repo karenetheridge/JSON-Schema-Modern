@@ -211,12 +211,8 @@ sub add_document {
   if ("$uri" and not $self->_get_resource($uri)) {
     my $resource = $document->_get_resource($document->canonical_uri);
     $self->_add_resources($uri.'' => {
-        path => '',
-        canonical_uri => $document->canonical_uri,
-        specification_version => $resource->{specification_version},
-        vocabularies => $resource->{vocabularies},  # reference, not copy
+        $resource->%*,
         document => $document,
-        configs => $resource->{configs},
       });
   }
 
