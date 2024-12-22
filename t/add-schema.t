@@ -268,7 +268,7 @@ subtest 'add a schema associated with a uri' => sub {
   );
 
   cmp_result(
-    my $result = $js->evaluate(1, 'https://bar.com#/allOf/0')->TO_JSON,
+    $js->evaluate(1, 'https://bar.com#/allOf/0')->TO_JSON,
     {
       valid => false,
       errors => [
