@@ -207,7 +207,8 @@ sub add_document {
     }
   }
 
-  if ("$uri") {
+  # also add the document under the additional uri, if provided one
+  if ("$uri" and not $self->_get_resource($uri)) {
     my $resource = $document->_get_resource($document->canonical_uri);
     $self->_add_resources($uri.'' => {
         path => '',
