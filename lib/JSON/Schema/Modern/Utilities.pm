@@ -188,9 +188,9 @@ sub is_bignum ($value) {
 # compares two arbitrary data payloads for equality, as per
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.2
 # $state hashref supports the following fields:
-# - path: location of the first difference
-# - error: description of the difference
-# - stringy_numbers: strings will also be compared numerically
+# - stringy_numbers (input): strings will also be compared numerically
+# - path (output): location of the first difference
+# - error (output): description of the difference
 sub is_equal ($x, $y, $state = {}) {
   $state->{path} //= '';
 
@@ -253,8 +253,8 @@ sub is_equal ($x, $y, $state = {}) {
 # checks array elements for uniqueness. short-circuits on first pair of matching elements
 # if second arrayref is provided, it is populated with the indices of identical items
 # $state hashref supports the following fields:
-# - scalarref_booleans: treats \0 and \1 as boolean values
-# - stringy_numbers: strings will also be compared numerically
+# - scalarref_booleans (input): treats \0 and \1 as boolean values
+# - stringy_numbers (input): strings will also be compared numerically
 sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
   my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
   foreach my $idx0 (0 .. $array->$#*-1) {
@@ -269,8 +269,8 @@ sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
 }
 
 # shorthand for creating and appending json pointers
-# the first argument is a json pointer; remaining arguments are path segments to be encoded and
-# appended
+# the first argument is an already-encoded json pointer; remaining arguments are path segments to be
+# encoded and appended
 sub jsonp {
   warn q{first argument to jsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, grep defined, @_);
@@ -449,15 +449,15 @@ sub assert_uri ($state, $schema, $override = undef) {
   return 1;
 }
 
-# produces an annotation whose value is the same as that of the current keyword
+# produces an annotation whose value is the same as that of the current schema keyword
 # makes a copy as this is passed back to the user, who cannot be trusted to not mutate it
 sub annotate_self ($state, $schema) {
   A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
     : $schema->{$state->{keyword}});
 }
 
+# use original value as stored in the NV, without losing precision
 sub sprintf_num ($value) {
-  # use original value as stored in the NV, without losing precision
   is_bignum($value) ? $value->bstr : sprintf('%s', $value);
 }
 
