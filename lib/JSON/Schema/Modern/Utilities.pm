@@ -272,6 +272,7 @@ sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
 # the first argument is a json pointer; remaining arguments are path segments to be encoded and
 # appended
 sub jsonp {
+  warn q{first argument to jsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
   return join('/', shift, map s/~/~0/gr =~ s!/!~1!gr, grep defined, @_);
 }
 
