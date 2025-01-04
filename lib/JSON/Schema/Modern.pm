@@ -1199,12 +1199,12 @@ These values are all passed as arguments to the constructor.
 
 =head2 specification_version
 
-Indicates which version of the JSON Schema specification is used during evaluation. When not set,
-this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest version (currently C<draft2020-12>).
+Indicates which version of the JSON Schema specification is used during evaluation. This value is
+overridden by the value determined from the C<$schema> keyword in the schema used in evaluation
+(when present), or defaults to the latest version (currently C<draft2020-12>).
 
-The use of this option is I<HIGHLY> encouraged to ensure continued correct operation of your schema.
-The current default value will not stay the same over time.
+The use of the C<$schema> keyword in your schema is I<HIGHLY> encouraged to ensure continued correct
+operation of your schema. The current default value will not stay the same over time.
 
 May be one of:
 
@@ -1219,9 +1219,6 @@ May be one of:
   corresponding to metaschema C<http://json-schema.org/draft-06/schema#>
 * L<C<draft4> or C<4>|https://json-schema.org/specification-links.html#draft-4>,
   corresponding to metaschema C<http://json-schema.org/draft-04/schema#>
-
-Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
-specification version.
 
 =head2 output_format
 
