@@ -145,7 +145,7 @@ subtest 'object document' => sub {
       schema => { '$id' => 'https://bar.com' },
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         # note: no '' entry
         'https://bar.com' => {
           path => '',
@@ -154,18 +154,11 @@ subtest 'object document' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
-        str($_) => {
-          path => '',
-          canonical_uri => str('https://bar.com'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
-        },
-      ),
+      ],
       canonical_uri => [ str('https://bar.com') ], # note canonical_uri has been overwritten
       _entities => [ { '' => 0 } ],
     ),
-    'object schema with originally provided uri = \''.$_.'\' and absolute root $id',
+    'originally provided uri is not indexed when overridden by an absolute root $id',
   )
   foreach ('0', Mojo::URL->new('0'), 'https://foo.com');
 
@@ -224,13 +217,6 @@ subtest 'object document' => sub {
     ),
     listmethods(
       resource_index => unordered_pairs(
-        'https://foo.com' => {  # the originally-provided uri is only used for the root schema
-          path => '',
-          canonical_uri => str('https://bar.com'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
-        },
         'https://bar.com' => {
           path => '',
           canonical_uri => str('https://bar.com'),
@@ -267,7 +253,7 @@ subtest 'object document' => sub {
       canonical_uri => 'https://my-base.com',
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         'https://my-base.com/relative' => {
           path => '',
           canonical_uri => str('https://my-base.com/relative'),
@@ -275,14 +261,7 @@ subtest 'object document' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
-        'https://my-base.com' => {
-          path => '',
-          canonical_uri => str('https://my-base.com/relative'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
-        },
-      ),
+      ],
       canonical_uri => [ str('https://my-base.com/relative') ],
       _entities => [ { '' => 0 } ],
     ),

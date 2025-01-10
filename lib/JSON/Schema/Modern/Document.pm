@@ -75,7 +75,10 @@ sub resource_index { $_[0]->{resource_index}->%* }
 sub resource_pairs { pairs $_[0]->{resource_index}->%* }
 sub _get_resource { $_[0]->{resource_index}{$_[1]} }
 sub _canonical_resources { values $_[0]->{resource_index}->%* }
-sub _add_resource { $_[0]->{resource_index}{$resource_key_type->($_[1])} = $resource_type->($_[2]) }
+sub _add_resource {
+  croak 'uri "'.$_[1].'" conflicts with an existing schema resource' if $_[0]->{resource_index}{$_[1]};
+  $_[0]->{resource_index}{$resource_key_type->($_[1])} = $resource_type->($_[2]);
+}
 
 has _path_to_resource => (
   is => 'ro',
@@ -162,7 +165,15 @@ sub BUILD ($self, $args) {
     return;
   }
 
-  # make sure the root schema is always indexed against *something*.
+  my $seen_root;
+  foreach my $key (keys $state->{identifiers}->%*) {
+    my $value = $state->{identifiers}{$key};
+    $self->_add_resource($key => $value);
+
+    # we're adding a non-anchor entry for the document root
+    ++$seen_root if $value->{path} eq '' and $key !~ /#./
+  }
+
   $self->_add_resource($original_uri.'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
@@ -170,16 +181,7 @@ sub BUILD ($self, $args) {
       vocabularies => $state->{vocabularies},
       configs => $state->{configs},
     })
-    if $original_uri ne '' or $self->canonical_uri eq '';
-
-  foreach my $key (keys $state->{identifiers}->%*) {
-    my $value = $state->{identifiers}{$key};
-    if (my $existing = $self->_get_resource($key)) {
-      next if $key eq $original_uri and $value->{path} eq '';
-      croak 'uri "'.$key.'" conflicts with an existing schema resource';
-    }
-    $self->_add_resource($key.'' => $value);
-  }
+  if not $seen_root;
 
   $self->_add_entity_location($_, 'schema') foreach $state->{subschemas}->@*;
 }
@@ -259,8 +261,8 @@ The actual raw data representing the schema.
 =head2 canonical_uri
 
 When passed in during construction, this represents the initial URI by which the document should
-be known. It is overwritten with the root schema's C<$id> property when one exists, and as such
-can be considered the canonical URI for the document as a whole.
+be known. It is overwritten with the (resolved form of the) root schema's C<$id> property when one
+exists, and as such can be considered the canonical URI for the document as a whole.
 
 =head2 metaschema_uri
 

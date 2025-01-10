@@ -245,14 +245,7 @@ subtest 'add a schema associated with a uri' => sub {
     all(
       isa('JSON::Schema::Modern::Document'),
       listmethods(
-        resource_index => unordered_pairs(
-          'https://foo.com' => {
-            path => '',
-            canonical_uri => str('https://bar.com'),
-            specification_version => 'draft2020-12',
-            vocabularies => $vocabularies{'draft2020-12'},
-            configs => {},
-          },
+        resource_index => [
           'https://bar.com' => {
             path => '',
             canonical_uri => str('https://bar.com'),
@@ -260,7 +253,7 @@ subtest 'add a schema associated with a uri' => sub {
             vocabularies => $vocabularies{'draft2020-12'},
             configs => {},
           },
-        ),
+        ],
         canonical_uri => [ str('https://bar.com') ],
       ),
     ),
