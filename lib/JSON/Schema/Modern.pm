@@ -1477,6 +1477,10 @@ You B<MUST> call C<add_schema> or L</add_document> (below) for any external reso
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
 
+If you add multiple schemas (either with this method, or implicitly via L</evaluate>) with no root
+identifier (either provided explicitly in the method call, or via an C<$id> keyword at the schema
+root), all such previous schemas are removed from memory and can no longer be referenced.
+
 If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
 
@@ -1488,6 +1492,10 @@ otherwise returns the L<JSON::Schema::Modern::Document> that contains the added 
 Introduces the L<JSON::Schema::Modern::Document> (or subclass)
 object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
 provided (and all known identifiers within the document will be added as well).
+
+If you add multiple documents (either with this method, or implicitly via L</evaluate>) with no root
+identifier (either provided explicitly in the method call, or via an C<$id> keyword at the schema
+root), all such previous schemas are removed from memory and can no longer be referenced.
 
 If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> object.

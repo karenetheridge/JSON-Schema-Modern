@@ -340,6 +340,26 @@ subtest 'add a schema associated with a uri' => sub {
   );
 };
 
+subtest 'multiple anonymous schemas' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  cmp_result(
+    $js->evaluate(1, { minimum => 1 })->TO_JSON,
+    { valid => true },
+    'evaluate an anonymous schema',
+  );
+
+  cmp_deeply([ keys $js->{_resource_index}->%* ], [ '' ], 'one resource is indexed');
+
+  cmp_result(
+    $js->evaluate(2, { minimum => 2 })->TO_JSON,
+    { valid => true },
+    'evaluate another anonymous schema',
+  );
+
+  cmp_deeply([ keys $js->{_resource_index}->%* ], [ '' ], 'still only one resource is indexed');
+};
+
 subtest 'add a document without associating it with a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
