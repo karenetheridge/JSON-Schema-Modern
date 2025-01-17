@@ -1423,7 +1423,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/$schema',
-          error => 'EXCEPTION: unable to find resource https://unknown/metaschema',
+          error => 'EXCEPTION: unable to find resource "https://unknown/metaschema"',
         },
       ],
     },

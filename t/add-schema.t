@@ -172,7 +172,7 @@ subtest 'evaluate a uri' => sub {
         {
           instanceLocation => '',
           keywordLocation => '',
-          error => 'EXCEPTION: unable to find resource '.METASCHEMA.'#/does/not/exist',
+          error => 'EXCEPTION: unable to find resource "'.METASCHEMA.'#/does/not/exist"',
         },
       ],
     },
@@ -190,7 +190,7 @@ subtest 'evaluate a uri' => sub {
         {
           instanceLocation => '',
           keywordLocation => '',
-          error => 'EXCEPTION: unable to find resource '.METASCHEMA.'#does_not_exist',
+          error => 'EXCEPTION: unable to find resource "'.METASCHEMA.'#does_not_exist"',
         },
       ],
     },
@@ -482,7 +482,7 @@ subtest '$ref to non-canonical uri' => sub {
         {
           instanceLocation => '',
           keywordLocation => '',
-          error => 'EXCEPTION: unable to find resource http://otherhost:4242/beta',
+          error => 'EXCEPTION: unable to find resource "http://otherhost:4242/beta"',
         },
       ],
     },

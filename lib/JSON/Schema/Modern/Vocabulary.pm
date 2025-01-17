@@ -74,8 +74,8 @@ sub eval ($class, $data, $schema, $state) {
 
 sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
-  abort($state, 'EXCEPTION: unable to find resource %s', $uri) if not $schema_info;
-  abort($state, 'EXCEPTION: bad reference to %s: not a schema', $schema_info->{canonical_uri})
+  abort($state, 'EXCEPTION: unable to find resource "%s"', $uri) if not $schema_info;
+  abort($state, 'EXCEPTION: bad reference to "%s": not a schema', $schema_info->{canonical_uri})
     if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
   return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},

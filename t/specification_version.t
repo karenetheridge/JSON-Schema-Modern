@@ -111,7 +111,7 @@ subtest '$ref adjacent to a path used in a $ref' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/2/$ref',
-          error => 'EXCEPTION: bad reference to #/allOf/1/anyOf/1: not a schema',
+          error => 'EXCEPTION: bad reference to "#/allOf/1/anyOf/1": not a schema',
         },
       ],
     },
@@ -134,7 +134,7 @@ subtest '$defs support' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/$ref',
-          error => 'EXCEPTION: unable to find resource #/$defs/foo',
+          error => 'EXCEPTION: unable to find resource "#/$defs/foo"',
         },
       ],
     },
@@ -174,7 +174,7 @@ subtest 'definitions support' => sub {
           {
             instanceLocation => '',
             keywordLocation => '/allOf/0/$ref',
-            error => 'EXCEPTION: unable to find resource #/definitions/foo',
+            error => 'EXCEPTION: unable to find resource "#/definitions/foo"',
           },
         ],
       },

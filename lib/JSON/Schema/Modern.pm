@@ -378,9 +378,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     abort($state, 'EXCEPTION: collect_annotations cannot be used with specification_version '.$schema_info->{specification_version})
       if $config_override->{collect_annotations} and $schema_info->{specification_version} =~ /^draft[467]$/;
 
-    abort($state, 'EXCEPTION: unable to find resource %s', $schema_reference)
+    abort($state, 'EXCEPTION: unable to find resource "%s"', $schema_reference)
       if not $schema_info;
-    abort($state, 'EXCEPTION: %s is not a schema', $schema_reference)
+    abort($state, 'EXCEPTION: "%s" is not a schema', $schema_reference)
       if not $schema_info->{document}->get_entity_at_location($schema_info->{document_path});
 
     $state = +{

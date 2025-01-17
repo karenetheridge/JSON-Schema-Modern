@@ -34,7 +34,7 @@ subtest 'local JSON pointer' => sub {
       my $result = $js->evaluate(true, { '$ref' => '#/$defs/nowhere' });
       like(
         (($result->errors)[0])->error,
-        qr{^EXCEPTION: unable to find resource \#/\$defs/nowhere},
+        qr{^EXCEPTION: unable to find resource "\#/\$defs/nowhere"},
         'got error for unresolvable ref',
       );
     },
@@ -96,7 +96,7 @@ subtest 'local anchor' => sub {
       my $result = $js->evaluate(true, { '$ref' => '#nowhere' });
       like(
         (($result->errors)[0])->error,
-        qr{^EXCEPTION: unable to find resource \#nowhere},
+        qr{^EXCEPTION: unable to find resource "\#nowhere"},
         'got error for unresolvable ref',
       );
     },
@@ -1172,7 +1172,7 @@ subtest 'reference to a non-schema location' => sub {
         {
           instanceLocation => '/$ref',
           keywordLocation => '/properties/$ref/$ref',
-          error => 'EXCEPTION: bad reference to #/example/not_a_schema: not a schema',
+          error => 'EXCEPTION: bad reference to "#/example/not_a_schema": not a schema',
         },
       ],
     },
@@ -1187,7 +1187,7 @@ subtest 'reference to a non-schema location' => sub {
         {
           instanceLocation => '/$dynamicRef',
           keywordLocation => '/properties/$dynamicRef/$dynamicRef',
-          error => 'EXCEPTION: bad reference to #/example/not_a_schema: not a schema',
+          error => 'EXCEPTION: bad reference to "#/example/not_a_schema": not a schema',
         },
       ],
     },
@@ -1217,7 +1217,7 @@ subtest 'reference to a non-schema location' => sub {
           instanceLocation => '/$recursiveRef',
           keywordLocation => '/properties/$recursiveRef/$recursiveRef',
           absoluteKeywordLocation => '/foo#/properties/$recursiveRef/$recursiveRef',
-          error => 'EXCEPTION: bad reference to /foo#/example/not_a_schema: not a schema',
+          error => 'EXCEPTION: bad reference to "/foo#/example/not_a_schema": not a schema',
         },
       ],
     },
@@ -1265,7 +1265,7 @@ subtest 'reference to a non-schema location' => sub {
           instanceLocation => '',
           keywordLocation => '/$schema',
           # we haven't processed $id yet, so we don't know the absolute location
-          error => 'EXCEPTION: bad reference to $schema https://my_non_schema: not a schema',
+          error => 'EXCEPTION: bad reference to $schema "https://my_non_schema": not a schema',
         },
       ],
     },
@@ -1285,7 +1285,7 @@ subtest 'evaluate at a non-schema location' => sub {
         {
           instanceLocation => '',
           keywordLocation => '',
-          error => 'EXCEPTION: http://my_schema#/example/not_a_schema is not a schema',
+          error => 'EXCEPTION: "http://my_schema#/example/not_a_schema" is not a schema',
         },
       ],
     },
