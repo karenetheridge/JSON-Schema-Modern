@@ -568,7 +568,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
   cmp_result(
     $js->evaluate(
       { foo => true },
-      $schema,
+      'base',
     )->TO_JSON,
     {
       valid => false,
@@ -617,7 +617,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
   cmp_result(
     $js->evaluate(
       { foo => { bar => true } },
-      $schema,
+      'base',
     )->TO_JSON,
     {
       valid => false,
@@ -1180,7 +1180,7 @@ subtest 'reference to a non-schema location' => sub {
   );
 
   cmp_result(
-    $js->evaluate({ '$dynamicRef' => 1 }, $schema)->TO_JSON,
+    $js->evaluate({ '$dynamicRef' => 1 }, '')->TO_JSON,
     {
       valid => false,
       errors => [

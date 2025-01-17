@@ -7,6 +7,16 @@ Revision history for JSON-Schema-Modern
             Documents directly (rather than via the evaluator), if not
             specified by the "$schema" keyword
           - some fixes for $id handling in earlier drafts
+          - rework of document management and URI resolution:
+            $jsm->add_schema($uri, $schema) no longer sets the $uri in the
+            document object, allowing the document to be added to the index
+            under multiple URIs. Instead, we resolve the document's indexed
+            resources against the base URI and only store the resolved form in
+            the evaluator itself. This allows the same document to be reused
+            with different base URIs if it only contains relative $ids
+            internally.  add_document($uri, $document) now resolves all URI
+            resources against the provided URI, rather than adding document
+            resources as-is and adding $uri as one more resource URI.
 
 0.599     2025-01-26 22:54:02Z
           - the boolean overload in JSON::Schema::Modern::Result is now

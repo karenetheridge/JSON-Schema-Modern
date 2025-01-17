@@ -865,6 +865,26 @@ subtest 'resource collisions' => sub {
     'detected collision between two subschema uris in a document',
   );
 
+
+  my $doc1 = JSON::Schema::Modern::Document->new(schema => { '$id' => 'a/b' });
+  my $doc2 = JSON::Schema::Modern::Document->new(schema => { '$id' => 'b' });
+  my $js = JSON::Schema::Modern->new;
+
+  is(
+    # id resolves to https://foo.com/a/b
+    exception { $js->add_document('https://foo.com' => $doc1) },
+    undef,
+    'add first document, resolving resources to a base uri',
+  );
+
+  like(
+    # id resolves to https://foo.com/a/b
+    exception { $js->add_document('https://foo.com/a/' => $doc2) },
+    qr{^uri "https://foo.com/a/b" conflicts with an existing schema resource},
+    'the resource in the second document resolves to the same uri as from the first document',
+  );
+
+
   is(
     exception {
       JSON::Schema::Modern::Document->new(

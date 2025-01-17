@@ -157,13 +157,28 @@ sub add_schema {
   Carp::carp('use of deprecated form of add_schema with document')
     if $_[0]->$_isa('JSON::Schema::Modern::Document');
 
+  return $self->add_document($uri, $_[0]) if $_[0]->$_isa('JSON::Schema::Modern::Document');
+
   # document BUILD will trigger $self->traverse($schema)
-  my $document = $_[0]->$_isa('JSON::Schema::Modern::Document') ? shift
-    : JSON::Schema::Modern::Document->new(
-      schema => shift,
-      $uri ? (canonical_uri => $uri) : (),
-      evaluator => $self,  # used mainly for traversal during document construction
-    );
+  # Note we do not pass the uri to the document constructor, so resources in that document may still
+  # be relative
+  my $document = JSON::Schema::Modern::Document->new(
+    schema => $_[0],
+    evaluator => $self,  # used mainly for traversal during document construction
+  );
+
+  # try to reuse the same document, if the same schema is being added twice:
+  # this results in _add_resource silently ignoring the duplicate add, rather than erroring.
+  my $schema_checksum = $document->_checksum(md5($self->_json_decoder->encode($document->schema)));
+  if (my $existing_doc = first {
+        my $existing_checksum = $_->_checksum
+          // $_->_checksum(md5($self->_json_decoder->encode($_->schema)));
+        $existing_checksum eq $schema_checksum
+          and $_->canonical_uri eq $document->canonical_uri
+          # FIXME: must also check spec version/metaschema_uri/vocabularies
+      } uniqint map $_->{document}, $self->_canonical_resources) {
+    $document = $existing_doc;
+  }
 
   $self->add_document($uri, $document);
 }
@@ -173,10 +188,10 @@ sub add_document {
   my $self = shift;
 
   # TODO: resolve $uri against $self->base_uri
-  my $uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
+  my $base_uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
     : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
 
-  croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
+  croak 'cannot add a schema with a uri with a fragment' if defined $base_uri->fragment;
 
   my $document = shift or croak 'insufficient arguments';
   croak 'wrong document type' if not $document->$_isa('JSON::Schema::Modern::Document');
@@ -188,33 +203,26 @@ sub add_document {
     exception => 1,
   ) if $document->has_errors;
 
-  if (not grep refaddr($_->{document}) == refaddr($document), $self->_canonical_resources) {
-    my $schema_checksum = $document->_checksum
-      // $document->_checksum(md5($self->_json_decoder->encode($document->schema)));
+  my @root; # uri_string => resource hash of the resource at path ''
 
-    if (my $existing_doc = first {
-          my $existing_checksum = $_->_checksum
-            // $_->_checksum(md5($self->_json_decoder->encode($_->schema)));
-          $existing_checksum eq $schema_checksum
-        } uniqint map $_->{document}, $self->_canonical_resources) {
-      # we already have this schema content in another document object.
-      $document = $existing_doc;
-    }
-    else {
-      # this might croak if there are duplicates or malformed entries
-      $self->_add_resources(map +($_->[0] => +{ $_->[1]->%*, document => $document }),
-        $document->resource_pairs);
-    }
+  # document resources are added after resolving each resource against our provided base uri
+  foreach my $res_pair ($document->resource_pairs) {
+    my ($uri_string, $doc_resource) = @$res_pair;
+    $uri_string = Mojo::URL->new($uri_string)->to_abs($base_uri)->to_string if length $base_uri;
+
+    my $new_resource = {
+      $doc_resource->%*,
+      length $base_uri ? (canonical_uri => Mojo::URL->new($doc_resource->{canonical_uri})->to_abs($base_uri)) : (),
+      document => $document,
+    };
+
+    # this might croak if there are duplicates or malformed entries.
+    $self->_add_resource($uri_string => $new_resource);
+    @root = ( $uri_string => $new_resource ) if $new_resource->{path} eq '' and $uri_string !~ /#./;
   }
 
-  # also add the document under the additional uri, if provided one
-  if ("$uri" and not $self->_get_resource($uri)) {
-    my $resource = $document->_get_resource($document->canonical_uri);
-    $self->_add_resources($uri.'' => {
-        $resource->%*,
-        document => $document,
-      });
-  }
+  # associate the root resource with the base uri we were provided, if it does not already exist
+  $self->_add_resource($base_uri.'' => $root[1]) if length $base_uri and $root[0] ne $base_uri;
 
   return $document;
 }
@@ -345,7 +353,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-      my $document = $self->add_schema('', $schema_reference);
+      my $document = $self->add_schema($schema_reference);
       my $base_resource = $document->_get_resource($document->canonical_uri)
         || croak "couldn't get resource: document parse error";
 
@@ -766,7 +774,7 @@ sub _resource_index { ($_[0]->{_resource_index}//{})->%* }
 sub _canonical_resources { values(($_[0]->{_resource_index}//{})->%*) }
 sub _resource_pairs { pairs(($_[0]->{_resource_index}//{})->%*) }
 
-sub _add_resources ($self, @kvs) {
+sub _add_resource ($self, @kvs) {
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @kvs) {
     my ($key, $value) = @$pair;
 
@@ -1022,13 +1030,14 @@ sub _fetch_from_uri ($self, $uri_reference) {
     if (my $resource = $self->_get_or_load_resource($base)) {
       my $subschema = $resource->{document}->get(my $document_path = $resource->{path}.($fragment//''));
       return if not defined $subschema;
-      my $document = $resource->{document};
+      my $doc_addr = refaddr($resource->{document});
       my $closest_resource = first { !length($_->[1]{path})       # document root
           || length($document_path)
             && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
         sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
         grep { not length Mojo::URL->new($_->[0])->fragment }     # omit anchors
-        $document->resource_pairs;
+        grep { refaddr($_->[1]{document}) == $doc_addr }          # in same document
+        $self->_resource_pairs;
 
       my $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
         ->fragment(substr($document_path, length($closest_resource->[1]{path})));
@@ -1036,9 +1045,8 @@ sub _fetch_from_uri ($self, $uri_reference) {
       return {
         schema => $subschema,
         canonical_uri => $canonical_uri,
-        document => $document,
         document_path => $document_path,
-        $resource->%{qw(specification_version vocabularies configs)}, # reference, not copy
+        $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
       };
     }
   }
@@ -1470,8 +1478,8 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
 
 Introduces the (unblessed, nested) Perl data structure
 representing a JSON Schema to the implementation, registering it under the indicated URI if
-provided, and all identifiers found within the document will be added as well (C<''> will be used if
-no other identifier can be found within).
+provided, and all identifiers found within the document will be resolved against this URI (if
+provided) and added as well. C<''> will be used if no other identifier can be found within.
 
 You B<MUST> call C<add_schema> or L</add_document> (below) for any external resources that a schema may reference via C<$ref>
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
@@ -1491,7 +1499,8 @@ otherwise returns the L<JSON::Schema::Modern::Document> that contains the added 
 
 Introduces the L<JSON::Schema::Modern::Document> (or subclass)
 object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
-provided (and all known identifiers within the document will be added as well).
+provided (and all known identifiers within the document will be added as well, resolved against the
+provided URI).
 
 If you add multiple documents (either with this method, or implicitly via L</evaluate>) with no root
 identifier (either provided explicitly in the method call, or via an C<$id> keyword at the schema
