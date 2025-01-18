@@ -1013,13 +1013,13 @@ sub _get_or_load_resource ($self, $uri) {
 };
 
 # returns information necessary to use a schema found at a particular URI or uri-reference:
-# - a schema (which may not be at a document root)
-# - the canonical uri for that schema,
-# - the JSON::Schema::Modern::Document object that holds that schema
-# - the path relative to the document root for this schema
-# - the specification version that applies to this schema
-# - the vocabularies to use when considering schema keywords
-# - the config overrides to set when considering schema keywords
+# - schema: a schema (which may not be at a document root)
+# - canonical_uri: the canonical uri for that schema,
+# - document: the JSON::Schema::Modern::Document object that holds that schema
+# - document_path: the path relative to the document root for this schema
+# - specification_version: the specification version that applies to this schema
+# - vocabularies: the vocabularies to use when considering schema keywords
+# - configs: the config overrides to set when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri ($self, $uri_reference) {
   $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
