@@ -211,10 +211,23 @@ sub add_document {
     $uri_string = Mojo::URL->new($uri_string)->to_abs($base_uri)->to_string if length $base_uri;
 
     my $new_resource = {
-      $doc_resource->%*,
-      length $base_uri ? (canonical_uri => Mojo::URL->new($doc_resource->{canonical_uri})->to_abs($base_uri)) : (),
+      $doc_resource->%{qw(path specification_version vocabularies configs)},
       document => $document,
     };
+
+    $new_resource->{canonical_uri} = length $base_uri
+      ? Mojo::URL->new($doc_resource->{canonical_uri})->to_abs($base_uri)
+      : $doc_resource->{canonical_uri};
+
+    foreach my $anchor (keys (($doc_resource->{anchors}//{})->%*)) {
+      use autovivification 'store';
+      $new_resource->{anchors}{$anchor} = {
+        path => $doc_resource->{anchors}{$anchor}{path},
+        canonical_uri => length $base_uri
+          ? Mojo::URL->new($doc_resource->{anchors}{$anchor}{canonical_uri})->to_abs($base_uri)
+          : $doc_resource->{anchors}{$anchor}{canonical_uri},
+      };
+    }
 
     # this might croak if there are duplicates or malformed entries.
     $self->_add_resource($uri_string => $new_resource);
@@ -756,16 +769,21 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   return $valid;
 }
 
+my $path_type = Str->where('m{^(?:/|$)}');  # JSON pointer relative to the document root
 has _resource_index => (
   is => 'bare',
-  isa => Map[my $resource_key_type = Str->where('!m{#(?:/|$)}') => my $resource_type = Dict[
-      canonical_uri => (InstanceOf['Mojo::URL'])
-        ->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
-      path => Str->where('m{^(?:/|$)}'),  # JSON pointer relative to the document root
+  isa => Map[my $resource_key_type = Str->where('!/#/'), my $resource_type = Dict[
+      # always stringwise-equal to the top level key
+      canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
+      path => $path_type,
       specification_version => my $spec_version_type = Enum(SPECIFICATION_VERSIONS_SUPPORTED),
       document => InstanceOf['JSON::Schema::Modern::Document'],
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[my $vocabulary_class_type = ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
+      anchors => Optional[HashRef[Dict[
+        canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
+        path => $path_type,
+      ]]],
       configs => HashRef,
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
@@ -1034,43 +1052,39 @@ sub _fetch_from_uri ($self, $uri_reference) {
   $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
   my $fragment = $uri_reference->fragment;
 
-  if (not length($fragment) or $fragment =~ m{^/}) {
-    my $base = $uri_reference->clone->fragment(undef);
-    if (my $resource = $self->_get_or_load_resource($base)) {
-      my $subschema = $resource->{document}->get(my $document_path = $resource->{path}.($fragment//''));
-      return if not defined $subschema;
-      my $doc_addr = refaddr($resource->{document});
-      my $closest_resource = first { !length($_->[1]{path})       # document root
-          || length($document_path)
-            && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
-        sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
-        grep { not length Mojo::URL->new($_->[0])->fragment }     # omit anchors
-        grep { refaddr($_->[1]{document}) == $doc_addr }          # in same document
-        $self->_resource_pairs;
+  my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
+  return if not $resource;
 
-      my $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
-        ->fragment(substr($document_path, length($closest_resource->[1]{path})));
-      $canonical_uri->fragment(undef) if not length($canonical_uri->fragment);
-      return {
-        schema => $subschema,
-        canonical_uri => $canonical_uri,
-        document_path => $document_path,
-        $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
-      };
-    }
+  if (not length($fragment) or $fragment =~ m{^/}) {
+    my $subschema = $resource->{document}->get(my $document_path = $resource->{path}.($fragment//''));
+    return if not defined $subschema;
+    my $doc_addr = refaddr($resource->{document});
+    my $closest_resource = first { !length($_->[1]{path})       # document root
+        || length($document_path)
+          && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
+      sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
+      grep { refaddr($_->[1]{document}) == $doc_addr }          # in same document
+      $self->_resource_pairs;
+
+    my $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
+      ->fragment(substr($document_path, length($closest_resource->[1]{path})));
+    $canonical_uri->fragment(undef) if not length($canonical_uri->fragment);
+
+    return {
+      schema => $subschema,
+      canonical_uri => $canonical_uri,
+      document_path => $document_path,
+      $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
+    };
   }
   else {  # we are following a URI with a plain-name fragment
-    if (my $resource = $self->_get_resource($uri_reference)) {
-      my $subschema = $resource->{document}->get($resource->{path});
-      return if not defined $subschema;
-      return {
-        schema => $subschema,
-        canonical_uri => $resource->{canonical_uri}->clone, # this is *not* the anchor-containing URI
-        document => $resource->{document},
-        document_path => $resource->{path},
-        $resource->%{qw(specification_version vocabularies configs)}, # reference, not copy
-      };
-    }
+    return if not my $subresource = ($resource->{anchors}//{})->{$fragment};
+    return {
+      schema => $resource->{document}->get($subresource->{path}),
+      canonical_uri => $subresource->{canonical_uri}->clone, # this is *not* the anchor-containing URI
+      document_path => $subresource->{path},
+      $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
+    };
   }
 }
 

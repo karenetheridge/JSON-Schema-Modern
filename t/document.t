@@ -223,13 +223,12 @@ subtest 'object document' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        'https://bar.com#my_anchor' => {
-          path => '/allOf/0',
-          canonical_uri => str('https://bar.com#/allOf/0'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            my_anchor => {
+              path => '/allOf/0',
+              canonical_uri => str('https://bar.com#/allOf/0'),
+            },
+          },
         },
         'https://bar.com/x/y/z.json' => {
           path => '/allOf/1',
@@ -343,11 +342,12 @@ subtest 'object document' => sub {
           path => '', canonical_uri => str(''), specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        '#my_anchor' => {
-          path => '', canonical_uri => str(''), specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            my_anchor => {
+              path => '',
+              canonical_uri => str(''),
+            },
+          },
         },
       ),
     ),
@@ -369,13 +369,12 @@ subtest 'object document' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        'https://example.com#my_anchor' => {
-          path => '',
-          canonical_uri => str('https://example.com'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            my_anchor => {
+              path => '',
+              canonical_uri => str('https://example.com'),
+            },
+          },
         },
       ),
     ),
@@ -397,13 +396,12 @@ subtest 'object document' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        'https://my-base.com#my_anchor' => {
-          path => '',
-          canonical_uri => str('https://my-base.com'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            my_anchor => {
+              path => '',
+              canonical_uri => str('https://my-base.com'),
+            },
+          },
         },
       ),
     ),
@@ -429,13 +427,12 @@ subtest 'object document' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        'https://my-base.com#my_anchor' => {
-          path => '/$defs/foo',
-          canonical_uri => str('https://my-base.com#/$defs/foo'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            my_anchor => {
+              path => '/$defs/foo',
+              canonical_uri => str('https://my-base.com#/$defs/foo'),
+            },
+          },
         },
       ),
     ),
@@ -674,18 +671,16 @@ subtest '$anchor and $id below an $id that is not at the document root' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        'https://bar.com#my_anchor' => {
-          path => '/allOf/0', canonical_uri => str('https://bar.com'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
-        },
-        'https://bar.com#my_not' => {
-          path => '/allOf/0/not', canonical_uri => str('https://bar.com#/not'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            my_anchor => {
+              path => '/allOf/0',
+              canonical_uri => str('https://bar.com'),
+            },
+            my_not => {
+              path => '/allOf/0/not',
+              canonical_uri => str('https://bar.com#/not'),
+            },
+          },
         },
         'https://bar.com/inner_id' => {
           path => '/allOf/0/not/not', canonical_uri => str('https://bar.com/inner_id'),
@@ -749,6 +744,12 @@ subtest 'JSON pointer and URI escaping' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
+          anchors => {
+            tilde => {
+              path => '/$defs/foo/patternProperties/~0/properties/~0~1',
+              canonical_uri => str('http://localhost:4242/~username#/properties/~0~1'),
+            },
+          },
         },
         'http://localhost:4242/my_slash' => {
           path => '/$defs/foo/patternProperties/~1',
@@ -756,6 +757,12 @@ subtest 'JSON pointer and URI escaping' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
+          anchors => {
+            slash => {
+              path => '/$defs/foo/patternProperties/~1/properties/~0~1',
+              canonical_uri => str('http://localhost:4242/my_slash#/properties/~0~1'),
+            },
+          },
         },
         'http://localhost:4242/~username/my_slash' => {
           path => '/$defs/foo/patternProperties/[~0~1]',
@@ -763,27 +770,12 @@ subtest 'JSON pointer and URI escaping' => sub {
           specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
-        },
-        'http://localhost:4242/~username#tilde' => {
-          path => '/$defs/foo/patternProperties/~0/properties/~0~1',
-          canonical_uri => str('http://localhost:4242/~username#/properties/~0~1'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
-        },
-        'http://localhost:4242/my_slash#slash' => {
-          path => '/$defs/foo/patternProperties/~1/properties/~0~1',
-          canonical_uri => str('http://localhost:4242/my_slash#/properties/~0~1'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
-        },
-        'http://localhost:4242/~username/my_slash#tildeslash' => {
-          path => '/$defs/foo/patternProperties/[~0~1]/properties/~0~1',
-          canonical_uri => str('http://localhost:4242/~username/my_slash#/properties/~0~1'),
-          specification_version => 'draft2020-12',
-          vocabularies => $vocabularies{'draft2020-12'},
-          configs => {},
+          anchors => {
+            tildeslash => {
+              path => '/$defs/foo/patternProperties/[~0~1]/properties/~0~1',
+              canonical_uri => str('http://localhost:4242/~username/my_slash#/properties/~0~1'),
+            },
+          },
         },
       ),
       _entities => [ { map +($_ => 0),

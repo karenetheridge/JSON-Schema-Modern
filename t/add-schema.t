@@ -616,11 +616,12 @@ subtest 'register a document against multiple uris, with absolute root uri' => s
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         ) },
-      },
-      'https://foo.com#my_anchor' => {
-        path => '',
-        canonical_uri => str('https://foo.com'),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://foo.com'),
+          },
+        },
       },
       'https://foo.com/my_dir' => {
         path => '/$defs/foo',
@@ -641,12 +642,12 @@ subtest 'register a document against multiple uris, with absolute root uri' => s
         canonical_uri => str('https://foo.com'),
         document => shallow($document),
         %more_configs,
-      },
-      'https://foo.com#my_anchor' => {
-        path => '',
-        canonical_uri => str('https://foo.com'),
-        document => shallow($document),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://foo.com'),
+          },
+        },
       },
       'https://foo.com/my_dir' => {
         path => '/$defs/foo',
@@ -669,8 +670,13 @@ subtest 'register a document against multiple uris, with absolute root uri' => s
         canonical_uri => str('https://foo.com'),
         document => shallow($document),
         %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://foo.com'),
+          },
+        },
       },
-    # FIXME: https://uri2.com#my_anchor should also be addressable
     },
     'add a secondary uri for the same document',
   );
@@ -710,6 +716,12 @@ subtest 'register a document against multiple uris, with absolute root uri' => s
         canonical_uri => str('https://foo.com'),
         document => shallow($document),
         %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://foo.com'),
+          },
+        },
       },
     },
     'adding the same schema content again is permitted',
@@ -755,11 +767,12 @@ subtest 'register a document against multiple uris, with relative root uri' => s
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         ) },
-      },
-      'my_dir/#my_anchor' => {
-        path => '',
-        canonical_uri => str('my_dir/'),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('my_dir/'),
+          },
+        },
       },
       'my_dir/my_dir2' => {
         path => '/$defs/foo',
@@ -780,12 +793,12 @@ subtest 'register a document against multiple uris, with relative root uri' => s
         canonical_uri => str('my_dir/'),
         document => shallow($document),
         %more_configs,
-      },
-      'my_dir/#my_anchor' => {
-        path => '',
-        canonical_uri => str('my_dir/'),
-        document => shallow($document),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('my_dir/'),
+          },
+        },
       },
       'my_dir/my_dir2' => {
         path => '/$defs/foo',
@@ -803,12 +816,30 @@ subtest 'register a document against multiple uris, with relative root uri' => s
     { $js->_resource_index },
     $main_resource_index = {
       %$main_resource_index,
-      (map +($_ => {
+      'https://uri2.com' => {
         path => '',
         canonical_uri => str('https://uri2.com/my_dir/'),
         document => shallow($document),
         %more_configs,
-      }), 'https://uri2.com', 'https://uri2.com/my_dir/', 'https://uri2.com/my_dir/#my_anchor'),
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://uri2.com/my_dir/'),
+          },
+        },
+      },
+      'https://uri2.com/my_dir/' => {
+        path => '',
+        canonical_uri => str('https://uri2.com/my_dir/'),
+        document => shallow($document),
+        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://uri2.com/my_dir/'),
+          },
+        },
+      },
       'https://uri2.com/my_dir/my_dir2' => {
         path => '/$defs/foo',
         canonical_uri => str('https://uri2.com/my_dir/my_dir2'),
@@ -849,12 +880,30 @@ subtest 'register a document against multiple uris, with relative root uri' => s
     { $js->_resource_index },
     {
       %$main_resource_index,
-      (map +($_ => {
+      'https://uri4.com' => {
         path => '',
         canonical_uri => str('https://uri4.com/my_dir/'),
         document => shallow($document),
         %more_configs,
-      }), 'https://uri4.com', 'https://uri4.com/my_dir/', 'https://uri4.com/my_dir/#my_anchor'),
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://uri4.com/my_dir/'),
+          },
+        },
+      },
+      'https://uri4.com/my_dir/' => {
+        path => '',
+        canonical_uri => str('https://uri4.com/my_dir/'),
+        document => shallow($document),
+        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://uri4.com/my_dir/'),
+          },
+        },
+      },
       'https://uri4.com/my_dir/my_dir2' => {
         path => '/$defs/foo',
         canonical_uri => str('https://uri4.com/my_dir/my_dir2'),
@@ -893,11 +942,12 @@ subtest 'register a document against multiple uris, with no root uri' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         ) },
-      },
-      '#my_anchor' => {
-        path => '',
-        canonical_uri => str(''),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str(''),
+          },
+        },
       },
       'my_dir' => {
         path => '/$defs/foo',
@@ -918,12 +968,12 @@ subtest 'register a document against multiple uris, with no root uri' => sub {
         canonical_uri => str(''),
         document => shallow($document),
         %more_configs,
-      },
-      '#my_anchor' => {
-        path => '',
-        canonical_uri => str(''),
-        document => shallow($document),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str(''),
+          },
+        },
       },
       'my_dir' => {
         path => '/$defs/foo',
@@ -946,12 +996,12 @@ subtest 'register a document against multiple uris, with no root uri' => sub {
         canonical_uri => str('https://uri2.com'),
         document => shallow($document),
         %more_configs,
-      },
-      'https://uri2.com#my_anchor' => {
-        path => '',
-        canonical_uri => str('https://uri2.com'),
-        document => shallow($document),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://uri2.com'),
+          },
+        },
       },
       'https://uri2.com/my_dir' => {
         path => '/$defs/foo',
@@ -998,12 +1048,12 @@ subtest 'register a document against multiple uris, with no root uri' => sub {
         canonical_uri => str('https://uri4.com'),
         document => shallow($document),
         %more_configs,
-      },
-      'https://uri4.com#my_anchor' => {
-        path => '',
-        canonical_uri => str('https://uri4.com'),
-        document => shallow($document),
-        %more_configs,
+        anchors => {
+          my_anchor => {
+            path => '',
+            canonical_uri => str('https://uri4.com'),
+          },
+        },
       },
       'https://uri4.com/my_dir' => {
         path => '/$defs/foo',

@@ -22,7 +22,7 @@ use List::Util 1.29 'pairs';
 use Ref::Util 0.100 'is_plain_hashref';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
-use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy);
+use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy Optional);
 use Types::Common::Numeric 'PositiveOrZeroInt';
 use namespace::clean;
 
@@ -55,16 +55,21 @@ has evaluator => (
 
 # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
+my $path_type = Str->where('m{^(?:/|$)}');  # JSON pointer relative to the document root
 has resource_index => (
   is => 'bare',
-  isa => Map[my $resource_key_type = Str->where('!m{#(?:/|$)}') => my $resource_type = Dict[
-      canonical_uri => (InstanceOf['Mojo::URL'])
-        ->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
-      path => Str->where('m{^(?:/|$)}'),  # JSON pointer relative to the document root
+  isa => Map[my $resource_key_type = Str->where('!/#/'), my $resource_type = Dict[
+      # always stringwise-equal to the top level key
+      canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
+      path => $path_type,
       specification_version => Enum[qw(draft4 draft6 draft7 draft2019-09 draft2020-12)],
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       configs => HashRef,
+      anchors => Optional[HashRef[Dict[
+        canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
+        path => $path_type,
+      ]]],
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
   init_arg => undef,

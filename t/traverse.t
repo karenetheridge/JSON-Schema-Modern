@@ -205,7 +205,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
   cmp_result(
     $state->{identifiers},
     {
-      '#hello' => {
+      '' => {
         path => '',
         canonical_uri => str(''),
         specification_version => 'draft7',
@@ -214,6 +214,12 @@ subtest 'traversing a dialect with different core keywords' => sub {
           map 'JSON::Schema::Modern::Vocabulary::'.$_,
             qw(Core Validation FormatAnnotation Applicator Content MetaData),
         ],
+        anchors => {
+          hello => {
+            path => '',
+            canonical_uri => str(''),
+          },
+        },
       },
       '/bloop' => {
         path => '/definitions/bloop',
@@ -359,6 +365,60 @@ subtest 'duplicate identifiers' => sub {
   );
 };
 
+subtest '$anchor without $id' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  my $state = $js->traverse({
+    '$anchor' => 'root_anchor',
+  });
+  cmp_result(
+    $state->{identifiers},
+    {
+      '' => {
+        path => '',
+        canonical_uri => str(''),
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+        configs => {},
+        anchors => {
+          root_anchor => {
+            path => '',
+            canonical_uri => str(''),
+          },
+        },
+      },
+    },
+    'found anchor at root, without an $id to pre-populate the identifiers hash',
+  );
+
+  $state = $js->traverse({
+    properties => {
+      foo => {
+        '$anchor' => 'foo_anchor',
+      },
+    },
+  });
+  cmp_result(
+    $state->{identifiers},
+    {
+      '' => {
+        path => '',
+        canonical_uri => str(''),
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+        configs => {},
+        anchors => {
+          foo_anchor => {
+            path => '/properties/foo',
+            canonical_uri => str('#/properties/foo'),
+          },
+        },
+      },
+    },
+    'found anchor within schema, without an $id to pre-populate the identifiers hash',
+  );
+};
+
 subtest 'traverse with overridden metaschema_uri' => sub {
   my $js = JSON::Schema::Modern->new;
   $js->add_schema({
@@ -392,6 +452,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     ],
     'metaschema_uri is overridden with a bad schema: same errors are returned',
   );
+
 
   $state = $js->traverse(
     { '$id' => 'https://my-poor-schema/foo.json' },
@@ -476,15 +537,17 @@ subtest 'traverse with overridden metaschema_uri' => sub {
 subtest 'start traversing below the document root' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  # Remember: by this point the $document object exists, but we have no idea where in the document we are.
-  # It might not even be a JSON Schema.
+  # Remember: at this point the $document object may exist, but its constructor hasn't finished yet
+  # (until traverse() returns), and we have no idea where in the document we are, and the evaluator
+  # isn't provided the document object yet.
+  # The document data might not even be a JSON Schema.
   # Let's say the document actually looks like:
   # {
-  #   $id => 'my_document.yaml',
+  #   $self => 'my_document.yaml',
+  #   openapi => '3.1.1',
   #   components => {
-  #     alpha => {
-  #       $id => 'my_subdocument.yaml',
-  #       subid => {
+  #     schemas => {
+  #       alpha => {
   #         *** SUBSCHEMA BELOW ***
   #       },
   #     },
@@ -511,6 +574,7 @@ subtest 'start traversing below the document root' => sub {
       traversed_schema_path => '/components/alpha/subid',
     },
   );
+
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
@@ -531,31 +595,76 @@ subtest 'start traversing below the document root' => sub {
   );
 
 
-  cmp_result(
-    $js->traverse(
-      {
-        properties => {
-          alpha => {
-            '$id' => 'alpha_id',
-            properties => {
-              alpha_one => {
-                '$id' => 'alpha_one_id',
-              },
-              alpha_two => {
-                '$anchor' => 'alpha_two_anchor',
-              },
+  $state = $js->traverse(
+    {
+      properties => {
+        myprop => {
+          allOf => [
+            {
+              '$id' => 'inner_document',      # resolves to dir/inner_document
+              properties => { foo => true },
             },
-          },
-          beta => {
-            '$anchor' => 'beta_anchor',
-          },
+          ],
         },
       },
-      {
-        initial_schema_uri => 'dir/my_subdocument#/subid',
-        traversed_schema_path => '/components/alpha/subid',
+    },
+    {
+      initial_schema_uri => 'dir/my_subdocument#/subid',
+      traversed_schema_path => '/components/alpha/subid',
+    },
+  );
+
+  cmp_result(
+    $state->{identifiers},
+    {
+      'dir/inner_document' => {
+        canonical_uri => str('dir/inner_document'),
+        path => '/components/alpha/subid/properties/myprop/allOf/0',
+        specification_version => 'draft2020-12',
+        vocabularies => ignore,
+        configs => {},
       },
-    )->{identifiers},
+    },
+    'identifiers are correctly extracted when traversing below the document root',
+  );
+
+  $state = $js->traverse(
+    {
+      # the path at this position is /components/alpha/subid
+      properties => {
+        alpha => {
+          '$id' => 'alpha_id',          # resolves to dir/alpha_id
+          properties => {
+            alpha_one => {
+              '$id' => 'alpha_one_id',  # resolves to dir/alpha_one_id
+            },
+            alpha_two => {
+              '$anchor' => 'alpha_two_anchor',    # resolves to dir/alpha_id#alpha_two_anchor
+            },
+            alpha_three => {
+              '$anchor' => 'alpha_three_anchor',  # resolves to dir/alpha_id#alpha_three_anchor
+            },
+          },
+        },
+        beta => {
+          # produces anchor definition:
+          # base uri is dir/my_subdocument,
+          # canonical uri is dir/my_subdocument#/subid/properties/beta
+          # path is /components/alpha/subid/properties/beta
+          '$anchor' => 'beta_anchor',   # resolves to dir/my_subdocument#beta_anchor
+        },
+      },
+    },
+    {
+      # this is used for adjusting canonical_uri in extracted 'identifiers'; and for errors.
+      # we can infer that there is an identifier 'dir/mysubdocument' at path '/components/alpha'
+      initial_schema_uri => 'dir/my_subdocument#/subid',
+      traversed_schema_path => '/components/alpha/subid',
+    },
+  );
+
+  cmp_result(
+    $state->{identifiers},
     {
       'dir/alpha_id' => {
         canonical_uri => str('dir/alpha_id'),
@@ -563,6 +672,16 @@ subtest 'start traversing below the document root' => sub {
         specification_version => 'draft2020-12',
         vocabularies => ignore,
         configs => {},
+        anchors => {
+          alpha_two_anchor => {
+            canonical_uri => str('dir/alpha_id#/properties/alpha_two'),
+            path => '/components/alpha/subid/properties/alpha/properties/alpha_two',
+          },
+          alpha_three_anchor => {
+            canonical_uri => str('dir/alpha_id#/properties/alpha_three'),
+            path => '/components/alpha/subid/properties/alpha/properties/alpha_three',
+          },
+        },
       },
       'dir/alpha_one_id' => {
         canonical_uri => str('dir/alpha_one_id'),
@@ -571,22 +690,21 @@ subtest 'start traversing below the document root' => sub {
         vocabularies => ignore,
         configs => {},
       },
-      'dir/alpha_id#alpha_two_anchor'=> {
-        canonical_uri => str('dir/alpha_id#/properties/alpha_two'),
-        path => '/components/alpha/subid/properties/alpha/properties/alpha_two',
+      'dir/my_subdocument' => {   # this is inferred when we process "$anchor": "beta_anchor"
+        canonical_uri => str('dir/my_subdocument'),
+        path => '/components/alpha',
         specification_version => 'draft2020-12',
         vocabularies => ignore,
         configs => {},
-      },
-      'dir/my_subdocument#beta_anchor'=> {
-        canonical_uri => str('dir/my_subdocument#/subid/properties/beta'),
-        path => '/components/alpha/subid/properties/beta',
-        specification_version => 'draft2020-12',
-        vocabularies => ignore,
-        configs => {},
+        anchors => {
+          beta_anchor => {
+            canonical_uri => str('dir/my_subdocument#/subid/properties/beta'),
+            path => '/components/alpha/subid/properties/beta',
+          },
+        },
       },
     },
-    'identifiers are correctly extracted when traversing below the document root',
+    'identifiers are correctly extracted when traversing below the document root, with anchor',
   );
 };
 

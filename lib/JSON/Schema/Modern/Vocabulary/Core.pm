@@ -193,20 +193,52 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
       or $state->{spec_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 
   my $canonical_uri = canonical_uri($state);
+
   $anchor =~ s/^#// if $state->{spec_version} =~ /^draft[467]$/;
   my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($anchor);
+  my $base_uri = $canonical_uri->clone->fragment(undef);
 
-  return E($state, 'duplicate anchor uri "%s" found (original at path "%s")',
-      $uri, $state->{identifiers}{$uri}->{path})
-    if exists $state->{identifiers}{$uri};
+  if (exists $state->{identifiers}{$base_uri}) {
+    return E($state, 'duplicate anchor uri "%s" found (original at path "%s")',
+        $uri, $state->{identifiers}{$base_uri}{anchors}{$anchor}{path})
+      if exists(($state->{identifiers}{$base_uri}{anchors}//{})->{$anchor});
 
-  $state->{identifiers}{$uri} = {
-    path => $state->{traversed_schema_path}.$state->{schema_path},
-    canonical_uri => $canonical_uri,
-    specification_version => $state->{spec_version},
-    vocabularies => $state->{vocabularies}, # reference, not copy
-    configs => $state->{configs},
-  };
+    use autovivification 'store';
+    $state->{identifiers}{$base_uri}{anchors}{$anchor} = {
+      canonical_uri => $canonical_uri,
+      path => $state->{traversed_schema_path}.$state->{schema_path},
+    };
+  }
+  # we need not be at the root of the resource schema, and we need not even have an entry
+  # in 'identifiers' for our current base uri (if there was no $id at the root, or if
+  # initial_schema_uri was overridden in the call to traverse())
+  else {
+    my $base_path = '';
+    if (my $fragment = $canonical_uri->fragment) {
+      # this shouldn't happen, as we also check this at the start of traverse
+      return E($state, 'something is wrong; "%s" is not the suffix of "%s"', $fragment, $state->{traversed_schema_path}.$state->{schema_path})
+        if substr($state->{traversed_schema_path}.$state->{schema_path}, -length($fragment))
+          ne $fragment;
+      $base_path = substr($state->{traversed_schema_path}.$state->{schema_path}, 0, -length($fragment));
+    }
+
+    $state->{identifiers}{$base_uri} = {
+      # if we aren't at the starting point of the traversal, we have no idea where the base is located:
+      # this is an invalid resource entry, so it must be merged with the real base before being
+      # added to the document's resource index.
+      canonical_uri => $base_uri,
+      path => $base_path,
+      specification_version => $state->{spec_version},
+      vocabularies => $state->{vocabularies}, # reference, not copy
+      configs => $state->{configs},
+      anchors => {
+        $anchor => {
+          canonical_uri => $canonical_uri,
+          path => $state->{traversed_schema_path}.$state->{schema_path},
+        },
+      },
+    };
+  }
 
   return 1;
 }

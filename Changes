@@ -17,6 +17,9 @@ Revision history for JSON-Schema-Modern
             internally.  add_document($uri, $document) now resolves all URI
             resources against the provided URI, rather than adding document
             resources as-is and adding $uri as one more resource URI.
+          - further restructuring of internal resource indexes, anchor
+            management, and traversal of subschemas from embedded non-JSON
+            Schema documents (e.g. OpenAPI documents)
 
 0.599     2025-01-26 22:54:02Z
           - the boolean overload in JSON::Schema::Modern::Result is now
