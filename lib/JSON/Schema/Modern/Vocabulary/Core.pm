@@ -95,7 +95,7 @@ sub _traverse_keyword_id ($class, $schema, $state) {
 sub _eval_keyword_id ($class, $data, $schema, $state) {
   my $schema_info = $state->{document}->path_to_resource($state->{document_path}.$state->{schema_path});
   # this should never happen, if the pre-evaluation traversal was performed correctly
-  abort($state, 'failed to resolve %s to canonical uri', $state->{keyword}) if not $schema_info;
+  abort($state, 'failed to resolve "%s" to canonical uri', $state->{keyword}) if not $schema_info;
 
   $state->{initial_schema_uri} = $schema_info->{canonical_uri}->clone;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
