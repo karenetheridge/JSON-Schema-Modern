@@ -38,22 +38,26 @@ sub keywords ($class, $spec_version) {
 {
   # for now, all built-in formats are constrained to the 'string' type
 
-  my $is_email = sub {
+  my $is_email = sub {    # email, idn-email
+    require Email::Address::XS; Email::Address::XS->VERSION(1.04);
     Email::Address::XS->parse($_[0])->is_valid;
   };
-  my $is_hostname = sub {
+  my $is_hostname = sub { # hostname, idn-hostname
+    # FIXME: draft7 hostname uses RFC1034, draft2019-09+ hostname uses RFC1123
+    require Data::Validate::Domain;
     Data::Validate::Domain::is_domain($_[0]);
   };
-  my $idn_decode = sub {
+  my $idn_decode = sub {  # idn-hostname
+    require Net::IDN::Encode;
     try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch ($e) { return $_[0]; }
   };
-  my $is_ipv4 = sub {
+  my $is_ipv4 = sub {     # ipv4, ipv6
     my @o = split(/\./, $_[0], 5);
     @o == 4 && (grep /^(?:0|[1-9][0-9]{0,2})$/, @o) == 4 && (grep $_ < 256, @o) == 4;
   };
   # https://datatracker.ietf.org/doc/html/rfc3339#appendix-A with some additions for the 2000 version
   # as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
-  my $duration_re = do {
+  my $duration_re = do {  # duration
     my $num = qr{[0-9]+(?:[.,][0-9]+)?};
     my $second = qr{${num}S};
     my $minute = qr{${num}M};
@@ -80,8 +84,11 @@ sub keywords ($class, $spec_version) {
         && (!defined $7 || $7 <= 59)  # time-minute in time-numoffset
 
         # Time::Moment does month+day sanity check (with leap years), but not leap seconds
-        && ($5 <= 59 && eval { Time::Moment->from_string(uc($_[0])) }
-          || do {
+        && ($5 <= 59
+          && do {
+            require Time::Moment;
+            eval { Time::Moment->from_string(uc($_[0])) };
+          } || do {
             require DateTime::Format::RFC3339;
             eval { DateTime::Format::RFC3339->parse_datetime($_[0]) };
         });
@@ -91,7 +98,10 @@ sub keywords ($class, $spec_version) {
       $_[0] =~ m/^(\d{4})-(\d\d)-(\d\d)$/a
         && $2 >= 1 && $2 <= 12        # date-month
         && $3 >= 1 && $3 <= 31        # date-mday
-        && eval { Time::Moment->new(year => $1, month => $2, day => $3) };
+        && do {
+          require Time::Moment;
+          eval { Time::Moment->new(year => $1, month => $2, day => $3) };
+        };
     },
     time => sub {
       return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))$/a
@@ -189,31 +199,6 @@ sub keywords ($class, $spec_version) {
   }
 }
 
-# common code between FormatAnnotation+validate_formats and FormatAssertion paths
-sub _get_format_definition ($class, $schema, $state) {
-  try {
-    if ($schema->{format} eq 'date-time' or $schema->{format} eq 'date') {
-      require Time::Moment;
-    }
-    elsif ($schema->{format} eq 'email' or $schema->{format} eq 'idn-email') {
-      require Email::Address::XS; Email::Address::XS->VERSION(1.04);
-    }
-    # FIXME:
-    # draft7 hostname uses RFC1034
-    # draft2019-09+ hostname uses RFC1123
-    elsif ($schema->{format} eq 'hostname' or $schema->{format} eq 'idn-hostname') {
-      require Data::Validate::Domain;
-      require Net::IDN::Encode if $schema->{format} eq 'idn-hostname';
-    }
-  }
-  catch ($e) {
-    abort($state, 'EXCEPTION: cannot validate with format "%s": %s', $schema->{format}, $e);
-  }
-
-  return $state->{evaluator}->_get_format_validation($schema->{format})
-    // $class->_get_default_format_validation($state, $schema->{format});
-}
-
 sub _traverse_keyword_format ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
   return E($state, 'unimplemented format "%s"', $schema->{format})
@@ -240,7 +225,8 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
   abort($state, 'unimplemented format "%s"', $schema->{format})
     if $schema->{format} eq 'uri-template';
 
-  my $spec = $class->_get_format_definition($schema, $state);
+  my $spec = $state->{evaluator}->_get_format_validation($schema->{format})
+    // $class->_get_default_format_validation($state, $schema->{format});
 
   # §7.2.3 (draft2020-12) "When the Format-Assertion vocabulary is specified, implementations MUST
   # fail upon encountering unknown formats."
@@ -255,7 +241,13 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       and is_plain_arrayref($spec->{type}) ? any { $_ eq 'number' } $spec->{type}->@* : $spec->{type} eq 'number'
       and looks_like_number($data));
 
-  return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
+  try {
+    return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
+  }
+  catch ($e) {
+    abort($state, 'EXCEPTION: cannot validate with format "%s": %s', $schema->{format}, $e);
+  }
+
   return 1;
 }
 

@@ -318,7 +318,7 @@ cmp_result(
 $js = JSON::Schema::Modern->new(validate_formats => 1);
 {
   $result = $js->evaluate(
-    'foo',
+    '2025-01-01T00:00:00Z',
     { format => 'date-time'},
   );
 

@@ -16,6 +16,36 @@ use JSON::Schema::Modern::Utilities qw(get_type);
 use lib 't/lib';
 use Helper;
 
+use Test::Without::Module qw(
+  Time::Moment
+  DateTime::Format::RFC3339
+  Data::Validate::Domain
+  Email::Address::XS
+  Net::IDN::Encode
+);
+
+use constant ALL_FORMATS => [ qw(
+  date-time
+  email
+  hostname
+  ipv4
+  ipv6
+  uri
+  uri-reference
+  uri-template
+  json-pointer
+  iri
+  iri-reference
+  idn-email
+  idn-hostname
+  relative-json-pointer
+  regex
+  date
+  time
+  duration
+  uuid
+) ];
+
 my ($annotation_result, $validation_result);
 subtest 'no validation' => sub {
   cmp_result(
@@ -357,7 +387,7 @@ subtest 'custom metaschemas' => sub {
         },
       ],
     },
-    'custom metaschema using format-assertion=true validates formats',
+    'custom metaschema using format-assertion=false validates formats',
   );
 
   cmp_result(
@@ -823,6 +853,74 @@ subtest 'stringy numbers with a numeric format' => sub {
       ],
     },
     'FormatAssertion: strings that look like numbers can be validated against a numeric format when stringy_numbers=1',
+  );
+};
+
+  # we do have support for these formats, but we do not force that their dependencies be installed
+  # unless the formats are actually to be used.
+  # Therefore we will allow them to be tested against other data types (e.g. in acceptance tests)
+  # even without these dependencies installed, without throwing an exception.
+
+subtest 'annotation formats using implementations that rely on optional dependencies' => sub {
+  cmp_result(
+    # relying on default format-assertion behaviour
+    JSON::Schema::Modern->new->evaluate(
+      [
+        undef,
+        true,
+        {},
+        [],
+        1
+      ],
+      { items => { allOf => [ map +{ format => $_ }, ALL_FORMATS->@* ] } },
+    )->TO_JSON,
+    { valid => true },
+    'can annotate a non-string against formats without their optional dependencies, without dying',
+  );
+};
+
+subtest 'assertion formats using implementations that rely on optional dependencies' => sub {
+  my $js = JSON::Schema::Modern->new(validate_formats => 1);
+  cmp_result(
+    $js->evaluate(
+      [
+        undef,
+        true,
+        {},
+        [],
+        1
+      ],
+      {
+        type => 'array',
+        items => { allOf => [ map +{ format => $_ }, ALL_FORMATS->@* ] }
+      },
+    )->TO_JSON,
+    { valid => true },
+    'can assert a non-string against formats without their optional dependencies, without dying',
+  );
+
+  cmp_result(
+    $js->evaluate(
+      '2025-01-01T00:00:00Z',
+      {
+        type => 'string',
+        allOf => [
+          { format => 'date-time' },
+          true,
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          error => re(qr{^EXCEPTION: cannot validate with format "date-time": Can't locate Time/Moment\.pm}),
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/format',
+        },
+      ],
+    },
+    'in assertion mode, we immediately abort when encountering a format that throws an exception',
   );
 };
 
