@@ -317,7 +317,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Error')) {
-      # note: we should never be here, since traversal subs are no longer be fatal
+      # note: we should never be here, since traversal subs are no longer fatal
       push $state->{errors}->@*, $e;
     }
     else {
