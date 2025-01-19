@@ -51,7 +51,7 @@ acceptance_tests(
   },
   evaluator => {
     specification_version => $version,
-    # validate_formats behaviour should default to true for draft4
+    # validate_formats behaviour should default to true for this draft
     collect_annotations => 0,
   },
   output_file => $version.'-acceptance-format.txt',

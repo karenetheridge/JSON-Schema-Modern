@@ -39,7 +39,7 @@ acceptance_tests(
   },
   evaluator => {
     specification_version => $version,
-    # validate_formats behaviour should default to true for draft6
+    validate_formats => 0,    # not the default for the Format vocabulary for this draft
     collect_annotations => 0,
   },
   output_file => $version.'-acceptance.txt',

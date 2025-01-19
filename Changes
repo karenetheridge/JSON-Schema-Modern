@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - fix format acceptance tests that would fail when some optional
             modules are not installed
+          - fix some acceptance tests that used the wrong validate_formats
+            mode (since v0.592)
 
 0.597     2024-12-07 23:30:38Z
           - report installed version of builtin
