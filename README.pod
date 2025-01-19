@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.597
+version 0.598
 
 =head1 SYNOPSIS
 
@@ -223,7 +223,7 @@ Defaults to false.
 =head2 evaluate_json_string
 
   $result = $js->evaluate_json_string($data_as_json_string, $schema);
-  $result = $js->evaluate_json_string($data_as_json_string, $schema, { collect_annotations => 1});
+  $result = $js->evaluate_json_string($data_as_json_string, $schema, { collect_annotations => 1 });
 
 Evaluates the provided instance data against the known schema document.
 
@@ -861,6 +861,11 @@ L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI 
 L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
 
 =back
+
+=head1 AVAILABILITY
+
+This distribution and executable is available on modern Debian versions (via C<apt-get>) as the
+C<libjson-schema-modern-perl> package.
 
 =head1 SUPPORT
 
