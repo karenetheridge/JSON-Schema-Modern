@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.598     2025-01-19 18:30:32Z
           - fix format acceptance tests that would fail when some optional
             modules are not installed
