@@ -284,6 +284,14 @@ L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.8.1.2/
 in a metaschema's C<$vocabulary> keyword, or by toggling the
 L<JSON::Schema::Modern/validate_formats> option.
 
+When the Format-Annotation vocabulary is specified (which is the default for the draft2020-12
+metaschema) and combined with the C<validate_formats> option set to true, unimplemented formats will
+silently validate, but implemented formats will validate completely. Note that some formats require
+optional module dependencies, and the lack of these modules will generate an error.
+
+When this vocabulary (the Format-Assertion vocabulary) is specified, unimplemented formats will
+generate an error on use.
+
 Overrides to particular format implementations, or additions of new ones, can be done through
 L<JSON::Schema::Modern/format_validations>.
 
@@ -294,5 +302,6 @@ Use of this format will always result in an error.
 
 =for :list
 * L<JSON::Schema::Modern/Format Validation>
+* L<JSON::Schema::Modern::Vocabulary::FormatAnnotation>
 
 =cut

@@ -111,9 +111,17 @@ generate errors; this differs from the more strict behaviour in
 LJSON::Schema::Modern::Vocabulary::FormatAssertion> which requires all formats used in the schema to
 be supported and defined.
 
+When this vocabulary (the Format-Annotation vocabulary) is specified (which is the default for the
+draft2020-12 metaschema) and combined with the C<validate_formats> option set to true, unimplemented
+formats will silently validate, but implemented formats will validate completely. Note that some
+formats require optional module dependencies, and the lack of these modules will generate an error.
+
+When the Format-Assertion vocabulary is specified, unimplemented formats will generate an error on use.
+
 =head1 SEE ALSO
 
 =for :list
 * L<JSON::Schema::Modern/Format Validation>
+* L<JSON::Schema::Modern::Vocabulary::FormatAssertion>
 
 =cut
