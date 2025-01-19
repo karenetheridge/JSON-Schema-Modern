@@ -297,26 +297,14 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
       $config_override->{metaschema_uri} // $self->METASCHEMA_URIS->{$spec_version},
       $for_canonical_uri,
     );
+
+    $self->_traverse_subschema($schema_reference, $state);
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Result')) {
       push $state->{errors}->@*, $e->errors;
     }
     elsif ($e->$_isa('JSON::Schema::Modern::Error')) {
-      push $state->{errors}->@*, $e;
-    }
-    else {
-      ()= E({ %$state, exception => 1 }, 'EXCEPTION: '.$e);
-    }
-
-    return $state;
-  }
-
-  try {
-    $self->_traverse_subschema($schema_reference, $state);
-  }
-  catch ($e) {
-    if ($e->$_isa('JSON::Schema::Modern::Error')) {
       # note: we should never be here, since traversal subs are no longer fatal
       push $state->{errors}->@*, $e;
     }
