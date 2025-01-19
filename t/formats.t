@@ -914,7 +914,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
       valid => false,
       errors => [
         {
-          error => re(qr{^EXCEPTION: cannot validate with format "date-time": Can't locate Time/Moment\.pm}),
+          error => re(qr{^EXCEPTION: Can't locate Time/Moment\.pm}),
           instanceLocation => '',
           keywordLocation => '/allOf/0/format',
         },

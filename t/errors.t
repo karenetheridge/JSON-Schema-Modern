@@ -982,8 +982,8 @@ subtest 'bad regex in schema' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
-          keywordLocation => '/properties',
+          instanceLocation => '/my_runtime_pattern',
+          keywordLocation => '/properties/my_runtime_pattern/pattern',
           # in 5.28 and earlier: Can't find Unicode property definition "IsFoo"
           # in 5.30 and later:   Unknown user-defined property name \p{main::IsFoo}
           error => re(qr/^EXCEPTION: .*property.*IsFoo/),

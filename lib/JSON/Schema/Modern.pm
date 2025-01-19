@@ -689,13 +689,19 @@ sub _eval_subschema ($self, $data, $schema, $state) {
         my $old_spec_version = $state->{spec_version};
         my $error_count = $state->{errors}->@*;
 
-        if (not $sub->($vocabulary, $data, $schema, $state)) {
-          warn 'evaluation result is false but there are no errors (keyword: '.$keyword.')'
-            if $error_count == $state->{errors}->@*;
-          $valid = 0;
+        try {
+          if (not $sub->($vocabulary, $data, $schema, $state)) {
+            warn 'evaluation result is false but there are no errors (keyword: '.$keyword.')'
+              if $error_count == $state->{errors}->@*;
+            $valid = 0;
 
-          last ALL_KEYWORDS if $state->{short_circuit};
-          next;
+            last ALL_KEYWORDS if $state->{short_circuit};
+            next;
+          }
+        }
+        catch ($e) {
+          die $e if $e->$_isa('JSON::Schema::Modern::Error');
+          abort($state, 'EXCEPTION: '.$e);
         }
 
         # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing

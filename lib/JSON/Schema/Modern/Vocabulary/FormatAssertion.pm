@@ -241,13 +241,7 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       and is_plain_arrayref($spec->{type}) ? any { $_ eq 'number' } $spec->{type}->@* : $spec->{type} eq 'number'
       and looks_like_number($data));
 
-  try {
-    return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
-  }
-  catch ($e) {
-    abort($state, 'EXCEPTION: cannot validate with format "%s": %s', $schema->{format}, $e);
-  }
-
+  return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
   return 1;
 }
 

@@ -16,9 +16,8 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
-use JSON::Schema::Modern::Utilities qw(A E assert_keyword_type get_type abort);
+use JSON::Schema::Modern::Utilities qw(A E assert_keyword_type get_type);
 use JSON::Schema::Modern::Vocabulary::FormatAssertion;
-use Feature::Compat::Try;
 use List::Util 'any';
 use Ref::Util 0.100 'is_plain_arrayref';
 use Scalar::Util 'looks_like_number';
@@ -67,13 +66,7 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       and is_plain_arrayref($spec->{type}) ? any { $_ eq 'number' } $spec->{type}->@* : $spec->{type} eq 'number'
       and looks_like_number($data));
 
-  try {
-    return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
-  }
-  catch ($e) {
-    abort($state, 'EXCEPTION: cannot validate with format "%s": %s', $schema->{format}, $e);
-  }
-
+  return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
   return 1;
 }
 
