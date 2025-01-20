@@ -178,10 +178,6 @@ sub BUILD ($self, $args) {
   $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
 
   if ($state->{errors}->@*) {
-    foreach my $error ($state->{errors}->@*) {
-      $error->mode('traverse') if not defined $error->mode;
-    }
-
     $self->_set_errors($state->{errors});
     return;
   }

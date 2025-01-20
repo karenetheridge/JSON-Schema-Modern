@@ -39,8 +39,9 @@ has exception => (
 );
 
 has mode => (
-  is => 'rw',
+  is => 'ro',
   isa => Enum[qw(traverse evaluate)],
+  required => 1,
 );
 
 has recommended_response => (
@@ -49,7 +50,7 @@ has recommended_response => (
 );
 
 sub stringify ($self) {
-  ($self->mode//'evaluate') eq 'traverse'
+  $self->mode eq 'traverse'
     ? '\''.$self->keyword_location.'\': '.$self->error
     : '\''.$self->instance_location.'\': '.$self->error;
 }

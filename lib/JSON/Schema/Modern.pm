@@ -238,6 +238,7 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
       errors => [
         JSON::Schema::Modern::Error->new(
           depth => 0,
+          mode => 'evaluate',
           keyword => undef,
           instance_location => '',
           keyword_location => '',
@@ -890,6 +891,7 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
         my $absolute_location = $e->absolute_keyword_location // $for_canonical_uri;
         JSON::Schema::Modern::Error->new(
           depth => $e->depth,
+          mode => 'traverse',
           keyword => $e->keyword eq '$schema' ? '' : $e->keyword,
           instance_location => $e->instance_location,
           keyword_location => ($for_canonical_uri->fragment//'').($e->keyword_location =~ s{^/\$schema\b}{}r),

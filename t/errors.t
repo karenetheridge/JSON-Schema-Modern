@@ -1511,12 +1511,13 @@ subtest 'recommended_response' => sub {
       # TODO: I haven't implemented authentication in OpenAPI::Modern yet, so I'm not sure how
       # exactly these errors are going to look
       JSON::Schema::Modern::Error->new(
+        depth => 0,
+        mode => 'evaluate',
         keyword => 'authentication',
         instance_location => '/request/headers/Authentication',
         keyword_location => '/paths/foo/get/security',
         error => 'security check failed',
         recommended_response => [ 401, 'Unauthorized' ],
-        depth => 0,
       ),
     ],
   );

@@ -437,6 +437,7 @@ subtest 'AND two result objects together' => sub {
       ($valid ? 'annotations' : 'errors') => [
         map ${\ ('JSON::Schema::Modern::'.($valid ? 'Annotation' : 'Error'))}->new(
           depth => 0,
+          mode => 'evaluate',
           keyword => 'keyword '.$count.'-'.$_,
           instance_location => 'instance location '.$count.'-'.$_,
           keyword_location => 'keyword location '.$count.'-'.$_,
@@ -565,6 +566,7 @@ subtest 'data_only' => sub {
     errors => [
       JSON::Schema::Modern::Error->new(
         depth => 1,
+        mode => 'evaluate',
         keyword => 'hello',
         instance_location => '/foo/bar',
         keyword_location => '/allOf/0/hello',
@@ -572,6 +574,7 @@ subtest 'data_only' => sub {
       ),
       JSON::Schema::Modern::Error->new(
         depth => 1,
+        mode => 'evaluate',
         keyword => 'goodbye',
         instance_location => '/foo/bar',
         keyword_location => '/allOf/1/goodbye',
@@ -579,6 +582,7 @@ subtest 'data_only' => sub {
       ),
       JSON::Schema::Modern::Error->new(
         depth => 0,
+        mode => 'evaluate',
         keyword => 'allOf',
         instance_location => '/foo/bar',
         keyword_location => '/allOf',
@@ -593,11 +597,16 @@ subtest 'data_only' => sub {
     'data_only format outputs a string of data locations only, with duplicates removed',
   );
 
-
-  $_->mode('traverse') foreach $result->errors;
-
   is(
-    $result->format('data_only'),
+    JSON::Schema::Modern::Result->new(
+      valid => 0,
+      errors => [
+        map JSON::Schema::Modern::Error->new(
+          do { my $e = $_; map +( $_ => $e->$_ ), qw(depth keyword instance_location keyword_location error) },
+          mode => 'traverse',
+        ), $result->errors
+      ],
+    )->format('data_only'),
     "'/allOf/0/hello': schema is invalid\n'/allOf/1/goodbye': schema is invalid\n'/allOf': subschemas 0, 1 are not valid",
     'data_only format uses keyword locations when result came from traverse',
   );

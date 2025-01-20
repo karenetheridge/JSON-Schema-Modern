@@ -310,6 +310,7 @@ sub canonical_uri ($state, @extra_path) {
 # - exception (set by abort())
 # - recommended_response
 # - depth
+# - traverse (boolean, used for mode)
 # returns defined-false, so callers can use 'return;' to differentiate between
 # failed-with-no-error from failed-with-error.
 sub E ($state, $error_string, @args) {
@@ -337,6 +338,7 @@ sub E ($state, $error_string, @args) {
     error => @args ? sprintf($error_string, @args) : $error_string,
     $state->{exception} ? ( exception => $state->{exception} ) : (),
     $state->{recommended_response} ? ( recommended_response => $state->{recommended_response} ) : (),
+    mode => $state->{traverse} ? 'traverse' : 'evaluate',
   );
 
   return 0;
