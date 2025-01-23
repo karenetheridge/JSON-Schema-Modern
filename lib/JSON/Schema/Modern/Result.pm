@@ -278,6 +278,10 @@ L<JSON::Schema::Modern>.
 
 =head1 OVERLOADS
 
+The object contains a string overload, which evaluates to a potentially multi-line string
+summarizing the errors within (if any); this is intended to be used as a user-oriented error message
+that references data locations, but not schema locations.
+
 The object contains a I<boolean> overload, which evaluates to the value of L</valid>, so you can
 use the result of L<JSON::Schema::Modern/evaluate> in boolean context.
 
