@@ -31,7 +31,7 @@ foreach my $test (@tests) {
   is(
     exception {
       my $result = $js->evaluate($data, $test->{schema});
-      ok(!($result xor $test->{valid}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{valid}));
+      ok(!($result->valid xor $test->{valid}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{valid}));
 
       cmp_result(
         $result->TO_JSON,

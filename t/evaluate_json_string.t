@@ -22,7 +22,7 @@ like(ref($js->_json_decoder), qr/^(?:Cpanel::JSON::XS|JSON::PP)$/, 'we have a JS
 
 is(
   exception {
-    ok($js->evaluate_json_string('true', {}), 'json data "true" is evaluated successfully');
+    ok($js->evaluate_json_string('true', {})->valid, 'json data "true" is evaluated successfully');
   },
   undef,
   'no exceptions in evaluate_json_string on good json',

@@ -41,7 +41,7 @@ my $note = $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? \&diag : \&note;
 sub run_test ($data, $schema_value, $expected) {
   local $Test::Builder::Level = $Test::Builder::Level + 1;
   my $result = $js->evaluate($data, { multipleOf => $schema_value });
-  my $pass = ok(!($result xor $expected), "$data is ".($expected ? '' : 'not ')."a multiple of $schema_value");
+  my $pass = ok(!($result->valid xor $expected), "$data is ".($expected ? '' : 'not ')."a multiple of $schema_value");
   $note->('got result: '.$result->dump) if not $pass;
 }
 

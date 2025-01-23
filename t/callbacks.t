@@ -42,7 +42,7 @@ subtest 'evaluation callbacks' => sub {
       },
     },
   );
-  ok($result, 'evaluation was successful');
+  ok($result->valid, 'evaluation was successful');
   cmp_result(
     \@used_ref_at,
     bag(
@@ -62,7 +62,7 @@ subtest 'evaluation callbacks' => sub {
     $schema,
     $config,
   );
-  ok(!$result, 'evaluation was not successful');
+  ok(!$result->valid, 'evaluation was not successful');
   cmp_result(
     \@used_ref_at,
     [],
@@ -94,7 +94,7 @@ subtest 'evaluation callbacks' => sub {
     },
     $config,
   );
-  ok($result, 'evaluation was successful');
+  ok($result->valid, 'evaluation was successful');
 
   cmp_result(
     \@used_ref_at,
@@ -129,7 +129,7 @@ subtest 'callbacks for keywords without eval subs' => sub {
       },
     },
   );
-  ok($result, 'evaluation was successful');
+  ok($result->valid, 'evaluation was successful');
 
   cmp_result(
     \%keywords,

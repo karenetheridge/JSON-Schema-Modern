@@ -68,7 +68,7 @@ foreach my $target (keys %files) {
   my $document = $js->get_document($source_uri);
   print '# validating ', $document->canonical_uri, "\n" if $ENV{DEBUG};
   my $result = $document->validate;
-  die $result->dump if not $result;
+  die $result->dump if not $result->valid;
 }
 
 # compute checksums and record them in the test

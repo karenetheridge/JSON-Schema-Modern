@@ -81,7 +81,7 @@ sub acceptance_tests (%options) {
           if not $result_short->isa('JSON::Schema::Modern::Result');
         note 'short-circuited result: ', $result_short->dump;
         die 'results inconsistent between short_circuit = false and true'
-          if ($result xor $result_short);
+          if ($result->valid xor $result_short->valid);
       }
 
       my $in_todo;
@@ -98,7 +98,7 @@ sub acceptance_tests (%options) {
               $r->errors;
       }
 
-      $result;
+      $result->valid;
     },
     add_resource => $add_resource,
     @ARGV ? (tests => { file => \@ARGV }) : (),
