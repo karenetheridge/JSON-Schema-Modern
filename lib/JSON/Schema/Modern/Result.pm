@@ -30,7 +30,6 @@ use namespace::clean;
 use overload
   'bool'  => sub { $_[0]->valid },
   '&'     => \&combine,
-  '0+'    => sub { refaddr($_[0]) },
   '""' => sub { $_[0]->stringify },
   fallback => 1;
 
