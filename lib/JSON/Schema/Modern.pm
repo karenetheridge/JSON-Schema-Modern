@@ -183,15 +183,12 @@ sub add_document {
   my $document = shift or croak 'insufficient arguments';
   croak 'wrong document type' if not $document->$_isa('JSON::Schema::Modern::Document');
 
-  if ($document->has_errors) {
-    my $result = JSON::Schema::Modern::Result->new(
-      output_format => $self->output_format,
-      valid => 0,
-      errors => [ $document->errors ],
-      exception => 1,
-    );
-    die $result;
-  }
+  die JSON::Schema::Modern::Result->new(
+    output_format => $self->output_format,
+    valid => 0,
+    errors => [ $document->errors ],
+    exception => 1,
+  ) if $document->has_errors;
 
   if (not grep refaddr($_->{document}) == refaddr($document), $self->_canonical_resources) {
     my $schema_checksum = $document->_checksum
