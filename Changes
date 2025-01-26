@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.599     2025-01-26 22:54:02Z
           - the boolean overload in JSON::Schema::Modern::Result is now
             deprecated: it will warn on use, and will be removed no sooner

@@ -4,7 +4,7 @@ package JSON::Schema::Modern::Vocabulary::Validation;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Implementation of the JSON Schema Validation vocabulary
 
-our $VERSION = '0.599';
+our $VERSION = '0.600';
 
 use 5.020;
 use Moo;
