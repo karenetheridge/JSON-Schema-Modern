@@ -271,6 +271,15 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
   my $initial_path = $config_override->{traversed_schema_path} // '';
   my $spec_version = $config_override->{specification_version} // $self->specification_version // SPECIFICATION_VERSION_DEFAULT;
 
+  croak 'traversed_schema_path must be a json pointer' if $initial_path !~ m{^(?:/|$)};
+
+  if (length(my $uri_path = $initial_uri->fragment)) {
+    croak 'initial_schema_uri fragment must be a json pointer' if $uri_path !~ m{^/};
+
+    croak 'traversed_schema_path does not match initial_schema_uri path fragment'
+      if $initial_path !~ m{\Q$uri_path\E$};
+  }
+
   my $state = {
     depth => 0,
     data_path => '',                        # this never changes since we don't have an instance yet

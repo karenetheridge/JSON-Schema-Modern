@@ -414,6 +414,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     {
       metaschema_uri => 'https://metaschema/with/wrong/spec',
       initial_schema_uri => 'https://my-poor-schema/foo.json#/$my_dialect_is',
+      traversed_schema_path => '/$my_dialect_is',
     });
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
