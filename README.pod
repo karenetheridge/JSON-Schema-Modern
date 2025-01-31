@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.599
+version 0.600
 
 =head1 SYNOPSIS
 
@@ -36,12 +36,12 @@ These values are all passed as arguments to the constructor.
 
 =head2 specification_version
 
-Indicates which version of the JSON Schema specification is used during evaluation. When not set,
-this value is derived from the C<$schema> keyword in the schema used in evaluation, or defaults to
-the latest version (currently C<draft2020-12>).
+Indicates which version of the JSON Schema specification is used during evaluation. This value is
+overridden by the value determined from the C<$schema> keyword in the schema used in evaluation
+(when present), or defaults to the latest version (currently C<draft2020-12>).
 
-The use of this option is I<HIGHLY> encouraged to ensure continued correct operation of your schema.
-The current default value will not stay the same over time.
+The use of the C<$schema> keyword in your schema is I<HIGHLY> encouraged to ensure continued correct
+operation of your schema. The current default value will not stay the same over time.
 
 May be one of:
 
@@ -68,9 +68,6 @@ L<C<draft6> or C<6>|https://json-schema.org/specification-links.html#draft-6>, c
 L<C<draft4> or C<4>|https://json-schema.org/specification-links.html#draft-4>, corresponding to metaschema C<http://json-schema.org/draft-04/schema#>
 
 =back
-
-Note that you can also use a C<$schema> keyword in the schema itself, to specify a different metaschema or
-specification version.
 
 =head2 output_format
 
@@ -413,12 +410,16 @@ For example, to find the resolved targets of all C<$ref> keywords in a schema do
 
 Introduces the (unblessed, nested) Perl data structure
 representing a JSON Schema to the implementation, registering it under the indicated URI if
-provided, and all identifiers found within the document will be added as well (C<''> will be used if
-no other identifier can be found within).
+provided, and all identifiers found within the document will be resolved against this URI (if
+provided) and added as well. C<''> will be used if no other identifier can be found within.
 
 You B<MUST> call C<add_schema> or L</add_document> (below) for any external resources that a schema may reference via C<$ref>
 before calling L</evaluate>, other than the standard metaschemas which are loaded from a local cache
 as needed.
+
+If you add multiple schemas (either with this method, or implicitly via L</evaluate>) with no root
+identifier (either provided explicitly in the method call, or via an C<$id> keyword at the schema
+root), all such previous schemas are removed from memory and can no longer be referenced.
 
 If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
@@ -430,7 +431,12 @@ otherwise returns the L<JSON::Schema::Modern::Document> that contains the added 
 
 Introduces the L<JSON::Schema::Modern::Document> (or subclass)
 object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
-provided (and all known identifiers within the document will be added as well).
+provided (and all known identifiers within the document will be added as well, resolved against the
+provided URI).
+
+If you add multiple documents (either with this method, or implicitly via L</evaluate>) with no root
+identifier (either provided explicitly in the method call, or via an C<$id> keyword at the schema
+root), all such previous schemas are removed from memory and can no longer be referenced.
 
 If there were errors in the document, will die with these errors;
 otherwise returns the L<JSON::Schema::Modern::Document> object.
