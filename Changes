@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.600     2025-01-31 23:23:21Z
           BREAKING CHANGES: OpenAPI::Modern must be updated to 0.079 after
           installing this version.
