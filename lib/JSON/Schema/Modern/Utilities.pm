@@ -18,7 +18,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use B;
 use Carp 'croak';
 use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
-use builtin::compat qw(blessed created_as_number created_as_string);
+use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
 use Feature::Compat::Try;
