@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.026
-with commit:                 9fc880bfb6d8ccd093bc82431f17d13681ffae8e (23.2.0-117-g9fc880b)
+generated with:              Test::JSON::Schema::Acceptance 1.027
+with commit:                 e524505b8ac4a61c5dc162b51d68c2385a134706 (Test-JSON-Schema-Acceptance-1.026-16-ge524505)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft2020-12
 optional tests included:     yes
@@ -58,7 +58,7 @@ optional/bignum.json                         9          0     0
 optional/cross-draft.json                    1          0     0
 optional/dependencies-compatibility.json    22         14     0
 optional/dynamicRef.json                     2          0     0
-optional/ecmascript-regex.json              60         15     0
+optional/ecmascript-regex.json              60         14     0
 optional/float-overflow.json                 1          0     0
 optional/format-assertion.json               4          0     0
 optional/id.json                             3          0     0
@@ -67,4 +67,4 @@ optional/non-bmp-regex.json                 12          0     0
 optional/refOfUnknownKeyword.json            3          3     0
 optional/unknownKeyword.json                 3          0     0
 ---------------------------------------------------------------
-TOTAL                                     1372         32     0
+TOTAL                                     1372         31     0
