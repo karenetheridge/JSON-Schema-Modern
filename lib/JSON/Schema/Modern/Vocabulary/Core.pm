@@ -223,9 +223,12 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
     }
 
     $state->{identifiers}{$base_uri} = {
-      # if we aren't at the starting point of the traversal, we have no idea where the base is located:
-      # this is an invalid resource entry, so it must be merged with the real base before being
-      # added to the document's resource index.
+      # We didn't see an $id keyword at this position or above us, so a resource entry hasn't been
+      # made yet for this identifier. However, we have all the information we need to infer its
+      # data. If this entry is being created in a subschema (below the document root), another one
+      # just like it may be created by another subschema using the same base canonical uri, so that
+      # caller will need to merge the entries together before providing them to the Document's
+      # resource index.
       canonical_uri => $base_uri,
       path => $base_path,
       specification_version => $state->{spec_version},
