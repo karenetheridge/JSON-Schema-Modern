@@ -122,7 +122,7 @@ subtest 'object document' => sub {
       schema => { '$id' => 'https://foo.com' },
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         # note: no '' entry
         'https://foo.com' => {
           path => '',
@@ -131,7 +131,7 @@ subtest 'object document' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
-      ),
+      ],
       canonical_uri => [ str('https://foo.com') ], # note canonical_uri has been overwritten
       _entities => [ { '' => 0 } ],
     ),
@@ -170,7 +170,7 @@ subtest 'object document' => sub {
       canonical_uri => 'https://example.com',
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         'https://example.com' => {
           path => '',
           canonical_uri => str('https://example.com'),
@@ -178,7 +178,7 @@ subtest 'object document' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
-      ),
+      ],
     ),
     'when canonical_uri provided, the empty uri is not added as a referenceable uri',
   );
@@ -189,7 +189,7 @@ subtest 'object document' => sub {
       schema => { '$id' => 'https://foo.com' },
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         'https://foo.com' => {
           path => '',
           canonical_uri => str('https://foo.com'),
@@ -197,7 +197,7 @@ subtest 'object document' => sub {
           vocabularies => $vocabularies{'draft2020-12'},
           configs => {},
         },
-      ),
+      ],
       canonical_uri => [ str('https://foo.com') ],
       _entities => [ { '' => 0 } ],
     ),
@@ -337,7 +337,7 @@ subtest 'object document' => sub {
       },
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         '' => {
           path => '', canonical_uri => str(''), specification_version => 'draft2020-12',
           vocabularies => $vocabularies{'draft2020-12'},
@@ -349,7 +349,7 @@ subtest 'object document' => sub {
             },
           },
         },
-      ),
+      ],
     ),
     'no root $id or canonical_uri provided; anchor is indexed at the root',
   );
@@ -362,7 +362,7 @@ subtest 'object document' => sub {
       canonical_uri => 'https://example.com',
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         'https://example.com' => {
           path => '',
           canonical_uri => str('https://example.com'),
@@ -376,7 +376,7 @@ subtest 'object document' => sub {
             },
           },
         },
-      ),
+      ],
     ),
     'canonical_uri provided; empty uri not added as a referenceable uri when an anchor exists',
   );
@@ -389,7 +389,7 @@ subtest 'object document' => sub {
       },
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         'https://my-base.com' => {
           path => '',
           canonical_uri => str('https://my-base.com'),
@@ -403,7 +403,7 @@ subtest 'object document' => sub {
             },
           },
         },
-      ),
+      ],
     ),
     'absolute uri provided at root; adjacent anchor has the same canonical uri',
   );
@@ -420,7 +420,7 @@ subtest 'object document' => sub {
       },
     ),
     listmethods(
-      resource_index => unordered_pairs(
+      resource_index => [
         'https://my-base.com' => {
           path => '',
           canonical_uri => str('https://my-base.com'),
@@ -434,7 +434,7 @@ subtest 'object document' => sub {
             },
           },
         },
-      ),
+      ],
     ),
     'absolute uri provided at root; anchor lower down has its own canonical uri',
   );
