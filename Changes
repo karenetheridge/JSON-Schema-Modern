@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.601     2025-02-02 00:23:38Z
           - check for builtin::Backport at install time
 
 0.600     2025-01-31 23:23:21Z
