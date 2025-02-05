@@ -322,7 +322,9 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
       $for_canonical_uri,
     );
 
-    $self->_traverse_subschema($schema_reference, $state);
+    my $valid = $self->_traverse_subschema($schema_reference, $state);
+    die 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
+    die 'result is true but there are errors' if $valid and $state->{errors}->@*;
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Result')) {
@@ -426,6 +428,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
     $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
     warn 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
+    warn 'result is true but there are errors' if $valid and $state->{errors}->@*;
   }
   catch ($e) {
     if ($e->$_isa('JSON::Schema::Modern::Result')) {
@@ -575,22 +578,31 @@ sub _traverse_subschema ($self, $schema, $state) {
       $state->{keyword} = $keyword;
 
       my $old_spec_version = $state->{spec_version};
+      my $error_count = $state->{errors}->@*;
 
       if (not $sub->($vocabulary, $schema, $state)) {
-        die 'traverse result is false but there are no errors (keyword: '.$keyword.')' if not $state->{errors}->@*;
+        die 'traverse result is false but there are no errors (keyword: '.$keyword.')'
+          if $error_count == $state->{errors}->@*;
         $valid = 0;
         next;
       }
+      warn 'traverse result is true but there are errors (keyword: '.$keyword.')'
+        if $error_count != $state->{errors}->@*;
 
       # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing
       undef $keyword_list if $state->{spec_version} ne $old_spec_version;
 
       if (my $callback = $state->{callbacks}{$keyword}) {
+        $error_count = $state->{errors}->@*;
+
         if (not $callback->($schema, $state)) {
-          die 'callback result is false but there are no errors (keyword: '.$keyword.')' if not $state->{errors}->@*;
+          die 'callback result is false but there are no errors (keyword: '.$keyword.')'
+            if $error_count == $state->{errors}->@*;
           $valid = 0;
           next;
         }
+        die 'callback result is true but there are errors (keyword: '.$keyword.')'
+          if $error_count != $state->{errors}->@*;
       }
     }
   }
@@ -598,7 +610,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   delete $state->{keyword};
 
   if ($self->strict and keys %unknown_keywords) {
-    ()= E($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
+    $valid = E($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
       join(', ', sort keys %unknown_keywords));
   }
 
@@ -710,6 +722,9 @@ sub _eval_subschema ($self, $data, $schema, $state) {
             last ALL_KEYWORDS if $state->{short_circuit};
             next;
           }
+
+          warn 'evaluation result is true but there are errors (keyword: '.$keyword.')'
+            if $error_count != $state->{errors}->@*;
         }
         catch ($e) {
           die $e if $e->$_isa('JSON::Schema::Modern::Error');
@@ -731,6 +746,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
           last ALL_KEYWORDS if $state->{short_circuit};
           next;
         }
+        warn 'callback result is true but there are errors (keyword: '.$keyword.')'
+          if $error_count != $state->{errors}->@*;
       }
     }
   }
