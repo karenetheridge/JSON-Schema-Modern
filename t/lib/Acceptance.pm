@@ -51,16 +51,23 @@ sub acceptance_tests (%options) {
   my $js = JSON::Schema::Modern->new($options{evaluator}->%*);
   my $js_short_circuit = $ENV{NO_SHORT_CIRCUIT} || JSON::Schema::Modern->new($options{evaluator}->%*, short_circuit => 1);
 
-  my $add_resource = sub ($uri, $schema) {
+  my $add_resource = sub ($uri, $schema, @options) {
     return if $uri =~ m{/draft-next/};
     try {
       # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
       local $SIG{__WARN__} = sub {
         warn @_ if $_[0] !~ /^no-longer-supported "definitions" keyword present/;
       } if $options{acceptance}{specification} !~ /^draft[467]$/
-          and Test::JSON::Schema::Acceptance->VERSION < '1.027';
-      $js->add_schema($uri => $schema);
-      $js_short_circuit->add_schema($uri => $schema) if not $ENV{NO_SHORT_CIRCUIT};
+          and Test::JSON::Schema::Acceptance->VERSION < '1.028';
+
+      my $doc = my $document = JSON::Schema::Modern::Document->new(
+        schema => $schema,
+        evaluator => $js,
+        @options,
+      );
+
+      $js->add_document($uri => $doc);
+      $js_short_circuit->add_document($uri => $doc) if not $ENV{NO_SHORT_CIRCUIT};
     }
     catch ($e) {
       die $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump : $e;
