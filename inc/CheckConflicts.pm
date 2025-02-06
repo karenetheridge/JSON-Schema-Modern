@@ -4,38 +4,34 @@ use warnings;
 package inc::CheckConflicts;
 
 use Moose;
-extends 'Dist::Zilla::Plugin::Conflicts';
+with 'Dist::Zilla::Role::InstallTool';
 
-# like [Conflicts], except:
-# - we die instead of warn in Makefile.PL and Build.PL when conflicts are detected
-# - the Conflicts check only runs for perls < 5.38 (which is when builtin::Backport is active)
-# - the Conflicts module is defined inline, and contains no -also clause
-# - we manually populate metadata with x_breaks
-
-sub gather_files {}
-
-sub metadata {} # we add to x_breaks in dist.ini
-
-around _check_conflicts_sub => sub {
-  my $orig = shift;
+sub setup_installer {
   my $self = shift;
 
-  my $content = $self->$orig(@_);
+  my @mfpl = grep +($_->name eq 'Makefile.PL' or $_->name eq 'Build.PL'), $self->zilla->files->@*;
+  $self->log_fatal('No Makefile.PL or Build.PL was found.') if not @mfpl;
 
-  $content =~ s/sub check_conflicts \{\K/\n    return if "\$\]" >= 5.038;\n/;
-  $content =~ s/\bwarn /die /;
+  foreach my $file (@mfpl) {
+    $self->log_debug([ 'munging %s in setup_installer phase', $file->name ]);
 
-  $content =~ s/eval \{\K require [^}]+ \}/
-package JSON::Schema::Modern::Conflicts;
-require Dist::CheckConflicts;
-Dist::CheckConflicts->import(
-  -dist => 'JSON::Schema::Modern',
-  -conflicts => { 'builtin::Backport' => '0.02' }
-); 1;
+    my $orig_content = $file->content;
+    $self->log_fatal('could not find position in ' . $file->name . ' to modify!')
+      if not $orig_content =~ m/use strict;\nuse warnings;\n\n/g;
+
+    my $pos = pos($orig_content);
+
+    my $content = <<'CONTENT';
+if ("$]" < 5.038) {
+  die "This distribution will not install where builtin::Backport exists.\n"
+    if eval { +require builtin::Backport; 1 };
 }
-/;
+CONTENT
 
-  return $content;
-};
+    $file->content(substr($orig_content, 0, $pos) . $content . substr($orig_content, $pos));
+  }
+
+  return;
+}
 
 1;
