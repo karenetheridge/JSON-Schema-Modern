@@ -474,10 +474,28 @@ sub validate_schema ($self, $schema, $config_override = {}) {
 }
 
 sub get ($self, $uri_reference) {
-  my $schema_info = $self->_fetch_from_uri($uri_reference);
-  return if not $schema_info;
-  my $subschema = is_ref($schema_info->{schema}) ? dclone($schema_info->{schema}) : $schema_info->{schema};
-  return wantarray ? ($subschema, $schema_info->{canonical_uri}) : $subschema;
+  if (wantarray) {
+    my $schema_info = $self->_fetch_from_uri($uri_reference);
+    return if not $schema_info;
+    my $subschema = is_ref($schema_info->{schema}) ? dclone($schema_info->{schema}) : $schema_info->{schema};
+    return ($subschema, $schema_info->{canonical_uri});
+  }
+  else {  # abridged version of _fetch_from_uri
+    $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
+    my $fragment = $uri_reference->fragment;
+    my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
+    return if not $resource;
+
+    my $schema;
+    if (not length($fragment) or $fragment =~ m{^/}) {
+      $schema = $resource->{document}->get($resource->{path}.($fragment//''));
+    }
+    else {  # we are following a URI with a plain-name fragment
+      return if not my $subresource = ($resource->{anchors}//{})->{$fragment};
+      $schema = $resource->{document}->get($subresource->{path});
+    }
+    return is_ref($schema) ? dclone($schema) : $schema;
+  }
 }
 
 sub get_document ($self, $uri_reference) {
