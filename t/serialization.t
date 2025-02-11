@@ -102,6 +102,9 @@ cmp_deeply(
   'thawed object contains all the right keys',
 );
 
+$frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
+Sereal::Decoder->new->decode($frozen, $thawed);
+
 cmp_result(
   $thawed->evaluate($schema, {})->TO_JSON,
   { valid => true },
@@ -109,7 +112,7 @@ cmp_result(
 );
 
 cmp_result(
-  $js->evaluate('hi', 'https://my_schema')->TO_JSON,
+  $thawed->evaluate('hi', 'https://my_schema')->TO_JSON,
   {
     valid => true,
     annotations => [

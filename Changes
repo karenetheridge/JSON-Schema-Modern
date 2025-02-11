@@ -3,6 +3,7 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - more checks at traverse and evaluation time for inconsistent
             results
+          - fix Sereal deserialization hooks
 
 0.601     2025-02-02 00:23:38Z
           - check for builtin::Backport at install time

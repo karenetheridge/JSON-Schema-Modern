@@ -224,11 +224,12 @@ sub validate ($self) {
 
 # callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
+  my $self = bless($data, $class);
   foreach my $attr (qw(schema _entities _checksum)) {
     die "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
-      if not exists $class->{$attr};
+      if not exists $self->{$attr};
   }
-  bless($data, $class);
+  return $self;
 }
 
 1;
