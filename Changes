@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.602     2025-02-21 00:11:32Z
           - more checks at traverse and evaluation time for inconsistent
             results
