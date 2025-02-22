@@ -63,7 +63,7 @@ around BUILDARGS => sub ($orig, $class, @args) {
 
   $args->{recommended_response}[1] =
       Mojo::Message::Response->default_message($args->{recommended_response}[0]) // 'Unknown Error'
-    if $args->{recommended_response}->@* == 1;
+    if $args->{recommended_response} and $args->{recommended_response}->@* == 1;
 
   return $args;
 };
@@ -133,6 +133,9 @@ A tuple, consisting of C<[ integer, string ]>, indicating the recommended HTTP r
 string to use for this error (if validating an HTTP request). This could exist for things like a
 failed authentication check in OpenAPI validation, in which case it would contain
 C<[ 401, 'Unauthorized' ]>.
+
+The string can be omitted at construction time, in which case it will be populated from the standard
+list of error strings corresponding to HTTP response codes (see RFC9110 §15).
 
 =head2 depth
 
