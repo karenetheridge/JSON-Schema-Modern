@@ -222,6 +222,9 @@ sub validate ($self) {
   return $js->evaluate($self->schema, $self->metaschema_uri);
 }
 
+# callback hook for Sereal::Encoder
+sub FREEZE ($self, $serializer) { +{ %$self } }
+
 # callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
   my $self = bless($data, $class);
@@ -331,7 +334,7 @@ errors halt the parsing process.) Documents with errors cannot be evaluated.
 
 =head1 METHODS
 
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location get_entity_locations
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD FREEZE THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location get_entity_locations
 
 =head2 path_to_canonical_uri
 
