@@ -21,6 +21,7 @@ use MooX::TypeTiny;
 use Types::Standard qw(Str Bool Enum Tuple);
 use Types::Common::Numeric qw(PositiveInt);
 use builtin::compat 'refaddr';
+use Mojo::Message::Response;
 use namespace::clean;
 
 use overload
@@ -56,6 +57,16 @@ sub stringify ($self) {
 }
 
 sub __thing { 'error' }
+
+around BUILDARGS => sub ($orig, $class, @args) {
+  my $args = $class->$orig(@args);
+
+  $args->{recommended_response}[1] =
+      Mojo::Message::Response->default_message($args->{recommended_response}[0]) // 'Unknown Error'
+    if $args->{recommended_response}->@* == 1;
+
+  return $args;
+};
 
 1;
 __END__
