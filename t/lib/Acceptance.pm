@@ -37,7 +37,7 @@ sub acceptance_tests (%options) {
   my $accepter = Test::JSON::Schema::Acceptance->new(
     include_optional => 1,
     verbose => 1,
-    test_schemas => -d '.git' || $ENV{AUTHOR_TESTING},
+    test_schemas => $ENV{AUTHOR_TESTING},
     $options{acceptance}->%*,
     $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR})
       : $ENV{TEST_PREFIXDIR} ? (test_dir => path($ENV{TEST_PREFIXDIR}, 'tests', $options{acceptance}{specification})) : (),
@@ -117,7 +117,7 @@ sub acceptance_tests (%options) {
     if not $ENV{NO_SHORT_CIRCUIT};
 
   path('t/results/'.$options{output_file})->spew_utf8($accepter->results_text)
-    if -d '.git' or $ENV{AUTHOR_TESTING} or $ENV{RELEASE_TESTING};
+    if $ENV{AUTHOR_TESTING};
 }
 
 1;

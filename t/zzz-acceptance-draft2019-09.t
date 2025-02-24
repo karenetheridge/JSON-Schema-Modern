@@ -22,7 +22,7 @@ BEGIN {
 
   plan skip_all => 'These tests may fail if the test suite continues to evolve! They should only be run with '
       .join(', ', map $_.'=1', head(-1, @variables)).' or '.$variables[-1].'=1'
-    if not -d '.git' and not grep $ENV{$_}, @variables;
+    if not grep $ENV{$_}, @variables;
 }
 
 my $version = 'draft2019-09';

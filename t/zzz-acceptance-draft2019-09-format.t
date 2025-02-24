@@ -21,7 +21,7 @@ BEGIN {
 
   plan skip_all => 'These tests may fail if the test suite continues to evolve! They should only be run with '
       .join(', ', map $_.'=1', head(-1, @variables)).' or '.$variables[-1].'=1'
-    if not -d '.git' and not grep $ENV{$_}, @variables;
+    if not grep $ENV{$_}, @variables;
 }
 
 if ($ENV{EXTENDED_TESTING}) {
@@ -34,7 +34,7 @@ if ($ENV{EXTENDED_TESTING}) {
   };
 }
 
-if (-d '.git' or $ENV{AUTHOR_TESTING}) {
+if ($ENV{AUTHOR_TESTING}) {
   eval { require Time::Moment; 1 } or fail $@;
   eval { require DateTime::Format::RFC3339; 1 } or fail $@;
   eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } or fail $@;
