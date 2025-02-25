@@ -1312,85 +1312,6 @@ subtest dependentRequired => sub {
   );
 };
 
-subtest 'evaluate in the middle of a document' => sub {
-  $js->add_schema({
-    '$id' => 'https://myschema',
-    properties => {
-      foo => {
-        '$id' => 'https://my-inner-schema',
-        allOf => [
-          {                       # <-- evaluation starts here
-            type => 'object',
-            properties => {
-              bar => {
-                type => 'string',
-              },
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  cmp_result(
-    $js->evaluate(
-      {
-        bar => ['not a string'],
-      },
-      'https://myschema#/properties/foo/allOf/1',
-      {
-        data_path => '/request/body',
-        traversed_schema_path => '/some/other/thing/$ref/foo/$ref',
-        initial_schema_uri => 'https://somewhere/else#/foo',
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '/request/body',
-          keywordLocation => '/some/other/thing/$ref/foo/$ref',
-          absoluteKeywordLocation => 'https://somewhere/else#/foo',
-          error => 'EXCEPTION: unable to find resource "https://myschema#/properties/foo/allOf/1"',
-        },
-      ],
-    },
-    'provided evaluation uri does not exist',
-  );
-
-  cmp_result(
-    $js->evaluate(
-      {
-        bar => ['not a string'],
-      },
-      'https://myschema#/properties/foo/allOf/0', # <-- not the canonical URI!
-      {
-        data_path => '/request/body',
-        traversed_schema_path => '/some/other/thing/$ref/foo/$ref',
-        initial_schema_uri => 'https://somewhere/else#/foo',
-      },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '/request/body/bar',
-          keywordLocation => '/some/other/thing/$ref/foo/$ref/properties/bar/type',
-          absoluteKeywordLocation => 'https://my-inner-schema#/allOf/0/properties/bar/type',
-          error => 'got array, not string',
-        },
-        {
-          instanceLocation => '/request/body',
-          keywordLocation => '/some/other/thing/$ref/foo/$ref/properties',
-          absoluteKeywordLocation => 'https://my-inner-schema#/allOf/0/properties',
-          error => 'not all properties are valid',
-        },
-      ],
-    },
-    'error has correct locations from override hash',
-  );
-};
-
 subtest 'numbers in output' => sub {
   cmp_result(
     $js->evaluate(
@@ -1437,7 +1358,7 @@ subtest 'numbers in output' => sub {
   );
 };
 
-subtest 'effective_base_uri' => sub {
+subtest 'effective_base_uri and overriding starting locations' => sub {
   cmp_result(
     $js->evaluate(
       5,
@@ -1469,6 +1390,50 @@ subtest 'effective_base_uri' => sub {
       ],
     },
     'error locations are relative to the effective_base_uri, but $ref usage is not restricted',
+  );
+
+  # evaluating this document from its root would do nothing, as it is only definitions
+  $js->add_schema('/api', {
+    '$defs' => {
+      alpha => {
+        items => {
+          '$ref' => '#/$defs/beta',
+        },
+      },
+      beta => {
+        not => true,
+      },
+    },
+  });
+
+  cmp_result(
+    $js->evaluate(
+      [ 5 ],
+      '/api#/$defs/alpha',
+      {
+        data_path => '/html/body/div/div/h1/div/p',     # reported data location
+        traversed_schema_path => '/some/other/document/$ref',   # reported keywords passed through before we start
+        effective_base_uri => 'https://example.com',    # base uri to use for document locations
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/html/body/div/div/h1/div/p/0',
+          keywordLocation => '/some/other/document/$ref/items/$ref/not',
+          absoluteKeywordLocation => 'https://example.com/api#/$defs/beta/not',
+          error => 'subschema is valid',
+        },
+        {
+          instanceLocation => '/html/body/div/div/h1/div/p',
+          keywordLocation => '/some/other/document/$ref/items',
+          absoluteKeywordLocation => 'https://example.com/api#/$defs/alpha/items',
+          error => 'subschema is not valid against all items',
+        },
+      ],
+    },
+    'can alter locations with data_path, traversed_schema_path, effective_base_uri',
   );
 };
 

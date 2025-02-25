@@ -279,7 +279,8 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
   croak join(', ', sort keys %overrides), ' not supported as a config override in traverse'
     if keys %overrides;
 
-  # Note: the starting position is not guaranteed to be at the root of the $document.
+  # Note: the starting position is not guaranteed to be at the root of the $document,
+  # nor is the fragment portion of this uri necessarily empty
   my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
   my $initial_path = $config_override->{traversed_schema_path} // '';
   my $spec_version = $config_override->{specification_version} // $self->specification_version // SPECIFICATION_VERSION_DEFAULT;
@@ -363,7 +364,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
   # note this is not quite the same list as what we use when defining $state below
   my %overrides = %$config_override;
-  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks initial_schema_uri effective_base_uri data_path traversed_schema_path _strict_schema_data)};
+  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks effective_base_uri data_path traversed_schema_path _strict_schema_data)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
     if keys %overrides;
 
@@ -373,7 +374,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
     if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
       $schema_info = $self->_fetch_from_uri($schema_reference);
-      $state->{initial_schema_uri} = Mojo::URL->new($config_override->{initial_schema_uri} // '');
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
@@ -1465,7 +1465,6 @@ applications that contain embedded JSON Schemas):
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
-* C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
 * C<effective_base_uri>: locations in errors and annotations are resolved against this URI
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
@@ -1509,7 +1508,7 @@ applications that contain embedded JSON Schemas):
 
 =for :list
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
-* C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+* C<initial_schema_uri>: adjusts the absolute keyword location as of the start of evaluation
 * C<metaschema_uri>: use the indicated URI as the metaschema
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
