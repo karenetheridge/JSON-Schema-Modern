@@ -154,10 +154,10 @@ sub add_schema {
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
   croak 'insufficient arguments' if not @_;
 
-  Carp::carp('use of deprecated form of add_schema with document')
-    if $_[0]->$_isa('JSON::Schema::Modern::Document');
-
-  return $self->add_document($uri, $_[0]) if $_[0]->$_isa('JSON::Schema::Modern::Document');
+  if ($_[0]->$_isa('JSON::Schema::Modern::Document')) {
+    Carp::carp('use of deprecated form of add_schema with document');
+    return $self->add_document($uri, $_[0]);
+  }
 
   # document BUILD will trigger $self->traverse($schema)
   # Note we do not pass the uri to the document constructor, so resources in that document may still
