@@ -290,7 +290,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     croak 'initial_schema_uri fragment must be a json pointer' if $uri_path !~ m{^/};
 
     croak 'traversed_schema_path does not match initial_schema_uri path fragment'
-      if $initial_path !~ m{\Q$uri_path\E$};
+      if substr($initial_path, -length($uri_path)) ne $uri_path;
   }
 
   my $state = {
