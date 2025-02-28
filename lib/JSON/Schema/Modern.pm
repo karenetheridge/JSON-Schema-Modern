@@ -300,7 +300,6 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     initial_schema_uri => $initial_uri,     # the canonical URI as of the start of this method or last $id
     traversed_schema_path => $initial_path, # the accumulated traversal path as of the start or last $id
     schema_path => '',                      # the rest of the path, since the start of this method or last $id
-    effective_base_uri => Mojo::URL->new(''),
     errors => [],
     identifiers => {},
     subschemas => [],
@@ -348,25 +347,27 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
 sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
-  my $initial_path = $config_override->{traversed_schema_path} // '';
-  my $effective_base_uri = Mojo::URL->new($config_override->{effective_base_uri}//'');
+  my %overrides = %$config_override;
+  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks effective_base_uri data_path traversed_schema_path _strict_schema_data)};
+  croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
+    if keys %overrides;
 
   my $state = {
     data_path => $config_override->{data_path} // '',
-    traversed_schema_path => $initial_path, # the accumulated path as of the start of evaluation or last $id or $ref
+    traversed_schema_path => $config_override->{traversed_schema_path} // '', # the accumulated path as of the start of evaluation or last $id or $ref
     initial_schema_uri => Mojo::URL->new,   # the canonical URI as of the start of evaluation or last $id or $ref
     schema_path => '',                  # the rest of the path, since the start of evaluation or last $id or $ref
-    effective_base_uri => $effective_base_uri, # resolve locations against this for errors and annotations
     errors => [],
     depth => 0,
     configs => {},
   };
 
-  # note this is not quite the same list as what we use when defining $state below
-  my %overrides = %$config_override;
-  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks effective_base_uri data_path traversed_schema_path _strict_schema_data)};
-  croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
-    if keys %overrides;
+  # resolve locations against this for errors and annotations, if locations are not already absolute
+  if (length $config_override->{effective_base_uri}) {
+    $state->{effective_base_uri} = Mojo::URL->new($config_override->{effective_base_uri});
+    croak 'it is meaningless for effective_base_uri to have a fragment'
+      if defined $state->{effective_base_uri}->fragment;
+  }
 
   my $valid;
   try {

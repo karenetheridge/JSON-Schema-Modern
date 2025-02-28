@@ -44,13 +44,15 @@ has absolute_keyword_location => (
       my $effective_base_uri = pop @$uri_bits;
       my ($initial_schema_uri, $schema_path, @extra_path) = @$uri_bits;
 
-      return $initial_schema_uri if not @extra_path and not length($schema_path);
+      return($initial_schema_uri eq '' && $self->{keyword_location} eq '' ? undef : $initial_schema_uri)
+        if not @extra_path and not length($schema_path) and not length $effective_base_uri;
+
       my $uri = $initial_schema_uri->clone;
       my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($schema_path, @extra_path) : $schema_path);
       undef $fragment if not length($fragment);
       $uri->fragment($fragment);
 
-      $uri = $uri->to_abs($effective_base_uri);
+      $uri = $uri->to_abs($effective_base_uri) if length $effective_base_uri;
 
       undef $uri if $uri eq '' and $self->{keyword_location} eq ''
         or ($uri->fragment // '') eq $self->{keyword_location} and $uri->clone->fragment(undef) eq '';

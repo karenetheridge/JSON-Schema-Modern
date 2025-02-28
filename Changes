@@ -2,6 +2,7 @@ Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
           - fix Sereal serialization hooks
+          - various performance improvements when dealing with base URIs
 
 0.602     2025-02-21 00:11:32Z
           - more checks at traverse and evaluation time for inconsistent

@@ -323,7 +323,7 @@ sub E ($state, $error_string, @args) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->{initial_schema_uri}, $state->{schema_path}, $state->{keyword}, @schema_path_suffix, $state->{effective_base_uri} ];
+  my $uri = [ $state->{initial_schema_uri}, $state->{schema_path}, ($state->{keyword}//()), @schema_path_suffix, $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
     .jsonp($state->{schema_path}, $state->{keyword}, @schema_path_suffix);
