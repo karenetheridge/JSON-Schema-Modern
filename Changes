@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.603     2025-02-28 23:35:43Z
           - fix Sereal serialization hooks
           - various performance improvements when dealing with base URIs
