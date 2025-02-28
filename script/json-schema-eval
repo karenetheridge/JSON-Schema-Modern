@@ -128,7 +128,7 @@ if ($opt->dump_identifiers) {
   say $encoder->encode(\%identifiers);
 }
 
-exit($result ? 0 : $result->exception ? 2 : 1);
+exit($result->valid ? 0 : $result->exception ? 2 : 1);
 
 __END__
 
