@@ -301,14 +301,15 @@ sub canonical_uri ($state, @extra_path) {
 # shorthand for creating error objects
 # uses these keys from $state:
 # - initial_schema_uri
-# - keyword
+# - effective_base_uri (optional)
+# - keyword (optional)
 # - data_path
 # - traversed_schema_path
 # - schema_path
-# - _schema_path_suffix
+# - _schema_path_suffix (optional)
 # - errors
-# - exception (set by abort())
-# - recommended_response
+# - exception (optional; set by abort())
+# - recommended_response (optional)
 # - depth
 # - traverse (boolean, used for mode)
 # returns defined-false, so callers can use 'return;' to differentiate between
@@ -347,15 +348,15 @@ sub E ($state, $error_string, @args) {
 # shorthand for creating annotations
 # uses these keys from $state:
 # - initial_schema_uri
-# - keyword
+# - keyword (mandatory)
 # - data_path
 # - traversed_schema_path
 # - schema_path
-# - _schema_path_suffix
+# - _schema_path_suffix (optional)
 # - annotations
 # - collect_annotations
 # - spec_version
-# - _unknown
+# - _unknown (boolean)
 # - depth
 sub A ($state, $annotation) {
   return 1 if not $state->{collect_annotations};
