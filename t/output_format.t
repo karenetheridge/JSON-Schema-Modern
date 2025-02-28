@@ -108,7 +108,7 @@ cmp_result(
       {
         instanceLocation => '',
         keywordLocation => '/not',
-        error => 'subschema is valid',
+        error => 'subschema is true',
       },
       {
         instanceLocation => '',
@@ -252,7 +252,7 @@ cmp_result(
       {
         instanceLocation => '',
         keywordLocation => '/not',
-        error => 'subschema is valid',
+        error => 'subschema is true',
       },
       {
         instanceLocation => '',

@@ -128,7 +128,7 @@ subtest 'anchors' => sub {
           instanceLocation => '',
           keywordLocation => '/allOf/1/$ref/not',
           absoluteKeywordLocation => 'http://localhost:4242#/$defs/bar/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
         {
           instanceLocation => '',

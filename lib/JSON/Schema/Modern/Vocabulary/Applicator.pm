@@ -134,6 +134,8 @@ sub _eval_keyword_oneOf ($class, $data, $schema, $state) {
 sub _traverse_keyword_not { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_not ($class, $data, $schema, $state) {
+  return !$schema->{not} || E($state, 'subschema is true') if is_type('boolean', $schema->{not});
+
   return 1 if not $class->eval($data, $schema->{not},
     +{ %$state, schema_path => $state->{schema_path}.'/not',
       short_circuit_suggested => 1, # errors do not propagate upward from this subschema
@@ -158,6 +160,10 @@ sub _eval_keyword_if ($class, $data, $schema, $state) {
     ? 'then' : 'else';
 
   return 1 if not exists $schema->{$keyword};
+
+  return $schema->{$keyword} || E({ %$state, keyword => $keyword }, 'subschema is false')
+    if is_type('boolean', $schema->{$keyword});
+
   return 1 if $class->eval($data, $schema->{$keyword},
     +{ %$state, schema_path => $state->{schema_path}.'/'.$keyword });
   return E({ %$state, keyword => $keyword }, 'subschema is not valid');

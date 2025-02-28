@@ -180,7 +180,7 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
         {
           instanceLocation => '',
           keywordLocation => '/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
       ],
     },
@@ -376,7 +376,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
         {
           instanceLocation => '',
           keywordLocation => '/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
         # these errors are discarded because /contains passes on instance /1
         #{
@@ -402,7 +402,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
         {
           instanceLocation => '',
           keywordLocation => '/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
       ],
     },
@@ -695,7 +695,7 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/$ref/$ref/$ref/not',
           absoluteKeywordLocation => 'base.json#/$defs/mynot/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
         {
           instanceLocation => '',
@@ -757,7 +757,7 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
           instanceLocation => '',
           keywordLocation => '/$ref/not',
           absoluteKeywordLocation => 'http://localhost:1234/a/b.json#/$defs/bar/$defs/baz/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
       ],
     },
@@ -1385,7 +1385,7 @@ subtest 'effective_base_uri and overriding starting locations' => sub {
           instanceLocation => '',
           keywordLocation => '/not',
           absoluteKeywordLocation => 'https://example.com/foo#/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
       ],
     },
@@ -1423,7 +1423,7 @@ subtest 'effective_base_uri and overriding starting locations' => sub {
           instanceLocation => '/html/body/div/div/h1/div/p/0',
           keywordLocation => '/some/other/document/$ref/items/$ref/not',
           absoluteKeywordLocation => 'https://example.com/api#/$defs/beta/not',
-          error => 'subschema is valid',
+          error => 'subschema is true',
         },
         {
           instanceLocation => '/html/body/div/div/h1/div/p',
