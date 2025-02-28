@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.602
+version 0.603
 
 =head1 SYNOPSIS
 
@@ -323,10 +323,6 @@ C<traversed_schema_path>: adjusts the accumulated path as of the start of evalua
 
 =item *
 
-C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
-
-=item *
-
 C<effective_base_uri>: locations in errors and annotations are resolved against this URI
 
 =back
@@ -378,7 +374,7 @@ C<traversed_schema_path>: adjusts the accumulated path as of the start of evalua
 
 =item *
 
-C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+C<initial_schema_uri>: adjusts the absolute keyword location as of the start of evaluation
 
 =item *
 
