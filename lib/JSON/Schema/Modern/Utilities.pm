@@ -422,11 +422,11 @@ sub assert_uri_reference ($state, $schema) {
   return E($state, '%s value is not a valid URI reference', $state->{keyword})
     # see also uri-reference format sub
     if fc(Mojo::URL->new($string)->to_unsafe_string) ne fc($string)
-      or $string =~ /[^[:ascii:]]/
-      or $string =~ /#/
-        and $string !~ m{#$}                          # empty fragment
-        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
-        and $string !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
+      or $string =~ /[^[:ascii:]]/            # ascii characters only
+      or $string =~ /#/                       # no fragment, except...
+        and $string !~ m{#$}                          # allow empty fragment
+        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # allow plain-name fragment
+        and $string !~ m{#/(?:[^~]|~[01])*$};         # allow json pointer fragment
 
   return 1;
 }
