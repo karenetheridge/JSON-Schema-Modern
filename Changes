@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - mark some failing format tests as todo that will be added in
+            Test::JSON::Schema::Acceptance 1.028
 
 0.603     2025-02-28 23:35:43Z
           - fix Sereal serialization hooks
