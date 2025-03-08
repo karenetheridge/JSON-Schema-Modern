@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.604     2025-03-08 23:23:05Z
           - mark some failing format tests as todo that will be added in
             Test::JSON::Schema::Acceptance 1.028
