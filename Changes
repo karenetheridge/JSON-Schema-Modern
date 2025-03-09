@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.605     2025-03-09 16:31:05Z
           - update 'hostname' and 'idn-hostname' format validation to be more
             lax with respect to domain names; fixes some acceptance tests
 
