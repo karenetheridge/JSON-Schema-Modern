@@ -69,25 +69,10 @@ acceptance_tests(
         ] },
       # various edge cases that are difficult to accomodate
       { file => 'email.json', group_description => 'validation of e-mail addresses', test_description => [ 'an invalid domain', 'an invalid IPv4-address-literal' ] },
-      { file => 'hostname.json', test_description => [
-          'single label with hyphen',
-          'single label with digits',
-          'single label starting with digit',
-          'single label ending with digit',
-          'single label',
-        ] },
       { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
         test_description => 'an invalid IRI based on IPv6' },
       { file => 'idn-hostname.json',
         group_description => 'validation of internationalized host names' }, # IDN decoder, Data::Validate::Domain both have issues
-      { file => 'idn-hostname.json',
-        group_description => 'validation of separators in internationalized host names',
-        test_description => [
-          'dot as label separator',
-          'ideographic full stop as label separator',
-          'fullwidth full stop as label separator',
-          'halfwidth ideographic full stop as label separator',
-        ] },
       { file => 'uri.json',
         test_description => 'validation of URIs',
         test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate

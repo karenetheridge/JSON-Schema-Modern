@@ -10,9 +10,9 @@ filename                                  pass  todo-fail  fail
 date-time.json                              25          0     0
 date.json                                   47          0     0
 email.json                                  15          0     0
-hostname.json                               20          4     0
+hostname.json                               24          0     0
 idn-email.json                              10          0     0
-idn-hostname.json                           37         20     0
+idn-hostname.json                           42         15     0
 ipv4.json                                   16          0     0
 ipv6.json                                   40          0     0
 iri-reference.json                          11          2     0
@@ -26,4 +26,4 @@ uri-reference.json                          13          0     0
 uri-template.json                            9          1     0
 uri.json                                    25          1     0
 ---------------------------------------------------------------
-TOTAL                                      398         29     0
+TOTAL                                      407         20     0

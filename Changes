@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - update 'hostname' and 'idn-hostname' format validation to be more
+            lax with respect to domain names; fixes some acceptance tests
 
 0.604     2025-03-08 23:23:05Z
           - mark some failing format tests as todo that will be added in

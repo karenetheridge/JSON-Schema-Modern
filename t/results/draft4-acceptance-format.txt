@@ -9,10 +9,10 @@ filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
 date-time.json                              25          0     0
 email.json                                  15          0     0
-hostname.json                               20          4     0
+hostname.json                               24          0     0
 ipv4.json                                   16          0     0
 ipv6.json                                   40          0     0
 unknown.json                                 7          0     0
 uri.json                                    25          1     0
 ---------------------------------------------------------------
-TOTAL                                      148          5     0
+TOTAL                                      152          1     0

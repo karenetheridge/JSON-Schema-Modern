@@ -11,9 +11,9 @@ date-time.json                              25          0     0
 date.json                                   47          0     0
 duration.json                               26          0     0
 email.json                                  15          0     0
-hostname.json                               20          5     0
+hostname.json                               25          0     0
 idn-email.json                              10          0     0
-idn-hostname.json                           37         21     0
+idn-hostname.json                           43         15     0
 ipv4.json                                   16          0     0
 ipv6.json                                   40          0     0
 iri-reference.json                          11          2     0
@@ -28,4 +28,4 @@ uri-template.json                            9          1     0
 uri.json                                    25          1     0
 uuid.json                                   21          0     0
 ---------------------------------------------------------------
-TOTAL                                      445         31     0
+TOTAL                                      456         20     0

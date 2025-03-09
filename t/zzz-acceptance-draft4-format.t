@@ -65,12 +65,6 @@ acceptance_tests(
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; 1 } ? 'hostname.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
-      { file => 'hostname.json', test_description => [
-          'single label with hyphen',
-          'single label with digits',
-          'single label ending with digit',
-          'single label',
-        ] },
       { file => 'uri.json',
         test_description => 'validation of URIs',
         test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate
