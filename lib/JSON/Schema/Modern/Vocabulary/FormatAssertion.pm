@@ -44,7 +44,7 @@ sub keywords ($class, $spec_version) {
   };
   my $is_hostname = sub { # hostname, idn-hostname
     # FIXME: draft7 hostname uses RFC1034, draft2019-09+ hostname uses RFC1123
-    require Data::Validate::Domain;
+    require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13);
     Data::Validate::Domain::is_domain($_[0],
       { domain_disable_tld_validation => 1, domain_allow_single_label => 1 });
   };
