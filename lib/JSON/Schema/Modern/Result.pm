@@ -357,6 +357,7 @@ to C<'Bad Request'>.
 =head1 METHODS
 
 =for Pod::Coverage BUILD BUILDARGS OUTPUT_FORMATS result stringify annotation_count error_count
+true false
 
 =head2 format
 
