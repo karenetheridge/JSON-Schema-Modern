@@ -29,6 +29,7 @@ sub acceptance_tests (%options) {
   local $Test::Builder::Level = $Test::Builder::Level + 1;
 
   my $note = $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? \&diag : \&note;
+  $note->('');
   foreach my $env (qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING NO_TODO TEST_DIR NO_SHORT_CIRCUIT)) {
     $note->($env.': '.($ENV{$env} // '<undef>'));
   }
@@ -36,7 +37,7 @@ sub acceptance_tests (%options) {
 
   my $accepter = Test::JSON::Schema::Acceptance->new(
     include_optional => 1,
-    verbose => 1,
+    verbose => $ENV{AUTOMATED_TESTING},
     test_schemas => $ENV{AUTHOR_TESTING},
     $options{acceptance}->%*,
     $ENV{TEST_DIR} ? (test_dir => $ENV{TEST_DIR})
