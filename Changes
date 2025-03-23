@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - now performing stricter email address validation for the 'email' and
+            'idn-email' formats
 
 0.606     2025-03-23 00:16:35Z
           - bump required version for optional module Data::Validate::Domain

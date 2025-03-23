@@ -40,7 +40,7 @@ sub keywords ($class, $spec_version) {
 
   my $is_email = sub {    # email, idn-email
     require Email::Address::XS; Email::Address::XS->VERSION(1.04);
-    Email::Address::XS->parse($_[0])->is_valid;
+    Email::Address::XS->parse_bare_address($_[0])->is_valid;
   };
   my $is_hostname = sub { # hostname, idn-hostname
     # FIXME: draft7 hostname uses RFC1034, draft2019-09+ hostname uses RFC1123
