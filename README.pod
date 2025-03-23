@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.605
+version 0.606
 
 =head1 SYNOPSIS
 
@@ -216,6 +216,7 @@ Defaults to false.
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW
+CACHED_METASCHEMAS METASCHEMA_URIS SPECIFICATION_VERSIONS_SUPPORTED SPECIFICATION_VERSION_DEFAULT
 
 =head2 evaluate_json_string
 

@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.606     2025-03-23 00:16:35Z
           - bump required version for optional module Data::Validate::Domain
             (used by the 'hostname' and 'idn-hostname' formats)
 
