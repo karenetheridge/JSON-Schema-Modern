@@ -32,9 +32,12 @@ sub vocabulary ($class) {
 sub evaluation_order ($class) { 2 }
 
 sub keywords ($class, $spec_version) {
-  qw(format);
+  return (
+    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? qw(format) : (),
+  );
 }
 
+# these definitions are shared with the FormatAnnotation vocabulary
 {
   # for now, all built-in formats are constrained to the 'string' type
 
@@ -205,10 +208,9 @@ sub _traverse_keyword_format ($class, $schema, $state) {
   return E($state, 'unimplemented format "%s"', $schema->{format})
     if $schema->{format} eq 'uri-template';
 
-  # in the draft2020-12 (and later) FormatAssertion vocabulary, an unrecognized format is an error
+  # in the FormatAssertion vocabulary, an unrecognized format is an error
   return E($state, 'unimplemented custom format "%s"', $schema->{format})
-    if $state->{spec_version} !~ /^draft(?:[467]|2019-09)$/
-      and not $class->_get_default_format_validation($state, $schema->{format})
+    if not $class->_get_default_format_validation($state, $schema->{format})
       and not $state->{evaluator}->_get_format_validation($schema->{format});
 
   return 1;
