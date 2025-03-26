@@ -10,6 +10,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
+use Test::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
 use Test::Fatal;
 use JSON::Schema::Modern::Utilities qw(get_type);
 
@@ -915,48 +916,95 @@ subtest 'annotation formats using implementations that rely on optional dependen
 };
 
 subtest 'assertion formats using implementations that rely on optional dependencies' => sub {
-  my $js = JSON::Schema::Modern->new(validate_formats => 1);
-  cmp_result(
-    $js->evaluate(
-      [
-        undef,
-        true,
-        {},
-        [],
-        1
-      ],
-      {
-        type => 'array',
-        items => { allOf => [ map +{ format => $_ }, ALL_FORMATS->@* ] }
-      },
-    )->TO_JSON,
-    { valid => true },
-    'can assert a non-string against formats without their optional dependencies, without dying',
-  );
+  foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
+    my $js = JSON::Schema::Modern->new(
+      specification_version => $spec_version,
+      validate_formats => 1,
+    );
 
-  cmp_result(
-    $js->evaluate(
-      '2025-01-01T00:00:00Z',
-      {
-        type => 'string',
+    cmp_result(
+      $js->evaluate(
+        [
+          undef,
+          true,
+          {},
+          [],
+          1
+        ],
+        {
+          type => 'array',
+          items => { allOf => [ map +{ format => $_ }, ALL_FORMATS->@* ] }
+        },
+      )->TO_JSON,
+      { valid => true },
+      $spec_version . ': for format validation with the Format-Annotation vocabulary, can assert a non-string against formats without their optional dependencies, without dying',
+    );
+
+    cmp_result(
+      $js->evaluate(
+        '2025-01-01T00:00:00Z',
+        {
+          type => 'string',
+          allOf => [
+            { format => 'date-time' },
+            true,
+          ],
+        },
+      )->TO_JSON,
+      { valid => true },
+      $spec_version . ': for format validation with the Format-Annotation vocabulary, in assertion mode, we treat missing prereqs as the format being valid',
+    );
+  }
+
+  foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
+    next if $spec_version =~ /^draft[467]$/ or $spec_version eq 'draft2019-09';
+
+    my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
+    $js->add_schema({
+      '$id' => 'https://my_metaschema',
+      '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+      '$vocabulary' => {
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+      },
+      '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
+    });
+
+    my $doc;
+    my @warnings = warnings {
+      $doc = $js->add_schema({
+        '$schema' => 'https://my_metaschema',
         allOf => [
           { format => 'date-time' },
           true,
         ],
+      });
+    };
+    is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using an unknown custom format');
+
+    cmp_deeply(
+      \@warnings,
+      [ re(qr{Can't locate Time/Moment\.pm}) ],
+      '...but we do warn for the missing module',
+    );
+
+    cmp_result(
+      $js->evaluate('2025-01-01T00:00:00Z', $doc)->TO_JSON,
+      {
+        valid => false,
+        errors => [
+          {
+            error => re(qr{^EXCEPTION: Can't locate Time/Moment\.pm}),
+            instanceLocation => '',
+            keywordLocation => '/allOf/0/format',
+          },
+        ],
       },
-    )->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          error => re(qr{^EXCEPTION: Can't locate Time/Moment\.pm}),
-          instanceLocation => '',
-          keywordLocation => '/allOf/0/format',
-        },
-      ],
-    },
-    'in assertion mode, we immediately abort when encountering a format that throws an exception',
-  );
+      $spec_version . ': for Format-Asertion vocabulary, we immediately abort when encountering a format that throws an exception',
+    );
+  }
 };
 
+had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;

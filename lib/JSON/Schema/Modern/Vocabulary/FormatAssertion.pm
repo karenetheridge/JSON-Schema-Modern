@@ -204,8 +204,22 @@ sub keywords ($class, $spec_version) {
   }
 }
 
+my $warnings = {
+  email => sub { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 },
+  hostname => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 },
+  'idn-hostname' => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); require Net::IDN::Encode; 1 },
+  'date-time' => sub { require Time::Moment; require DateTime::Format::RFC3339; 1 },
+  date => sub { require Time::Moment; 1 },
+};
+$warnings->{'idn-email'} = $warnings->{email};
+
 sub _traverse_keyword_format ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
+
+  # warn when prereq is missing for a format implementation
+  if (my $warn_sub = $warnings->{$schema->{format}}) {
+    try { $warn_sub->() } catch ($e) { warn $e }
+  }
 
   # §7.2.2 (draft2020-12) "When the Format-Assertion vocabulary is declared with a value of true,
   # implementations MUST provide full validation support for all of the formats defined by this

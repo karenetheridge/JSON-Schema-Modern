@@ -1777,7 +1777,8 @@ but remember you can always supply custom format handlers; see L</format_validat
 * C<regex>
 
 A few optional prerequisites are needed for some of these (if the prerequisite is missing,
-validation will always succeed):
+validation will always succeed, unless draft2020-12 is in use with the Format-Assertion vocabulary
+declared in the metaschema, in which case use of the format will produce an error).
 
 =for :list
 * C<date-time>, C<date>, and C<time> require L<Time::Moment>, L<DateTime::Format::RFC3339>

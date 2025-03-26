@@ -10,7 +10,6 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Without::Module 0.21 'Time::Moment';
 use Test::Fatal;
 use builtin::compat 'refaddr';
 use lib 't/lib';
@@ -318,8 +317,8 @@ cmp_result(
 $js = JSON::Schema::Modern->new(validate_formats => 1);
 {
   $result = $js->evaluate(
-    '2025-01-01T00:00:00Z',
-    { format => 'date-time'},
+    'foo',
+    { format => 'uuid'},
   );
 
   cmp_result(
@@ -330,7 +329,7 @@ $js = JSON::Schema::Modern->new(validate_formats => 1);
         {
           instanceLocation => '',
           keywordLocation => '/format',
-          error => re(qr{^EXCEPTION: Can't locate Time/Moment\.pm}),
+          error => 'not a valid uuid string',
         },
       ],
     },
