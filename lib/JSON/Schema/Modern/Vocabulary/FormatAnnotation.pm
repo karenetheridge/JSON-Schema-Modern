@@ -66,7 +66,9 @@ sub _eval_keyword_format ($class, $data, $schema, $state) {
       and is_plain_arrayref($spec->{type}) ? any { $_ eq 'number' } $spec->{type}->@* : $spec->{type} eq 'number'
       and looks_like_number($data));
 
-  return E($state, 'not a valid %s', $schema->{format}) if not $spec->{sub}->($data);
+  return E($state, 'not a valid %s %s', $schema->{format},
+      is_plain_arrayref($spec->{type}) ? join(', ', $spec->{type}->@*) : $spec->{type})
+    if not $spec->{sub}->($data);
   return 1;
 }
 

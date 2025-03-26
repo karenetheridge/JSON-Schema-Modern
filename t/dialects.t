@@ -506,7 +506,7 @@ subtest 'changing specification versions across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/$ref/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7.com#/additionalProperties/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
         {
           instanceLocation => '',
@@ -530,7 +530,7 @@ subtest 'changing specification versions across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2019-09.com#/additionalProperties/format',
-          error => 'not a valid ipv6',
+          error => 'not a valid ipv6 string',
         },
         {
           instanceLocation => '',
@@ -608,7 +608,7 @@ subtest 'changing specification versions across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/$ref/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2020-12-2.com#/additionalProperties/format',
-          error => 'not a valid ipv6',
+          error => 'not a valid ipv6 string',
         },
         {
           instanceLocation => '',
@@ -638,7 +638,7 @@ subtest 'changing specification versions across documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7-2.com#/additionalProperties/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
         {
           instanceLocation => '',
@@ -712,7 +712,7 @@ subtest 'changing specification versions within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7-3.com#/additionalProperties/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
         {
           instanceLocation => '',
@@ -742,7 +742,7 @@ subtest 'changing specification versions within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2019-09-3.com#/additionalProperties/format',
-          error => 'not a valid ipv6',
+          error => 'not a valid ipv6 string',
         },
         {
           instanceLocation => '',
@@ -816,7 +816,7 @@ subtest 'changing specification versions within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2020-12-4.com#/additionalProperties/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
         {
           instanceLocation => '',
@@ -846,7 +846,7 @@ subtest 'changing specification versions within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft7-4.com#/additionalProperties/format',
-          error => 'not a valid ipv6',
+          error => 'not a valid ipv6 string',
         },
         {
           instanceLocation => '',
@@ -933,7 +933,7 @@ subtest 'changing specification versions within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/allOf/0/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft4-5.com#/additionalProperties/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
         {
           instanceLocation => '',
@@ -963,7 +963,7 @@ subtest 'changing specification versions within documents' => sub {
           instanceLocation => '/foo',
           keywordLocation => '/additionalProperties/format',
           absoluteKeywordLocation => 'https://iam.draft2020-12-5.com#/additionalProperties/format',
-          error => 'not a valid ipv6',
+          error => 'not a valid ipv6 string',
         },
         {
           instanceLocation => '',

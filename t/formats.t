@@ -98,7 +98,7 @@ subtest 'simple validation' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/format',
-          error => 'not a valid uuid',
+          error => 'not a valid uuid string',
         },
       ],
     },
@@ -171,7 +171,7 @@ subtest 'override a format sub' => sub {
         {
           instanceLocation => '/5',
           keywordLocation => '/items/format',
-          error => 'not a valid uuid',
+          error => 'not a valid uuid string',
         },
         {
           instanceLocation => '',
@@ -236,12 +236,12 @@ subtest 'override a format sub' => sub {
         {
           instanceLocation => '/0/mult_5',
           keywordLocation => '/items/properties/mult_5/format',
-          error => 'not a valid mult_5',
+          error => 'not a valid mult_5 number',
         },
         {
           instanceLocation => '/0/uuid',
           keywordLocation => '/items/properties/uuid/format',
-          error => 'not a valid uuid',
+          error => 'not a valid uuid string',
         },
         {
           instanceLocation => '/0',
@@ -279,7 +279,7 @@ subtest 'override a format sub' => sub {
         (map +{
           instanceLocation => '/'.$_,
           keywordLocation => '/items/format',
-          error => 'not a valid mult_5',
+          error => 'not a valid mult_5 object',
         }, 0, 1, 2),
         {
           instanceLocation => '',
@@ -311,7 +311,7 @@ subtest 'toggle validate_formats after adding schema' => sub {
           instanceLocation => '',
           keywordLocation => '/format',
           absoluteKeywordLocation => 'http://localhost:1234/ipv4#/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
       ],
     },
@@ -335,7 +335,7 @@ subtest 'toggle validate_formats after adding schema' => sub {
           instanceLocation => '',
           keywordLocation => '/format',
           absoluteKeywordLocation => 'http://localhost:1234/ipv4#/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
       ],
     },
@@ -614,12 +614,12 @@ subtest 'format: pure_integer' => sub {
         {
           instanceLocation => '/1',
           keywordLocation => '/items/format',
-          error => 'not a valid pure_integer',
+          error => 'not a valid pure_integer number',
         },
         {
           instanceLocation => '/2',
           keywordLocation => '/items/format',
-          error => 'not a valid pure_integer',
+          error => 'not a valid pure_integer number',
         },
         {
           instanceLocation => '/4',
@@ -660,12 +660,12 @@ subtest 'format: pure_integer' => sub {
         {
           instanceLocation => '/1',
           keywordLocation => '/items/format',
-          error => 'not a valid pure_integer',
+          error => 'not a valid pure_integer number',
         },
         {
           instanceLocation => '/2',
           keywordLocation => '/items/format',
-          error => 'not a valid pure_integer',
+          error => 'not a valid pure_integer number',
         },
         {
           instanceLocation => '',
@@ -742,7 +742,7 @@ subtest 'formats supporting multiple core types' => sub {
           (map +{
             instanceLocation => "/$_",
             keywordLocation => '/items/format',
-            error => 'not a valid int64',
+            error => 'not a valid int64 number, string',
           },
           4, 10, 11, 12, 13, 19),
           {
@@ -783,12 +783,12 @@ subtest 'stringy numbers with a numeric format' => sub {
         {
           instanceLocation => '/0',
           keywordLocation => '/items/format',
-          error => 'not a valid mult_5',
+          error => 'not a valid mult_5 number',
         },
         {
           instanceLocation => '/1',
           keywordLocation => '/items/format',
-          error => 'not a valid mult_5',
+          error => 'not a valid mult_5 number',
         },
         {
           instanceLocation => '',
