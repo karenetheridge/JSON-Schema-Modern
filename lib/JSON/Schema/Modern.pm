@@ -1781,10 +1781,11 @@ validation will always succeed, unless draft2020-12 is in use with the Format-As
 declared in the metaschema, in which case use of the format will produce an error).
 
 =for :list
-* C<date-time>, C<date>, and C<time> require L<Time::Moment>, L<DateTime::Format::RFC3339>
+* C<date-time> and C<date> require L<Time::Moment>
+* C<date-time> also requires <DateTime::Format::RFC3339>
 * C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (or higher)
-* C<idn-hostname> requires L<Net::IDN::Encode>
+* C<idn-hostname> also requires L<Net::IDN::Encode>
 
 =head2 Specification Compliance
 
