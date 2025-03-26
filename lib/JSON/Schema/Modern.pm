@@ -1782,7 +1782,7 @@ validation will always succeed):
 =for :list
 * C<date-time>, C<date>, and C<time> require L<Time::Moment>, L<DateTime::Format::RFC3339>
 * C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
-* C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
+* C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (or higher)
 * C<idn-hostname> requires L<Net::IDN::Encode>
 
 =head2 Specification Compliance
