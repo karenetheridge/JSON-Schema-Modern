@@ -165,7 +165,7 @@ sub keywords ($class, $spec_version) {
     },
 
     'iri-reference' => sub { 1 },
-    'uri-template' => sub { 1 },
+    # uri-template is not implemented, but user can add a custom definition
   };
 
   my %formats_by_spec_version = (
@@ -199,19 +199,23 @@ sub keywords ($class, $spec_version) {
   sub _get_default_format_validation ($class, $state, $format) {
     # all core formats are of type string (so far)
     return { type => 'string', sub => $formats->{$format} }
-      if grep $format eq $_, $formats_by_spec_version{$state->{spec_version}}->@*;
+      if grep $format eq $_, $formats_by_spec_version{$state->{spec_version}}->@*
+        and $formats->{$format};
   }
 }
 
 sub _traverse_keyword_format ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string');
-  return E($state, 'unimplemented format "%s"', $schema->{format})
-    if $schema->{format} eq 'uri-template';
 
-  # in the FormatAssertion vocabulary, an unrecognized format is an error
-  return E($state, 'unimplemented custom format "%s"', $schema->{format})
-    if not $class->_get_default_format_validation($state, $schema->{format})
+  # §7.2.2 (draft2020-12) "When the Format-Assertion vocabulary is declared with a value of true,
+  # implementations MUST provide full validation support for all of the formats defined by this
+  # specification. Implementations that cannot provide full validation support MUST refuse to
+  # process the schema."
+  return E($state, 'unimplemented core format "%s"', $schema->{format})
+    if $schema->{format} eq 'uri-template'
       and not $state->{evaluator}->_get_format_validation($schema->{format});
+
+  # unimplemented custom formats are detected at runtime, only if actually evaluated
 
   return 1;
 }
@@ -221,12 +225,7 @@ sub _traverse_keyword_format ($class, $schema, $state) {
 sub _eval_keyword_format ($class, $data, $schema, $state) {
   A($state, $schema->{format});
 
-  # §7.2.2 (draft2020-12) "When the Format-Assertion vocabulary is declared with a value of true,
-  # implementations MUST provide full validation support for all of the formats defined by this
-  # specification. Implementations that cannot provide full validation support MUST refuse to
-  # process the schema."
-  abort($state, 'unimplemented format "%s"', $schema->{format})
-    if $schema->{format} eq 'uri-template';
+  # unimplemented core formats were already detected in the traverse phase
 
   my $spec = $state->{evaluator}->_get_format_validation($schema->{format})
     // $class->_get_default_format_validation($state, $schema->{format});

@@ -432,6 +432,7 @@ subtest 'core formats added after draft7' => sub {
 };
 
 subtest 'unimplemented core formats' => sub {
+  # all specification versions
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version, validate_formats => 1);
     cmp_result(
@@ -442,10 +443,11 @@ subtest 'unimplemented core formats' => sub {
         },
       )->TO_JSON,
       { valid => true },
-      $spec_version . ' with validate_formats = 1, no error when an unimplemented core format is used',
+      $spec_version . ' with validate_formats = 1 and default dialect, no error when an unimplemented core format is used',
     );
   }
 
+  # specification version draft2020-12 and later, format-assertion vocabulary
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     next if $spec_version =~ /^draft(?:[467]|2019-09)$/;
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
@@ -474,11 +476,11 @@ subtest 'unimplemented core formats' => sub {
           {
             instanceLocation => '',
             keywordLocation => '/format',
-            error => 'unimplemented format "uri-template"',
+            error => 'unimplemented core format "uri-template"',
           },
         ],
       },
-      $spec_version . ' with Format-Assertion vocabulary: error when an unimplemented core format is used',
+      $spec_version . ' with Format-Assertion vocabulary: error when using a core format that is unimplemented',
     );
 
     cmp_result(
@@ -498,11 +500,26 @@ subtest 'unimplemented core formats' => sub {
           {
             instanceLocation => '',
             keywordLocation => '/anyOf/1/format',
-            error => 'unimplemented format "uri-template"',
+            error => 'unimplemented core format "uri-template"',
           },
         ],
       },
-      $spec_version . ' with Format-Assertion vocabulary: error is seen even when containing subschema would be true',
+      $spec_version . ' with Format-Assertion vocabulary: error is seen even when containing subschema would be true, and evaluation is short-circuited',
+    );
+
+    # add uri-template definition that allows lower-cased characters
+    $js->add_format_validation('uri-template' => sub { $_[0] !~ /[A-Z]/ });
+
+    cmp_result(
+      $js->evaluate(
+        'hello',
+        {
+          '$schema' => 'https://my_metaschema',
+          format => 'uri-template',
+        },
+      )->TO_JSON,
+      { valid => true },
+      'unimplemented core format can have a custom definition provided',
     );
   }
 };
@@ -535,6 +552,9 @@ subtest 'unknown custom formats' => sub {
     );
   }
 
+  # see https://json-schema.org/draft/2020-12/json-schema-validation#section-7.2.3
+  # "When the Format-Assertion vocabulary is specified, implementations MUST fail upon encountering
+  # unknown formats."
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     next if $spec_version =~ /^draft[467]$/ or $spec_version eq 'draft2019-09';
 
@@ -544,26 +564,41 @@ subtest 'unknown custom formats' => sub {
       '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
       '$vocabulary' => {
         JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/validation}r => true,
         JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
       },
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });
 
+    my $doc = $js->add_schema({
+      '$schema' => 'https://my_metaschema',
+      anyOf => [
+        { minLength => 3 },
+        { format => 'bloop' },
+      ],
+    });
+    is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using an unknown custom format');
+
     cmp_result(
-      JSON::Schema::Modern::Document->new(
-        evaluator => $js,
-        schema => { '$schema' => 'https://my_metaschema', format => 'bloop' },
-      ),
-      listmethods(
+      $js->evaluate('hi', $doc)->TO_JSON,
+      {
+        valid => false,
         errors => [
-          methods(TO_JSON => {
+          {
             instanceLocation => '',
-            keywordLocation => '/format',
+            keywordLocation => '/anyOf/1/format',
             error => 'unimplemented custom format "bloop"',
-          }),
+          },
         ],
-      ),
-      $spec_version . ': for format validation with the Format-Assertion vocabulary, unrecognized format attributes are detected at traverse time',
+      },
+      $spec_version . ': for format validation with the Format-Assertion vocabulary, unrecognized custom formats are detected at evaluation time',
+    );
+
+    cmp_result(
+      $js->evaluate('hello', $doc, { short_circuit => 1 })->TO_JSON,
+      { valid => true },
+      '...but this error can be avoided if the keyword is never evaluated',
     );
   }
 };
