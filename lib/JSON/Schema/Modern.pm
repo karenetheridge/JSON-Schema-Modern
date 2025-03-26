@@ -378,7 +378,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     }
     else {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-      my $document = $self->add_schema($schema_reference);
+      my $document =
+          $schema_reference->$_isa('JSON::Schema::Modern::Document') ? $self->add_document($schema_reference)
+        : $self->add_schema($schema_reference);
       my $base_resource = $document->_get_resource($document->canonical_uri)
         || croak "couldn't get resource: document parse error";
 
