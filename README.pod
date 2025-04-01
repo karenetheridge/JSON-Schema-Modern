@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.606
+version 0.607
 
 =head1 SYNOPSIS
 
@@ -732,13 +732,18 @@ C<regex>
 =back
 
 A few optional prerequisites are needed for some of these (if the prerequisite is missing,
-validation will always succeed):
+validation will always succeed, unless draft2020-12 is in use with the Format-Assertion vocabulary
+declared in the metaschema, in which case use of the format will produce an error).
 
 =over 4
 
 =item *
 
-C<date-time>, C<date>, and C<time> require L<Time::Moment>, L<DateTime::Format::RFC3339>
+C<date-time> and C<date> require L<Time::Moment>
+
+=item *
+
+C<date-time> also requires <DateTime::Format::RFC3339>
 
 =item *
 
@@ -746,11 +751,11 @@ C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
 
 =item *
 
-C<hostname> and C<idn-hostname> require L<Data::Validate::Domain>
+C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (or higher)
 
 =item *
 
-C<idn-hostname> requires L<Net::IDN::Encode>
+C<idn-hostname> also requires L<Net::IDN::Encode>
 
 =back
 
