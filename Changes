@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.607     2025-04-01 19:35:50Z
           - now performing stricter email address validation for the 'email' and
             'idn-email' formats
