@@ -105,6 +105,8 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   return 1
     if $state->{spec_version} =~ /^draft[467]$/ and $schema->{$state->{keyword}} =~ /^#/;
 
+  # we could use _fetch_from_uri here to use the parent base uri to resolve against $id at our
+  # current location, but looking up the current path in the resource index is faster.
   my $schema_info = $state->{document}->path_to_resource($state->{document_path}.$state->{schema_path});
   # this should never happen, if the pre-evaluation traversal was performed correctly
   abort($state, 'failed to resolve "%s" to canonical uri', $state->{keyword}) if not $schema_info;

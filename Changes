@@ -3,6 +3,8 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - documentation now makes a note of the special licence for JSON
             Schema schema files
+          - documentation fixes for JSM and JSM::Document regarding handling
+            of uris
 
 0.607     2025-04-01 19:35:50Z
           - now performing stricter email address validation for the 'email' and

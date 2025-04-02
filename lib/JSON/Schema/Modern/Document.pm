@@ -85,6 +85,7 @@ sub _add_resource {
   $_[0]->{resource_index}{$resource_key_type->($_[1])} = $resource_type->($_[2]);
 }
 
+# this is not "the path to the resource", but rather "have path, want resource"
 has _path_to_resource => (
   is => 'ro',
   isa => HashRef[$resource_type],
@@ -261,17 +262,21 @@ __END__
 
 This class represents one JSON Schema document, to be used by L<JSON::Schema::Modern>.
 
-=head1 ATTRIBUTES
+=head1 CONSTRUCTOR ARGUMENTS
+
+Unless otherwise noted, these are also available as read-only accessors.
 
 =head2 schema
 
-The actual raw data representing the schema.
+The actual raw data representing the schema. Required.
 
 =head2 canonical_uri
 
-When passed in during construction, this represents the initial URI by which the document should
-be known. It is overwritten with the (resolved form of the) root schema's C<$id> property when one
-exists, and as such can be considered the canonical URI for the document as a whole.
+As a constructor value, represents the initial URI by which the document should be known, or a base
+URI to use to determine that value. The URI found in the root schema's C<$id> keyword is resolved
+against this URI to determine the final value, which is then stored in this accessor. As such, it
+can be considered the canonical URI for the document as a whole, from which subsequent C<$ref>
+keywords are resolved.
 
 =head2 metaschema_uri
 
@@ -282,7 +287,9 @@ contained within the document), which determines the
 specification version and vocabularies used during evaluation. Does not override any
 C<$schema> keyword actually present in the schema document.
 
-=head2 specification version
+=head2 specification_version
+
+Only a constructor argument, not an accessor method.
 
 Indicates which version of the JSON Schema specification is used during evaluation. This value is
 overridden by the value determined from the C<$schema> keyword in the schema used in evaluation
@@ -309,6 +316,16 @@ May be one of:
 
 A L<JSON::Schema::Modern> object. Optional, unless custom metaschemas are used.
 
+=head1 METHODS
+
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD FREEZE THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location get_entity_locations
+
+=head2 errors
+
+Returns a list of L<JSON::Schema::Modern::Error> objects that resulted when the schema document was
+originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
+errors halt the parsing process.) Documents with errors cannot be used for evaluation.
+
 =head2 resource_index
 
 An index of URIs to subschemas (JSON pointer to reach the location, and the canonical URI of that
@@ -320,29 +337,6 @@ externally (you should use the public accessors in L<JSON::Schema::Modern> inste
 
 When called as a method, returns the flattened list of tuples (path, uri). You can also use
 C<resource_pairs> which returns a list of tuples as arrayrefs.
-
-=head2 canonical_uri_index
-
-An index of JSON pointers (from the document root) to canonical URIs. This is the inversion of
-L</resource_index> and is constructed as that is built up.
-
-=head2 errors
-
-A list of L<JSON::Schema::Modern::Error> objects that resulted when the schema document was
-originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
-errors halt the parsing process.) Documents with errors cannot be evaluated.
-
-=head1 METHODS
-
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD FREEZE THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location get_entity_locations
-
-=head2 path_to_canonical_uri
-
-=for stopwords fragmentless
-
-Given a JSON pointer (a path) within this document, returns the canonical URI corresponding to that location.
-Only fragmentless URIs can be looked up in this manner, so it is only suitable for finding the
-canonical URI corresponding to a subschema known to have an C<$id> keyword.
 
 =head2 contains
 
