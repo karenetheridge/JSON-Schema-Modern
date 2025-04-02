@@ -1,7 +1,7 @@
 # vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
 use strict;
 use warnings;
-package inc::AppendSupport;
+package inc::AppendSection;
 
 use Moose;
 extends 'Pod::Weaver::Section::AllowOverride';
