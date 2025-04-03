@@ -177,7 +177,7 @@ sub BUILD ($self, $args) {
     $self->_add_resource($key => $value);
 
     # we're adding a non-anchor entry for the document root
-    ++$seen_root if $value->{path} eq '' and $key !~ /#./
+    ++$seen_root if $value->{path} eq '';
   }
 
   $self->_add_resource($original_uri.'' => {
