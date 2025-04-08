@@ -981,4 +981,96 @@ subtest 'custom metaschema_uri' => sub {
   memory_cycle_ok($js, 'no leaks in the evaluator object');
 };
 
+subtest 'multiple uris used for resolution and identification' => sub {
+  my $js = JSON::Schema::Modern->new;
+  my $doc = $js->add_document(
+    'https://example.com/api/' => JSON::Schema::Modern::Document->new(
+      canonical_uri => 'staging/',
+      schema => {
+        '$id' => 'alpha.json',
+        properties => {
+          foo => { '$id' => 'beta' },
+        },
+      },
+      evaluator => $js,
+    )
+  );
+
+  cmp_deeply(
+    $doc,
+    listmethods(
+      canonical_uri => [ str('staging/alpha.json') ],
+      resource_index => unordered_pairs(
+        'staging/alpha.json' => {
+          path => '',
+          canonical_uri => str('staging/alpha.json'),
+          %configs,
+        },
+        'staging/beta' => {
+          canonical_uri => str('staging/beta'),
+          path => '/properties/foo',
+          %configs,
+        },
+      ),
+    ),
+    'document has correct resources, resolved against the provided base uri',
+  );
+
+  cmp_deeply(
+    $js->{_resource_index},
+    my $resource_index = {
+      'https://example.com/api/' => {
+        path => '',
+        canonical_uri => str('https://example.com/api/staging/alpha.json'),
+        document => $doc,
+        %configs,
+      },
+      'https://example.com/api/staging/alpha.json' => {
+        path => '',
+        canonical_uri => str('https://example.com/api/staging/alpha.json'),
+        document => $doc,
+        %configs,
+      },
+      'https://example.com/api/staging/beta' => {
+        path => '/properties/foo',
+        canonical_uri => str('https://example.com/api/staging/beta'),
+        document => $doc,
+        %configs,
+      },
+    },
+    'evaluator has correct resources, resolved against the provided base uri',
+  );
+
+
+  my $doc2 = $js->add_document('file:///usr/local/share/api.json' => $doc);
+  is($doc2, $doc, 'same document is added a second time');
+
+  cmp_deeply(
+    $js->{_resource_index},
+    {
+      %$resource_index, # original entries
+
+      'file:///usr/local/share/api.json' => {
+        path => '',
+        canonical_uri => str('file:///usr/local/share/staging/alpha.json'),
+        document => $doc,
+        %configs,
+      },
+      'file:///usr/local/share/staging/alpha.json' => {
+        path => '',
+        canonical_uri => str('file:///usr/local/share/staging/alpha.json'),
+        document => $doc,
+        %configs,
+      },
+      'file:///usr/local/share/staging/beta' => {
+        path => '/properties/foo',
+        canonical_uri => str('file:///usr/local/share/staging/beta'),
+        document => $doc,
+        %configs,
+      },
+    },
+    'document resources are added using new base, which appears in their canonical_uri values',
+  );
+};
+
 done_testing;
