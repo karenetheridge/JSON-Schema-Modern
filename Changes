@@ -5,6 +5,9 @@ Revision history for JSON-Schema-Modern
             Schema schema files
           - documentation fixes for JSM and JSM::Document regarding handling
             of uris
+          - introduction of 'original_uri' for JSON::Schema::Modern::Document,
+            which document subclasses may wish to use for logic of their own
+            after changing the canonical uri of the document
 
 0.607     2025-04-01 19:35:50Z
           - now performing stricter email address validation for the 'email' and

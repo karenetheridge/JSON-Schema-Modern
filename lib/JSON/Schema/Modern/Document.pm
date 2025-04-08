@@ -20,6 +20,7 @@ use Mojo::URL;
 use Carp 'croak';
 use List::Util 1.29 'pairs';
 use Ref::Util 0.100 'is_plain_hashref';
+use builtin::compat 'refaddr';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
 use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy Optional);
@@ -40,6 +41,14 @@ has canonical_uri => (
   default => sub { Mojo::URL->new },
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
 );
+
+# this is also known as the retrieval uri in the OpenAPI::Modern specification
+has original_uri => (
+  is => 'rwp',
+  isa => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
+  init_arg => undef,
+);
+*retrieval_uri = \&original_uri;
 
 has metaschema_uri => (
   is => 'rwp',
@@ -157,14 +166,13 @@ sub TO_JSON { shift->schema }
 
 # note that this is always called, even in subclasses
 sub BUILD ($self, $args) {
-  my $original_uri = $self->canonical_uri->clone;
+  # note! not a clone! Please don't change canonical_uri in-place.
+  $self->_set_original_uri($self->canonical_uri);
+
   my $state = $self->traverse(
     $self->evaluator // $self->_set_evaluator(JSON::Schema::Modern->new),
     $args->{specification_version} ? +{ $args->%{specification_version} } : (),
   );
-
-  # if the schema identified a canonical uri for itself, it overrides the initial value
-  $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
 
   if ($state->{errors}->@*) {
     $self->_set_errors($state->{errors});
@@ -180,7 +188,9 @@ sub BUILD ($self, $args) {
     ++$seen_root if $value->{path} eq '';
   }
 
-  $self->_add_resource($original_uri.'' => {
+  # we only index the original uri if nothing in the schema itself identified a root resource:
+  # otherwise the top of the document would be unreferenceable.
+  $self->_add_resource($self->original_uri.'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
       specification_version => $state->{spec_version},
@@ -197,13 +207,22 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   die 'wrong class - use JSON::Schema::Modern::Document::OpenAPI instead'
     if is_plain_hashref($self->schema) and exists $self->schema->{openapi};
 
+  my $original_uri = $self->original_uri;
+
   my $state = $evaluator->traverse($self->schema,
     {
-      initial_schema_uri => $self->canonical_uri->clone,
+      initial_schema_uri => $original_uri,
       $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri ) : (),
       %$config_override,
     }
   );
+
+  die 'original_uri has changed' if $self->original_uri ne $original_uri
+    or refaddr($self->original_uri) != refaddr($original_uri);
+
+  # if the schema identified a canonical uri for itself via '$id', it overrides the initial value
+  # Note that subclasses of this class may choose to identify the canonical uri in a different way
+  $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
 
   return $state if $state->{errors}->@*;
 
@@ -278,6 +297,8 @@ against this URI to determine the final value, which is then stored in this acce
 can be considered the canonical URI for the document as a whole, from which subsequent C<$ref>
 keywords are resolved.
 
+The original passed-in value is saved in L</original_uri>.
+
 =head2 metaschema_uri
 
 =for stopwords metaschema schemas
@@ -318,13 +339,27 @@ A L<JSON::Schema::Modern> object. Optional, unless custom metaschemas are used.
 
 =head1 METHODS
 
-=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD FREEZE THAW traverse has_errors path_to_resource resource_pairs get_entity_at_location get_entity_locations
+=for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD FREEZE THAW traverse has_errors path_to_resource
+resource_pairs get_entity_at_location get_entity_locations retrieval_uri
 
 =head2 errors
 
 Returns a list of L<JSON::Schema::Modern::Error> objects that resulted when the schema document was
 originally parsed. (If a syntax error occurred, usually there will be just one error, as parse
 errors halt the parsing process.) Documents with errors cannot be used for evaluation.
+
+=head2 original_uri
+
+Returns the original value of L</canonical_uri> that was passed to the document constructor (which
+C<$id> keywords within the document would have been resolved against, if they were not already
+absolute). Some subclasses may make use of this value for resolving URIs when matching HTTP requests
+at runtime.
+
+This URI is B<not> added to the document's resource index, so if you want the document to be
+addressable at this location you must add it to the evaluator yourself with the two-argument form of
+L<JSON::Schema::Modern/add_document>.
+
+Read-only.
 
 =head2 resource_index
 
