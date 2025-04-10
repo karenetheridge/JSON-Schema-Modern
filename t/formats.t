@@ -17,7 +17,7 @@ use JSON::Schema::Modern::Utilities qw(get_type);
 use lib 't/lib';
 use Helper;
 
-use Test::Without::Module qw(
+use Test::Without::Module 0.19 qw(
   Time::Moment
   DateTime::Format::RFC3339
   Data::Validate::Domain
