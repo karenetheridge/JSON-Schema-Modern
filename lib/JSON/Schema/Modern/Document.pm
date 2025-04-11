@@ -54,6 +54,8 @@ has metaschema_uri => (
   is => 'rwp',
   isa => (InstanceOf['Mojo::URL'])->where(q{not length $_->fragment}), # allow for .../draft-07/schema#
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
+  predicate => '_has_metaschema_uri',
+  # default not defined here, but might be defined in a subclass
 );
 
 has evaluator => (
@@ -212,7 +214,7 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   my $state = $evaluator->traverse($self->schema,
     {
       initial_schema_uri => $original_uri,
-      $self->metaschema_uri ? ( metaschema_uri => $self->metaschema_uri ) : (),
+      $self->_has_metaschema_uri ? ( metaschema_uri => $self->metaschema_uri ) : (),
       %$config_override,
     }
   );
