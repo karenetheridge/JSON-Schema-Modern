@@ -42,7 +42,7 @@ has canonical_uri => (
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
 );
 
-# this is also known as the retrieval uri in the OpenAPI::Modern specification
+# this is also known as the retrieval uri in the OpenAPI specification
 has original_uri => (
   is => 'rwp',
   isa => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
