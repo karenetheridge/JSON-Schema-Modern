@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.608     2025-04-11 20:57:16Z
           - documentation now makes a note of the special licence for JSON
             Schema schema files
