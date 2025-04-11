@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.607
+version 0.608
 
 =head1 SYNOPSIS
 
@@ -426,17 +426,19 @@ otherwise returns the L<JSON::Schema::Modern::Document> that contains the added 
   $js->add_document($uri => $document);
   $js->add_document($document);
 
-Introduces the L<JSON::Schema::Modern::Document> (or subclass)
-object, representing a JSON Schema, to the implementation, registering it under the indicated URI if
-provided (and all known identifiers within the document will be added as well, resolved against the
-provided URI).
+Makes the L<JSON::Schema::Modern::Document> (or subclass)
+object, representing a JSON Schema, available to the evaluator. All identifiers known to the
+document are added to the evaluator's resource index; if the C<$uri> argument is provided, those
+identifiers are resolved against C<$uri> as they are added.
 
-If you add multiple documents (either with this method, or implicitly via L</evaluate>) with no root
+C<$uri> itself is also added to the resource index, referencing the root of the document itself.
+
+If you add multiple documents (either with this method, or implicitly via C</add_schema> or L</evaluate>) with no root
 identifier (either provided explicitly in the method call, or via an C<$id> keyword at the schema
 root), all such previous schemas are removed from memory and can no longer be referenced.
 
-If there were errors in the document, will die with these errors;
-otherwise returns the L<JSON::Schema::Modern::Document> object.
+If there were errors in the document, this method will die with these errors;
+otherwise it returns the L<JSON::Schema::Modern::Document> object.
 
 =head2 add_format_validation
 
@@ -896,5 +898,7 @@ This software is copyright (c) 2020 by Karen Etheridge.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
+Some schema files have their own licence, in share/LICENSE.
 
 =cut
