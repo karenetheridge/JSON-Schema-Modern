@@ -671,7 +671,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   return 1 if not keys %$schema;
 
-  # find all schema locations in effect at this data path + canonical_uri combination
+  # find all schema locations in effect at this data path + uri combination
   # if any of them are absolute prefix of this schema location, we are in a loop.
   my $canonical_uri = canonical_uri($state);
   my $schema_location = $state->{traversed_schema_path}.$state->{schema_path};
@@ -811,7 +811,7 @@ my $path_type = Str->where('m{^(?:/|$)}');  # JSON pointer relative to the docum
 has _resource_index => (
   is => 'bare',
   isa => Map[my $resource_key_type = Str->where('!/#/'), my $resource_type = Dict[
-      # always stringwise-equal to the top level key
+      # may not be stringwise-equal to the top level key
       canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
       path => $path_type,
       specification_version => my $spec_version_type = Enum(SPECIFICATION_VERSIONS_SUPPORTED),
@@ -1437,7 +1437,8 @@ applications that contain embedded JSON Schemas):
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
-* C<effective_base_uri>: locations in errors and annotations are resolved against this URI
+* C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
+  useful when providing an inline schema that does not declare an absolute base URI for itself)
 
 The return value is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
@@ -1469,7 +1470,8 @@ applications that contain embedded JSON Schemas):
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
-* C<effective_base_uri>: locations in errors and annotations are resolved against this URI
+* C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
+  useful when providing an inline schema that does not declare an absolute base URI for itself)
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 identifying various data that are not exposed by annotations.

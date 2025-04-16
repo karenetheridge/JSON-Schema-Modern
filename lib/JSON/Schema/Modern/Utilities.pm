@@ -287,8 +287,10 @@ sub local_annotations ($state) {
   grep $_->{instance_location} eq $state->{data_path}, $state->{annotations}->@*;
 }
 
-# shorthand for finding the canonical uri of the present schema location
+# shorthand for finding the current uri of the present schema location
 # ensure that this code is kept consistent with the absolute_keyword_location builder in ResultNode
+# Note that this may not be canonical if schema_path has not yet been reset via the processing of a
+# local identifier keyword (e.g. '$id').
 sub canonical_uri ($state, @extra_path) {
   return $state->{initial_schema_uri} if not @extra_path and not length($state->{schema_path});
   my $uri = $state->{initial_schema_uri}->clone;
