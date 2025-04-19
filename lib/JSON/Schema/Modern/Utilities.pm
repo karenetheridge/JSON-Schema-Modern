@@ -444,9 +444,9 @@ sub assert_uri ($state, $schema, $override = undef) {
   return E($state, '"%s" is not a valid URI', $string)
     # see also uri format sub
     if fc($uri->to_unsafe_string) ne fc($string)
-      or $string =~ /[^[:ascii:]]/
-      or not $uri->is_abs
-      or $string =~ /#/
+      or $string =~ /[^[:ascii:]]/            # ascii characters only
+      or not $uri->is_abs                     # must have a scheme
+      or $string =~ /#/                       # no fragment, except...
         and $string !~ m{#$}                          # empty fragment
         and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
         and $string !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
