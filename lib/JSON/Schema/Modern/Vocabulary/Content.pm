@@ -56,7 +56,7 @@ sub _eval_keyword_contentEncoding ($class, $data, $schema, $state) {
     catch ($e) {
       chomp $e;
       return E($state, 'could not decode %s string: %s', $schema->{contentEncoding}, $e);
-    };
+    }
   }
 
   return A($state, $schema->{$state->{keyword}});
