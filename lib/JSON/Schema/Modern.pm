@@ -472,8 +472,19 @@ sub validate_schema ($self, $schema, $config_override = {}) {
   my $metaschema_uri = is_plain_hashref($schema) && $schema->{'$schema'} ? $schema->{'$schema'}
     : $self->METASCHEMA_URIS->{$self->specification_version // $self->SPECIFICATION_VERSION_DEFAULT};
 
-  return $self->evaluate($schema, $metaschema_uri,
+  my $result = $self->evaluate($schema, $metaschema_uri,
     { %$config_override, $self->strict || $config_override->{strict} ? (_strict_schema_data => 1) : () });
+
+  return $result if not $result->valid;
+
+  my $state = $self->traverse($schema, $config_override);
+  return JSON::Schema::Modern::Result->new(
+    output_format => $self->output_format,
+    valid => 0,
+    errors => $state->{errors},
+  ) if $state->{errors}->@*;
+
+  return $result; # valid: true
 }
 
 sub get ($self, $uri_reference) {

@@ -72,4 +72,22 @@ cmp_result(
   'validate_schema with custom metaschema',
 );
 
+cmp_result(
+  $js->validate_schema({
+    '$id' => '#/$defs/foo',
+    '$schema' => 'http://json-schema.org/draft-07/schema#',
+  })->TO_JSON,
+  {
+    valid => false,
+    errors => [
+      {
+        instanceLocation => '',
+        keywordLocation => '/$id',
+        error => '$id value "#/$defs/foo" does not match required syntax',
+      },
+    ],
+  },
+  'validate_schema with schema that validates against the metaschema, but fails in extra traverse checks',
+);
+
 done_testing;

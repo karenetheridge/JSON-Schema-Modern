@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - validate_schema() (and the json-schema-eval --validate-schema
+            option) now detect more errors
 
 0.608     2025-04-11 20:57:16Z
           - documentation now makes a note of the special licence for JSON
