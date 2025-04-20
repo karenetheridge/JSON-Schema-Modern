@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.609     2025-04-20 23:40:09Z
           - validate_schema() (and the json-schema-eval --validate-schema
             option) now detect more errors
 
