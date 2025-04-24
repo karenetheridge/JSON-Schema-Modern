@@ -19,7 +19,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Mojo::JSON ();  # for JSON_XS, MOJO_NO_JSON_XS environment variables
 use Carp qw(croak carp);
-use List::Util 1.55 qw(pairs first uniqint pairmap uniq any);
+use List::Util 1.55 qw(pairs first uniqint pairmap uniq any min);
 use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use builtin::compat qw(refaddr load_module);
 use Mojo::URL;
@@ -1085,6 +1085,7 @@ sub _get_or_load_resource ($self, $uri) {
 sub _fetch_from_uri ($self, $uri_reference) {
   $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
 
+  # this is *a* resource that would contain our desired location, but may not be the closest one
   my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
   return if not $resource;
 
@@ -1094,18 +1095,31 @@ sub _fetch_from_uri ($self, $uri_reference) {
     return if not defined $subschema;
 
     my $closest_resource;
-    if (not length $fragment) {
+    if (not length $fragment) { # we already have the canonical resource root
       $closest_resource = [ undef, $resource ];
     }
     else {
-      # determine the canonical uri by finding the closest schema resource
+      # determine the canonical uri by finding the closest schema resource(s)
       my $doc_addr = refaddr($resource->{document});
-      $closest_resource = first { !length($_->[1]{path})       # document root
-          || length($document_path)
-            && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
+      my @closest_resources =
         sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
+        grep { !length($_->[1]{path})       # document root
+          || length($document_path)
+            && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above desired location
         grep { refaddr($_->[1]{document}) == $doc_addr }          # in same document
         $self->_resource_pairs;
+
+      # now whittle down to all the resources with the same document path as the first candidate
+      if (@closest_resources > 1) {
+        # find the resource key that most closely matches the original query uri, by matching prefixes
+        my $match = $uri_reference.'';
+        @closest_resources =
+          sort { _prefix_match_length($b->[0], $match) <=> _prefix_match_length($a->[0], $match) }
+          grep $_->[1]{path} eq $closest_resources[0]->[1]{path},
+          @closest_resources;
+      }
+
+      $closest_resource = $closest_resources[0];
     }
 
     my $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
@@ -1128,6 +1142,16 @@ sub _fetch_from_uri ($self, $uri_reference) {
       $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
     };
   }
+}
+
+# given two strings, determines the number of characters in common, starting from the first
+# character
+sub _prefix_match_length ($x, $y) {
+  my $len = min(length($x), length($y));
+  foreach my $pos (0..$len) {
+    return $pos if substr($x, $pos, 1) ne substr($y, $pos, 1);
+  }
+  return $len;
 }
 
 # Mojo::JSON::JSON_XS is false when the environment variable $MOJO_NO_JSON_XS is set

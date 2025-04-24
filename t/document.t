@@ -878,18 +878,6 @@ subtest 'resource collisions' => sub {
     undef,
     'ignored "duplicate" uris embedded in non-schemas',
   );
-
-  cmp_deeply(
-    JSON::Schema::Modern::Document->new(
-      canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
-      schema => {
-        '$id' => 'https://bar.com',
-        '$anchor' => 'hello',
-      },
-    )->path_to_resource(''),
-    superhashof({ canonical_uri => str('https://bar.com') }),
-    'the correct canonical uri is indexed in the inverted index',
-  );
 };
 
 subtest 'create document with explicit canonical_uri set to the same as root $id' => sub {
@@ -1007,10 +995,11 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     'https://example.com/api/' => JSON::Schema::Modern::Document->new(
       canonical_uri => 'staging/',
       schema => {
-        '$id' => 'alpha.json',
+        '$id' => 'alpha.json',  # https://example.com/staging/alpha.json
         properties => {
-          foo => { '$id' => 'beta' },
+          foo => { '$id' => 'beta', not => true }, # https://example.com/staging/beta
         },
+        not => true,
       },
       evaluator => $js,
     )
@@ -1062,6 +1051,61 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     'evaluator has correct resources, resolved against the provided base uri',
   );
 
+  cmp_deeply(
+    $js->evaluate({ foo => 1 }, 'https://example.com/api/staging/alpha.json')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/not',
+          absoluteKeywordLocation => 'https://example.com/api/staging/alpha.json#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/not',
+          absoluteKeywordLocation => 'https://example.com/api/staging/beta#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'https://example.com/api/staging/alpha.json#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'when evaluating the document using the canonical uri, error locations use the canonical uri',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ foo => 1 }, 'https://example.com/api/')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/not',
+          absoluteKeywordLocation => 'https://example.com/api/staging/alpha.json#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/not',
+          absoluteKeywordLocation => 'https://example.com/api/staging/beta#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'https://example.com/api/staging/alpha.json#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'when evaluating the document using a retrieval uri, error locations still use the canonical uri',
+  );
 
   my $doc2 = $js->add_document('file:///usr/local/share/api.json' => $doc);
   is($doc2, $doc, 'same document is added a second time');
@@ -1090,7 +1134,65 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
         %configs,
       },
     },
-    'document resources are added using new base, which appears in their canonical_uri values',
+    'document resources are added using the new base, which appears in their canonical_uri values',
+  );
+
+  cmp_deeply(
+    $js->evaluate({ foo => 1 }, 'https://example.com/api/')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/not',
+          absoluteKeywordLocation => 'https://example.com/api/staging/alpha.json#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/not',
+          absoluteKeywordLocation => 'https://example.com/api/staging/beta#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'https://example.com/api/staging/alpha.json#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'when evaluating using the first base uri, error locations are relative to the provided base uri',
+  );
+
+  # there are multiple resources mapped to the same document+path locations, but we want error
+  # locations to be using the set that we used in the evaluation call.
+  cmp_deeply(
+    $js->evaluate({ foo => 1 }, 'file:///usr/local/share/api.json')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/not',
+          absoluteKeywordLocation => 'file:///usr/local/share/staging/alpha.json#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/properties/foo/not',
+          absoluteKeywordLocation => 'file:///usr/local/share/staging/beta#/not',
+          error => 'subschema is true',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/properties',
+          absoluteKeywordLocation => 'file:///usr/local/share/staging/alpha.json#/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'when evaluating using the second base uri, error locations are relative to the original evaluation location',
   );
 };
 

@@ -96,17 +96,6 @@ sub _add_resource {
   $_[0]->{resource_index}{$resource_key_type->($_[1])} = $resource_type->($_[2]);
 }
 
-# this is not "the path to the resource", but rather "have path, want resource"
-has _path_to_resource => (
-  is => 'ro',
-  isa => HashRef[$resource_type],
-  init_arg => undef,
-  lazy => 1,
-  default => sub { +{ map +($_->{path} => $_), shift->_canonical_resources } },
-);
-
-sub path_to_resource { $_[0]->_path_to_resource; $_[0]->{_path_to_resource}{$_[1]} }
-
 # for internal use only
 has _checksum => (
   is => 'rw',
