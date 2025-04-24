@@ -371,26 +371,11 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
   my $valid;
   try {
-    my $schema_info;
+    # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
+    $schema_reference = $self->add_schema($schema_reference)->canonical_uri
+      if is_ref($schema_reference) and not $schema_reference->$_isa('Mojo::URL');
 
-    if (not is_ref($schema_reference) or $schema_reference->$_isa('Mojo::URL')) {
-      $schema_info = $self->_fetch_from_uri($schema_reference);
-    }
-    else {
-      # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-      my $document =
-          $schema_reference->$_isa('JSON::Schema::Modern::Document') ? $self->add_document($schema_reference)
-        : $self->add_schema($schema_reference);
-      my $base_resource = $document->_get_resource($document->canonical_uri)
-        || croak "couldn't get resource: document parse error";
-
-      $schema_info = {
-        schema => $document->schema,
-        document => $document,
-        document_path => '',
-        $base_resource->%{qw(canonical_uri specification_version vocabularies configs)},
-      };
-    }
+    my $schema_info = $self->_fetch_from_uri($schema_reference);
 
     abort($state, 'EXCEPTION: collect_annotations cannot be used with specification_version '.$schema_info->{specification_version})
       if $config_override->{collect_annotations} and $schema_info->{specification_version} =~ /^draft[467]$/;
@@ -1441,8 +1426,7 @@ The schema must be in one of these forms:
 
 =for :list
 * a Perl data structure, such as what is returned from a JSON decode operation,
-* a L<JSON::Schema::Modern::Document> object,
-* or a URI string indicating the location where such a schema is located.
+* or a URI string indicating the identity of such a schema.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
@@ -1475,8 +1459,7 @@ The schema must be in one of these forms:
 
 =for :list
 * a Perl data structure, such as what is returned from a JSON decode operation,
-* a L<JSON::Schema::Modern::Document> object,
-* or a URI string indicating the location where such a schema is located.
+* or a URI string indicating the identity of such a schema.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,

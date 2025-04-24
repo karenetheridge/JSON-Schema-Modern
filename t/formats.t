@@ -582,7 +582,7 @@ subtest 'unknown custom formats' => sub {
     is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using an unknown custom format');
 
     cmp_result(
-      $js->evaluate('hi', $doc)->TO_JSON,
+      $js->evaluate('hi', '')->TO_JSON,
       {
         valid => false,
         errors => [
@@ -597,7 +597,7 @@ subtest 'unknown custom formats' => sub {
     );
 
     cmp_result(
-      $js->evaluate('hello', $doc, { short_circuit => 1 })->TO_JSON,
+      $js->evaluate('hello', '', { short_circuit => 1 })->TO_JSON,
       { valid => true },
       '...but this error can be avoided if the keyword is never evaluated',
     );
@@ -990,7 +990,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
     );
 
     cmp_result(
-      $js->evaluate('2025-01-01T00:00:00Z', $doc)->TO_JSON,
+      $js->evaluate('2025-01-01T00:00:00Z', $doc->canonical_uri)->TO_JSON,
       {
         valid => false,
         errors => [

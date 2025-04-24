@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - evaluate() and evaluate_json_string() can no longer be called with
+            a JSON::Schema::Modern::Document object; now you should only pass
+            in the desired URI directly (or the raw schema), as before.
 
 0.609     2025-04-20 23:40:09Z
           - validate_schema() (and the json-schema-eval --validate-schema
