@@ -376,12 +376,12 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       if is_ref($schema_reference) and not $schema_reference->$_isa('Mojo::URL');
 
     my $schema_info = $self->_fetch_from_uri($schema_reference);
+    abort($state, 'EXCEPTION: unable to find resource "%s"', $schema_reference)
+      if not $schema_info;
 
     abort($state, 'EXCEPTION: collect_annotations cannot be used with specification_version '.$schema_info->{specification_version})
       if $config_override->{collect_annotations} and $schema_info->{specification_version} =~ /^draft[467]$/;
 
-    abort($state, 'EXCEPTION: unable to find resource "%s"', $schema_reference)
-      if not $schema_info;
     abort($state, 'EXCEPTION: "%s" is not a schema', $schema_reference)
       if not $schema_info->{document}->get_entity_at_location($schema_info->{document_path});
 
