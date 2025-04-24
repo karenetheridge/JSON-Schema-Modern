@@ -1766,5 +1766,70 @@ subtest '$schema points to a boolean schema' => sub {
   );
 };
 
+subtest '$ref to a different dialect' => sub {
+  my $js = JSON::Schema::Modern->new(collect_annotations => 1);
+
+  $js->add_schema({
+    '$id' => 'https://my_metaschema',
+    '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/validation' => true,
+    },
+  });
+
+  cmp_result(
+    $js->evaluate(
+      { foo => { bar => 1 } },
+      {
+        '$id' => 'https://example.com',
+        '$defs' => {
+          subschema => {
+            '$id' => 'https://foo.com',
+            '$schema' => 'https://my_metaschema',
+            '$defs' => {
+              my_def => { type => 'object', blah => 1 },
+            },
+            '$ref' => '#/$defs/my_def',
+            bloop => 2,
+            properties => { bar => false }, # this keyword should only annotate
+          },
+        },
+        additionalProperties => { '$ref' => '#/$defs/subschema' },
+      },
+    )->TO_JSON,
+    {
+      valid => true,
+      annotations => [
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/$ref/blah',
+          absoluteKeywordLocation => 'https://foo.com#/$defs/my_def/blah',
+          annotation => 1,
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/bloop',
+          absoluteKeywordLocation => 'https://foo.com#/bloop',
+          annotation => 2,
+        },
+        {
+          instanceLocation => '/foo',
+          keywordLocation => '/additionalProperties/$ref/properties',
+          absoluteKeywordLocation => 'https://foo.com#/properties',
+          annotation => { bar => false },
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/additionalProperties',
+          absoluteKeywordLocation => 'https://example.com#/additionalProperties',
+          annotation => [ 'foo' ],
+        },
+      ],
+    },
+    'evaluation of the subschema correctly uses the new $id and $schema',
+  );
+};
+
 had_no_warnings() if $ENV{AUTHOR_TESTING};
 done_testing;

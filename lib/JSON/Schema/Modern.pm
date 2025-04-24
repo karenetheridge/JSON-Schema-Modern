@@ -1099,21 +1099,29 @@ sub _get_or_load_resource ($self, $uri) {
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri ($self, $uri_reference) {
   $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
-  my $fragment = $uri_reference->fragment;
 
   my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
   return if not $resource;
 
+  my $fragment = $uri_reference->fragment;
   if (not length($fragment) or $fragment =~ m{^/}) {
     my $subschema = $resource->{document}->get(my $document_path = $resource->{path}.($fragment//''));
     return if not defined $subschema;
-    my $doc_addr = refaddr($resource->{document});
-    my $closest_resource = first { !length($_->[1]{path})       # document root
-        || length($document_path)
-          && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
-      sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
-      grep { refaddr($_->[1]{document}) == $doc_addr }          # in same document
-      $self->_resource_pairs;
+
+    my $closest_resource;
+    if (not length $fragment) {
+      $closest_resource = [ undef, $resource ];
+    }
+    else {
+      # determine the canonical uri by finding the closest schema resource
+      my $doc_addr = refaddr($resource->{document});
+      $closest_resource = first { !length($_->[1]{path})       # document root
+          || length($document_path)
+            && $document_path =~ m{^\Q$_->[1]{path}\E(?:/|\z)} }  # path is above present location
+        sort { length($b->[1]{path}) <=> length($a->[1]{path}) }  # sort by length, descending
+        grep { refaddr($_->[1]{document}) == $doc_addr }          # in same document
+        $self->_resource_pairs;
+    }
 
     my $canonical_uri = $closest_resource->[1]{canonical_uri}->clone
       ->fragment(substr($document_path, length($closest_resource->[1]{path})));
@@ -1123,7 +1131,7 @@ sub _fetch_from_uri ($self, $uri_reference) {
       schema => $subschema,
       canonical_uri => $canonical_uri,
       document_path => $document_path,
-      $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
+      $closest_resource->[1]->%{qw(document specification_version vocabularies configs)}, # reference, not copy
     };
   }
   else {  # we are following a URI with a plain-name fragment
