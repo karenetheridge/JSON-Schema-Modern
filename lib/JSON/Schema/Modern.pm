@@ -1579,7 +1579,9 @@ identifier (either provided explicitly in the method call, or via an C<$id> keyw
 root), all such previous schemas are removed from memory and can no longer be referenced.
 
 If there were errors in the document, will die with these errors;
-otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
+otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema. URIs
+identified within this document will not be resolved to the provided C<$uri> argument, so you can
+re-add the document object again (with L</add_document>, below) using a new base URI if you wish.
 
 =head2 add_document
 
