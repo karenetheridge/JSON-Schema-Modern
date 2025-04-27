@@ -1137,7 +1137,7 @@ sub _fetch_from_uri ($self, $uri_reference) {
     return if not my $subresource = ($resource->{anchors}//{})->{$fragment};
     return {
       schema => $resource->{document}->get($subresource->{path}),
-      canonical_uri => $subresource->{canonical_uri}->clone, # this is *not* the anchor-containing URI
+      canonical_uri => $subresource->{canonical_uri}, # this is *not* the anchor-containing URI
       document_path => $subresource->{path},
       $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
     };
