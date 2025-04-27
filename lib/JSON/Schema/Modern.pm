@@ -300,6 +300,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     initial_schema_uri => $initial_uri,     # the canonical URI as of the start of this method or last $id
     traversed_schema_path => $initial_path, # the accumulated traversal path as of the start or last $id
     schema_path => '',                      # the rest of the path, since the start of this method or last $id
+    spec_version => $spec_version,
     errors => [],
     identifiers => {},
     subschemas => [],
@@ -309,20 +310,32 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     traverse => 1,
   };
 
+  my $valid = 1;
+
   try {
-    my $for_canonical_uri = Mojo::URL->new(
-      (is_plain_hashref($schema_reference) && exists $schema_reference->{'$id'}
-          ? Mojo::URL->new($schema_reference->{'$id'}) : undef)
-        // $state->{initial_schema_uri});
-    $for_canonical_uri->fragment(undef) if not length $for_canonical_uri->fragment;
+    # determine the initial value of spec_version and vocabularies, so we have something to start
+    # with in _traverse_subschema().
+    # a subsequent "$schema" keyword can still change these values, and it is always processed
+    # first, so the override is skipped if the keyword exists in the schema
+    $state->{metaschema_uri} =
+      (is_plain_hashref($schema_reference) && exists $schema_reference->{'$schema'} ? undef
+        : $config_override->{metaschema_uri}) // $self->METASCHEMA_URIS->{$spec_version};
 
-    # a subsequent "$schema" keyword can still change these values
-    $state->@{qw(spec_version vocabularies metaschema_uri)} = $self->_get_metaschema_info(
-      $config_override->{metaschema_uri} // $self->METASCHEMA_URIS->{$spec_version},
-      $for_canonical_uri,
-    );
+    if (my $metaschema_info = $self->_get_metaschema_vocabulary_classes($state->{metaschema_uri})) {
+      $state->@{qw(spec_version vocabularies)} = @$metaschema_info;
+    }
+    else {
+      # metaschema has not been processed for vocabularies yet...
 
-    my $valid = $self->_traverse_subschema($schema_reference, $state);
+      die 'something went wrong - cannot get metaschema data for '.$state->{metaschema_uri}
+        if not $config_override->{metaschema_uri};
+
+      # use the Core vocabulary to set metaschema info via the '$schema' keyword implementation
+      $valid = $self->_get_metaschema_vocabulary_classes($self->METASCHEMA_URIS->{$spec_version})->[1][0]
+          ->_traverse_keyword_schema({ '$schema' => $state->{metaschema_uri}.'' }, $state);
+    }
+
+    $valid = $self->_traverse_subschema($schema_reference, $state) if $valid and not $state->{errors}->@*;
     die 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
     die 'result is true but there are errors' if $valid and $state->{errors}->@*;
   }
@@ -924,41 +937,6 @@ has _metaschema_vocabulary_classes => (
 sub _get_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#$//r} }
 sub _set_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#$//r} = $mvc_type->($_[2]) }
 sub __all_metaschema_vocabulary_classes { values $_[0]->__metaschema_vocabulary_classes->%* }
-
-# retrieves metaschema info either from cache or by parsing the schema for vocabularies
-# throws a JSON::Schema::Modern::Result on error
-sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
-  # check the cache. specification metaschemas are already populated.
-  my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
-  return (@$metaschema_info, $metaschema_uri) if $metaschema_info;
-
-  # otherwise, fetch the metaschema and parse its $vocabulary keyword.
-  # we do this by traversing a baby schema with just the $schema keyword.
-  my $state = $self->traverse({ '$schema' => $metaschema_uri.'' });
-  die JSON::Schema::Modern::Result->new(
-    output_format => $self->output_format,
-    valid => JSON::PP::false,
-    errors => [
-      map {
-        my $e = $_;
-        # absolute location is undef iff the location = '/$schema'
-        my $absolute_location = $e->absolute_keyword_location // $for_canonical_uri;
-        JSON::Schema::Modern::Error->new(
-          depth => $e->depth,
-          mode => 'traverse',
-          keyword => $e->keyword eq '$schema' ? '' : $e->keyword,
-          instance_location => $e->instance_location,
-          keyword_location => ($for_canonical_uri->fragment//'').($e->keyword_location =~ s{^/\$schema\b}{}r),
-          length $absolute_location ? ( absolute_keyword_location => $absolute_location ) : (),
-          error => $e->error,
-        )
-      }
-      $state->{errors}->@* ],
-    exception => 1,
-  ) if $state->{errors}->@*;
-
-  return ($state->{spec_version}, $state->{vocabularies}, $metaschema_uri);
-}
 
 # translate vocabulary URIs into classes, caching the results (if any)
 sub _fetch_vocabulary_data ($self, $state, $schema_info) {

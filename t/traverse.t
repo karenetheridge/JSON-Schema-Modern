@@ -500,6 +500,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
   my $state = $js->traverse({}, { metaschema_uri => 'https://unknown/metaschema' });
+
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     my $errors = [
@@ -512,6 +513,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     'metaschema_uri is not a known uri',
   );
 
+
   $js->add_schema({
     '$id' => 'https://metaschema/with/wrong/spec',
     '$vocabulary' => {
@@ -520,7 +522,9 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     },
   });
 
+
   $state = $js->traverse(true, { metaschema_uri => 'https://metaschema/with/wrong/spec' });
+
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     $errors = [
@@ -542,47 +546,45 @@ subtest 'traverse with overridden metaschema_uri' => sub {
         error => '"https://metaschema/with/wrong/spec" is not a valid metaschema',
       },
     ],
-    'metaschema_uri is overridden with a bad schema: same errors are returned',
+    'boolean schema: metaschema_uri is overridden with a bad schema: same errors are returned',
   );
 
 
   $state = $js->traverse(
-    { '$id' => 'https://my-poor-schema/foo.json' },
+    { '$id' => 'https://my/bad/schema' },
     { metaschema_uri => 'https://metaschema/with/wrong/spec' });
+
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
-    [
-      $errors->@[0..1],
-      {
-        $errors->[2]->%*,
-        absoluteKeywordLocation => 'https://my-poor-schema/foo.json',
-      },
-    ],
-    'metaschema_uri is overridden with a bad schema: errors contain the right locations',
+    $errors,
+    'object schema: metaschema_uri is overridden with a bad schema: same errors are returned',
   );
 
 
+  # simulation of parsing a schema with a custom keyword that sets the metaschema uri
+  # (see OpenAPI's jsonSchemaDialect keyword)
   $state = $js->traverse(
     true,
     {
       metaschema_uri => 'https://metaschema/with/wrong/spec',
       initial_schema_uri => 'https://my-poor-schema/foo.json#/$my_dialect_is',
-      traversed_schema_path => '/$my_dialect_is',
+      traversed_schema_path => '/$ref/$ref/some_keyword/$ref/$my_dialect_is',
     });
+
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
         $errors->[0]->%*,
-        keywordLocation => '/$my_dialect_is'.$errors->[0]{keywordLocation},
+        keywordLocation => '/$ref/$ref/some_keyword/$ref/$my_dialect_is'.$errors->[0]{keywordLocation},
       },
       {
         $errors->[1]->%*,
-        keywordLocation => '/$my_dialect_is'.$errors->[1]{keywordLocation},
+        keywordLocation => '/$ref/$ref/some_keyword/$ref/$my_dialect_is'.$errors->[1]{keywordLocation},
       },
       {
         $errors->[2]->%*,
-        keywordLocation => '/$my_dialect_is'.$errors->[2]{keywordLocation},
+        keywordLocation => '/$ref/$ref/some_keyword/$ref/$my_dialect_is'.$errors->[2]{keywordLocation},
         absoluteKeywordLocation => 'https://my-poor-schema/foo.json#/$my_dialect_is',
       },
     ],
@@ -604,7 +606,6 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     {
       '$id' => my $id = 'https://my/first/schema/with/custom/metaschema',
       # note: no $schema keyword!
-      allOf => [ { minimum => 'not even an integer' } ],
     },
     { metaschema_uri => 'https://my/first/metaschema' },
   );
@@ -628,17 +629,17 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     'determined specification version and vocabularies to use for this schema from override',
   );
 
+
   $state = $js->traverse(
     {
       '$id' => $id = 'https://my/second/schema/with/custom/metaschema',
       '$schema' => 'http://json-schema.org/draft-07/schema',
-      allOf => [ { minimum => 'not even an integer' } ],
     },
     { metaschema_uri => 'https://my/first/metaschema' },
   );
 
   cmp_result(
-    $state,
+    my $state_copy = $state,
     superhashof({
       identifiers => {
         $id => {
@@ -656,6 +657,26 @@ subtest 'traverse with overridden metaschema_uri' => sub {
         qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
     'determined specification version and vocabularies to use for this schema from $schema keyword',
+  );
+
+
+  $state = $js->traverse(
+    {
+      '$id' => my $third_id = 'https://my/third/schema/with/custom/metaschema',
+      '$schema' => 'http://json-schema.org/draft-07/schema',
+    },
+    { metaschema_uri => 'https://metaschema/with/wrong/spec' },
+  );
+
+  cmp_result(
+    $state,
+    superhashof({
+        identifiers => {
+          $third_id => { $state_copy->{identifiers}{$id}->%*, canonical_uri => str($third_id) },
+        },
+        $state_copy->%{qw(metaschema_uri spec_version vocabularies)},
+      }),
+    'when $schema keyword is used, custom metaschema_uri is never parsed, so there are no errors',
   );
 };
 

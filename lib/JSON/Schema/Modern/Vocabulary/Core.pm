@@ -126,7 +126,13 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_schema ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'string') or not assert_uri($state, $schema);
+  # Note that this sub is sometimes called with $state->{keyword} undefined, in order to change
+  # error locations
+
+  # Note that because this keyword is parsed ahead of "id"/"$id", location information may not
+  # be correct if an error occurs when parsing this keyword.
+  ()= E($state, '$schema value is not a string'), return if not is_type('string', $schema->{'$schema'});
+  return if not assert_uri($state, $schema, $schema->{'$schema'});
 
   my ($spec_version, $vocabularies);
 
@@ -146,7 +152,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     else {
       ($spec_version, $vocabularies) = $state->{evaluator}->_fetch_vocabulary_data({ %$state,
           keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
-          traversed_schema_path => jsonp($state->{schema_path}, '$schema') },
+          traversed_schema_path => jsonp($state->{traversed_schema_path}.$state->{schema_path}, $state->{keyword}) },
         $schema_info);
     }
   }
