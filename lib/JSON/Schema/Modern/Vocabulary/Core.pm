@@ -360,7 +360,7 @@ sub _traverse_keyword_vocabulary ($class, $schema, $state) {
   #   vocabulary uri while still validating those vocabulary keywords (e.g.
   #   https://spec.openapis.org/oas/3.1/schema-base/2021-05-20)
   # Instead, we will verify these constraints when we actually use the metaschema, in
-  # _traverse_keyword_schema -> __fetch_vocabulary_data
+  # _traverse_keyword_schema -> _fetch_vocabulary_data
 
   return $valid;
 }
