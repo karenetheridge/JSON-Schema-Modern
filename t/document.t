@@ -630,6 +630,8 @@ subtest '$schema not conforming to syntax' => sub {
       schema => { '$schema' => 'foo' },
     ),
     listmethods(
+      canonical_uri => [ str('') ],
+      metaschema_uri => [ str('https://json-schema.org/draft/2020-12/schema') ],
       resource_index => [],
       errors => [
         methods(TO_JSON => {

@@ -211,12 +211,11 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   die 'original_uri has changed' if $self->original_uri ne $original_uri
     or refaddr($self->original_uri) != refaddr($original_uri);
 
-  # if the schema identified a canonical uri for itself via '$id', it overrides the initial value
-  # Note that subclasses of this class may choose to identify the canonical uri in a different way
-  $self->_set_canonical_uri($state->{initial_schema_uri}) if $state->{initial_schema_uri} ne $original_uri;
-
-  return $state if $state->{errors}->@*;
-
+  # if the document identified a canonical uri for itself via '$id', or metaschema uri via '$schema',
+  # they overrides the initial values
+  # Note that subclasses of this class may choose to identify these values in a different way
+  # (e.g. "$self" in OpenAPI)
+  $self->_set_canonical_uri($state->{initial_schema_uri});
   $self->_set_metaschema_uri($state->{metaschema_uri});
 
   return $state;
