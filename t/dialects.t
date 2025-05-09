@@ -1320,6 +1320,15 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
     allOf => [ { '$ref' => 'https://json-schema.org/draft/2019-09/schema' } ],
   });
 
+  cmp_deeply(
+    $metaschema_document,
+    methods(
+      canonical_uri => str('http://localhost:1234/my-meta-schema'),
+      metaschema_uri => str('https://json-schema.org/draft/2019-09/schema'),
+    ),
+    'document contains correct values',
+  );
+
   is($metaschema_document->_get_resource($metaschema->{'$id'})->{specification_version}, 'draft2019-09',
     'specification version detected from standard metaschema URI');
 
@@ -1591,6 +1600,14 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
     )->TO_JSON,
     { valid => true },
     'validation succeeds because "minimum" never gets run',
+  );
+  cmp_deeply(
+    $js->{_resource_index}{$id}{document},
+    methods(
+      canonical_uri => str($id),
+      metaschema_uri => str('https://my/first/metaschema'),
+    ),
+    'document contains correct values',
   );
   cmp_result(
     $js->{_resource_index}{$id},

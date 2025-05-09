@@ -142,6 +142,8 @@ subtest 'default metaschema' => sub {
     $state,
     superhashof({
       spec_version => 'draft2020-12',
+      metaschema_uri => str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}),
+      initial_schema_uri => str(''),
       vocabularies => [
         map 'JSON::Schema::Modern::Vocabulary::'.$_,
           qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated),

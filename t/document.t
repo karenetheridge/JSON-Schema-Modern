@@ -38,6 +38,7 @@ subtest 'boolean document' => sub {
       ],
       original_uri => [ str('') ],
       canonical_uri => [ str('') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { '' => 0 } ],
     ),
     'boolean schema with no canonical_uri',
@@ -68,6 +69,7 @@ subtest 'boolean document' => sub {
         },
       ],
       canonical_uri => [ str('https://foo.com') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { '' => 0 } ],
     ),
     'boolean schema with valid canonical_uri',
@@ -112,6 +114,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str('https://foo.com') ],
       canonical_uri => [ str('https://foo.com') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { '' => 0 } ],
     ),
     'object schema with valid canonical_uri, no root $id',
@@ -133,6 +136,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str($_//'') ],
       canonical_uri => [ str('https://foo.com') ], # note canonical_uri has been overwritten
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { '' => 0 } ],
     ),
     'object schema with originally provided uri = \''.($_//'<undef>').'\' and absolute root $id',
@@ -155,6 +159,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str($_) ],
       canonical_uri => [ str('https://bar.com') ], # note canonical_uri has been overwritten
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { '' => 0 } ],
     ),
     'originally provided uri is not indexed when overridden by an absolute root $id',
@@ -232,6 +237,7 @@ subtest 'object document' => sub {
       ),
       original_uri => [ str('https://foo.com') ],
       canonical_uri => [ str('https://bar.com') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { map +($_ => 0), '', '/allOf/0', '/allOf/1' } ],
     ),
     'object schema with canonical_uri and root $id, and additional resource schemas as well',
@@ -254,6 +260,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str('https://my-base.com') ],
       canonical_uri => [ str('https://my-base.com/relative') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { '' => 0 } ],
     ),
     'relative $id at root is resolved against provided canonical_id',
@@ -285,6 +292,7 @@ subtest 'object document' => sub {
       ),
       original_uri => [ str('') ],
       canonical_uri => [ str('') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { map +($_ => 0), '', '/$defs/foo' } ],
     ),
     'relative uri for inner $id',
@@ -315,6 +323,7 @@ subtest 'object document' => sub {
       ),
       original_uri => [ str('') ],
       canonical_uri => [ str('') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
       _entities => [ { map +($_ => 0), '', '/$defs/foo' } ],
     ),
     'no root $id; absolute uri with path in subschema resource',
@@ -369,6 +378,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str('https://example.com') ],
       canonical_uri => [ str('https://example.com') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
     ),
     'canonical_uri provided; empty uri not added as a referenceable uri when an anchor exists',
   );
@@ -396,6 +406,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str('') ],
       canonical_uri => [ str('https://my-base.com') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
     ),
     'absolute uri provided at root; adjacent anchor has the same canonical uri',
   );
@@ -427,6 +438,7 @@ subtest 'object document' => sub {
       ],
       original_uri => [ str('') ],
       canonical_uri => [ str('https://my-base.com') ],
+      metaschema_uri => [ str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}) ],
     ),
     'absolute uri provided at root; anchor lower down has its own canonical uri',
   );
@@ -952,6 +964,15 @@ subtest 'custom metaschema_uri' => sub {
     metaschema_uri => 'https://my/first/metaschema',
     evaluator => $js,  # needed in order to find the metaschema
   ));
+
+  cmp_deeply(
+    $js->{_resource_index}{$id}{document},
+    methods(
+      canonical_uri => str($id),
+      metaschema_uri => str('https://my/first/metaschema'),
+    ),
+    'document contains correct values',
+  );
 
   cmp_result(
     $js->{_resource_index}{$id},
