@@ -603,7 +603,7 @@ sub _traverse_subschema ($self, $schema, $state) {
         $valid = 0;
         next;
       }
-      warn 'traverse result is true but there are errors (keyword: '.$keyword.')'
+      warn 'traverse result is true but there are errors ('.$keyword.': '.$state->{errors}[-1]->error
         if $error_count != $state->{errors}->@*;
 
       # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing
