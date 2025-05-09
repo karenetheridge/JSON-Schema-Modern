@@ -188,6 +188,17 @@ subtest 'traversing a dialect with different core keywords' => sub {
     'dialect changes at root, with $id - dialect is switched in time to get a new keyword list for the core vocabulary',
   );
 
+  cmp_deeply(
+    $state,
+    superhashof({
+      metaschema_uri => 'http://json-schema.org/draft-07/schema',
+      spec_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
+    }),
+    'other $state information is correct',
+  );
+
   $state = $js->traverse(
     {
       '$id' => '#hello',

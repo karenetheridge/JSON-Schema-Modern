@@ -171,7 +171,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     if exists $schema->{'$ref'} and $spec_version =~ /^draft[467]$/;
 
   $state->{evaluator}->_set_metaschema_vocabulary_classes($schema->{'$schema'}, [ $spec_version, $vocabularies ]);
-  $state->@{qw(spec_version vocabularies)} = ($spec_version, $vocabularies);
+  $state->@{qw(spec_version vocabularies metaschema_uri)} = ($spec_version, $vocabularies, $schema->{'$schema'} =~ s/#$//r);
   return 1;
 }
 

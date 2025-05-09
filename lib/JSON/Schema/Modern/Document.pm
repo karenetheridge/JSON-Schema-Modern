@@ -52,7 +52,7 @@ has original_uri => (
 
 has metaschema_uri => (
   is => 'rwp',
-  isa => (InstanceOf['Mojo::URL'])->where(q{not length $_->fragment}), # allow for .../draft-07/schema#
+  isa => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
   predicate => '_has_metaschema_uri',
   # default not defined here, but might be defined in a subclass
@@ -217,12 +217,7 @@ sub traverse ($self, $evaluator, $config_override = {}) {
 
   return $state if $state->{errors}->@*;
 
-  # we don't store the metaschema_uri in $state nor in resource_index, but we can figure it out
-  # easily enough.
-  my $metaschema_uri = (is_plain_hashref($self->schema) ? $self->schema->{'$schema'} : undef)
-    // $self->metaschema_uri // $evaluator->METASCHEMA_URIS->{$state->{spec_version}};
-
-  $self->_set_metaschema_uri($metaschema_uri) if $metaschema_uri ne ($self->metaschema_uri//'');
+  $self->_set_metaschema_uri($state->{metaschema_uri});
 
   return $state;
 }

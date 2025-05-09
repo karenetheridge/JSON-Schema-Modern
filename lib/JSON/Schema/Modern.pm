@@ -317,7 +317,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     $for_canonical_uri->fragment(undef) if not length $for_canonical_uri->fragment;
 
     # a subsequent "$schema" keyword can still change these values
-    $state->@{qw(spec_version vocabularies)} = $self->_get_metaschema_info(
+    $state->@{qw(spec_version vocabularies metaschema_uri)} = $self->_get_metaschema_info(
       $config_override->{metaschema_uri} // $self->METASCHEMA_URIS->{$spec_version},
       $for_canonical_uri,
     );
@@ -930,7 +930,7 @@ sub __all_metaschema_vocabulary_classes { values $_[0]->__metaschema_vocabulary_
 sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
   # check the cache. specification metaschemas are already populated.
   my $metaschema_info = $self->_get_metaschema_vocabulary_classes($metaschema_uri);
-  return @$metaschema_info if $metaschema_info;
+  return (@$metaschema_info, $metaschema_uri) if $metaschema_info;
 
   # otherwise, fetch the metaschema and parse its $vocabulary keyword.
   # we do this by traversing a baby schema with just the $schema keyword.
@@ -957,7 +957,7 @@ sub _get_metaschema_info ($self, $metaschema_uri, $for_canonical_uri) {
     exception => 1,
   ) if $state->{errors}->@*;
 
-  return ($state->{spec_version}, $state->{vocabularies});
+  return ($state->{spec_version}, $state->{vocabularies}, $metaschema_uri);
 }
 
 # translate vocabulary URIs into classes, caching the results (if any)
@@ -1005,12 +1005,13 @@ sub _fetch_vocabulary_data ($self, $state, $schema_info) {
 }
 
 # used for determining a default '$schema' keyword where there is none
+# these are also normalized as this is how we cache them
 use constant METASCHEMA_URIS => {
   'draft2020-12' => 'https://json-schema.org/draft/2020-12/schema',
   'draft2019-09' => 'https://json-schema.org/draft/2019-09/schema',
-  'draft7' => 'http://json-schema.org/draft-07/schema#',
-  'draft6' => 'http://json-schema.org/draft-06/schema#',
-  'draft4' => 'http://json-schema.org/draft-04/schema#',
+  'draft7' => 'http://json-schema.org/draft-07/schema',
+  'draft6' => 'http://json-schema.org/draft-06/schema',
+  'draft4' => 'http://json-schema.org/draft-04/schema',
 };
 
 use constant CACHED_METASCHEMAS => {
