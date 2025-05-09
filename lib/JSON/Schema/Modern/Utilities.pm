@@ -339,8 +339,8 @@ sub E ($state, $error_string, @args) {
     # we calculate absolute_keyword_location when instantiating the Error object for Result
     _uri => $uri,
     error => @args ? sprintf($error_string, @args) : $error_string,
-    $state->{exception} ? ( exception => $state->{exception} ) : (),
-    $state->{recommended_response} ? ( recommended_response => $state->{recommended_response} ) : (),
+    exception => $state->{exception},
+    ($state->%{recommended_response})x!!$state->{recommended_response},
     mode => $state->{traverse} ? 'traverse' : 'evaluate',
   );
 
