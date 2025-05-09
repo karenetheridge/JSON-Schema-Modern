@@ -325,10 +325,10 @@ sub E ($state, $error_string, @args) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->{initial_schema_uri}, $state->{schema_path}, ($state->{keyword}//()), @schema_path_suffix, $state->{effective_base_uri} ];
+  my $uri = [ $state->@{qw(initial_schema_uri schema_path)}, $state->{keyword}//(), @schema_path_suffix, $state->{effective_base_uri} ];
 
   my $keyword_location = $state->{traversed_schema_path}
-    .jsonp($state->{schema_path}, $state->{keyword}, @schema_path_suffix);
+    .jsonp($state->@{qw(schema_path keyword)}, @schema_path_suffix);
 
   require JSON::Schema::Modern::Error;
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
@@ -365,10 +365,9 @@ sub A ($state, $annotation) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->{initial_schema_uri}, $state->{schema_path}, $state->{keyword}, $state->{effective_base_uri} ];
+  my $uri = [ $state->@{qw(initial_schema_uri schema_path keyword effective_base_uri)} ];
 
-  my $keyword_location = $state->{traversed_schema_path}
-    .jsonp($state->{schema_path}, $state->{keyword});
+  my $keyword_location = $state->{traversed_schema_path}.jsonp($state->@{qw(schema_path keyword)});
 
   push $state->{annotations}->@*, {
     depth => $state->{depth} // 0,
