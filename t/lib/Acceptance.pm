@@ -52,7 +52,7 @@ sub acceptance_tests (%options) {
   my $js = JSON::Schema::Modern->new($options{evaluator}->%*);
   my $js_short_circuit = $ENV{NO_SHORT_CIRCUIT} || JSON::Schema::Modern->new($options{evaluator}->%*, short_circuit => 1);
 
-  my $add_resource = sub ($uri, $schema, @options) {
+  my $add_resource = sub ($uri, $schema, %resource_options) {
     return if $uri =~ m{/draft-next/};
     try {
       # suppress warnings from parsing remotes/* intended for draft <= 7 with 'definitions'
@@ -64,7 +64,7 @@ sub acceptance_tests (%options) {
       my $doc = my $document = JSON::Schema::Modern::Document->new(
         schema => $schema,
         evaluator => $js,
-        @options,
+        %resource_options,
       );
 
       $js->add_document($uri => $doc);
