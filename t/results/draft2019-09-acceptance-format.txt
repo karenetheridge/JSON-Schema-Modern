@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.027
-with commit:                 e524505b8ac4a61c5dc162b51d68c2385a134706 (Test-JSON-Schema-Acceptance-1.026-16-ge524505)
+generated with:              Test::JSON::Schema::Acceptance 1.028
+with commit:                 9f256c8811c9c6d181db049d1e69bad35156bf60 (Test-JSON-Schema-Acceptance-1.027-25-g9f256c8)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft2019-09
 using custom test directory: <base test directory>/optional/format
@@ -13,7 +13,7 @@ duration.json                               26          0     0
 email.json                                  15          0     0
 hostname.json                               25          0     0
 idn-email.json                              10          0     0
-idn-hostname.json                           43         15     0
+idn-hostname.json                           50         15     0
 ipv4.json                                   16          0     0
 ipv6.json                                   40          0     0
 iri-reference.json                          11          2     0
@@ -28,4 +28,4 @@ uri-template.json                            9          1     0
 uri.json                                    25          1     0
 uuid.json                                   21          0     0
 ---------------------------------------------------------------
-TOTAL                                      456         20     0
+TOTAL                                      463         20     0

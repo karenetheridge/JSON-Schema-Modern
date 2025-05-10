@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.027
-with commit:                 e524505b8ac4a61c5dc162b51d68c2385a134706 (Test-JSON-Schema-Acceptance-1.026-16-ge524505)
+generated with:              Test::JSON::Schema::Acceptance 1.028
+with commit:                 9f256c8811c9c6d181db049d1e69bad35156bf60 (Test-JSON-Schema-Acceptance-1.027-25-g9f256c8)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft6
 using custom test directory: <base test directory>/optional/format
