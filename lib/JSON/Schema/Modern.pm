@@ -1858,8 +1858,6 @@ which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 * L<https://json-schema.org>
 * L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://datatracker.ietf.org/doc/html/rfc8259>
 * L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://datatracker.ietf.org/doc/html/rfc3986>
-* L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
-* L<JSON::Schema::Tiny>: a more stripped-down implementation of the specification, with fewer
   dependencies and faster evaluation
 * L<https://json-schema.org/draft/2020-12/release-notes.html>
 * L<https://json-schema.org/draft/2019-09/release-notes.html>
@@ -1867,6 +1865,8 @@ which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 * L<https://json-schema.org/draft-06#draft-06-release-notes>
 * L<https://json-schema.org/draft-04/draft-zyp-json-schema-04>
 * L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
+* L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
+* L<JSON::Schema::Tiny>: a more stripped-down implementation of the specification, with fewer
 * L<OpenAPI::Modern>: a parser and evaluator for OpenAPI v3.1 documents
 * L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality
 * L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
