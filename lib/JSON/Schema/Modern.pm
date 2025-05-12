@@ -1814,7 +1814,7 @@ declared in the metaschema, in which case use of the format will produce an erro
 
 =for :list
 * C<date-time> and C<date> require L<Time::Moment>
-* C<date-time> also requires <DateTime::Format::RFC3339>
+* C<date-time> also requires L<DateTime::Format::RFC3339>
 * C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (or higher)
 * C<idn-hostname> also requires L<Net::IDN::Encode>
