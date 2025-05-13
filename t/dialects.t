@@ -1425,6 +1425,36 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
   my $js = JSON::Schema::Modern->new;
 
   cmp_result(
+    $js->evaluate(1, { '$schema' => 20 })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '$schema value is not a string',
+        },
+      ],
+    },
+    '$schema values must be strings',
+  );
+
+  cmp_result(
+    $js->evaluate(1, { '$schema' => '#/not_a_uri' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"#/not_a_uri" is not a valid URI',
+        },
+      ],
+    },
+    '$schema values must be URIs',
+  );
+
+  cmp_result(
     $js->evaluate(1, { '$schema' => 'https://unknown/metaschema' })->TO_JSON,
     {
       valid => false,

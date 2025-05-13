@@ -216,35 +216,41 @@ subtest 'traversing a dialect with different core keywords' => sub {
 
   cmp_result($state->{errors}, [], 'no errors when parsing this schema');
   cmp_result(
-    $state->{identifiers},
-    {
-      '' => {
-        path => '',
-        canonical_uri => str(''),
-        specification_version => 'draft7',
-        configs => {},
-        vocabularies => [
-          map 'JSON::Schema::Modern::Vocabulary::'.$_,
-            qw(Core Validation FormatAnnotation Applicator Content MetaData),
-        ],
-        anchors => {
-          hello => {
-            path => '',
-            canonical_uri => str(''),
+    $state,
+    superhashof({
+      identifiers => {
+        '' => {
+          path => '',
+          canonical_uri => str(''),
+          specification_version => 'draft7',
+          configs => {},
+          vocabularies => [
+            map 'JSON::Schema::Modern::Vocabulary::'.$_,
+              qw(Core Validation FormatAnnotation Applicator Content MetaData),
+          ],
+          anchors => {
+            hello => {
+              path => '',
+              canonical_uri => str(''),
+            },
           },
         },
+        '/bloop' => {
+          path => '/definitions/bloop',
+          canonical_uri => str('/bloop'),
+          specification_version => 'draft7',
+          configs => {},
+          vocabularies => [
+            map 'JSON::Schema::Modern::Vocabulary::'.$_,
+              qw(Core Validation FormatAnnotation Applicator Content MetaData),
+          ],
+        },
       },
-      '/bloop' => {
-        path => '/definitions/bloop',
-        canonical_uri => str('/bloop'),
-        specification_version => 'draft7',
-        configs => {},
-        vocabularies => [
-          map 'JSON::Schema::Modern::Vocabulary::'.$_,
-            qw(Core Validation FormatAnnotation Applicator Content MetaData),
-        ],
-      },
-    },
+      metaschema_uri => 'http://json-schema.org/draft-07/schema',
+      spec_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
+    }),
     'switched dialect in time to extract all identifiers, from root and definition',
   );
 
@@ -432,8 +438,80 @@ subtest '$anchor without $id' => sub {
   );
 };
 
+subtest 'traverse with overridden specification_version' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
+
+  my $state = $js->traverse({});
+  cmp_deeply(
+    $state,
+    superhashof({
+      errors => [],
+      metaschema_uri => 'http://json-schema.org/draft-07/schema',
+      spec_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
+    }),
+    '$state is correct with no $schema keyword, no overrides'
+  );
+
+  $state = $js->traverse({ '$schema' => 'https://json-schema.org/draft/2020-12/schema'});
+  cmp_deeply(
+    $state,
+    superhashof({
+      errors => [],
+      metaschema_uri => 'https://json-schema.org/draft/2020-12/schema',
+      spec_version => 'draft2020-12',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
+    }),
+    '$state is correct with a $schema keyword, no overrides'
+  );
+
+  $state = $js->traverse({}, { specification_version => 'draft2019-09' });
+  cmp_deeply(
+    $state,
+    superhashof({
+      errors => [],
+      metaschema_uri => 'https://json-schema.org/draft/2019-09/schema',
+      spec_version => 'draft2019-09',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
+    }),
+    '$state is correct with no $schema keyword, and an overridden specification_version'
+  );
+
+  $state = $js->traverse(
+    { '$schema' => 'http://json-schema.org/draft-04/schema#' },
+    { specification_version => 'draft2020-12' });
+  cmp_deeply(
+    $state,
+    superhashof({
+      errors => [],
+      metaschema_uri => 'http://json-schema.org/draft-04/schema',
+      spec_version => 'draft4',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator MetaData) ],
+    }),
+    '$state is correct with a $schema keyword, and an overridden specification_version'
+  );
+};
+
 subtest 'traverse with overridden metaschema_uri' => sub {
   my $js = JSON::Schema::Modern->new;
+
+  my $state = $js->traverse({}, { metaschema_uri => 'https://unknown/metaschema' });
+  cmp_result(
+    [ map $_->TO_JSON, $state->{errors}->@* ],
+    my $errors = [
+      {
+        instanceLocation => '',
+        keywordLocation => '',
+        error => 'EXCEPTION: unable to find resource "https://unknown/metaschema"',
+      },
+    ],
+    'metaschema_uri is not a known uri',
+  );
+
   $js->add_schema({
     '$id' => 'https://metaschema/with/wrong/spec',
     '$vocabulary' => {
@@ -441,10 +519,11 @@ subtest 'traverse with overridden metaschema_uri' => sub {
       'https://unknown2' => false,
     },
   });
-  my $state = $js->traverse(true, { metaschema_uri => 'https://metaschema/with/wrong/spec' });
+
+  $state = $js->traverse(true, { metaschema_uri => 'https://metaschema/with/wrong/spec' });
   cmp_result(
     [ map $_->TO_JSON, $state->{errors}->@* ],
-    my $errors = [
+    $errors = [
       {
         instanceLocation => '',
         keywordLocation => jsonp(qw(/$vocabulary https://unknown)),
@@ -513,9 +592,10 @@ subtest 'traverse with overridden metaschema_uri' => sub {
 
   $js->add_schema({
     '$id' => 'https://my/first/metaschema',
+    '$schema' => 'https://json-schema.org/draft/2019-09/schema',
     '$vocabulary' => {
-      'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
-      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2019-09/vocab/applicator' => true,
+      'https://json-schema.org/draft/2019-09/vocab/core' => true,
       # note: no validation!
     },
   });
@@ -530,20 +610,52 @@ subtest 'traverse with overridden metaschema_uri' => sub {
   );
 
   cmp_result(
-    $state->{identifiers},
+    $state,
+    superhashof({
+      identifiers => {
+        $id => {
+          canonical_uri => str($id),
+          path => '',
+          specification_version => 'draft2019-09',
+          vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Core Applicator) ],
+          configs => {},
+        },
+      },
+      metaschema_uri => 'https://my/first/metaschema',
+      spec_version => 'draft2019-09',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Core Applicator) ],
+    }),
+    'determined specification version and vocabularies to use for this schema from override',
+  );
+
+  $state = $js->traverse(
     {
-      $id => {
-        canonical_uri => str($id),
-        path => '',
-        specification_version => 'draft2020-12',
-        vocabularies => [
-          map 'JSON::Schema::Modern::Vocabulary::'.$_,
-            qw(Core Applicator),
-        ],
-        configs => {},
-      }
+      '$id' => $id = 'https://my/second/schema/with/custom/metaschema',
+      '$schema' => 'http://json-schema.org/draft-07/schema',
+      allOf => [ { minimum => 'not even an integer' } ],
     },
-    'determined vocabularies to use for this schema',
+    { metaschema_uri => 'https://my/first/metaschema' },
+  );
+
+  cmp_result(
+    $state,
+    superhashof({
+      identifiers => {
+        $id => {
+          canonical_uri => str($id),
+          path => '',
+          specification_version => 'draft7',
+          vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+            qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
+          configs => {},
+        },
+      },
+      metaschema_uri => 'http://json-schema.org/draft-07/schema',
+      spec_version => 'draft7',
+      vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
+        qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
+    }),
+    'determined specification version and vocabularies to use for this schema from $schema keyword',
   );
 };
 
