@@ -94,7 +94,7 @@ subtest 'object document' => sub {
     ),
     'object schema with originally provided uri = \''.($_//'<undef>').'\' and no root $id',
   )
-  foreach (undef, '', '0', Mojo::URL->new(''), Mojo::URL->new('0'));
+  foreach (undef, '', '0', Mojo::URL->new, Mojo::URL->new(''), Mojo::URL->new('0'));
 
   cmp_deeply(
     JSON::Schema::Modern::Document->new(

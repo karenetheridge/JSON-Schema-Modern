@@ -281,7 +281,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
 
   # Note: the starting position is not guaranteed to be at the root of the $document,
   # nor is the fragment portion of this uri necessarily empty
-  my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // '');
+  my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // ());
   my $initial_path = $config_override->{traversed_schema_path} // '';
   my $spec_version = $config_override->{specification_version} // $self->specification_version // SPECIFICATION_VERSION_DEFAULT;
 
