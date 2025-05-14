@@ -16,6 +16,7 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep; # import symbols: ignore, re etc
 use Test2::API 'context_do';
 use JSON::Schema::Modern;
+use JSON::Schema::Modern::Utilities 'jsonp';
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::PP ();
 use constant { true => JSON::PP::true, false => JSON::PP::false };

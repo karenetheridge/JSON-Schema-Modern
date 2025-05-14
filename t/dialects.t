@@ -1020,12 +1020,12 @@ subtest '$vocabulary syntax' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$vocabulary/#~1notauri',
+          keywordLocation => jsonp('/$vocabulary', '#/notauri'),
           error => '"#/notauri" is not a valid URI',
         },
         {
           instanceLocation => '',
-          keywordLocation => '/$vocabulary/https:~1~1foo',
+          keywordLocation => jsonp('/$vocabulary', 'https://foo'),
           error => '$vocabulary value at "https://foo" is not a boolean',
         },
       ],
@@ -1499,14 +1499,14 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/$schema/$vocabulary/https:~1~1json-schema.org~1draft~12019-09~1vocab~1validation',
-          absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#/$vocabulary/https:~1~1json-schema.org~1draft~12019-09~1vocab~1validation',
+          keywordLocation => jsonp(qw(/$schema $vocabulary https://json-schema.org/draft/2019-09/vocab/validation)),
+          absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#'.jsonp(qw(/$vocabulary https://json-schema.org/draft/2019-09/vocab/validation)),
           error => '"https://json-schema.org/draft/2019-09/vocab/validation" uses draft2019-09, but the metaschema itself uses draft2020-12',
         },
         {
           instanceLocation => '',
-          keywordLocation => '/$schema/$vocabulary/https:~1~1unknown',
-          absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#/$vocabulary/https:~1~1unknown',
+          keywordLocation => jsonp(qw(/$schema $vocabulary https://unknown)),
+          absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#'.jsonp(qw(/$vocabulary https://unknown)),
           error => '"https://unknown" is not a known vocabulary',
         },
         {

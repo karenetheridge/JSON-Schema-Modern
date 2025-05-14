@@ -434,8 +434,8 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     my $errors = [
       {
         instanceLocation => '',
-        keywordLocation => '/$vocabulary/https:~1~1unknown',
-        absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#/$vocabulary/https:~1~1unknown',
+        keywordLocation => jsonp(qw(/$vocabulary https://unknown)),
+        absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#'.jsonp(qw(/$vocabulary https://unknown)),
         error => '"https://unknown" is not a known vocabulary',
       },
       {
