@@ -1559,6 +1559,37 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
   );
 
   $js->add_schema({
+    '$id' => 'https://my/mismatched/metaschema',
+    '$schema' => 'https://json-schema.org/draft/2019-09/schema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2019-09/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
+      # note: no validation!
+    },
+  });
+
+  cmp_result(
+    $js->evaluate(1, { '$schema' => 'https://my/mismatched/metaschema' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => jsonp(qw(/$schema $vocabulary https://json-schema.org/draft/2020-12/vocab/applicator)),
+          absoluteKeywordLocation => 'https://my/mismatched/metaschema#'.jsonp(qw(/$vocabulary https://json-schema.org/draft/2020-12/vocab/applicator)),
+          error => '"https://json-schema.org/draft/2020-12/vocab/applicator" uses draft2020-12, but the metaschema itself uses draft2019-09',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"https://my/mismatched/metaschema" is not a valid metaschema',
+        },
+      ],
+    },
+    'vocabularies in the metaschema must match the $schema version',
+  );
+
+  $js->add_schema({
     '$id' => 'https://metaschema/missing/vocabs',
     '$vocabulary' => {},
   });
