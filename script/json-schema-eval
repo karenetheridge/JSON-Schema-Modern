@@ -50,9 +50,9 @@ die '--validate-schema and --schema should not be used together' if defined $sch
 my $js = JSON::Schema::Modern->new(%$opt);
 my $decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0);
 
-foreach my $add_schema (@{$opt->add_schema//[]}) {
+foreach my $add_schema_file (@{$opt->add_schema//[]}) {
   try {
-    $js->add_schema($decoder->decode(path($add_schema)->slurp_utf8));
+    $js->add_schema('file://'.$add_schema_file => $decoder->decode(path($add_schema_file)->slurp_utf8));
   }
   catch ($e) {
     say $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump: '"'.$e.'"';
@@ -61,10 +61,11 @@ foreach my $add_schema (@{$opt->add_schema//[]}) {
 }
 
 my $result;
+my $schema_filename = '';
 
 if (defined $validate_schema) {
   if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename
-    $schema = path($validate_schema)->slurp_utf8;
+    $schema = path($schema_filename = $validate_schema)->slurp_utf8;
   }
   else {
     say 'enter schema, followed by ^D:';
@@ -88,7 +89,7 @@ else {
   }
 
   if (defined $schema) {
-    $schema = path($schema)->slurp_utf8;
+    $schema = path($schema_filename = $schema)->slurp_utf8;
   }
   else {
     say 'enter schema, followed by ^D:';
@@ -100,7 +101,7 @@ else {
   $data = $decoder->decode($data);
   $schema = $decoder->decode($schema);
 
-  $result = $js->evaluate($data, $schema);
+  $result = $js->evaluate($data, $schema, { effective_base_uri => 'file://'.$schema_filename });
 }
 
 say $result->dump;
