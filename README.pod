@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.609
+version 0.610
 
 =head1 SYNOPSIS
 
@@ -238,11 +238,7 @@ a Perl data structure, such as what is returned from a JSON decode operation,
 
 =item *
 
-a L<JSON::Schema::Modern::Document> object,
-
-=item *
-
-or a URI string indicating the location where such a schema is located.
+or a URI string indicating the identity of such a schema.
 
 =back
 
@@ -296,11 +292,7 @@ a Perl data structure, such as what is returned from a JSON decode operation,
 
 =item *
 
-a L<JSON::Schema::Modern::Document> object,
-
-=item *
-
-or a URI string indicating the location where such a schema is located.
+or a URI string indicating the identity of such a schema.
 
 =back
 
@@ -419,7 +411,9 @@ identifier (either provided explicitly in the method call, or via an C<$id> keyw
 root), all such previous schemas are removed from memory and can no longer be referenced.
 
 If there were errors in the document, will die with these errors;
-otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema.
+otherwise returns the L<JSON::Schema::Modern::Document> that contains the added schema. URIs
+identified within this document will not be resolved to the provided C<$uri> argument, so you can
+re-add the document object again (with L</add_document>, below) using a new base URI if you wish.
 
 =head2 add_document
 
@@ -745,7 +739,7 @@ C<date-time> and C<date> require L<Time::Moment>
 
 =item *
 
-C<date-time> also requires <DateTime::Format::RFC3339>
+C<date-time> also requires L<DateTime::Format::RFC3339>
 
 =item *
 
@@ -824,15 +818,7 @@ L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https:/
 
 =item *
 
-L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://datatracker.ietf.org/doc/html/rfc3986>
-
-=item *
-
-L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
-
-=item *
-
-L<JSON::Schema::Tiny>: a more stripped-down implementation of the specification, with fewer dependencies and faster evaluation
+L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://datatracker.ietf.org/doc/html/rfc3986> dependencies and faster evaluation
 
 =item *
 
@@ -857,6 +843,14 @@ L<https://json-schema.org/draft-04/draft-zyp-json-schema-04>
 =item *
 
 L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
+
+=item *
+
+L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
+
+=item *
+
+L<JSON::Schema::Tiny>: a more stripped-down implementation of the specification, with fewer
 
 =item *
 
