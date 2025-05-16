@@ -948,6 +948,8 @@ sub _fetch_vocabulary_data ($self, $state, $schema_info) {
   }
 
   my $valid = 1;
+  # Core §8.1.2-6: "The "$vocabulary" keyword SHOULD be used in the root schema of any schema
+  # document intended for use as a meta-schema. It MUST NOT appear in subschemas."
   $valid = E($state, '$vocabulary can only appear at the document root') if length $schema_info->{document_path};
   $valid = E($state, 'metaschemas must have an $id') if not exists $schema_info->{schema}{'$id'};
 
