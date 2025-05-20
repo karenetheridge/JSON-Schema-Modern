@@ -105,7 +105,8 @@ sub is_type ($type, $value, $config = {}) {
       }
       else {
         # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
-        # therefore they will fail this check
+        # therefore they will fail this check -- which is why use of Math::BigInt is recommended
+        # if the exact type is important, or loss of any accuracy is unacceptable
         return is_bignum($value) && $value->is_int
           # if dualvar, PV and stringified NV/IV must be identical
           || created_as_number($value) && int($value) == $value;
@@ -160,7 +161,8 @@ sub get_type ($value, $config = {}) {
   }
   else {
     # note: values that are larger than $Config{ivsize} will be represented as an NV, not IV,
-    # therefore they will fail this check
+    # therefore they will fail this check -- which is why use of Math::BigInt is recommended
+    # if the exact type is important, or loss of any accuracy is unacceptable
     return int($value) == $value ? 'integer' : 'number' if created_as_number($value);
   }
 
