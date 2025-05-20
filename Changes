@@ -1,6 +1,10 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix integer vs number distinction in draft4 for x.0 values. This
+            comes at the expense of properly identifying other numbers as
+            integers in draft4 instead of numbers, e.g. 2e1 as a json literal,
+            as these all decode to Math::BigFloat objects.
 
 0.610     2025-05-16 20:58:28Z
           - evaluate() and evaluate_json_string() can no longer be called with

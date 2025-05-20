@@ -60,6 +60,7 @@ use constant { true => JSON::PP::true, false => JSON::PP::false };
 # note that sometimes a value may return true for more than one type, e.g. integer+number,
 # or number+string, depending on its internal flags.
 # pass { legacy_ints => 1 } in $config to use draft4 integer behaviour
+# behaviour is consistent with get_type() (where integers are also numbers).
 sub is_type ($type, $value, $config = {}) {
   if ($type eq 'null') {
     return !(defined $value);
@@ -124,6 +125,7 @@ sub is_type ($type, $value, $config = {}) {
 # returns one of the six core types, plus integer
 # we do NOT check stringy_numbers here -- you must do that in the caller
 # pass { legacy_ints => 1 } in $config to use draft4 integer behaviour
+# behaviour is consistent with is_type().
 sub get_type ($value, $config = {}) {
   return 'object' if is_plain_hashref($value);
   return 'boolean' if is_bool($value);
@@ -134,8 +136,7 @@ sub get_type ($value, $config = {}) {
   if (is_ref($value)) {
     my $ref = ref($value);
     return $ref eq 'Math::BigInt' ? 'integer'
-      # note: this will be wrong for Math::BigFloat->new('1.0') in draft4
-      : $ref eq 'Math::BigFloat' ? ($value->is_int ? 'integer' : 'number')
+      : $ref eq 'Math::BigFloat' ? (!$config->{legacy_ints} && $value->is_int ? 'integer' : 'number')
       : (defined blessed($value) ? '' : 'reference to ').$ref;
   }
 

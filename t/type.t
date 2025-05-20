@@ -26,9 +26,11 @@ my %inflated_data = (
   boolean => [ false, true ],
   object => [ {}, { a => 1 } ],
   array => [ [], [ 1 ] ],
-  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123') ],
+  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), Math::BigFloat->new('12345123451234512345.2') ],
   integer => [ 0, -1, 2, 2.0, 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65, 1000000000000000,
-    Math::BigInt->new('1e20'), Math::BigInt->new('1'), Math::BigInt->new('1.0'),
+    Math::BigInt->new('1e100'), Math::BigInt->new('1'), Math::BigInt->new('1.0'),
+    Math::BigInt->new('12345123451234512345.0'), Math::BigFloat->new('12345123451234512345.0'),
+    Math::BigFloat->new('1e100'), Math::BigFloat->new('20000000000000.0'),
     Math::BigFloat->new('2e1'), Math::BigFloat->new('1'), Math::BigFloat->new('1.0') ],
   string => [ '', '0', '-1', '2', '2.0', '3.1', 'école', 'ಠ_ಠ' ],
 );
@@ -38,8 +40,8 @@ my %json_data = (
   boolean => [ 'false', 'true' ],
   object => [ '{}', '{"a":1}' ],
   array => [ '[]', '[1]' ],
-  number => [ '3.1', '1.23456789012e10' ],
-  integer => [ '0', '-1', '2.0', (map $_.'', 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65), '1000000000000000', '2e1' ],
+  number => [ '3.1', '1.23456789012e10', '0.123', '12345123451234512345.2' ],
+  integer => [ '0', '-1', '2.0', (map $_.'', 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65), '1000000000000000', '2e1', '1e100', '12345123451234512345.0' ],
   string => [ '""', '"0"', '"-1"', '"2.0"', '"3.1"',
     qq{"\x{c3}\x{a9}cole"}, qq{"\x{e0}\x{b2}\x{a0}_\x{e0}\x{b2}\x{a0}"} ],
 );
@@ -98,7 +100,7 @@ foreach my $type (sort keys %json_data) {
 subtest 'integers and numbers in draft4' => sub {
   subtest 'pre-inflated data' => sub {
     my %draft4_inflated_data = (
-      number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), 2.0 ],
+      number => [ 3.1, 2.0, 1.23456789012e10, Math::BigFloat->new('0.123'), Math::BigFloat->new('2.0') ],
       integer => [ 0, -1, 2, Math::BigInt->new('2'), Math::BigInt->new('1.0') ],
     );
 
@@ -125,8 +127,11 @@ subtest 'integers and numbers in draft4' => sub {
 
   subtest 'data from encoded json' => sub {
     my %draft4_json_data = (
-      number => [ '3.1', '1.23456789012e10' ],
-      integer => [ '0', '-1', '3' ],
+      number => [ '3.1', '1.23456789012e10', '0.123', '2.0' ],
+      integer => [ '0', '-1', '1000000000000000' ],
+      # these are actually integers, but we are unable to verify that, as they inflate to
+      # Math::BigFloat objects where is_int is true:
+      # (map $_.'', 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65), '2e1', '1e100'
     );
 
     foreach my $type (sort keys %draft4_json_data) {

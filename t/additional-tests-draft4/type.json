@@ -1,0 +1,34 @@
+[
+  {
+    "description": "number",
+    "schema": { "type": "number" },
+    "tests": [
+      {
+        "description": "an integer is a number",
+        "data": 2,
+        "valid": true
+      },
+      {
+        "description": "a float with zero fractional part is a number",
+        "data": 2.0,
+        "valid": true
+      }
+    ]
+  },
+  {
+    "description": "integers",
+    "schema": { "type": "integer" },
+    "tests": [
+      {
+        "description": "an integer is an integer",
+        "data": 2,
+        "valid": true
+      },
+      {
+        "description": "a float with zero fractional part is not an integer",
+        "data": 2.0,
+        "valid": false
+      }
+    ]
+  }
+]
