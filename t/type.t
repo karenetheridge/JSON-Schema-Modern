@@ -95,55 +95,61 @@ foreach my $type (sort keys %json_data) {
   };
 }
 
-my %draft4_inflated_data = (
-  number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), 2.0 ],
-  integer => [ 0, -1, 2, Math::BigInt->new('2'), Math::BigInt->new('1.0') ],
-);
-
-my %draft4_json_data = (
-  number => [ '3.1', '1.23456789012e10' ],
-  integer => [ '0', '-1', '3' ],
-);
-
 subtest 'integers and numbers in draft4' => sub {
-  foreach my $type (sort keys %draft4_inflated_data) {
-    foreach my $value ($draft4_inflated_data{$type}->@*) {
-      my $value_copy = $value;
-      ok(is_type($type, $value, { legacy_ints => 1 }), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
-      ok(is_type('number', $value, { legacy_ints => 1 }), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
-        if $type eq 'integer';
-      is(get_type($value, { legacy_ints => 1 }), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+  subtest 'pre-inflated data' => sub {
+    my %draft4_inflated_data = (
+      number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), 2.0 ],
+      integer => [ 0, -1, 2, Math::BigInt->new('2'), Math::BigInt->new('1.0') ],
+    );
 
-      foreach my $other_type (qw(null boolean object array string), sort keys %draft4_inflated_data) {
-        next if $other_type eq $type;
-        next if $type eq 'integer' and $other_type eq 'number';
+    foreach my $type (sort keys %draft4_inflated_data) {
+      foreach my $value ($draft4_inflated_data{$type}->@*) {
+        my $value_copy = $value;
+        ok(is_type($type, $value, { legacy_ints => 1 }), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
+        ok(is_type('number', $value, { legacy_ints => 1 }), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
+          if $type eq 'integer';
+        is(get_type($value, { legacy_ints => 1 }), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
 
-        ok(!is_type($other_type, $value, { legacy_ints => 1 }),
-          json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
+        foreach my $other_type (qw(null boolean object array string), sort keys %draft4_inflated_data) {
+          next if $other_type eq $type;
+          next if $type eq 'integer' and $other_type eq 'number';
+
+          ok(!is_type($other_type, $value, { legacy_ints => 1 }),
+            json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
+        }
+
+        ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
       }
-
-      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
     }
+  };
 
-    foreach my $value ($draft4_json_data{$type}->@*) {
-      $value = $decoder->decode($value);
-      my $value_copy = $value;
-      ok(is_type($type, $value, { legacy_ints => 1 }), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
-      ok(is_type('number', $value, { legacy_ints => 1 }), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
-        if $type eq 'integer';
-      is(get_type($value, { legacy_ints => 1 }), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
+  subtest 'data from encoded json' => sub {
+    my %draft4_json_data = (
+      number => [ '3.1', '1.23456789012e10' ],
+      integer => [ '0', '-1', '3' ],
+    );
 
-      foreach my $other_type (qw(null boolean object array string), sort keys %draft4_json_data) {
-        next if $other_type eq $type;
-        next if $type eq 'integer' and $other_type eq 'number';
+    foreach my $type (sort keys %draft4_json_data) {
+      foreach my $value ($draft4_json_data{$type}->@*) {
+        $value = $decoder->decode($value);
+        my $value_copy = $value;
+        ok(is_type($type, $value, { legacy_ints => 1 }), json_sprintf(('is_type("'.$type.'", %s) is true'), $value_copy ));
+        ok(is_type('number', $value, { legacy_ints => 1 }), json_sprintf(('is_type("number", %s) is true'), $value_copy ))
+          if $type eq 'integer';
+        is(get_type($value, { legacy_ints => 1 }), $type, json_sprintf(('get_type(%s) = '.$type), $value_copy));
 
-        ok(!is_type($other_type, $value, { legacy_ints => 1 }),
-          json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
+        foreach my $other_type (qw(null boolean object array string), sort keys %draft4_json_data) {
+          next if $other_type eq $type;
+          next if $type eq 'integer' and $other_type eq 'number';
+
+          ok(!is_type($other_type, $value, { legacy_ints => 1 }),
+            json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
+        }
+
+        ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
       }
-
-      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
     }
-  }
+  };
 };
 
 ok(!is_type('foo', 'wharbarbl'), 'non-existent type does not result in exception');
