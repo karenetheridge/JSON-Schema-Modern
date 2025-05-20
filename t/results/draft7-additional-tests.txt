@@ -7,8 +7,11 @@ filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
 badRef.json                                  3          0     0
 faux-buggy-schemas.json                      2          0     0
+format-date-time.json                        4          0     0
+format-date.json                             1          0     0
 format-ipv4.json                             4          0     0
 format-relative-json-pointer.json            7          0     0
+format-time.json                            13          0     0
 id.json                                      9          0     0
 integers.json                               29          0     0
 keyword-independence.json                  636          0     0
@@ -20,8 +23,5 @@ ref.json                                    10          0     0
 short-circuit.json                          16          0     0
 unknownKeyword.json                          8          0     0
 vocabulary.json                              3          0     0
-optional/format-date-time.json               4          0     0
-optional/format-date.json                    1          0     0
-optional/format-time.json                   13          0     0
 ---------------------------------------------------------------
 TOTAL                                      759          0     0

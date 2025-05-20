@@ -9,10 +9,13 @@ anchor.json                                  2          0     0
 annotation-collection.json                  10          0     0
 badRef.json                                  3          0     0
 faux-buggy-schemas.json                      2          0     0
+format-date-time.json                        4          0     0
+format-date.json                             1          0     0
 format-duration.json                         9          0     0
 format-ipv4.json                             4          0     0
 format-ipv6.json                            17          0     0
 format-relative-json-pointer.json            7          0     0
+format-time.json                            13          0     0
 formats.json                                 4          0     0
 id.json                                      6          0     0
 integers.json                               29          0     0
@@ -24,8 +27,5 @@ ref.json                                    10          0     0
 short-circuit.json                          20          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                              5          0     0
-optional/format-date-time.json               4          0     0
-optional/format-date.json                    1          0     0
-optional/format-time.json                   13          0     0
 ---------------------------------------------------------------
 TOTAL                                      980          0     0
