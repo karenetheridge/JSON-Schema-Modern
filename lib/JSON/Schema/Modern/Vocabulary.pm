@@ -101,7 +101,7 @@ __END__
 =head1 SYNOPSIS
 
   package MyApp::Vocabulary::Awesome;
-  use Moo::Role;
+  use Moo;
   with 'JSON::Schema::Modern::Vocabulary';
 
 =head1 DESCRIPTION
