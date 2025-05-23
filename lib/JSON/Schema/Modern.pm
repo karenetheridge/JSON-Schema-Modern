@@ -101,6 +101,9 @@ has [qw(collect_annotations scalarref_booleans stringy_numbers strict)] => (
   isa => Bool,
 );
 
+# Validation §7.1-2: "Note that the "type" keyword in this specification defines an "integer" type
+# which is not part of the data model. Therefore a format attribute can be limited to numbers, but
+# not specifically to integers."
 my $core_types = Enum[qw(null object array boolean string number)];
 my @core_formats = qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex);
 
@@ -1340,8 +1343,8 @@ Overrides to existing formats (see L</Format Validation>)
 must be specified in the form of C<< { $format_name => $format_sub } >>, where
 the format sub is a subref that takes one argument and returns a boolean result. New formats must
 be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
-where the type indicates which of the core JSON Schema types (null, object, array, boolean, string,
-number, or integer) the instance value must be for the format validation to be considered.
+where the type indicates which of the data model types (null, object, array, boolean, string,
+or number) the instance value must be for the format validation to be considered.
 
 =head2 validate_content_schemas
 

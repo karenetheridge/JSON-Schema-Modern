@@ -606,6 +606,22 @@ subtest 'unknown custom formats' => sub {
   }
 };
 
+subtest 'format: invalid base type(s)' => sub {
+  my $js = JSON::Schema::Modern->new(validate_formats => 1);
+
+  like(
+    exception { $js->add_format_validation(my_integer => { type => 'integer', sub => sub {} }) },
+    qr/Value .* did not pass type constraint /,
+    'integer is not a valid base type for a format validation',
+  );
+
+  like(
+    exception { $js->add_format_validation(my_integer => { type => [qw(integer string)], sub => sub {} }) },
+    qr/Reference .* did not pass type constraint /,
+    'integer, string is not a valid base type for a format validation',
+  );
+};
+
 subtest 'format: pure_integer' => sub {
   my $js = JSON::Schema::Modern->new(
     validate_formats => 1,
