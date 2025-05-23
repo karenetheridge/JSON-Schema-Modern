@@ -17,6 +17,8 @@ use if "$]" >= 5.022, experimental => 're_strict';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
+no if "$]" >= 5.041009, feature => 'smartmatch';
+no feature 'switch';
 use Mojo::JSON ();  # for JSON_XS, MOJO_NO_JSON_XS environment variables
 use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap uniq any min);
