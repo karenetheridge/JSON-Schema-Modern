@@ -1772,7 +1772,8 @@ By default (and unless you specify a custom metaschema with the C<$schema> keywo
 L<JSON::Schema::Modern::Document/metaschema>),
 formats are treated only as annotations, not assertions. When L</validate_formats> is
 true, strings are also checked against the format as specified in the schema. At present the
-following formats are supported (use of any other formats than these will always evaluate as true,
+following formats are supported for the latest version of the specification
+(use of any other formats than these will always evaluate as true,
 but remember you can always supply custom format handlers; see L</format_validations> above):
 
 =for :list
@@ -1808,9 +1809,9 @@ declared in the metaschema, in which case use of the format will produce an erro
 =head2 Specification Compliance
 
 This implementation is now fully specification-compliant (for versions
-draft4, draft6, draft7, draft2019-09, draft2020-12),
-but until version 1.000 is released, it is
-still deemed to be missing some optional but quite useful features, such as:
+draft4, draft6, draft7, draft2019-09, draft2020-12).
+
+However, some potentially-useful features are not yet implemented, such as:
 
 =for stopwords Mojolicious
 
@@ -1818,7 +1819,7 @@ still deemed to be missing some optional but quite useful features, such as:
 * loading schema documents from disk
 * loading schema documents from the network
 * loading schema documents from a local web application (e.g. L<Mojolicious>)
-* additional output formats beyond C<flag>, C<basic>, and C<terse>
+* additional "official" output formats beyond C<flag>, C<basic>, and C<terse>
   (L<https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.12>)
 
 =head1 SECURITY CONSIDERATIONS
