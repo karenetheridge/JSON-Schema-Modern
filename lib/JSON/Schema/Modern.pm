@@ -1851,6 +1851,7 @@ which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 * L<https://json-schema.org/draft-06#draft-06-release-notes>
 * L<https://json-schema.org/draft-04/draft-zyp-json-schema-04>
 * L<Understanding JSON Schema|https://json-schema.org/understanding-json-schema>: tutorial-focused documentation
+* L<Test::JSON::Schema>: test your data against a JSON Schema
 * L<Test::JSON::Schema::Acceptance>: contains the official JSON Schema test suite
 * L<JSON::Schema::Tiny>: a more stripped-down implementation of the specification, with fewer
 * L<OpenAPI::Modern>: a parser and evaluator for OpenAPI v3.1 documents
