@@ -58,20 +58,26 @@ sub _traverse_keyword_id ($class, $schema, $state) {
 
   my $uri = Mojo::URL->new($schema->{$state->{keyword}});
 
-  if ($state->{spec_version} =~ /^draft[467]$/) {
-    # technically the draft4 spec allows this form, but we are not supporting it.
-    if (length($uri->fragment)) {
-      return E($state, '%s cannot change the base uri at the same time as declaring an anchor', $state->{keyword})
-        if length($uri->clone->fragment(undef));
-
-      return $class->_traverse_keyword_anchor($schema, $state);
-    }
-  }
-  else {
+  if (length $uri->fragment) {
     return E($state, '%s value "%s" cannot have a non-empty fragment', $state->{keyword}, $schema->{$state->{keyword}})
-      if length $uri->fragment;
+      if $state->{spec_version} !~ /^draft[467]$/;
+
+    if (length(my $base = $uri->clone->fragment(undef))) {
+      return E($state, '$id cannot change the base uri at the same time as declaring an anchor')
+        if $state->{spec_version} =~ /^draft[67]$/;
+
+      # only permitted in draft4: add an id and an anchor via the single 'id' keyword
+      return if not $class->__create_identifier($base, $state);
+    }
+
+    return $class->_traverse_keyword_anchor({ %$schema, id => '#'.$uri->fragment }, $state);
   }
 
+  return if not $class->__create_identifier($uri, $state);
+  return 1;
+}
+
+sub __create_identifier ($class, $uri, $state) {
   $uri->fragment(undef);
   return E($state, '%s cannot be empty', $state->{keyword}) if not length $uri;
 
@@ -97,6 +103,7 @@ sub _traverse_keyword_id ($class, $schema, $state) {
     vocabularies => $state->{vocabularies}, # reference, not copy
     configs => $state->{configs},
   };
+
   return 1;
 }
 

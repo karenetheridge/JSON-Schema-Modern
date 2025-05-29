@@ -1,0 +1,40 @@
+[
+    {
+        "description": "weird but valid use of non-empty plain name fragment in id",
+        "schema": {
+            "$schema": "http://json-schema.org/draft-04/schema",
+            "id": "https://example.com/draft4-id-and-anchor",
+            "definitions": {
+                "num": {
+                    "id": "def1#num",
+                    "type": "number"
+                },
+                "str": {
+                    "id": "def2#str",
+                    "type": "string"
+                }
+            },
+            "anyOf": [
+                { "$ref": "def1#num" },
+                { "$ref": "def2#str" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "valid case, number",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "valid case, string",
+                "data": "hi",
+                "valid": true
+            },
+            {
+                "description": "invalid case",
+                "data": [ "not just a string" ],
+                "valid": false
+            }
+        ]
+    }
+]

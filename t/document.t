@@ -660,9 +660,6 @@ subtest '$anchor not conforming to syntax' => sub {
         foo => {
           id => '#_my_bad_anchor',  # legal in draft2020-12
         },
-        qux => {
-          id => 'https://foo.com#my_bad_id',
-        },
       },
     },
   );
@@ -674,15 +671,51 @@ subtest '$anchor not conforming to syntax' => sub {
         keywordLocation => '/definitions/foo/id',
         error => 'id value "#_my_bad_anchor" does not match required syntax',
       },
-      {
-        instanceLocation => '',
-        keywordLocation => '/definitions/qux/id',
-        error => 'id cannot change the base uri at the same time as declaring an anchor',
-      },
     ],
-    'did not index a draft4 fragment-only $id with invalid characters, or non-fragment-only id',
+    'did not index a draft4 fragment-only id with invalid characters',
   );
   cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+
+  $doc = JSON::Schema::Modern::Document->new(
+    specification_version => 'draft4',
+    schema => {
+      id => 'https://foo.com',
+      definitions => {
+        qux => {
+          id => 'blah#weird_but_legal',
+        },
+      },
+    },
+  );
+
+  cmp_result([ map $_->TO_JSON, $doc->errors ], [], 'no errors');
+  cmp_deeply(
+    $doc,
+    listmethods(
+      resource_index => unordered_pairs(
+        'https://foo.com' => {
+          path => '',
+          canonical_uri => str('https://foo.com'),
+          specification_version => 'draft4',
+          vocabularies => $vocabularies{'draft4'},
+          configs => {},
+        },
+        'https://foo.com/blah' => {
+          path => '/definitions/qux',
+          canonical_uri => str('https://foo.com/blah'),
+          specification_version => 'draft4',
+          vocabularies => $vocabularies{'draft4'},
+          configs => {},
+          anchors => {
+            weird_but_legal => {
+              path => '/definitions/qux',
+              canonical_uri => str('https://foo.com/blah'),
+            },
+          },
+        },
+      )),
+    'can combine a canonical identifier with an anchor in draft4',
+  );
 };
 
 subtest '$schema not conforming to syntax' => sub {
