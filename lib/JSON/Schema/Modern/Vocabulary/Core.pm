@@ -53,7 +53,8 @@ sub keywords ($class, $spec_version) {
 # this is used by the Document constructor to build its resource_index.
 
 sub _traverse_keyword_id ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'string');
+  return if not assert_keyword_type($state, $schema, 'string')
+    or not assert_uri_reference($state, $schema);
 
   my $uri = Mojo::URL->new($schema->{$state->{keyword}});
 
@@ -67,8 +68,6 @@ sub _traverse_keyword_id ($class, $schema, $state) {
     }
   }
   else {
-    return if not assert_uri_reference($state, $schema);
-
     return E($state, '%s value "%s" cannot have a non-empty fragment', $state->{keyword}, $schema->{$state->{keyword}})
       if length $uri->fragment;
   }
@@ -197,7 +196,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
 
   my $anchor = $schema->{$state->{keyword}};
   return E($state, '%s value "%s" does not match required syntax', $state->{keyword}, $anchor)
-    if $state->{spec_version} =~ /^draft[467]$/ and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*$/
+    if $state->{spec_version} =~ /^draft[467]$/  and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*$/
       or $state->{spec_version} eq 'draft2019-09' and $anchor !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
       or $state->{spec_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 

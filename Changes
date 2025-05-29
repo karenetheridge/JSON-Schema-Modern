@@ -5,6 +5,7 @@ Revision history for JSON-Schema-Modern
             comes at the expense of properly identifying other numbers as
             integers in draft4 instead of numbers, e.g. 2e1 as a json literal,
             as these all decode to Math::BigFloat objects.
+          - some fixes to id/$id validity checks across all drafts
 
 0.610     2025-05-16 20:58:28Z
           - evaluate() and evaluate_json_string() can no longer be called with

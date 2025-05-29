@@ -421,6 +421,8 @@ sub assert_pattern ($state, $pattern) {
 }
 
 # this is only suitable for checking URIs within schemas themselves
+# note that we cannot use $state->{spec_version} to more tightly constrain the plain-name fragment
+# syntax, as we could be checking a $ref to a schema using a different version
 sub assert_uri_reference ($state, $schema) {
   croak 'assert_uri_reference called in void context' if not defined wantarray;
 
@@ -431,7 +433,7 @@ sub assert_uri_reference ($state, $schema) {
       or $string =~ /[^[:ascii:]]/            # ascii characters only
       or $string =~ /#/                       # no fragment, except...
         and $string !~ m{#$}                          # allow empty fragment
-        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # allow plain-name fragment
+        and $string !~ m{#[A-Za-z_][A-Za-z0-9_:.-]*$} # allow plain-name fragment, superset of all drafts
         and $string !~ m{#/(?:[^~]|~[01])*$};         # allow json pointer fragment
 
   return 1;

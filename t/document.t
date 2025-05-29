@@ -559,11 +559,11 @@ subtest '$anchor not conforming to syntax' => sub {
   cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
 
   $doc = JSON::Schema::Modern::Document->new(
-    specification_version => 'draft7',
+    specification_version => 'draft2020-12',
     schema => {
-      definitions => {
+      '$defs' => {
         foo => {
-          '$id' => '#my_$bad_anchor',
+          '$anchor' => 'my:bad_anchor',  # legal in earlier drafts
         },
         qux => {
           '$id' => 'https://foo.com#my_bad_id',
@@ -576,25 +576,89 @@ subtest '$anchor not conforming to syntax' => sub {
     [
       {
         instanceLocation => '',
-        keywordLocation => '/definitions/foo/$id',
-        error => '$id value "#my_$bad_anchor" does not match required syntax',
+        keywordLocation => '/$defs/foo/$anchor',
+        error => '$anchor value "my:bad_anchor" does not match required syntax',
       },
       {
         instanceLocation => '',
-        keywordLocation => '/definitions/qux/$id',
-        error => '$id cannot change the base uri at the same time as declaring an anchor',
+        keywordLocation => '/$defs/qux/$id',
+        error => '$id value "https://foo.com#my_bad_id" cannot have a non-empty fragment',
       },
     ],
-    'did not index a draft7 fragment-only $id with invalid characters, or non-fragment-only $id',
+    'did not index a draft2020-12 $anchor with invalid characters, or non-fragment-only $id',
   );
   cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+
+  $doc = JSON::Schema::Modern::Document->new(
+    specification_version => 'draft2019-09',
+    schema => {
+      '$defs' => {
+        foo => {
+          '$anchor' => '_my_bad_anchor',  # legal in draft2020-12
+        },
+        qux => {
+          '$id' => 'https://foo.com#my_bad_id',
+        },
+      },
+    },
+  );
+  cmp_result(
+    [ map $_->TO_JSON, $doc->errors ],
+    [
+      {
+        instanceLocation => '',
+        keywordLocation => '/$defs/foo/$anchor',
+        error => '$anchor value "_my_bad_anchor" does not match required syntax',
+      },
+      {
+        instanceLocation => '',
+        keywordLocation => '/$defs/qux/$id',
+        error => '$id value "https://foo.com#my_bad_id" cannot have a non-empty fragment',
+      },
+    ],
+    'did not index a draft2019-09 $anchor with invalid characters, or non-fragment-only $id',
+  );
+  cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+
+  foreach my $version (qw(draft6 draft7)) {
+    $doc = JSON::Schema::Modern::Document->new(
+      specification_version => $version,
+      schema => {
+        definitions => {
+          foo => {
+            '$id' => '#_my_bad_anchor',  # legal in draft2020-12
+          },
+          qux => {
+            '$id' => 'https://foo.com#my_bad_id',
+          },
+        },
+      },
+    );
+    cmp_result(
+      [ map $_->TO_JSON, $doc->errors ],
+      [
+        {
+          instanceLocation => '',
+          keywordLocation => '/definitions/foo/$id',
+          error => '$id value "#_my_bad_anchor" does not match required syntax',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/definitions/qux/$id',
+          error => '$id cannot change the base uri at the same time as declaring an anchor',
+        },
+      ],
+      'did not index a '.$version.' fragment-only $id with invalid characters, or non-fragment-only $id',
+    );
+    cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+  }
 
   $doc = JSON::Schema::Modern::Document->new(
     specification_version => 'draft4',
     schema => {
       definitions => {
         foo => {
-          id => '#my_$bad_anchor',
+          id => '#_my_bad_anchor',  # legal in draft2020-12
         },
         qux => {
           id => 'https://foo.com#my_bad_id',
@@ -608,7 +672,7 @@ subtest '$anchor not conforming to syntax' => sub {
       {
         instanceLocation => '',
         keywordLocation => '/definitions/foo/id',
-        error => 'id value "#my_$bad_anchor" does not match required syntax',
+        error => 'id value "#_my_bad_anchor" does not match required syntax',
       },
       {
         instanceLocation => '',
