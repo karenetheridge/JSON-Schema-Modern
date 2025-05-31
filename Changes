@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.611     2025-05-31 03:38:55Z
           - fix integer vs number distinction in draft4 for x.0 values. This
             comes at the expense of properly identifying other numbers as
             integers in draft4 instead of numbers, e.g. 2e1 as a json literal,
