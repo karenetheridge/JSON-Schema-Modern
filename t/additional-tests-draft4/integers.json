@@ -2,7 +2,7 @@
     {
         "description": "type checks",
         "schema": {
-            "$comment": "on some architectures, some of these values may decode to strings",
+            "$comment": "on some architectures, some of these values may decode to strings or Math::BigInt objects",
             "type": "integer"
         },
         "tests": [
@@ -49,6 +49,16 @@
             {
                 "description": "beyond int64 upper boundary",
                 "data": 9223372036854775808,
+                "valid": true
+            },
+            {
+                "description": "uint64 upper boundary",
+                "data": 18446744073709551615,
+                "valid": true
+            },
+            {
+                "description": "beyond uint64 upper boundary",
+                "data": 18446744073709551616,
                 "valid": true
             }
         ]

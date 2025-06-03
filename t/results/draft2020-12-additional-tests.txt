@@ -19,7 +19,7 @@ format-relative-json-pointer.json            7          0     0
 format-time.json                            13          0     0
 formats.json                                 4          0     0
 id.json                                      6          0     0
-integers.json                               29          0     0
+integers.json                               31          0     0
 keyword-independence.json                  884          0     0
 loose-types-const-enum.json                  8          0     0
 recursive-dynamic.json                       2          0     0
@@ -29,4 +29,4 @@ short-circuit.json                          20          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                             11          0     0
 ---------------------------------------------------------------
-TOTAL                                     1063          0     0
+TOTAL                                     1065          0     0
