@@ -66,7 +66,7 @@ acceptance_tests(
           !$ENV{AUTHOR_TESTING} && !eval { require Time::Moment; 1 } ? qw(date-time.json date.json) : (),
           !$ENV{AUTHOR_TESTING} && !eval { require DateTime::Format::RFC3339; 1 } ? 'date-time.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? qw(email.json idn-email.json) : (),
-          !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } ? 'hostname.json' : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } ? qw(hostname.json idn-hostname.json) : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
