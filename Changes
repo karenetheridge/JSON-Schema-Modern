@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - additional diagnostics to track down some edge case failures
 
 0.611     2025-05-31 03:38:55Z
           - fix integer vs number distinction in draft4 for x.0 values. This
