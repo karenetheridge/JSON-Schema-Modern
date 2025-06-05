@@ -9,7 +9,7 @@ format-date-time.json                        4          0     0
 format-ipv4.json                             4          0     0
 format-ipv6.json                            17          0     0
 id.json                                      3          0     0
-integers.json                               31          0     0
+integers.json                               33          0     0
 type.json                                    4          0     0
 ---------------------------------------------------------------
-TOTAL                                       63          0     0
+TOTAL                                       65          0     0

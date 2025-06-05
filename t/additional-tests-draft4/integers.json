@@ -42,6 +42,16 @@
                 "valid": true
             },
             {
+                "description": "uint32 upper boundary",
+                "data": 4294967295,
+                "valid": true
+            },
+            {
+                "description": "beyond uint32 upper boundary",
+                "data": 4294967296,
+                "valid": true
+            },
+            {
                 "description": "upper int64 boundary",
                 "data": 9223372036854775807,
                 "valid": true
