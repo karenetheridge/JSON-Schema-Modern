@@ -1274,9 +1274,9 @@ validator, targeting the currently-latest
 L<Draft 2020-12|https://json-schema.org/specification-links.html#2020-12>
 version of the specification.
 
-=head1 CONFIGURATION OPTIONS
+=head1 CONSTRUCTOR ARGUMENTS
 
-These values are all passed as arguments to the constructor.
+Unless otherwise noted, these are also available as read-only accessors.
 
 =head2 specification_version
 
@@ -1345,6 +1345,8 @@ the format sub is a subref that takes one argument and returns a boolean result.
 be specified in the form of C<< { $format_name => { type => $type, sub => $format_sub } } >>,
 where the type indicates which of the data model types (null, object, array, boolean, string,
 or number) the instance value must be for the format validation to be considered.
+
+Not available as an accessor.
 
 =head2 validate_content_schemas
 
