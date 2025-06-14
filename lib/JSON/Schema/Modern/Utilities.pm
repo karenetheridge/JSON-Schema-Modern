@@ -282,8 +282,9 @@ sub jsonp {
 }
 
 # splits a json pointer apart into its path segments
-sub unjsonp ($path) {
-  return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $path;
+sub unjsonp {
+  warn q{argument to unjsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
+  return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $_[0];
 }
 
 # get all annotations produced for the current instance data location (that are visible to this
