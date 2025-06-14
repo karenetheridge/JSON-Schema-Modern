@@ -224,7 +224,6 @@ sub combine ($self, $other, $swap) {
   );
 }
 
-
 sub stringify ($self) {
   return $self->format('data_only');
 }
