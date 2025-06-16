@@ -269,7 +269,7 @@ __END__
   my $result_data_encoded = encode_json($result); # calls TO_JSON
 
   # use in numeric and boolean context
-  say sprintf('got %d %ss', $result, ($result ? 'annotation' : 'error'));
+  say sprintf('got %d %ss', $result, ($result->valid ? 'annotation' : 'error'));
 
   # use in string context
   say 'full results: ', $result;
