@@ -990,6 +990,16 @@ sub _fetch_vocabulary_data ($self, $state, $schema_info) {
   $valid = E($state, 'the first vocabulary (by evaluation_order) must be Core')
     if ($vocabulary_classes[0]//'') ne 'JSON::Schema::Modern::Vocabulary::Core';
 
+  my %seen_keyword;
+  foreach my $class (@vocabulary_classes) {
+    foreach my $keyword ($class->keywords($schema_info->{specification_version})) {
+      $valid = E($state, '%s keyword "%s" conflicts with keyword of the same name from %s',
+          $class, $keyword, $seen_keyword{$keyword})
+        if $seen_keyword{$keyword};
+      $seen_keyword{$keyword} = $class;
+    }
+  }
+
   return ($schema_info->{specification_version}, $valid ? \@vocabulary_classes : []);
 }
 

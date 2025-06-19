@@ -1819,6 +1819,50 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     qr/^keywords starting with "\$" are reserved for core and cannot be used/,
     '$ keywords are prohibited',
   );
+
+
+  is(
+    exception { $js->add_vocabulary('MyVocabulary::ConflictingKeyword') },
+    undef,
+    'added another vocabulary sub',
+  );
+
+  $js->add_schema({
+    '$id' => 'https://colliding/keyword/metaschema',
+    '$vocabulary' => {
+      'https://json-schema.org/draft/2020-12/vocab/core' => true,
+      'https://json-schema.org/draft/2020-12/vocab/validation' => true,
+      'https://vocabulary/conflicting/keyword' => true,
+    },
+  });
+
+  cmp_result(
+    $js->evaluate(
+      'bloop',
+      {
+        '$id' => 'https://my/second/schema/with/custom/metaschema',
+        '$schema' => 'https://colliding/keyword/metaschema',
+        minLength => 2,
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema/$vocabulary',
+          absoluteKeywordLocation => 'https://colliding/keyword/metaschema#/$vocabulary',
+          error => 'MyVocabulary::ConflictingKeyword keyword "minLength" conflicts with keyword of the same name from JSON::Schema::Modern::Vocabulary::Validation',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$schema',
+          error => '"https://colliding/keyword/metaschema" is not a valid metaschema',
+        },
+      ],
+    },
+    'keywords cannot appear in more than one vocabulary in the same dialect',
+  );
 };
 
 subtest '$schema points to a boolean schema' => sub {
