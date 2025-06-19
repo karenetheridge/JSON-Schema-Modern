@@ -909,6 +909,10 @@ sub add_vocabulary ($self, $classname) {
     my ($uri_string, $spec_version) = @$pair;
     Str->where(q{my $uri = Mojo::URL->new($_); $uri->is_abs && !defined $uri->fragment})->($uri_string);
     $spec_version_type->($spec_version);
+
+    croak 'keywords starting with "$" are reserved for core and cannot be used'
+      if grep /^\$/, $classname->keywords;
+
     $self->{_vocabulary_classes}{$uri_string} = $vocabulary_type->([ $spec_version, $classname ]);
   }
 }

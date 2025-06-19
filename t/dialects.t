@@ -1812,6 +1812,13 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     },
     'custom vocabulary class used by a custom metaschema used by a schema',
   );
+
+
+  like(
+    exception { $js->add_vocabulary('MyVocabulary::ReservedKeyword') },
+    qr/^keywords starting with "\$" are reserved for core and cannot be used/,
+    '$ keywords are prohibited',
+  );
 };
 
 subtest '$schema points to a boolean schema' => sub {
