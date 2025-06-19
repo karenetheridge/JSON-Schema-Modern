@@ -109,7 +109,8 @@ __END__
 =head1 DESCRIPTION
 
 This package is the role which all all vocabulary classes for L<JSON::Schema::Modern>
-must compose, describing the basic structure expected of a vocabulary class.
+must compose, describing the basic structure expected of a vocabulary class and defining some basic
+methods which are useful for traversing or evaluating various keywords.
 
 =head1 ATTRIBUTES
 
