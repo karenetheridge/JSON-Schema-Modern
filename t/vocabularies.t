@@ -228,8 +228,6 @@ use constant KEYWORDS => {
       items
       additionalItems
       contains
-      maxContains
-      minContains
       properties
       patternProperties
       additionalProperties
@@ -302,8 +300,6 @@ use constant KEYWORDS => {
       prefixItems
       items
       contains
-      maxContains
-      minContains
       properties
       patternProperties
       additionalProperties

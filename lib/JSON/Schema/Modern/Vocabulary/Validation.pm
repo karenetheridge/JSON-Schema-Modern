@@ -262,8 +262,8 @@ sub _eval_keyword_uniqueItems ($class, $data, $schema, $state) {
   return E($state, 'items at indices %d and %d are not unique', @$equal_indices);
 }
 
-# Note: no effort is made to check if the 'contains' keyword has been disabled via its vocabulary.
-# The evaluation implementation of maxContains and minContains are in the Applicator vocabulary
+# The evaluation implementations of maxContains and minContains are in the Applicator vocabulary,
+# as 'contains' needs to run first
 *_traverse_keyword_maxContains = \&_assert_non_negative_integer;
 
 *_traverse_keyword_minContains = \&_assert_non_negative_integer;
