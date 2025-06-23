@@ -117,6 +117,10 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   # this should never happen, if the pre-evaluation traversal was performed correctly
   abort($state, 'failed to resolve "%s" to canonical uri', $state->{keyword}) if not $schema_info;
 
+  abort($state, 'EXCEPTION: mismatched document when processing %s "%s"',
+      $state->{keyword}, $schema->{$state->{keyword}})
+    if $schema_info->{document} != $state->{document};
+
   $state->{initial_schema_uri} = $schema_info->{canonical_uri};
   # these will already be set in all cases: at document root, or if we are here via a $ref
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
