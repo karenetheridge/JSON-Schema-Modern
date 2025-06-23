@@ -88,7 +88,6 @@ sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},
       initial_schema_uri => $schema_info->{canonical_uri},
       document => $schema_info->{document},
-      document_path => $schema_info->{document_path},
       spec_version => $schema_info->{specification_version},
       schema_path => '',
       vocabularies => $schema_info->{vocabularies},

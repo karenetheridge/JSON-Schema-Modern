@@ -407,7 +407,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       %$state,
       initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start of evaluation, or last $id or $ref
       document => $schema_info->{document},   # the ::Document object containing this schema
-      document_path => $schema_info->{document_path}, # the path within the document of this schema, as of the start of evaluation, or last $id or $ref
       dynamic_scope => [ $schema_info->{canonical_uri} ],
       annotations => [],
       seen => {},

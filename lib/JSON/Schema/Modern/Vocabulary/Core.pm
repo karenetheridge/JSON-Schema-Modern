@@ -89,7 +89,6 @@ sub __create_identifier ($class, $uri, $state) {
 
   $state->{initial_schema_uri} = $uri;
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  # we don't set or update document_path because it is identical to traversed_schema_path
   $state->{schema_path} = '';
 
   # Note that even though '$id' is considered ahead of '$schema' in the keyword list, we have
@@ -121,7 +120,6 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{initial_schema_uri} = $schema_info->{canonical_uri};
   # these will already be set in all cases: at document root, or if we are here via a $ref
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  $state->{document_path} = $state->{document_path}.$state->{schema_path};
   $state->{schema_path} = '';
   # these will already be set if there is an adjacent $schema keyword, or if we are here via a $ref
   $state->{spec_version} = $schema_info->{specification_version};
