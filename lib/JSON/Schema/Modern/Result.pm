@@ -23,6 +23,7 @@ use Types::Standard qw(ArrayRef InstanceOf Enum Bool Str Maybe Tuple);
 use Types::Common::Numeric 'PositiveInt';
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
+use JSON::Schema::Modern::Utilities qw(true false);
 use JSON::PP ();
 use List::Util 1.50 qw(any uniq all);
 use Carp 'croak';
@@ -39,13 +40,10 @@ use overload
   '""' => sub { $_[0]->stringify },
   fallback => 1;
 
-use constant { true => JSON::PP::true, false => JSON::PP::false };
-use constant HAVE_BUILTIN => "$]" >= 5.036;
-
 has valid => (
   is => 'ro',
   isa => Bool|InstanceOf('JSON::PP::true')|InstanceOf('JSON::PP::false'),
-  coerce => sub { HAVE_BUILTIN ? !!$_[0] : $_[0] ? true : false },
+  coerce => sub { $_[0] ? true : false }, # might be JSON::PP::* or builtin::* booleans
   required => 1,
 );
 sub result { goto \&valid } # backcompat only
