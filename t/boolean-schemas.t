@@ -19,13 +19,13 @@ use Helper;
 my $js = JSON::Schema::Modern->new;
 
 my @tests = (
-  { schema => false, valid => false },
-  { schema => true, valid => true },
-  { schema => {}, valid => true },
-  { schema => 0, valid => false },
-  { schema => 1, valid => false },
-  { schema => \0, valid => false },
-  { schema => \1, valid => false },
+  { schema => false, valid => false, exception => 0 },
+  { schema => true, valid => true, exception => 0 },
+  { schema => {}, valid => true, exception => 0 },
+  { schema => 0, valid => false, exception => 1 },
+  { schema => 1, valid => false, exception => 1 },
+  { schema => \0, valid => false, exception => 1 },
+  { schema => \1, valid => false, exception => 1 },
 );
 
 foreach my $test (@tests) {
@@ -33,6 +33,7 @@ foreach my $test (@tests) {
   is(
     exception {
       my $result = $js->evaluate($data, $test->{schema});
+      ok(!($result->exception xor $test->{exception}), json_sprintf('%s is not a schema', $test->{schema}));
       ok(!($result->valid xor $test->{valid}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{valid}));
 
       cmp_result(
