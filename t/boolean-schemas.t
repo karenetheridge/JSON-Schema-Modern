@@ -21,6 +21,8 @@ my $js = JSON::Schema::Modern->new;
 my @tests = (
   { schema => false, valid => false, exception => 0 },
   { schema => true, valid => true, exception => 0 },
+  { schema => JSON::PP::false, valid => false, exception => 0 },
+  { schema => JSON::PP::true, valid => true, exception => 0 },
   { schema => {}, valid => true, exception => 0 },
   { schema => 0, valid => false, exception => 1 },
   { schema => 1, valid => false, exception => 1 },
