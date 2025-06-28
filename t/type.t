@@ -18,12 +18,16 @@ use Scalar::Util qw(isdual dualvar);
 use JSON::Schema::Modern::Utilities qw(is_type get_type);
 use Math::BigInt;
 use Math::BigFloat;
+use JSON::PP ();
 use lib 't/lib';
 use Helper;
 
+use constant HAVE_BUILTIN => "$]" >= 5.035010;
+use if HAVE_BUILTIN, experimental => 'builtin';
+
 my %inflated_data = (
   null => [ undef ],
-  boolean => [ false, true ],
+  boolean => [ false, true, JSON::PP::false, JSON::PP::true ],
   object => [ {}, { a => 1 } ],
   array => [ [], [ 1 ] ],
   number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), Math::BigFloat->new('12345123451234512345.2') ],
@@ -63,7 +67,8 @@ foreach my $type (sort keys %inflated_data) {
           json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
       }
 
-      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
+      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)')
+        if not (HAVE_BUILTIN and builtin::is_bool($value));
     }
   };
 }
@@ -92,7 +97,8 @@ foreach my $type (sort keys %json_data) {
           json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
       }
 
-      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
+      ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)')
+        if not (HAVE_BUILTIN and builtin::is_bool($value));
     }
   };
 }
@@ -120,7 +126,8 @@ subtest 'integers and numbers in draft4' => sub {
             json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
         }
 
-        ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
+        ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)')
+          if not (HAVE_BUILTIN and builtin::is_bool($value));
       }
     }
   };
@@ -151,7 +158,8 @@ subtest 'integers and numbers in draft4' => sub {
             json_sprintf('is_type("'.$other_type.'", %s) is false', $value));
         }
 
-        ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)');
+        ok(!isdual($value), 'data is not tampered with while it is tested (not dualvar)')
+          if not (HAVE_BUILTIN and builtin::is_bool($value));
       }
     }
   };

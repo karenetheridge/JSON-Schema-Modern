@@ -24,6 +24,8 @@ use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
 use Feature::Compat::Try;
+use Mojo::JSON ();
+use JSON::PP ();
 use namespace::clean;
 
 use Exporter 'import';
@@ -53,8 +55,14 @@ our @EXPORT_OK = qw(
   false
 );
 
-use JSON::PP ();
-use constant { true => JSON::PP::true, false => JSON::PP::false };
+use constant HAVE_BUILTIN => "$]" >= 5.035010;
+use if HAVE_BUILTIN, experimental => 'builtin';
+
+use constant {
+  HAVE_BUILTIN && Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION(4.38); 1 }
+    ? ( true => builtin::true, false => builtin::false )
+    : ( true => JSON::PP::true, false => JSON::PP::false )
+};
 
 # supports the six core types, plus integer (which is also a number)
 # we do NOT check stringy_numbers here -- you must do that in the caller
@@ -88,9 +96,10 @@ sub is_type ($type, $value, $config = {}) {
     if ($type eq 'string') {
       # like created_as_string, but rejects dualvars with stringwise-unequal string and numeric parts
       return !is_ref($value)
+        && !(HAVE_BUILTIN && builtin::is_bool($value))
         && $flags & B::SVf_POK
         && (!($flags & (B::SVf_IOK | B::SVf_NOK))
-          || do { no warnings 'numeric'; 0+$value eq $value });
+            || do { no warnings 'numeric'; 0+$value eq $value });
     }
 
     if ($type eq 'number') {
@@ -176,8 +185,6 @@ sub get_type ($value, $config = {}) {
 # note: unlike builtin::compat::is_bool on older perls, we do not accept
 # dualvar(0,"") or dualvar(1,"1") because JSON::PP and Cpanel::JSON::XS
 # do not encode these as booleans.
-use constant HAVE_BUILTIN => "$]" >= 5.035010;
-use if HAVE_BUILTIN, experimental => 'builtin';
 sub is_bool ($value) {
   HAVE_BUILTIN and builtin::is_bool($value)
   or
