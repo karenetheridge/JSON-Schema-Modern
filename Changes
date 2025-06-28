@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.613     2025-06-28 18:07:20Z
           - now checking for keyword collisions in custom vocabulary classes
           - now using builtin booleans when available (requires perl 5.36 and
