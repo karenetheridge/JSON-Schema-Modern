@@ -27,7 +27,7 @@ use if HAVE_BUILTIN, experimental => 'builtin';
 
 my %inflated_data = (
   null => [ undef ],
-  boolean => [ false, true, JSON::PP::false, JSON::PP::true ],
+  boolean => [ false, true, JSON::PP::false, JSON::PP::true, HAVE_BUILTIN ? ( builtin::true, builtin::false ) : () ],
   object => [ {}, { a => 1 } ],
   array => [ [], [ 1 ] ],
   number => [ 3.1, 1.23456789012e10, Math::BigFloat->new('0.123'), Math::BigFloat->new('12345123451234512345.2') ],
