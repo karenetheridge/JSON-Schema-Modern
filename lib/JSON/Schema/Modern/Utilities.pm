@@ -31,6 +31,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw(
   is_type
   get_type
+  is_schema
   is_bignum
   is_equal
   is_elements_unique
@@ -184,6 +185,10 @@ sub is_bool ($value) {
     and ($value->isa('JSON::PP::Boolean')
       or $value->isa('Cpanel::JSON::XS::Boolean')
       or $value->isa('JSON::XS::Boolean'));
+}
+
+sub is_schema ($value) {
+  is_plain_hashref($value) || is_bool($value);
 }
 
 sub is_bignum ($value) {
@@ -486,7 +491,7 @@ __END__
 
 This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
-=for Pod::Coverage is_type get_type is_bignum is_bool is_equal is_elements_unique jsonp unjsonp local_annotations
+=for Pod::Coverage is_type get_type is_bignum is_bool is_schema is_equal is_elements_unique jsonp unjsonp local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
 annotate_self sprintf_num HAVE_BUILTIN true false
 

@@ -36,7 +36,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -153,7 +153,7 @@ sub add_schema {
   my $self = shift;
 
   # TODO: resolve $uri against $self->base_uri
-  my $uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
+  my $uri = !is_schema($_[0]) ? Mojo::URL->new(shift)
     : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
 
   croak 'cannot add a schema with a uri with a fragment' if defined $uri->fragment;
@@ -193,12 +193,13 @@ sub add_document {
   my $self = shift;
 
   # TODO: resolve $uri against $self->base_uri
-  my $base_uri = !is_ref($_[0]) ? Mojo::URL->new(shift)
+  my $base_uri = !$_[0]->$_isa('JSON::Schema::Modern::Document') ? Mojo::URL->new(shift)
     : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
 
   croak 'cannot add a schema with a uri with a fragment' if defined $base_uri->fragment;
+  croak 'insufficient arguments' if not @_;
 
-  my $document = shift or croak 'insufficient arguments';
+  my $document = shift;
   croak 'wrong document type' if not $document->$_isa('JSON::Schema::Modern::Document');
 
   die JSON::Schema::Modern::Result->new(
@@ -389,9 +390,13 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
   my $valid;
   try {
-    # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
-    $schema_reference = $self->add_schema($schema_reference)->canonical_uri
-      if is_ref($schema_reference) and not $schema_reference->$_isa('Mojo::URL');
+    if (is_schema($schema_reference)) {
+      # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
+      $schema_reference = $self->add_schema($schema_reference)->canonical_uri;
+    }
+    elsif (is_ref($schema_reference) and not $schema_reference->$_isa('Mojo::URL')) {
+      abort($state, 'invalid schema type: %s', get_type($schema_reference));
+    }
 
     my $schema_info = $self->_fetch_from_uri($schema_reference);
     abort($state, 'EXCEPTION: unable to find resource "%s"', $schema_reference)
@@ -1082,7 +1087,7 @@ sub _get_or_load_resource ($self, $uri) {
 # - configs: the config overrides to set when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri ($self, $uri_reference) {
-  $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
+  $uri_reference = Mojo::URL->new($uri_reference) if not is_schema($uri_reference);
 
   # this is *a* resource that would contain our desired location, but may not be the closest one
   my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
@@ -1483,8 +1488,8 @@ allows: null, boolean, string, number, object, array. (See L</Types> below.)
 The schema must be in one of these forms:
 
 =for :list
-* a Perl data structure, such as what is returned from a JSON decode operation,
-* or a URI string indicating the identity of such a schema.
+* a Perl data structure, such as what is returned from a JSON decode operation
+* or a URI string (or L<Mojo::URL>) indicating the identity of such a schema.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
