@@ -58,8 +58,9 @@ our @EXPORT_OK = qw(
 use constant HAVE_BUILTIN => "$]" >= 5.035010;
 use if HAVE_BUILTIN, experimental => 'builtin';
 
+use constant _BUILTIN_BOOLS => 0;
 use constant {
-  HAVE_BUILTIN && Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION(4.38); 1 }
+  _BUILTIN_BOOLS && HAVE_BUILTIN && Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION(4.38); 1 }
     ? ( true => builtin::true, false => builtin::false )
     : ( true => JSON::PP::true, false => JSON::PP::false )
 };

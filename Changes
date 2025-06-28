@@ -1,11 +1,12 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - revert to using JSON::PP booleans for now
 
 0.613     2025-06-28 18:07:20Z
           - now checking for keyword collisions in custom vocabulary classes
           - now using builtin booleans when available (requires perl 5.36 and
-            Cpanel::JSON::XS 4.38)
+            Cpanel::JSON::XS 4.38); reverted in 0.614
 
 0.612     2025-06-03 22:50:17Z
           - additional diagnostics to track down some edge case failures
