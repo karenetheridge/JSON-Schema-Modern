@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.614     2025-06-28 18:51:12Z
           - revert to using JSON::PP booleans for now
 
 0.613     2025-06-28 18:07:20Z
