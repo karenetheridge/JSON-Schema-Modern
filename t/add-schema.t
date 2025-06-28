@@ -316,7 +316,21 @@ subtest 'add a schema associated with a uri' => sub {
   cmp_result(
     \@warnings,
     [ re(qr/use of deprecated form of add_schema with document/) ],
-    'warned when using deprecated form of add_schema',
+    'warned when using deprecated form of add_schema with URI',
+  );
+
+  @warnings = warnings {
+    cmp_result(
+      $js->add_schema($document),
+      shallow($document),
+      'can add the same document again, using deprecated interface',
+    );
+  };
+
+  cmp_result(
+    \@warnings,
+    [ re(qr/use of deprecated form of add_schema with document/) ],
+    'warned when using deprecated form of add_schema without URI',
   );
 
   # this actually does nothing, via the duplicate check in _add_resource

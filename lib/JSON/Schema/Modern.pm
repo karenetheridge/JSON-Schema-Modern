@@ -152,6 +152,11 @@ sub add_schema {
   croak 'insufficient arguments' if @_ < 2;
   my $self = shift;
 
+  if ($_[0]->$_isa('JSON::Schema::Modern::Document')) {
+    Carp::carp('use of deprecated form of add_schema with document');
+    return $self->add_document($_[0]);
+  }
+
   # TODO: resolve $uri against $self->base_uri
   my $uri = !is_schema($_[0]) ? Mojo::URL->new(shift)
     : $_[0]->$_isa('Mojo::URL') ? shift : Mojo::URL->new;
