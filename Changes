@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - do not allow the use of builtin bools when Storable is too old to
+            know how to serialize them
 
 0.614     2025-06-28 18:51:12Z
           - revert to using JSON::PP booleans for now
