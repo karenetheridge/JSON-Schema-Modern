@@ -4,7 +4,7 @@ package JSON::Schema::Modern::Annotation;
 # vim: set ts=8 sts=2 sw=2 tw=100 et :
 # ABSTRACT: Contains a single annotation from a JSON Schema evaluation
 
-our $VERSION = '0.615';
+our $VERSION = '0.616';
 
 use 5.020;
 use Moo;
