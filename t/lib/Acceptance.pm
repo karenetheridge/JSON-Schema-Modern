@@ -50,7 +50,7 @@ sub acceptance_tests (%options) {
       test_dir => $accepter->test_dir->child($options{acceptance}{test_subdir}))
     if not $ENV{TEST_DIR} and $options{acceptance}{test_subdir};
 
-  $note->('Using JSON decoder: ', builtin::blessed($accepter->_json_serializer), ' ', $accepter->_json_serializer->VERSION);
+  $note->('Using JSON decoder: ', builtin::compat::blessed($accepter->_json_serializer), ' ', $accepter->_json_serializer->VERSION);
   $note->('');
 
   my $js = JSON::Schema::Modern->new($options{evaluator}->%*);
