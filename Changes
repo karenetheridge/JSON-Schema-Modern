@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.615     2025-07-12 16:12:36Z
           - do not allow the use of builtin bools when Storable is too old to
             know how to serialize them
           - avoid experimental warnings in tests from perl versions 5.36.0 to
