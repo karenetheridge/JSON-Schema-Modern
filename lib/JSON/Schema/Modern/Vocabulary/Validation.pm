@@ -67,22 +67,16 @@ sub _traverse_keyword_type ($class, $schema, $state) {
 
 sub _eval_keyword_type ($class, $data, $schema, $state) {
   my $type = get_type($data, $state->{spec_version} eq 'draft4' ? { legacy_ints => 1 } : ());
-  if (is_plain_arrayref($schema->{type})) {
-    return 1 if any {
-      $type eq $_ or ($_ eq 'number' and $type eq 'integer')
-        or ($type eq 'string' and $state->{stringy_numbers} and looks_like_number($data)
-            and ($_ eq 'number' or ($_ eq 'integer' and $data == int($data))))
-        or ($_ eq 'boolean' and $state->{scalarref_booleans} and $type eq 'reference to SCALAR')
-    } $schema->{type}->@*;
-    return E($state, 'got %s, not one of %s', $type, join(', ', $schema->{type}->@*));
-  }
-  else {
-    return 1 if $type eq $schema->{type} or ($schema->{type} eq 'number' and $type eq 'integer')
+  my @want = is_plain_arrayref($schema->{type}) ? $schema->{type}->@* : $schema->{type};
+
+  return 1 if any {
+    $type eq $_ or ($_ eq 'number' and $type eq 'integer')
       or ($type eq 'string' and $state->{stringy_numbers} and looks_like_number($data)
-          and ($schema->{type} eq 'number' or ($schema->{type} eq 'integer' and $data == int($data))))
-      or ($schema->{type} eq 'boolean' and $state->{scalarref_booleans} and $type eq 'reference to SCALAR');
-    return E($state, 'got %s, not %s', $type, $schema->{type});
-  }
+          and ($_ eq 'number' or ($_ eq 'integer' and $data == int($data))))
+      or ($_ eq 'boolean' and $state->{scalarref_booleans} and $type eq 'reference to SCALAR')
+  } @want;
+
+  return E($state, 'got %s, not %s%s', $type, (@want > 1 ? 'one of ' : ''), join(', ', @want));
 }
 
 sub _traverse_keyword_enum ($class, $schema, $state) {
