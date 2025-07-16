@@ -18,7 +18,9 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
-use List::Util 1.45 qw(any max);
+use List::Util 'max';
+use if "$]" < 5.041010, 'List::Util' => 'any';
+use if "$]" >= 5.041010, experimental => 'keyword_any';
 use JSON::Schema::Modern::Utilities qw(is_type jsonp local_annotations E A abort true);
 use namespace::clean;
 

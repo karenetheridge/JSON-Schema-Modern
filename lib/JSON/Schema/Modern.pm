@@ -21,7 +21,9 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use Mojo::JSON ();  # for JSON_XS, MOJO_NO_JSON_XS environment variables
 use Carp qw(croak carp);
-use List::Util 1.55 qw(pairs first uniqint pairmap uniq any min);
+use List::Util 1.55 qw(pairs first uniqint pairmap uniq min);
+use if "$]" < 5.041010, 'List::Util' => 'any';
+use if "$]" >= 5.041010, experimental => 'keyword_any';
 use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use builtin::compat qw(refaddr load_module);
 use Mojo::URL;
