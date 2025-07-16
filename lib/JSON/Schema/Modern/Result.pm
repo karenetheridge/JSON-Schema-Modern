@@ -25,7 +25,7 @@ use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Utilities qw(true false);
 use JSON::PP ();
-use List::Util 1.50 qw(any uniq all);
+use List::Util 1.45 qw(any uniq all);
 use Carp 'croak';
 use builtin::compat qw(refaddr blessed);
 use Safe::Isa;
