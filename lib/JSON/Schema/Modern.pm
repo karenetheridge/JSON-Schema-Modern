@@ -1863,6 +1863,17 @@ UNTRUSTED SOURCES.>
 L<perl5363delta/CVE-2023-47038-Write-past-buffer-end-via-illegal-user-defined-Unicode-property>,
 which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
 
+=head1 BUNDLED META-SCHEMAS
+
+These specification meta-schemas are bundled with this distribution and loaded as needed:
+
+=for :list
+* C<http://json-schema.org/draft-04/schema#>
+* C<http://json-schema.org/draft-06/schema#>
+* C<http://json-schema.org/draft-07/schema#>
+* C<https://json-schema.org/draft/2019-09/schema>
+* C<https://json-schema.org/draft/2020-12/schema>
+
 =head1 SEE ALSO
 
 =for stopwords OpenAPI
