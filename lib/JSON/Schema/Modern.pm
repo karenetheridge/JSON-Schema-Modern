@@ -1051,7 +1051,7 @@ use constant CACHED_METASCHEMAS => {
   'http://json-schema.org/draft-04/schema' => 'draft4/schema.json',
 };
 
-# simple runtime-wide cache of metaschema documentation objects that are sourced from disk
+# simple runtime-wide cache of metaschema document objects that are sourced from disk
 my $metaschema_cache = {};
 
 # returns the same as _get_resource
