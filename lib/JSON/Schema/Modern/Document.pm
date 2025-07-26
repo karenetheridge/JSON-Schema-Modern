@@ -60,6 +60,7 @@ has metaschema_uri => (
   # default not defined here, but might be defined in a subclass
 );
 
+# TODO: remove, after OpenAPI::Modern and JSON::Schema::Modern::Document::OpenAPI stop using it
 has evaluator => (
   is => 'rwp',
   isa => InstanceOf['JSON::Schema::Modern'],
@@ -163,7 +164,8 @@ sub BUILD ($self, $args) {
   $self->_set_original_uri($self->canonical_uri);
 
   my $state = $self->traverse(
-    $self->evaluator // $self->_set_evaluator(JSON::Schema::Modern->new),
+    # TODO: remove evaluator attribute, after OpenAPI::Modern and JSMDO stop using it.
+    $args->{evaluator} // $self->_set_evaluator(JSON::Schema::Modern->new),
     $args->{specification_version} ? +{ $args->%{specification_version} } : (),
   );
 
@@ -223,10 +225,9 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   return $state;
 }
 
-sub validate ($self) {
-  my $js = $self->$_call_if_can('evaluator') // JSON::Schema::Modern->new;
-
-  return $js->evaluate($self->schema, $self->metaschema_uri);
+sub validate ($self, $evaluator = undef) {
+  $evaluator //= JSON::Schema::Modern->new;
+  return $evaluator->evaluate($self->schema, $self->metaschema_uri);
 }
 
 # callback hook for Sereal::Encoder
@@ -234,7 +235,10 @@ sub FREEZE ($self, $serializer) { +{ %$self } }
 
 # callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
+  # TODO: delete $data->{evaluator};  when JSMDO stops using it
+
   my $self = bless($data, $class);
+
   foreach my $attr (qw(schema _entities _checksum)) {
     croak "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
       if not exists $self->{$attr};
@@ -322,7 +326,10 @@ May be one of:
 
 =head2 evaluator
 
-A L<JSON::Schema::Modern> object. Optional, unless custom metaschemas are used.
+A L<JSON::Schema::Modern> object. Optional, unless custom metaschemas are used (see notes below
+under L</validate>).
+
+This argument is not preserved by the constructor, so it is not available as an accessor.
 
 =head1 METHODS
 
@@ -372,10 +379,18 @@ See L<Mojo::JSON::Pointer/get>.
 
 =head2 validate
 
+  $result = $document->validate;
+  $result = $document->validate($evaluator);
+
 Evaluates the document against its metaschema. See L<JSON::Schema::Modern/evaluate>.
-For regular JSON Schemas this is redundant with creating the document in the first place (which also
+For regular JSON Schemas this is redundant with creating the document in the first place (as it
 includes a validation check), but for some subclasses of this class, additional things might be
 checked that are not caught by document creation.
+
+If the document's metaschema is one of the core bundled metaschemas (see
+L<JSON::Schema::Modern/BUNDLED META-SCHEMAS>), the C<$evaluator> argument is optional, as these
+metaschemas are available to all evaluator instances; otherwise (you are using a custom metaschema),
+you must provide the same evaluator instance as was used to construct the document object.
 
 =head2 TO_JSON
 

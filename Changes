@@ -3,6 +3,11 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - documentation notes added for which definitions can be overridden
             (formats, media-types and encodings can; vocabularies cannot).
+          - "validate" in JSON::Schema::Modern::Document must now be provided
+            with a JSON::Schema::Modern object if a custom metaschema is used
+            by the schema (this is a forward-looking change in preparation for
+            removing the "evaluator" attribute from the JSMD object in a
+            subsequent release).
 
 0.615     2025-07-12 16:12:36Z
           - do not allow the use of builtin bools when Storable is too old to

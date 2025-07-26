@@ -1099,8 +1099,23 @@ subtest 'custom metaschema_uri' => sub {
 
   cmp_result(
     $doc->validate->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => 'EXCEPTION: unable to find resource "https://my/first/metaschema"',
+        },
+      ],
+    },
+    'when not providing the original evaluator, the metaschema cannot be found',
+  );
+
+  cmp_result(
+    $doc->validate($js)->TO_JSON,
     { valid => true },
-    'schema validates against its metaschema, and "minimum" is ignored',
+    'using the proper evaluator, schema validates against its metaschema, and "minimum" is ignored',
   );
 
   memory_cycle_ok($js, 'no leaks in the evaluator object');
