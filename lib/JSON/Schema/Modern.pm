@@ -1051,23 +1051,31 @@ use constant CACHED_METASCHEMAS => {
   'http://json-schema.org/draft-04/schema' => 'draft4/schema.json',
 };
 
+# simple runtime-wide cache of metaschema documentation objects that are sourced from disk
+my $metaschema_cache = {};
+
 # returns the same as _get_resource
 sub _get_or_load_resource ($self, $uri) {
   my $resource = $self->_get_resource($uri);
   return $resource if $resource;
 
   if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
-    my $file = path(dist_dir('JSON-Schema-Modern'), $local_filename);
-    my $schema = $self->_json_decoder->decode($file->slurp_raw);
-    my $document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $self);
+    my $document;
+    if (not $document = $metaschema_cache->{$local_filename}) {
+      my $file = path(dist_dir('JSON-Schema-Modern'), $local_filename);
+      my $schema = $self->_json_decoder->decode($file->slurp_raw);
+      my $_document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $self);
 
-    # this should be caught by the try/catch in evaluate()
-    die JSON::Schema::Modern::Result->new(
-      output_format => $self->output_format,
-      valid => 0,
-      errors => [ $document->errors ],
-      exception => 1,
-    ) if $document->has_errors;
+      # this should be caught by the try/catch in evaluate()
+      die JSON::Schema::Modern::Result->new(
+        output_format => $self->output_format,
+        valid => 0,
+        errors => [ $_document->errors ],
+        exception => 1,
+      ) if $_document->has_errors;
+
+      $metaschema_cache->{$local_filename} = $document = $_document;
+    }
 
     # we have already performed the appropriate collision checks, so we bypass them here
     $self->_add_resources_unsafe(
