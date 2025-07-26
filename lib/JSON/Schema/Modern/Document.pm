@@ -140,7 +140,7 @@ sub _add_entity_location ($self, $location, $entity) {
 
 sub get_entity_at_location ($self, $location) {
   return '' if not exists $self->_entities->{$location};
-  ($self->__entities)[ $self->_entities->{$location} ] // die "missing mapping for ", $self->_entities->{$location};
+  ($self->__entities)[ $self->_entities->{$location} ] // croak "missing mapping for ", $self->_entities->{$location};
 }
 
 # note: not sorted
@@ -236,7 +236,7 @@ sub FREEZE ($self, $serializer) { +{ %$self } }
 sub THAW ($class, $serializer, $data) {
   my $self = bless($data, $class);
   foreach my $attr (qw(schema _entities _checksum)) {
-    die "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
+    croak "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
       if not exists $self->{$attr};
   }
   return $self;

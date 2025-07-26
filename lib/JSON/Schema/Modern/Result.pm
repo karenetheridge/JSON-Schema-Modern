@@ -199,13 +199,13 @@ sub format ($self, $style, $formatted_annotations = undef) {
   }
 
   # TODO: support detailed, verbose ?
-  die 'unsupported output format';
+  croak 'unsupported output format';
 }
 
 sub count { $_[0]->valid ? $_[0]->annotation_count : $_[0]->error_count }
 
 sub combine ($self, $other, $swap) {
-  die 'wrong type for & operation' if not $other->$_isa(__PACKAGE__);
+  croak 'wrong type for & operation' if not $other->$_isa(__PACKAGE__);
 
   return $self if refaddr($other) == refaddr($self);
 
@@ -229,7 +229,7 @@ sub stringify ($self) {
 }
 
 sub TO_JSON ($self) {
-  die 'cannot produce JSON output for data_only format' if $self->output_format eq 'data_only';
+  croak 'cannot produce JSON output for data_only format' if $self->output_format eq 'data_only';
   $self->format($self->output_format);
 }
 
