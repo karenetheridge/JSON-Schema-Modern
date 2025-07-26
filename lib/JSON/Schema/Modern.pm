@@ -1640,6 +1640,8 @@ do not apply arithmetic operators to it -- or subsequent type checks on this val
 See L<https://spec.openapis.org/registry/format/> for a registry of known and useful formats; for
 compatibility reasons, avoid defining a format listed here with different semantics.
 
+Format definitions can be overridden with a new call to C<add_format_validation>.
+
 =head2 add_vocabulary
 
   $js->add_vocabulary('My::Custom::Vocabulary::Class');
@@ -1653,6 +1655,8 @@ L<vocabulary|JSON::Schema::Modern::Vocabulary/vocabulary> and
 L<keywords|JSON::Schema::Modern::Vocabulary/keywords> methods, as well as
 C<< _traverse_keyword_<keyword name> >> methods for each keyword. C<< _eval_keyword_<keyword name> >>
 methods are optional; when not provided, evaluation will always return a true result.
+
+Vocabularies cannot be redefined; subsequent calls to add the same vocabulary will do nothing.
 
 =head2 add_media_type
 
@@ -1676,6 +1680,8 @@ These media types are already known:
 * C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
 * C<text/*> - passes strings through unchanged
 
+Media-type definitions can be overridden with a new call to C<add_media_type>.
+
 =head2 get_media_type
 
 Fetches a decoder sub for the indicated media type. Lookups are performed B<without case sensitivity>.
@@ -1697,6 +1703,8 @@ You can use it thusly:
 Takes an encoding name and a subref which takes a single scalar reference, which is expected to be
 a reference to a string, which SHOULD be a 7-bit or 8-bit string. Result values MUST be a scalar-reference
 to a string (which is then dereferenced for the C<contentMediaType> keyword).
+
+Encoding definitions can be overridden with a new call to C<add_encoding>.
 
 =for stopwords natively
 

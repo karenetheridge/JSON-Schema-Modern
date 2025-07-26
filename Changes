@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - documentation notes added for which definitions can be overridden
+            (formats, media-types and encodings can; vocabularies cannot).
 
 0.615     2025-07-12 16:12:36Z
           - do not allow the use of builtin bools when Storable is too old to
