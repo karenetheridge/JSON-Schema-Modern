@@ -60,13 +60,6 @@ has metaschema_uri => (
   # default not defined here, but might be defined in a subclass
 );
 
-# TODO: remove, after OpenAPI::Modern and JSON::Schema::Modern::Document::OpenAPI stop using it
-has evaluator => (
-  is => 'rwp',
-  isa => InstanceOf['JSON::Schema::Modern'],
-  weak_ref => 1,
-);
-
 # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 my $path_type = Str->where('m{^(?:/|$)}');  # JSON pointer relative to the document root
@@ -164,8 +157,7 @@ sub BUILD ($self, $args) {
   $self->_set_original_uri($self->canonical_uri);
 
   my $state = $self->traverse(
-    # TODO: remove evaluator attribute, after OpenAPI::Modern and JSMDO stop using it.
-    $args->{evaluator} // $self->_set_evaluator(JSON::Schema::Modern->new),
+    $args->{evaluator} // JSON::Schema::Modern->new,
     $args->{specification_version} ? +{ $args->%{specification_version} } : (),
   );
 
@@ -235,7 +227,7 @@ sub FREEZE ($self, $serializer) { +{ %$self } }
 
 # callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
-  # TODO: delete $data->{evaluator};  when JSMDO stops using it
+  delete $data->{evaluator};
 
   my $self = bless($data, $class);
 
