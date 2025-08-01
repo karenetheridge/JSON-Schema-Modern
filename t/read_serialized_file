@@ -88,7 +88,7 @@ my $result = subtest 'thaw object in a separate process' => sub {
   $thawed->add_schema($strict_metaschema);
   $thawed->add_schema($strict_schema);
 
-  cmp_deeply(
+  cmp_result(
     $thawed->evaluate('foo', 'https://my_strict_schema')->TO_JSON,
     {
       valid => false,

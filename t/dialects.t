@@ -1322,7 +1322,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
     allOf => [ { '$ref' => 'https://json-schema.org/draft/2019-09/schema' } ],
   });
 
-  cmp_deeply(
+  cmp_result(
     $metaschema_document,
     methods(
       canonical_uri => str('http://localhost:1234/my-meta-schema'),
@@ -1664,7 +1664,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
     { valid => true },
     'validation succeeds because "minimum" never gets run',
   );
-  cmp_deeply(
+  cmp_result(
     $js->{_resource_index}{$id}{document},
     methods(
       canonical_uri => str($id),

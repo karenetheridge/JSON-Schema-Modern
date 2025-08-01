@@ -28,7 +28,7 @@ my %configs = (
 );
 
 subtest 'boolean document' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(schema => false),
     listmethods(
       resource_index => [
@@ -57,7 +57,7 @@ subtest 'boolean document' => sub {
     'boolean schema with invalid canonical_uri (fragment)',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => false,
@@ -79,7 +79,7 @@ subtest 'boolean document' => sub {
 };
 
 subtest 'object document' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       defined $_ ? ( canonical_uri => $_ ) : (),
       schema => {},
@@ -100,7 +100,7 @@ subtest 'object document' => sub {
   )
   foreach (undef, '', '0', Mojo::URL->new, Mojo::URL->new(''), Mojo::URL->new('0'));
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {},
@@ -122,7 +122,7 @@ subtest 'object document' => sub {
     'object schema with valid canonical_uri, no root $id',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       defined $_ ? ( canonical_uri => $_ ) : (),
       schema => { '$id' => 'https://foo.com' },
@@ -145,7 +145,7 @@ subtest 'object document' => sub {
   )
   foreach (undef, '', Mojo::URL->new);
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => $_,
       schema => { '$id' => 'https://bar.com' },
@@ -168,7 +168,7 @@ subtest 'object document' => sub {
   )
   foreach ('0', Mojo::URL->new('0'), 'https://foo.com');
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => { foo => {} },
@@ -187,7 +187,7 @@ subtest 'object document' => sub {
     'when canonical_uri provided, the empty uri is not added as a referenceable uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => { '$id' => 'https://foo.com' },
@@ -207,7 +207,7 @@ subtest 'object document' => sub {
     'object schema with originally provided uri equal to root $id',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
@@ -245,7 +245,7 @@ subtest 'object document' => sub {
     'object schema with canonical_uri and root $id, and additional resource schemas as well',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$id' => 'relative',
@@ -268,7 +268,7 @@ subtest 'object document' => sub {
     'relative $id at root is resolved against provided canonical_id',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -300,7 +300,7 @@ subtest 'object document' => sub {
     'relative uri for inner $id',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -331,7 +331,7 @@ subtest 'object document' => sub {
     'no root $id; absolute uri with path in subschema resource',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$anchor' => 'my_anchor',
@@ -357,7 +357,7 @@ subtest 'object document' => sub {
     'no root $id or canonical_uri provided; anchor is indexed at the root',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$anchor' => 'my_anchor',
@@ -385,7 +385,7 @@ subtest 'object document' => sub {
     'canonical_uri provided; empty uri not added as a referenceable uri when an anchor exists',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$id' => 'https://my-base.com',
@@ -413,7 +413,7 @@ subtest 'object document' => sub {
     'absolute uri provided at root; adjacent anchor has the same canonical uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$id' => 'https://my-base.com',
@@ -447,7 +447,7 @@ subtest 'object document' => sub {
 };
 
 subtest '$id and $anchor as properties' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         type => 'object',
@@ -472,7 +472,7 @@ subtest '$id and $anchor as properties' => sub {
 };
 
 subtest '$id with an empty fragment' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -531,7 +531,7 @@ subtest '$id with a non-empty fragment' => sub {
     'did not index the $id with a non-empty fragment, nor use it as the base for other identifiers',
   );
 
-  cmp_deeply($doc->canonical_uri, str('http://main.com'), 'canonical_uri');
+  cmp_result($doc->canonical_uri, str('http://main.com'), 'canonical_uri');
   cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
 };
 
@@ -689,7 +689,7 @@ subtest '$anchor not conforming to syntax' => sub {
   );
 
   cmp_result([ map $_->TO_JSON, $doc->errors ], [], 'no errors');
-  cmp_deeply(
+  cmp_result(
     $doc,
     listmethods(
       resource_index => unordered_pairs(
@@ -719,7 +719,7 @@ subtest '$anchor not conforming to syntax' => sub {
 };
 
 subtest '$schema not conforming to syntax' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       schema => { '$schema' => 'foo' },
     ),
@@ -740,7 +740,7 @@ subtest '$schema not conforming to syntax' => sub {
 };
 
 subtest '$anchor and $id below an $id that is not at the document root' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
@@ -790,7 +790,7 @@ subtest '$anchor and $id below an $id that is not at the document root' => sub {
 };
 
 subtest 'JSON pointer and URI escaping' => sub {
-  cmp_deeply(
+  cmp_result(
     my $doc = JSON::Schema::Modern::Document->new(
       schema => {
         '$defs' => {
@@ -884,7 +884,7 @@ subtest 'JSON pointer and URI escaping' => sub {
   is($doc->get_entity_at_location('/$defs/foo/patternProperties/~0'), 'schema', 'schema locations are tracked');
   is($doc->get_entity_at_location('/$defs/foo/patternProperties'), '', 'non-schema locations are also tracked');
 
-  cmp_deeply(
+  cmp_result(
     [ $doc->get_entity_locations('schema') ],
     bag(@locations),
     'schema locations can be queried',
@@ -919,7 +919,7 @@ subtest 'resource collisions' => sub {
     'detected collision between document\'s initial uri and a subschema\'s uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => Mojo::URL->new('https://foo.com'),
       schema => {
@@ -989,7 +989,7 @@ subtest 'resource collisions' => sub {
 };
 
 subtest 'create document with explicit canonical_uri set to the same as root $id' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://foo.com/x/y/z',
       schema => { '$id' => 'https://foo.com/x/y/z' },
@@ -1009,7 +1009,7 @@ subtest 'create document with explicit canonical_uri set to the same as root $id
 };
 
 subtest 'canonical_uri identification from a document with errors' => sub {
-  cmp_deeply(
+  cmp_result(
     JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://foo.com/x/y/z',
       schema => {
@@ -1061,7 +1061,7 @@ subtest 'custom metaschema_uri' => sub {
     evaluator => $js,  # needed in order to find the metaschema
   ));
 
-  cmp_deeply(
+  cmp_result(
     $js->{_resource_index}{$id}{document},
     methods(
       canonical_uri => str($id),
@@ -1137,7 +1137,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     )
   );
 
-  cmp_deeply(
+  cmp_result(
     $doc,
     listmethods(
       original_uri => [ str('staging/') ],
@@ -1158,7 +1158,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     'document has correct resources, resolved against the provided base uri',
   );
 
-  cmp_deeply(
+  cmp_result(
     $js->{_resource_index},
     my $resource_index = {
       'https://example.com/api/' => {
@@ -1242,7 +1242,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
   my $doc2 = $js->add_document('file:///usr/local/share/api.json' => $doc);
   is($doc2, $doc, 'same document is added a second time');
 
-  cmp_deeply(
+  cmp_result(
     $js->{_resource_index},
     {
       %$resource_index, # original entries

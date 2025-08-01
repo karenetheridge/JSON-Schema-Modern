@@ -238,7 +238,7 @@ subtest 'add a schema associated with a uri' => sub {
     'cannot use a uri with a fragment',
   );
 
-  cmp_deeply(
+  cmp_result(
     my $document = $js->add_schema(
       'https://foo.com',
       { '$id' => 'https://bar.com', allOf => [ false, true ] },
@@ -365,7 +365,7 @@ subtest 'multiple anonymous schemas' => sub {
     'evaluate an anonymous schema',
   );
 
-  cmp_deeply([ keys $js->{_resource_index}->%* ], [ '' ], 'one resource is indexed');
+  cmp_result([ keys $js->{_resource_index}->%* ], [ '' ], 'one resource is indexed');
 
   cmp_result(
     $js->evaluate(2, { minimum => 2 })->TO_JSON,
@@ -373,13 +373,13 @@ subtest 'multiple anonymous schemas' => sub {
     'evaluate another anonymous schema',
   );
 
-  cmp_deeply([ keys $js->{_resource_index}->%* ], [ '' ], 'still only one resource is indexed');
+  cmp_result([ keys $js->{_resource_index}->%* ], [ '' ], 'still only one resource is indexed');
 };
 
 subtest 'add a document without associating it with a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     $js->add_document(
       my $document = JSON::Schema::Modern::Document->new(
         schema => { '$id' => 'https://bar.com', allOf => [ false, true ] },
@@ -421,7 +421,7 @@ subtest 'add a document without associating it with a uri' => sub {
 subtest 'add a schema without a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_deeply(
+  cmp_result(
     my $document = $js->add_schema(
       { '$id' => 'https://bar.com', allOf => [ false, true ] },
     ),

@@ -91,14 +91,14 @@ my @serialized_attributes = sort qw(
 );
 
 my $frozen = $js->FREEZE(undef);
-cmp_deeply(
+cmp_result(
   [ sort keys %$frozen ],
   [ sort @serialized_attributes ],
   'frozen object contains all the right keys',
 );
 
 my $thawed = JSON::Schema::Modern->THAW(undef, $frozen);
-cmp_deeply(
+cmp_result(
   [ sort keys %$thawed ],
   [ sort @serialized_attributes ],
   'thawed object contains all the right keys',

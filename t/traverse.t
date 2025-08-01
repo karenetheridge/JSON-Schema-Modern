@@ -192,7 +192,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
     'dialect changes at root, with $id - dialect is switched in time to get a new keyword list for the core vocabulary',
   );
 
-  cmp_deeply(
+  cmp_result(
     $state,
     superhashof({
       metaschema_uri => 'http://json-schema.org/draft-07/schema',
@@ -444,7 +444,7 @@ subtest 'traverse with overridden specification_version' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
 
   my $state = $js->traverse({});
-  cmp_deeply(
+  cmp_result(
     $state,
     superhashof({
       errors => [],
@@ -457,7 +457,7 @@ subtest 'traverse with overridden specification_version' => sub {
   );
 
   $state = $js->traverse({ '$schema' => 'https://json-schema.org/draft/2020-12/schema'});
-  cmp_deeply(
+  cmp_result(
     $state,
     superhashof({
       errors => [],
@@ -470,7 +470,7 @@ subtest 'traverse with overridden specification_version' => sub {
   );
 
   $state = $js->traverse({}, { specification_version => 'draft2019-09' });
-  cmp_deeply(
+  cmp_result(
     $state,
     superhashof({
       errors => [],
@@ -485,7 +485,7 @@ subtest 'traverse with overridden specification_version' => sub {
   $state = $js->traverse(
     { '$schema' => 'http://json-schema.org/draft-04/schema#' },
     { specification_version => 'draft2020-12' });
-  cmp_deeply(
+  cmp_result(
     $state,
     superhashof({
       errors => [],

@@ -1001,7 +1001,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
     };
     is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using an unknown custom format');
 
-    cmp_deeply(
+    cmp_result(
       \@warnings,
       [ re(qr{Can't locate Time/Moment\.pm}) ],
       '...but we do warn for the missing module',
