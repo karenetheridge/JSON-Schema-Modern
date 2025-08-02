@@ -25,7 +25,7 @@ use Ref::Util 0.100 'is_plain_hashref';
 use builtin::compat 'refaddr';
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
-use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy Optional);
+use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy Optional Bool);
 use Types::Common::Numeric 'PositiveOrZeroInt';
 use namespace::clean;
 
@@ -76,6 +76,7 @@ has resource_index => (
       anchors => Optional[HashRef[Dict[
         canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
         path => $path_type,
+        dynamic => Optional[Bool],
       ]]],
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],

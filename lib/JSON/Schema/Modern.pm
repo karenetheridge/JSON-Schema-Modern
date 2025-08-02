@@ -235,7 +235,8 @@ sub add_document {
     foreach my $anchor (keys (($doc_resource->{anchors}//{})->%*)) {
       use autovivification 'store';
       $new_resource->{anchors}{$anchor} = {
-        path => $doc_resource->{anchors}{$anchor}{path},
+        $doc_resource->{anchors}{$anchor}->%{path},
+        (map +($_->[1] ? @$_ : ()), [ $doc_resource->{anchors}{$anchor}->%{dynamic} ]),
         canonical_uri => length $base_uri
           ? Mojo::URL->new($doc_resource->{anchors}{$anchor}{canonical_uri})->to_abs($base_uri)
           : $doc_resource->{anchors}{$anchor}{canonical_uri},
@@ -846,6 +847,7 @@ has _resource_index => (
       anchors => Optional[HashRef[Dict[
         canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
         path => $path_type,
+        dynamic => Optional[Bool],
       ]]],
       configs => HashRef,
       Slurpy[HashRef[Undef]],  # no other fields allowed

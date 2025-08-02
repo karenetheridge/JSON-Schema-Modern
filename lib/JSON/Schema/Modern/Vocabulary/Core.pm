@@ -285,7 +285,10 @@ sub _eval_keyword_recursiveAnchor ($class, $data, $schema, $state) {
   return 1;
 }
 
-*_traverse_keyword_dynamicAnchor = \&_traverse_keyword_anchor;
+sub _traverse_keyword_dynamicAnchor ($class, $schema, $state) {
+  return if not $class->_traverse_keyword_anchor($schema, $state);
+  $state->{identifiers}{$state->{initial_schema_uri}}{anchors}{$schema->{'$dynamicAnchor'}}{dynamic} = 1;
+}
 
 # we already indexed the $dynamicAnchor uri, so there is nothing more to do at evaluation time.
 # we explicitly do NOT set $state->{initial_schema_uri}.
@@ -338,11 +341,10 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
     # ...the initial URI MUST be replaced by the URI (including the fragment) for the outermost
     # schema resource in the dynamic scope that defines an identically named fragment with
     # "$dynamicAnchor".
-    foreach my $base_scope ($state->{dynamic_scope}->@*) {
-      my $test_uri = Mojo::URL->new($base_scope)->fragment($anchor);
-      my $dynamic_anchor_subschema_info = $state->{evaluator}->_fetch_from_uri($test_uri);
-      if (defined $dynamic_anchor_subschema_info and ($dynamic_anchor_subschema_info->{schema}{'$dynamicAnchor'}//'') eq $anchor) {
-        $uri = $test_uri;
+    foreach my $scope_uri ($state->{dynamic_scope}->@*) {
+      my $resource = $state->{evaluator}->_get_or_load_resource($scope_uri);
+      if (exists(($resource->{anchors}//{})->{$anchor}) and $resource->{anchors}{$anchor}{dynamic}) {
+        $uri = Mojo::URL->new($scope_uri)->fragment($anchor);
         last;
       }
     }
