@@ -1486,7 +1486,7 @@ applications that contain embedded JSON Schemas):
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
-* C<initial_schema_uri>: adjusts the recorded absolute keyword location as of the start of evaluation
+* C<initial_schema_uri>: adjusts the recorded absolute keyword location of the start of evaluation
 * C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
   useful when providing an inline schema that does not declare an absolute base URI for itself)
 
