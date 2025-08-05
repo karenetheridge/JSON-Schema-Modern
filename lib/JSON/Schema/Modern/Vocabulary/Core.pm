@@ -98,9 +98,8 @@ sub __create_identifier ($class, $uri, $state) {
   $state->{identifiers}{$uri} = {
     path => $state->{traversed_schema_path},
     canonical_uri => $uri,
-    specification_version => $state->{specification_version}, # note! $schema keyword can change this
-    vocabularies => $state->{vocabularies}, # reference, not copy
-    configs => $state->{configs},
+    # note! $schema keyword can change specification_version and vocabularies
+    $state->%{qw(specification_version vocabularies configs)},
   };
 
   return 1;
@@ -126,8 +125,7 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{schema_path} = '';
   # these will already be set if there is an adjacent $schema keyword, or if we are here via a $ref
-  $state->{specification_version} = $schema_info->{specification_version};
-  $state->{vocabularies} = $schema_info->{vocabularies};
+  $state->@{qw(specification_version vocabularies)} = $schema_info->@{qw(specification_version vocabularies)};
 
   $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
   push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
@@ -248,9 +246,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
       # resource index.
       canonical_uri => $base_uri,
       path => $base_path,
-      specification_version => $state->{specification_version},
-      vocabularies => $state->{vocabularies}, # reference, not copy
-      configs => $state->{configs},
+      $state->%{qw(specification_version vocabularies configs)},
       anchors => {
         $anchor => {
           canonical_uri => $canonical_uri,

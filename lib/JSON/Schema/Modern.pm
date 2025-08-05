@@ -419,12 +419,10 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     $state = +{
       %$state,
       initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start of evaluation, or last $id or $ref
-      document => $schema_info->{document},   # the ::Document object containing this schema
+      $schema_info->%{qw(document specification_version vocabularies)},
       dynamic_scope => [ $schema_info->{canonical_uri} ],
       annotations => [],
       seen => {},
-      specification_version => $schema_info->{specification_version},
-      vocabularies => $schema_info->{vocabularies},
       callbacks => $config_override->{callbacks} // {},
       evaluator => $self,
       $schema_info->{configs}->%*,

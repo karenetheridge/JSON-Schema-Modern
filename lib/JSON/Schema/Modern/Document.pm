@@ -181,9 +181,7 @@ sub BUILD ($self, $args) {
   $self->_add_resource($self->original_uri.'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
-      specification_version => $state->{specification_version},
-      vocabularies => $state->{vocabularies},
-      configs => $state->{configs},
+      $state->%{qw(specification_version vocabularies configs)},
     })
   if not $seen_root;
 
