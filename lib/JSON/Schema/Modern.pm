@@ -490,6 +490,7 @@ sub validate_schema ($self, $schema, $config_override = {}) {
 
   return $result if not $result->valid;
 
+  # the traversal pass will validate all constraints that weren't handled by the metaschema
   my $state = $self->traverse($schema, $config_override);
   return JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,

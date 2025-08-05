@@ -33,7 +33,7 @@ sub evaluation_order ($class) { 0 }
 
 sub keywords ($class, $spec_version) {
   return (
-    '$schema',
+    '$schema',  # must be first to ensure we use the correct Core keywords and subsequent vocabularies
     $spec_version eq 'draft4' ? 'id' : '$id',
     $spec_version !~ /^draft[467]$/ ? '$anchor' : (),
     $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
@@ -91,14 +91,12 @@ sub __create_identifier ($class, $uri, $state) {
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{schema_path} = '';
 
-  # Note that even though '$id' is considered ahead of '$schema' in the keyword list, we have
-  # already parsed the '$schema' keyword (before we even started looping through all vocabularies)
-  # and therefore this data (specification_version and vocabularies) is known to be correct.
+  # Note that since '$schema' is considered ahead of '$id' in the keyword list, the dialect
+  # (specification_version and vocabularies) is known to be correct.
 
   $state->{identifiers}{$uri} = {
     path => $state->{traversed_schema_path},
     canonical_uri => $uri,
-    # note! $schema keyword can change specification_version and vocabularies
     $state->%{qw(specification_version vocabularies configs)},
   };
 
@@ -116,15 +114,16 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   # this should never happen, if the pre-evaluation traversal was performed correctly
   abort($state, 'failed to resolve "%s" to canonical uri', $state->{keyword}) if not $schema_info;
 
+  # $state->{document} is set by evaluate() and does not change unless following a reference
   abort($state, 'EXCEPTION: mismatched document when processing %s "%s"',
       $state->{keyword}, $schema->{$state->{keyword}})
     if $schema_info->{document} != $state->{document};
 
+  # these will all be set when we are at the document root, or if we are here via a $ref,
+  # but not if we are organically passing through this subschema.
   $state->{initial_schema_uri} = $schema_info->{canonical_uri};
-  # these will already be set in all cases: at document root, or if we are here via a $ref
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{schema_path} = '';
-  # these will already be set if there is an adjacent $schema keyword, or if we are here via a $ref
   $state->@{qw(specification_version vocabularies)} = $schema_info->@{qw(specification_version vocabularies)};
 
   $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
@@ -190,10 +189,9 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
 }
 
 sub _eval_keyword_schema ($class, $data, $schema, $state) {
-  # we can't always rely on metaschema information being set in $state (if we recursed into this
-  # subschema from a parent, where the data is not already set via $ref), and we need to do it now
-  # so the evaluator knows whether to look for an 'id' or an '$id' keyword next (which sets up the
-  # remaining data in $state).
+  # the dialect can change at any time, even in the middle of a document, where subsequent keywords
+  # and vocabularies can change; however if we came to this schema via a $ref it will already be
+  # set correctly
   $state->@{qw(specification_version vocabularies)} = $state->{evaluator}->_get_metaschema_vocabulary_classes($schema->{'$schema'})->@*;
   return 1;
 }
