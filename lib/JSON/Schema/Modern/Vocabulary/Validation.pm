@@ -67,7 +67,7 @@ sub _traverse_keyword_type ($class, $schema, $state) {
 }
 
 sub _eval_keyword_type ($class, $data, $schema, $state) {
-  my $type = get_type($data, $state->{spec_version} eq 'draft4' ? { legacy_ints => 1 } : ());
+  my $type = get_type($data, $state->{specification_version} eq 'draft4' ? { legacy_ints => 1 } : ());
   my @want = is_plain_arrayref($schema->{type}) ? $schema->{type}->@* : $schema->{type};
 
   return 1 if any {
@@ -136,7 +136,7 @@ sub _eval_keyword_maximum ($class, $data, $schema, $state) {
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
 
   return 1 if 0+$data < $schema->{maximum};
-  if ($state->{spec_version} eq 'draft4' and $schema->{exclusiveMaximum}) {
+  if ($state->{specification_version} eq 'draft4' and $schema->{exclusiveMaximum}) {
     return E($state, 'value is greater than or equal to %s', sprintf_num($schema->{maximum}));
   }
   else {
@@ -146,7 +146,7 @@ sub _eval_keyword_maximum ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_exclusiveMaximum ($class, $schema, $state) {
-  return _assert_number($class, $schema, $state) if $state->{spec_version} ne 'draft4';
+  return _assert_number($class, $schema, $state) if $state->{specification_version} ne 'draft4';
 
   return if not assert_keyword_type($state, $schema, 'boolean');
   return E($state, 'use of exclusiveMaximum requires the presence of maximum')
@@ -156,7 +156,7 @@ sub _traverse_keyword_exclusiveMaximum ($class, $schema, $state) {
 
 sub _eval_keyword_exclusiveMaximum ($class, $data, $schema, $state) {
   # we do the work in maximum for draft4 so we don't generate multiple errors
-  return 1 if $state->{spec_version} eq 'draft4';
+  return 1 if $state->{specification_version} eq 'draft4';
 
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
@@ -172,7 +172,7 @@ sub _eval_keyword_minimum ($class, $data, $schema, $state) {
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
 
   return 1 if 0+$data > $schema->{minimum};
-  if ($state->{spec_version} eq 'draft4' and $schema->{exclusiveMinimum}) {
+  if ($state->{specification_version} eq 'draft4' and $schema->{exclusiveMinimum}) {
     return E($state, 'value is less than or equal to %s', sprintf_num($schema->{minimum}));
   }
   else {
@@ -182,7 +182,7 @@ sub _eval_keyword_minimum ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_exclusiveMinimum ($class, $schema, $state) {
-  return _assert_number($class, $schema, $state) if $state->{spec_version} ne 'draft4';
+  return _assert_number($class, $schema, $state) if $state->{specification_version} ne 'draft4';
 
   return if not assert_keyword_type($state, $schema, 'boolean');
   return E($state, 'use of exclusiveMinimum requires the presence of minimum')
@@ -192,7 +192,7 @@ sub _traverse_keyword_exclusiveMinimum ($class, $schema, $state) {
 
 sub _eval_keyword_exclusiveMinimum ($class, $data, $schema, $state) {
   # we do the work in minimum for draft4 so we don't generate multiple errors
-  return 1 if $state->{spec_version} eq 'draft4';
+  return 1 if $state->{specification_version} eq 'draft4';
 
   return 1 if not is_type('number', $data)
     and not ($state->{stringy_numbers} and is_type('string', $data) and looks_like_number($data));
@@ -283,7 +283,7 @@ sub _eval_keyword_minProperties ($class, $data, $schema, $state) {
 
 sub _traverse_keyword_required ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
-  return E($state, '"required" array is empty') if $state->{spec_version} eq 'draft4' and not $schema->{required}->@*;
+  return E($state, '"required" array is empty') if $state->{specification_version} eq 'draft4' and not $schema->{required}->@*;
   return E($state, '"required" element is not a string')
     if any { !is_type('string', $_) } $schema->{required}->@*;
   return E($state, '"required" values are not unique') if not is_elements_unique($schema->{required});

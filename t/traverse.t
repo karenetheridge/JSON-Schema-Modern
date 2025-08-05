@@ -143,7 +143,7 @@ subtest 'default metaschema' => sub {
   cmp_result(
     $state,
     superhashof({
-      spec_version => 'draft2020-12',
+      specification_version => 'draft2020-12',
       metaschema_uri => str(JSON::Schema::Modern::METASCHEMA_URIS->{'draft2020-12'}),
       initial_schema_uri => str(''),
       vocabularies => [
@@ -196,7 +196,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
     $state,
     superhashof({
       metaschema_uri => 'http://json-schema.org/draft-07/schema',
-      spec_version => 'draft7',
+      specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
@@ -249,7 +249,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
         },
       },
       metaschema_uri => 'http://json-schema.org/draft-07/schema',
-      spec_version => 'draft7',
+      specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
@@ -449,7 +449,7 @@ subtest 'traverse with overridden specification_version' => sub {
     superhashof({
       errors => [],
       metaschema_uri => 'http://json-schema.org/draft-07/schema',
-      spec_version => 'draft7',
+      specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
@@ -462,7 +462,7 @@ subtest 'traverse with overridden specification_version' => sub {
     superhashof({
       errors => [],
       metaschema_uri => 'https://json-schema.org/draft/2020-12/schema',
-      spec_version => 'draft2020-12',
+      specification_version => 'draft2020-12',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated) ],
     }),
@@ -475,7 +475,7 @@ subtest 'traverse with overridden specification_version' => sub {
     superhashof({
       errors => [],
       metaschema_uri => 'https://json-schema.org/draft/2019-09/schema',
-      spec_version => 'draft2019-09',
+      specification_version => 'draft2019-09',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
@@ -490,7 +490,7 @@ subtest 'traverse with overridden specification_version' => sub {
     superhashof({
       errors => [],
       metaschema_uri => 'http://json-schema.org/draft-04/schema',
-      spec_version => 'draft4',
+      specification_version => 'draft4',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator MetaData) ],
     }),
@@ -625,7 +625,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
         },
       },
       metaschema_uri => 'https://my/first/metaschema',
-      spec_version => 'draft2019-09',
+      specification_version => 'draft2019-09',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Core Applicator) ],
     }),
     'determined specification version and vocabularies to use for this schema from override',
@@ -654,7 +654,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
         },
       },
       metaschema_uri => 'http://json-schema.org/draft-07/schema',
-      spec_version => 'draft7',
+      specification_version => 'draft7',
       vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
         qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
     }),
@@ -676,7 +676,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
         identifiers => {
           $third_id => { $state_copy->{identifiers}{$id}->%*, canonical_uri => str($third_id) },
         },
-        $state_copy->%{qw(metaschema_uri spec_version vocabularies)},
+        $state_copy->%{qw(metaschema_uri specification_version vocabularies)},
       }),
     'when $schema keyword is used, custom metaschema_uri is never parsed, so there are no errors',
   );

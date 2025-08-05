@@ -331,11 +331,11 @@ subtest 'valid keywords' => sub {
     my $js = JSON::Schema::Modern->new;
     print STDERR "{\n";
     foreach my $spec_version (sort { length($a) <=> length($b) || $a cmp $b } $js->SPECIFICATION_VERSIONS_SUPPORTED->@*) {
-      # spec_version -> metaschema uri
+      # specification_version -> metaschema uri
       my $metaschema_uri = $js->METASCHEMA_URIS->{$spec_version};
       print STDERR "  # $spec_version -> $metaschema_uri\n";
 
-      # metaschema uri -> vocab list:  [ spec_version, [ vocab classes ] ]
+      # metaschema uri -> vocab list:  [ specification_version, [ vocab classes ] ]
       foreach my $metaschema_info ($js->_get_metaschema_vocabulary_classes($metaschema_uri)) {
         print STDERR "  '$spec_version' => {\n";
         foreach my $class (sort $metaschema_info->[1]->@*) {

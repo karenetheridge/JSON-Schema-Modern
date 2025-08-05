@@ -1236,7 +1236,7 @@ subtest 'reference to a non-schema location' => sub {
       return {
         initial_schema_uri => $self->canonical_uri,
         errors => [],
-        spec_version => 'draft2020-12',
+        specification_version => 'draft2020-12',
         vocabularies => [],
         configs => {},
         identifiers => {},

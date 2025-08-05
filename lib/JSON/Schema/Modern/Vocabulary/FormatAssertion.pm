@@ -202,7 +202,7 @@ sub keywords ($class, $spec_version) {
   sub _get_default_format_validation ($class, $state, $format) {
     # all core formats are of type string (so far)
     return { type => 'string', sub => $formats->{$format} }
-      if grep $format eq $_, $formats_by_spec_version{$state->{spec_version}}->@*
+      if grep $format eq $_, $formats_by_spec_version{$state->{specification_version}}->@*
         and $formats->{$format};
   }
 }

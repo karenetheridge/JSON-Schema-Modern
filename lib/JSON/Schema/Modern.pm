@@ -314,7 +314,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     initial_schema_uri => $initial_uri,     # the canonical URI as of the start of this method or last $id
     traversed_schema_path => $initial_path, # the accumulated traversal path as of the start or last $id
     schema_path => '',                      # the rest of the path, since the start of this method or last $id
-    spec_version => $spec_version,
+    specification_version => $spec_version,
     errors => [],
     identifiers => {},
     subschemas => [],
@@ -327,7 +327,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
   my $valid = 1;
 
   try {
-    # determine the initial value of spec_version and vocabularies, so we have something to start
+    # determine the initial value of specification_version and vocabularies, so we have something to start
     # with in _traverse_subschema().
     # a subsequent "$schema" keyword can still change these values, and it is always processed
     # first, so the override is skipped if the keyword exists in the schema
@@ -336,7 +336,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
         : $config_override->{metaschema_uri}) // $self->METASCHEMA_URIS->{$spec_version};
 
     if (my $metaschema_info = $self->_get_metaschema_vocabulary_classes($state->{metaschema_uri})) {
-      $state->@{qw(spec_version vocabularies)} = @$metaschema_info;
+      $state->@{qw(specification_version vocabularies)} = @$metaschema_info;
     }
     else {
       # metaschema has not been processed for vocabularies yet...
@@ -423,7 +423,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       dynamic_scope => [ $schema_info->{canonical_uri} ],
       annotations => [],
       seen => {},
-      spec_version => $schema_info->{specification_version},
+      specification_version => $schema_info->{specification_version},
       vocabularies => $schema_info->{vocabularies},
       callbacks => $config_override->{callbacks} // {},
       evaluator => $self,
@@ -609,9 +609,9 @@ sub _traverse_subschema ($self, $schema, $state) {
     for (my $keyword_index = 0;
         $keyword_index < ($keyword_list //= do {
           use autovivification qw(fetch store);
-          $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{traverse} //= [
+          $vocabulary_cache->{$state->{specification_version}}{$vocabulary}{traverse} //= [
             map [ $_ => $vocabulary->can('_traverse_keyword_'.($_ =~ s/^\$//r)) ],
-              $vocabulary->keywords($state->{spec_version})
+              $vocabulary->keywords($state->{specification_version})
           ];
         })->@*;
         $keyword_index++) {
@@ -619,12 +619,12 @@ sub _traverse_subschema ($self, $schema, $state) {
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
-      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]$/;
 
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
 
-      my $old_spec_version = $state->{spec_version};
+      my $old_spec_version = $state->{specification_version};
       my $error_count = $state->{errors}->@*;
 
       if (not $sub->($vocabulary, $schema, $state)) {
@@ -637,7 +637,7 @@ sub _traverse_subschema ($self, $schema, $state) {
         if $error_count != $state->{errors}->@*;
 
       # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing
-      undef $keyword_list if $state->{spec_version} ne $old_spec_version;
+      undef $keyword_list if $state->{specification_version} ne $old_spec_version;
 
       if (my $callback = $state->{callbacks}{$keyword}) {
         $error_count = $state->{errors}->@*;
@@ -662,11 +662,11 @@ sub _traverse_subschema ($self, $schema, $state) {
   }
 
   # check for previously-supported but now removed keywords
-  foreach my $keyword (sort keys $removed_keywords{$state->{spec_version}}->%*) {
+  foreach my $keyword (sort keys $removed_keywords{$state->{specification_version}}->%*) {
     next if not exists $schema->{$keyword};
     my $message ='no-longer-supported "'.$keyword.'" keyword present (at location "'
       .canonical_uri($state).'")';
-    if (my $alternates = $removed_keywords{$state->{spec_version}}->{$keyword}) {
+    if (my $alternates = $removed_keywords{$state->{specification_version}}->{$keyword}) {
       my @list = map '"'.$_.'"', @$alternates;
       @list = ((map $_.',', @list[0..$#list-1]), $list[-1]) if @list > 2;
       splice(@list, -1, 0, 'or') if @list > 1;
@@ -741,9 +741,9 @@ sub _eval_subschema ($self, $data, $schema, $state) {
     for (my $keyword_index = 0;
         $keyword_index < ($keyword_list //= do {
           use autovivification qw(fetch store);
-          $vocabulary_cache->{$state->{spec_version}}{$vocabulary}{evaluate} //= [
+          $vocabulary_cache->{$state->{specification_version}}{$vocabulary}{evaluate} //= [
             map [ $_ => $vocabulary->can('_eval_keyword_'.($_ =~ s/^\$//r)) ],
-              $vocabulary->keywords($state->{spec_version})
+              $vocabulary->keywords($state->{specification_version})
           ];
         })->@*;
         $keyword_index++) {
@@ -751,13 +751,13 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
-      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{spec_version} =~ /^draft[467]$/;
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]$/;
 
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
 
       if ($sub) {
-        my $old_spec_version = $state->{spec_version};
+        my $old_spec_version = $state->{specification_version};
         my $error_count = $state->{errors}->@*;
 
         try {
@@ -779,7 +779,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
         }
 
         # a keyword changed the keyword list for this vocabulary; re-fetch the list before continuing
-        undef $keyword_list if $state->{spec_version} ne $old_spec_version;
+        undef $keyword_list if $state->{specification_version} ne $old_spec_version;
       }
 
       if (my $callback = ($state->{callbacks}//{})->{$keyword}) {
@@ -822,7 +822,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
     $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 1 foreach @evaluated_properties;
   }
 
-  if ($valid and $state->{collect_annotations} and $state->{spec_version} !~ /^draft(?:7|2019-09)$/) {
+  if ($valid and $state->{collect_annotations} and $state->{specification_version} !~ /^draft(?:7|2019-09)$/) {
     annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
       foreach sort keys %unknown_keywords;
   }
@@ -890,7 +890,7 @@ sub _add_resource ($self, @kvs) {
   }
 }
 
-# $vocabulary uri (not its $id!) => [ spec_version, class ]
+# $vocabulary uri (not its $id!) => [ specification_version, class ]
 has _vocabulary_classes => (
   is => 'bare',
   isa => HashRef[
@@ -930,7 +930,7 @@ sub add_vocabulary ($self, $classname) {
   }
 }
 
-# $schema uri => [ spec_version, [ vocab classes, in evaluation order ] ].
+# $schema uri => [ specification_version, [ vocab classes, in evaluation order ] ].
 has _metaschema_vocabulary_classes => (
   is => 'bare',
   isa => HashRef[

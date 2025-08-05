@@ -60,11 +60,11 @@ sub _traverse_keyword_id ($class, $schema, $state) {
 
   if (length $uri->fragment) {
     return E($state, '%s value "%s" cannot have a non-empty fragment', $state->{keyword}, $schema->{$state->{keyword}})
-      if $state->{spec_version} !~ /^draft[467]$/;
+      if $state->{specification_version} !~ /^draft[467]$/;
 
     if (length(my $base = $uri->clone->fragment(undef))) {
       return E($state, '$id cannot change the base uri at the same time as declaring an anchor')
-        if $state->{spec_version} =~ /^draft[67]$/;
+        if $state->{specification_version} =~ /^draft[67]$/;
 
       # only permitted in draft4: add an id and an anchor via the single 'id' keyword
       return if not $class->__create_identifier($base, $state);
@@ -98,7 +98,7 @@ sub __create_identifier ($class, $uri, $state) {
   $state->{identifiers}{$uri} = {
     path => $state->{traversed_schema_path},
     canonical_uri => $uri,
-    specification_version => $state->{spec_version}, # note! $schema keyword can change this
+    specification_version => $state->{specification_version}, # note! $schema keyword can change this
     vocabularies => $state->{vocabularies}, # reference, not copy
     configs => $state->{configs},
   };
@@ -110,7 +110,7 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   # we already indexed the anchor uri, so there is nothing more to do at evaluation time.
   # we explicitly do NOT set $state->{initial_schema_uri} or change any other $state values.
   return 1
-    if $state->{spec_version} =~ /^draft[467]$/ and $schema->{$state->{keyword}} =~ /^#/;
+    if $state->{specification_version} =~ /^draft[467]$/ and $schema->{$state->{keyword}} =~ /^#/;
 
   my $schema_info = $state->{evaluator}->_fetch_from_uri($state->{initial_schema_uri}->clone->fragment($state->{schema_path}));
 
@@ -126,7 +126,7 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
   $state->{schema_path} = '';
   # these will already be set if there is an adjacent $schema keyword, or if we are here via a $ref
-  $state->{spec_version} = $schema_info->{specification_version};
+  $state->{specification_version} = $schema_info->{specification_version};
   $state->{vocabularies} = $schema_info->{vocabularies};
 
   $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
@@ -187,7 +187,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     if exists $schema->{'$ref'} and $spec_version =~ /^draft[467]$/;
 
   $state->{evaluator}->_set_metaschema_vocabulary_classes($schema->{'$schema'}, [ $spec_version, $vocabularies ]);
-  $state->@{qw(spec_version vocabularies metaschema_uri)} = ($spec_version, $vocabularies, $schema->{'$schema'} =~ s/#$//r);
+  $state->@{qw(specification_version vocabularies metaschema_uri)} = ($spec_version, $vocabularies, $schema->{'$schema'} =~ s/#$//r);
   return 1;
 }
 
@@ -196,7 +196,7 @@ sub _eval_keyword_schema ($class, $data, $schema, $state) {
   # subschema from a parent, where the data is not already set via $ref), and we need to do it now
   # so the evaluator knows whether to look for an 'id' or an '$id' keyword next (which sets up the
   # remaining data in $state).
-  $state->@{qw(spec_version vocabularies)} = $state->{evaluator}->_get_metaschema_vocabulary_classes($schema->{'$schema'})->@*;
+  $state->@{qw(specification_version vocabularies)} = $state->{evaluator}->_get_metaschema_vocabulary_classes($schema->{'$schema'})->@*;
   return 1;
 }
 
@@ -205,13 +205,13 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
 
   my $anchor = $schema->{$state->{keyword}};
   return E($state, '%s value "%s" does not match required syntax', $state->{keyword}, $anchor)
-    if $state->{spec_version} =~ /^draft[467]$/  and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*$/
-      or $state->{spec_version} eq 'draft2019-09' and $anchor !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
-      or $state->{spec_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
+    if $state->{specification_version} =~ /^draft[467]$/  and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*$/
+      or $state->{specification_version} eq 'draft2019-09' and $anchor !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
+      or $state->{specification_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
 
   my $canonical_uri = canonical_uri($state);
 
-  $anchor =~ s/^#// if $state->{spec_version} =~ /^draft[467]$/;
+  $anchor =~ s/^#// if $state->{specification_version} =~ /^draft[467]$/;
   my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($anchor);
   my $base_uri = $canonical_uri->clone->fragment(undef);
 
@@ -248,7 +248,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
       # resource index.
       canonical_uri => $base_uri,
       path => $base_path,
-      specification_version => $state->{spec_version},
+      specification_version => $state->{specification_version},
       vocabularies => $state->{vocabularies}, # reference, not copy
       configs => $state->{configs},
       anchors => {

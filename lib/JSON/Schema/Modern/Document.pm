@@ -181,7 +181,7 @@ sub BUILD ($self, $args) {
   $self->_add_resource($self->original_uri.'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
-      specification_version => $state->{spec_version},
+      specification_version => $state->{specification_version},
       vocabularies => $state->{vocabularies},
       configs => $state->{configs},
     })
