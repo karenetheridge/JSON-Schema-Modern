@@ -21,7 +21,7 @@ use Helper;
   like(
     exception { ()= JSON::Schema::Modern->new(specification_version => 'ohhai')->evaluate(true, true) },
     qr/^Value "ohhai" did not pass type constraint/,
-    'unrecognized $SPECIFICATION_VERSION',
+    'unrecognized specification_version',
   );
 }
 
