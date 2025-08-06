@@ -97,7 +97,7 @@ sub __create_identifier ($class, $uri, $state) {
   $state->{identifiers}{$uri} = {
     path => $state->{traversed_schema_path},
     canonical_uri => $uri,
-    $state->%{qw(specification_version vocabularies configs)},
+    $state->%{qw(specification_version vocabularies)},
   };
 
   return 1;
@@ -126,7 +126,6 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{schema_path} = '';
   $state->@{qw(specification_version vocabularies)} = $schema_info->@{qw(specification_version vocabularies)};
 
-  $state->@{keys $state->{configs}->%*} = values $state->{configs}->%*;
   push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
 
   return 1;
@@ -244,7 +243,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
       # resource index.
       canonical_uri => $base_uri,
       path => $base_path,
-      $state->%{qw(specification_version vocabularies configs)},
+      $state->%{qw(specification_version vocabularies)},
       anchors => {
         $anchor => {
           canonical_uri => $canonical_uri,

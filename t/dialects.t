@@ -1099,7 +1099,6 @@ subtest '$vocabulary syntax' => sub {
         map 'JSON::Schema::Modern::Vocabulary::'.$_,
           qw(Core Validation FormatAnnotation Applicator Content MetaData Unevaluated),
       ],
-      configs => {},
     },
     'metaschemas are not saved on the resource',
   );
@@ -1683,7 +1682,6 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
         map 'JSON::Schema::Modern::Vocabulary::'.$_,
           qw(Core Applicator),
       ],
-      configs => {},
     },
     'determined vocabularies to use for this schema',
   );

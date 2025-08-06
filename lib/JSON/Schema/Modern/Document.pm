@@ -72,7 +72,6 @@ has resource_index => (
       specification_version => Enum[qw(draft4 draft6 draft7 draft2019-09 draft2020-12)],
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
-      configs => HashRef,
       anchors => Optional[HashRef[Dict[
         canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
         path => $path_type,
@@ -181,7 +180,7 @@ sub BUILD ($self, $args) {
   $self->_add_resource($self->original_uri.'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
-      $state->%{qw(specification_version vocabularies configs)},
+      $state->%{qw(specification_version vocabularies)},
     })
   if not $seen_root;
 

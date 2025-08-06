@@ -24,7 +24,6 @@ my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabular
 my %dialect = (
   specification_version => 'draft2020-12',
   vocabularies => $vocabularies{'draft2020-12'},
-  configs => {},
 );
 
 subtest 'boolean document' => sub {
@@ -697,14 +696,12 @@ subtest '$anchor not conforming to syntax' => sub {
           canonical_uri => str('https://foo.com'),
           specification_version => 'draft4',
           vocabularies => $vocabularies{'draft4'},
-          configs => {},
         },
         'https://foo.com/blah' => {
           path => '/definitions/qux',
           canonical_uri => str('https://foo.com/blah'),
           specification_version => 'draft4',
           vocabularies => $vocabularies{'draft4'},
-          configs => {},
           anchors => {
             weird_but_legal => {
               path => '/definitions/qux',
@@ -1077,7 +1074,6 @@ subtest 'custom metaschema_uri' => sub {
         map 'JSON::Schema::Modern::Vocabulary::'.$_,
           qw(Core Applicator),
       ],
-      configs => {},
     },
     'determined vocabularies to use for this schema',
   );

@@ -24,7 +24,6 @@ my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabular
 my %dialect = (
   specification_version => 'draft2020-12',
   vocabularies => $vocabularies{'draft2020-12'},
-  configs => {},
 );
 
 subtest '$id sets canonical uri' => sub {

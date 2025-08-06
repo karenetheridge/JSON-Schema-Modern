@@ -82,7 +82,6 @@ sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
 
   return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
     +{
-      $schema_info->{configs}->%*,
       %$state,
       # keyword is assumed to be json pointer-encoded (if a suffix path is needed), so we just concat
       traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},

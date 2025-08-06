@@ -1238,7 +1238,6 @@ subtest 'reference to a non-schema location' => sub {
         errors => [],
         specification_version => 'draft2020-12',
         vocabularies => [],
-        configs => {},
         identifiers => {},
         subschemas => [],
       };

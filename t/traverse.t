@@ -225,7 +225,6 @@ subtest 'traversing a dialect with different core keywords' => sub {
           path => '',
           canonical_uri => str(''),
           specification_version => 'draft7',
-          configs => {},
           vocabularies => [
             map 'JSON::Schema::Modern::Vocabulary::'.$_,
               qw(Core Validation FormatAnnotation Applicator Content MetaData),
@@ -241,7 +240,6 @@ subtest 'traversing a dialect with different core keywords' => sub {
           path => '/definitions/bloop',
           canonical_uri => str('/bloop'),
           specification_version => 'draft7',
-          configs => {},
           vocabularies => [
             map 'JSON::Schema::Modern::Vocabulary::'.$_,
               qw(Core Validation FormatAnnotation Applicator Content MetaData),
@@ -400,7 +398,6 @@ subtest '$anchor without $id' => sub {
         canonical_uri => str(''),
         specification_version => 'draft2020-12',
         vocabularies => ignore,
-        configs => {},
         anchors => {
           root_anchor => {
             path => '',
@@ -427,7 +424,6 @@ subtest '$anchor without $id' => sub {
         canonical_uri => str(''),
         specification_version => 'draft2020-12',
         vocabularies => ignore,
-        configs => {},
         anchors => {
           foo_anchor => {
             path => '/properties/foo',
@@ -621,7 +617,6 @@ subtest 'traverse with overridden metaschema_uri' => sub {
           path => '',
           specification_version => 'draft2019-09',
           vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_, qw(Core Applicator) ],
-          configs => {},
         },
       },
       metaschema_uri => 'https://my/first/metaschema',
@@ -650,7 +645,6 @@ subtest 'traverse with overridden metaschema_uri' => sub {
           specification_version => 'draft7',
           vocabularies => [ map 'JSON::Schema::Modern::Vocabulary::'.$_,
             qw(Core Validation FormatAnnotation Applicator Content MetaData) ],
-          configs => {},
         },
       },
       metaschema_uri => 'http://json-schema.org/draft-07/schema',
@@ -770,7 +764,6 @@ subtest 'start traversing below the document root' => sub {
         path => '/components/alpha/subid/properties/myprop/allOf/0',
         specification_version => 'draft2020-12',
         vocabularies => ignore,
-        configs => {},
       },
     },
     'identifiers are correctly extracted when traversing below the document root',
@@ -819,7 +812,6 @@ subtest 'start traversing below the document root' => sub {
         path => '/components/alpha/subid/properties/alpha',
         specification_version => 'draft2020-12',
         vocabularies => ignore,
-        configs => {},
         anchors => {
           alpha_two_anchor => {
             canonical_uri => str('dir/alpha_id#/properties/alpha_two'),
@@ -836,14 +828,12 @@ subtest 'start traversing below the document root' => sub {
         path => '/components/alpha/subid/properties/alpha/properties/alpha_one',
         specification_version => 'draft2020-12',
         vocabularies => ignore,
-        configs => {},
       },
       'dir/my_subdocument' => {   # this is inferred when we process "$anchor": "beta_anchor"
         canonical_uri => str('dir/my_subdocument'),
         path => '/components/alpha',
         specification_version => 'draft2020-12',
         vocabularies => ignore,
-        configs => {},
         anchors => {
           beta_anchor => {
             canonical_uri => str('dir/my_subdocument#/subid/properties/beta'),

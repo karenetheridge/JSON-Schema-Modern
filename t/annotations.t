@@ -1278,18 +1278,6 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
   my $doc_properties = $js->add_schema('properties.json', { properties => { foo => true } });
 
   cmp_result(
-    $js->_get_resource('prefixItems.json')->{configs},
-    {},
-    'items.json does not need collect_annotations => 1 to evaluate itself',
-  );
-
-  cmp_result(
-    $js->_get_resource('properties.json')->{configs},
-    {},
-    'properties.json does not need collect_annotations => 1 to evaluate itself',
-  );
-
-  cmp_result(
     $js->evaluate(
       {
         item => [ 1 ],

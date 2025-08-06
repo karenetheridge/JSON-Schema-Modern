@@ -224,7 +224,7 @@ sub add_document {
     $uri_string = Mojo::URL->new($uri_string)->to_abs($base_uri)->to_string if length $base_uri;
 
     my $new_resource = {
-      $doc_resource->%{qw(path specification_version vocabularies configs)},
+      $doc_resource->%{qw(path specification_version vocabularies)},
       document => $document,
     };
 
@@ -318,7 +318,6 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     errors => [],
     identifiers => {},
     subschemas => [],
-    configs => {},
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
     traverse => 1,
@@ -386,7 +385,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     schema_path => '',                  # the rest of the path, since the start of evaluation or last $id or $ref
     errors => [],
     depth => 0,
-    configs => {},
   };
 
   # resolve locations against this for errors and annotations, if locations are not already absolute
@@ -425,7 +423,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       seen => {},
       callbacks => $config_override->{callbacks} // {},
       evaluator => $self,
-      $schema_info->{configs}->%*,
       (map {
         my $val = $config_override->{$_} // $self->$_;
         defined $val ? ( $_ => $val ) : ()
@@ -848,7 +845,6 @@ has _resource_index => (
         path => $path_type,
         dynamic => Optional[Bool],
       ]]],
-      configs => HashRef,
       Slurpy[HashRef[Undef]],  # no other fields allowed
     ]],
 );
@@ -1100,7 +1096,6 @@ sub _get_or_load_resource ($self, $uri) {
 # - document_path: the path relative to the document root for this schema
 # - specification_version: the specification version that applies to this schema
 # - vocabularies: the vocabularies to use when considering schema keywords
-# - configs: the config overrides to set when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri ($self, $uri_reference) {
   $uri_reference = Mojo::URL->new($uri_reference) if not is_schema($uri_reference);
@@ -1150,7 +1145,7 @@ sub _fetch_from_uri ($self, $uri_reference) {
       schema => $subschema,
       canonical_uri => $canonical_uri,
       document_path => $document_path,
-      $closest_resource->[1]->%{qw(document specification_version vocabularies configs)}, # reference, not copy
+      $closest_resource->[1]->%{qw(document specification_version vocabularies)}, # reference, not copy
     };
   }
   else {  # we are following a URI with a plain-name fragment
@@ -1159,7 +1154,7 @@ sub _fetch_from_uri ($self, $uri_reference) {
       schema => $resource->{document}->get($subresource->{path}),
       canonical_uri => $subresource->{canonical_uri}, # this is *not* the anchor-containing URI
       document_path => $subresource->{path},
-      $resource->%{qw(document specification_version vocabularies configs)}, # reference, not copy
+      $resource->%{qw(document specification_version vocabularies)}, # reference, not copy
     };
   }
 }
