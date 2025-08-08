@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - various internal changes for performance improvement
 
 0.616     2025-07-26 23:15:28Z
           - documentation notes added for which definitions can be overridden
