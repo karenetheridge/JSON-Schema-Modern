@@ -156,6 +156,7 @@ sub BUILD ($self, $args) {
   # note! not a clone! Please don't change canonical_uri in-place.
   $self->_set_original_uri($self->canonical_uri);
 
+  # this should extract all identifiers and entities, and set canonical_uri, metaschema_uri
   my $state = $self->traverse(
     $args->{evaluator} // JSON::Schema::Modern->new,
     $args->{specification_version} ? +{ $args->%{specification_version} } : (),
@@ -183,8 +184,6 @@ sub BUILD ($self, $args) {
       $state->%{qw(specification_version vocabularies)},
     })
   if not $seen_root;
-
-  $self->_add_entity_location($_, 'schema') foreach $state->{subschemas}->@*;
 }
 
 # a subclass's method will override this one
@@ -211,6 +210,8 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   # (e.g. "$self" in OpenAPI)
   $self->_set_canonical_uri($state->{initial_schema_uri});
   $self->_set_metaschema_uri($state->{metaschema_uri});
+
+  $self->_add_entity_location($_, 'schema') foreach $state->{subschemas}->@*;
 
   return $state;
 }
@@ -394,7 +395,9 @@ This class can be subclassed to describe documents of other types, which follow 
 (has a document-level identifier and may contain internal referenceable identifiers). The overall
 document itself may not be a JSON Schema, but it may contain JSON Schemas internally. Referenceable
 entities may or may not be JSON Schemas. As long as the C<traverse> method is implemented and the
-C<$state> object is respected, any other functionality may be contained by this subclass.
+C<$state> object is respected, any other functionality may be contained by this subclass. The
+C<traverse> method is responsible for finding any identifiers within the document, setting
+L</canonical_uri> and L</metaschema_uri>, and finding any C<$ref>abble entities within the document.
 
 To date, there is one subclass of JSON::Schema::Modern::Document:
 L<JSON::Schema::Modern::Document::OpenAPI>, which contains entities of type C<schema> as well as
