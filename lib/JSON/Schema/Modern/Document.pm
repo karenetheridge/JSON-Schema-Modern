@@ -217,7 +217,7 @@ sub traverse ($self, $evaluator, $config_override = {}) {
 }
 
 sub validate ($self, $evaluator = undef) {
-  $evaluator //= JSON::Schema::Modern->new;
+  $evaluator //= JSON::Schema::Modern->new(validate_formats => 1);
   return $evaluator->evaluate($self->schema, $self->metaschema_uri);
 }
 
