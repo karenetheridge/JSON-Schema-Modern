@@ -15,6 +15,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use List::Util 'unpairs';
 use builtin::compat 'refaddr';
+use Data::Dumper ();
 use lib 't/lib';
 use Helper;
 
@@ -88,7 +89,8 @@ subtest '$id sets canonical uri' => sub {
 
   my @blessed_values = grep ref($_), _find_all_values($doc1->schema);
   ok(!@blessed_values, 'the schema contains no blessed leaf nodes')
-    or diag 'found blessed values: ', explain [ map ref, @blessed_values ];
+    or diag 'found blessed values: ',
+      Data::Dumper->new([ map ref, @blessed_values ])->Indent(2)->Terse(1)->Sortkeys(1)->Dump;
 };
 
 subtest 'anchors' => sub {
