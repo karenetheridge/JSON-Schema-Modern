@@ -440,8 +440,8 @@ subtest 'AND two result objects together' => sub {
           depth => 0,
           mode => 'evaluate',
           keyword => 'keyword '.$count.'-'.$_,
-          instance_location => 'instance location '.$count.'-'.$_,
-          keyword_location => 'keyword location '.$count.'-'.$_,
+          instance_location => '/instance_location/'.$count.'-'.$_,
+          keyword_location => '/keyword_location/'.$count.'-'.$_,
           $valid ? (annotation => 'annotation '.$count.'-'.$_) : (error => 'error '.$count.'-'.$_),
         ), 0..1
       ],
@@ -455,15 +455,15 @@ subtest 'AND two result objects together' => sub {
       listmethods(
         errors => [
           map methods(TO_JSON => {
-            instanceLocation => 'instance location 0-'.$_,
-            keywordLocation => 'keyword location 0-'.$_,
+            instanceLocation => '/instance_location/0-'.$_,
+            keywordLocation => '/keyword_location/0-'.$_,
             error => 'error 0-'.$_,
           }), 0..1
         ],
         annotations => [
           map methods(TO_JSON => {
-            instanceLocation => 'instance location 1-'.$_,
-            keywordLocation => 'keyword location 1-'.$_,
+            instanceLocation => '/instance_location/1-'.$_,
+            keywordLocation => '/keyword_location/1-'.$_,
             annotation => 'annotation 1-'.$_,
           }), 0..1
         ],
@@ -481,8 +481,8 @@ subtest 'AND two result objects together' => sub {
           map {
             my $count = $_;
             map methods(TO_JSON => {
-              instanceLocation => 'instance location '.$count.'-'.$_,
-              keywordLocation => 'keyword location '.$count.'-'.$_,
+              instanceLocation => '/instance_location/'.$count.'-'.$_,
+              keywordLocation => '/keyword_location/'.$count.'-'.$_,
               annotation => 'annotation '.$count.'-'.$_,
             }), 0..1
           } 1,3
@@ -501,8 +501,8 @@ subtest 'AND two result objects together' => sub {
           map {
             my $count = $_;
             map methods(TO_JSON => {
-              instanceLocation => 'instance location '.$count.'-'.$_,
-              keywordLocation => 'keyword location '.$count.'-'.$_,
+              instanceLocation => '/instance_location/'.$count.'-'.$_,
+              keywordLocation => '/keyword_location/'.$count.'-'.$_,
               error => 'error '.$count.'-'.$_,
             }), 0..1
           } 0,2
@@ -532,8 +532,8 @@ subtest annotations => sub {
       JSON::Schema::Modern::Annotation->new(
         depth => 0,
         keyword => 'foo',
-        instance_location => 'instance location',
-        keyword_location => 'keyword location ',
+        instance_location => '/instance_location',
+        keyword_location => '/keyword_location ',
         annotation => 'annotation',
       )
     ],
@@ -545,8 +545,8 @@ subtest annotations => sub {
       valid => true,
       annotations => [
         {
-          instanceLocation => 'instance location',
-          keywordLocation => 'keyword location ',
+          instanceLocation => '/instance_location',
+          keywordLocation => '/keyword_location ',
           annotation => 'annotation',
         },
       ],

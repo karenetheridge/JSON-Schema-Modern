@@ -27,6 +27,7 @@ use Safe::Isa 1.000008;
 use MooX::TypeTiny;
 use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy Optional Bool);
 use Types::Common::Numeric 'PositiveOrZeroInt';
+use JSON::Schema::Modern::Utilities qw(json_pointer_type canonical_uri_type);
 use namespace::clean;
 
 extends 'Mojo::JSON::Pointer';
@@ -62,19 +63,17 @@ has metaschema_uri => (
 
 # "A JSON Schema resource is a schema which is canonically identified by an absolute URI."
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
-my $path_type = Str->where('m{^(?:/|$)}');  # JSON pointer relative to the document root
 has resource_index => (
   is => 'bare',
   isa => Map[my $resource_key_type = Str->where('!/#/'), my $resource_type = Dict[
-      # always stringwise-equal to the top level key
       canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
-      path => $path_type,
+      path => json_pointer_type,  # JSON pointer relative to the document root
       specification_version => Enum[qw(draft4 draft6 draft7 draft2019-09 draft2020-12)],
       # the vocabularies used when evaluating instance data against schema
       vocabularies => ArrayRef[ClassName->where(q{$_->DOES('JSON::Schema::Modern::Vocabulary')})],
       anchors => Optional[HashRef[Dict[
-        canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment or substr($_->fragment, 0, 1) eq '/'}),
-        path => $path_type,
+        canonical_uri => canonical_uri_type,  # equivalent uri with json pointer fragment
+        path => json_pointer_type,  # JSON pointer relative to the document root
         dynamic => Optional[Bool],
       ]]],
       Slurpy[HashRef[Undef]],  # no other fields allowed

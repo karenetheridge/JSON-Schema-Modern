@@ -21,7 +21,7 @@ no feature 'switch';
 use Safe::Isa;
 use Types::Standard qw(Str Undef InstanceOf);
 use Types::Common::Numeric 'PositiveOrZeroInt';
-use JSON::Schema::Modern::Utilities 'jsonp';
+use JSON::Schema::Modern::Utilities qw(jsonp json_pointer_type);
 use namespace::clean;
 
 has [qw(
@@ -29,7 +29,7 @@ has [qw(
   keyword_location
 )] => (
   is => 'ro',
-  isa => Str,
+  isa => json_pointer_type,
   required => 1,
 );
 

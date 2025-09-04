@@ -26,6 +26,7 @@ use Storable 'dclone';
 use Feature::Compat::Try;
 use Mojo::JSON ();
 use JSON::PP ();
+use Types::Standard qw(Str InstanceOf);
 use namespace::clean;
 
 use Exporter 'import';
@@ -53,6 +54,8 @@ our @EXPORT_OK = qw(
   sprintf_num
   true
   false
+  json_pointer_type
+  canonical_uri_type
 );
 
 use constant HAVE_BUILTIN => "$]" >= 5.035010;
@@ -487,6 +490,13 @@ sub sprintf_num ($value) {
   is_bignum($value) ? $value->bstr : sprintf('%s', $value);
 }
 
+# returns a reusable Types::Standard type for json pointers
+# TODO: move this off into its own distribution, see JSON::Schema::Types
+use constant json_pointer_type => Str->where('!length || m{^/} && !m{~(?![01])}');
+
+use constant canonical_uri_type =>
+  (InstanceOf['Mojo::URL'])->where(q{!defined($_->fragment) || $_->fragment =~ m{^/} && $_->fragment !~ m{~(?![01])}});
+
 1;
 __END__
 
@@ -502,6 +512,6 @@ This class contains internal utilities to be used by L<JSON::Schema::Modern>.
 
 =for Pod::Coverage is_type get_type is_bignum is_bool is_schema is_equal is_elements_unique jsonp unjsonp local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
-annotate_self sprintf_num HAVE_BUILTIN true false
+annotate_self sprintf_num HAVE_BUILTIN true false json_pointer_type canonical_uri_type
 
 =cut
