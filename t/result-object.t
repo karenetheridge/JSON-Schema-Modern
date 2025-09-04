@@ -613,4 +613,39 @@ subtest 'data_only' => sub {
   );
 };
 
+subtest 'construction errors' => sub {
+  my $error = JSON::Schema::Modern::Error->new(
+    error => 'oh no!',
+    mode => 'evaluate',
+    depth => 1,
+    keyword => 'me',
+    instance_location => '',
+    keyword_location => '',
+  );
+
+  like(
+    exception { JSON::Schema::Modern::Result->new(valid => true, errors => [$error]) },
+    qr/^inconsistent inputs: errors is not empty but valid is true/,
+    'valid results must not have errors',
+  );
+
+  like(
+    exception { JSON::Schema::Modern::Result->new(valid => false, errors => []) },
+    qr/^inconsistent inputs: errors is empty but valid is false/,
+    'invalid results must have errors',
+  );
+
+  is(
+    exception { JSON::Schema::Modern::Result->new(valid => true, errors => []) },
+    undef,
+    'no errors when valid is true and errors is empty',
+  );
+
+  is(
+    exception { JSON::Schema::Modern::Result->new(valid => false, errors => [$error]) },
+    undef,
+    'no errors when valid is false and errors is not empty',
+  );
+};
+
 done_testing;

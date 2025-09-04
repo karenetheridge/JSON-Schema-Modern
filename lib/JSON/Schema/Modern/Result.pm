@@ -121,12 +121,20 @@ around BUILDARGS => sub ($orig, $class, @args) {
   $args->{_annotations} = delete $args->{annotations} if
     exists $args->{annotations} and any { !blessed($_) } $args->{annotations}->@*;
 
+  croak 'inconsistent inputs: errors is not empty but valid is true'
+    if $args->{valid}
+      and (exists $args->{_errors} and $args->{_errors}->@*
+        or exists $args->{errors} and $args->{errors}->@*);
+
+  croak 'inconsistent inputs: errors is empty but valid is false'
+    if exists $args->{valid} and not $args->{valid}
+      and (not exists $args->{_errors} or not $args->{_errors}->@*)
+      and (not exists $args->{errors} or not $args->{errors}->@*);
+
   return $args;
 };
 
 sub BUILD ($self, $args) {
-  warn 'result is false but there are no errors' if not $self->valid and not $self->error_count;
-
   $self->{_errors} = $args->{_errors} if exists $args->{_errors};
   $self->{_annotations} = $args->{_annotations} if exists $args->{_annotations};
 }
