@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - the json-schema-eval executable now also handles YAML-encoded
+            schemas and data, via both files and STDIN, via string
+            autodetection
 
 0.617     2025-08-16 20:50:11Z
           - various internal changes for performance improvement
