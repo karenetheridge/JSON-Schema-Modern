@@ -104,7 +104,7 @@ else {
   $result = $js->evaluate($data, $schema, { effective_base_uri => 'file://'.$schema_filename });
 }
 
-say $result->dump;
+say $result->output_format eq 'data_only' ? $result : $result->dump;
 
 if ($opt->dump_identifiers) {
   $js->add_schema($schema) if $validate_schema;
