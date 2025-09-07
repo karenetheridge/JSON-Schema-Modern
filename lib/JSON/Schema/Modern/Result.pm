@@ -58,6 +58,8 @@ has exception => (
   default => sub ($self) { any { $_->exception or $_->error =~ /^EXCEPTION: / } $self->errors },
 );
 
+# has errors
+# has annotations
 # turn hashrefs in _errors or _annotations into blessed objects
 has $_.'s' => (
   is => 'bare',
@@ -303,7 +305,9 @@ The object also contains a I<bitwise AND> overload (C<&>), for combining two res
 result is valid iff both inputs are valid; annotations and errors from the second argument are
 appended to those of the first in a new Result object).
 
-=head1 ATTRIBUTES
+=head1 CONSTRUCTOR ARGUMENTS
+
+Unless otherwise noted, these are also available as read-only accessors.
 
 =head2 valid
 
@@ -313,15 +317,17 @@ Optional, as it can be calculated from the presence of C<errors> or C<annotation
 
 =head2 errors
 
-Returns an array of L<JSON::Schema::Modern::Error> objects.
+An array of L<JSON::Schema::Modern::Error> objects.
 
 =head2 annotations
 
-Returns an array of L<JSON::Schema::Modern::Annotation> objects.
+An array of L<JSON::Schema::Modern::Annotation> objects.
 
 =head2 output_format
 
 =for stopwords subschemas
+
+Also available as a read/write accessor.
 
 One of: C<flag>, C<basic>, C<strict_basic>, C<terse>, C<data_only>. Defaults to C<basic>.
 
@@ -366,6 +372,8 @@ C<< [ 400, <first error string> ] >> otherwise. The exact error string is hidden
 errors because you should not leak internal issues with your application, but you may also wish to
 obfuscate normal validation errors, in which case you should check for C<400> and change the string
 to C<'Bad Request'>.
+
+Also available as a read/write accessor.
 
 =head1 METHODS
 
