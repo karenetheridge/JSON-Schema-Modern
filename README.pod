@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.617
+version 0.618
 
 =head1 SYNOPSIS
 
@@ -604,6 +604,9 @@ types).
 Fetches the L<JSON::Schema::Modern::Document> object (or subclass) that contains the provided
 identifier (uri or uri-reference). C<undef> if the schema with that URI has not been loaded (or
 cached).
+
+Note: this _does not download a document from the network_. It only fetches the document from the
+internal cache in the C<JSON::Schema::Modern> document.
 
 =head1 CACHING
 
