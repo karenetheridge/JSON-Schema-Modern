@@ -1105,7 +1105,7 @@ subtest 'custom metaschema_uri' => sub {
   );
 
   cmp_result(
-    $doc->validate($js)->TO_JSON,
+    $doc->validate(evaluator => $js)->TO_JSON,
     { valid => true },
     'using the proper evaluator, schema validates against its metaschema, and "minimum" is ignored',
   );

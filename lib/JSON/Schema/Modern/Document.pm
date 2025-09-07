@@ -22,7 +22,7 @@ use Mojo::URL;
 use Carp 'croak';
 use List::Util 1.29 'pairs';
 use Ref::Util 0.100 'is_plain_hashref';
-use builtin::compat 'refaddr';
+use builtin::compat qw(refaddr blessed);
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
 use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict ArrayRef Enum ClassName Undef Slurpy Optional Bool);
@@ -215,9 +215,20 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   return $state;
 }
 
-sub validate ($self, $evaluator = undef) {
-  $evaluator //= JSON::Schema::Modern->new(validate_formats => 1);
-  return $evaluator->evaluate($self->schema, $self->metaschema_uri);
+sub validate ($class, @args) {
+  croak 'bad argument list' if blessed($args[0]);
+
+  my $args = $class->Moo::Object::BUILDARGS(@args);
+  my $document = blessed($class) ? $class : $class->new($args);
+
+  my $doc_result = JSON::Schema::Modern::Result->new(errors => [ $document->errors ]);
+
+  # ideally, the traverse phase run during document construction should have found all errors that a
+  # simple metaschema evaluation would reveal, but we'll do both just to make sure.
+  my $evaluator = $args->{evaluator} // JSON::Schema::Modern->new(validate_formats => 1);
+  my $eval_result = $evaluator->evaluate($document->schema, $document->metaschema_uri);
+
+  return $doc_result & $eval_result;
 }
 
 # callback hook for Sereal::Encoder
@@ -255,8 +266,6 @@ __END__
     );
     my $foo_definition = $document->get('/$defs/foo');
     my %resource_index = $document->resource_index;
-
-    my sanity_check = $document->validate;
 
 =head1 DESCRIPTION
 
@@ -369,18 +378,22 @@ See L<Mojo::JSON::Pointer/get>.
 
 =head2 validate
 
-  $result = $document->validate;
-  $result = $document->validate($evaluator);
+  $result = JSON::Schema::Modern::Document->validate(<normal constructor arguments>);
 
-Evaluates the document against its metaschema. See L<JSON::Schema::Modern/evaluate>.
-For regular JSON Schemas this is redundant with creating the document in the first place (as it
-includes a validation check), but for some subclasses of this class, additional things might be
-checked that are not caught by document creation.
+Constructs the document object, and then performs a further sanity check by evaluating the document
+against its metaschema. (See L<JSON::Schema::Modern/evaluate>.) This is preferred to simply
+attempting to add the document to the evaluator with L<JSON::Schema::Modern/add_schema> in cases
+where the document's sanity is not known, as that method will die if errors are encountered.
 
-If the document's metaschema is one of the core bundled metaschemas (see
+As with calling C<new>, if the document's metaschema is one of the core bundled metaschemas (see
 L<JSON::Schema::Modern/BUNDLED META-SCHEMAS>), the C<$evaluator> argument is optional, as these
 metaschemas are available to all evaluator instances; otherwise (you are using a custom metaschema),
-you must provide the same evaluator instance as was used to construct the document object.
+you must provide the same evaluator instance as would be used to construct the document object.
+
+Returns a L<JSON::Schema::Modern::Result> object containing the final result.
+
+See also L<JSON::Schema::Modern/validate_schema>, which is nearly equivalent but only works for
+JSON Schemas, not any potential subclass of JSON::Schema::Modern::Document.
 
 =head2 TO_JSON
 

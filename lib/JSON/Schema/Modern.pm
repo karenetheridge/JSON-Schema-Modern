@@ -209,6 +209,7 @@ sub add_document {
   my $document = shift;
   croak 'wrong document type' if not $document->$_isa('JSON::Schema::Modern::Document');
 
+  # we will never add a document to the resource index if it has errors
   die JSON::Schema::Modern::Result->new(
     output_format => $self->output_format,
     valid => 0,
@@ -1751,6 +1752,9 @@ types).
 Fetches the L<JSON::Schema::Modern::Document> object (or subclass) that contains the provided
 identifier (uri or uri-reference). C<undef> if the schema with that URI has not been loaded (or
 cached).
+
+Note: this _does not download a document from the network_. It only fetches the document from the
+internal cache in the C<JSON::Schema::Modern> document.
 
 =head1 CACHING
 
