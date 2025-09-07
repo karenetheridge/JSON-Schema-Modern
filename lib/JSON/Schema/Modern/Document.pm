@@ -261,11 +261,11 @@ __END__
 
     my $document = JSON::Schema::Modern::Document->new(
       canonical_uri => 'https://example.com/v1/schema',
-      metaschema_uri => 'https://example.com/my/custom/metaschema',
       schema => $schema,
     );
     my $foo_definition = $document->get('/$defs/foo');
     my %resource_index = $document->resource_index;
+    my $metaschema_uri = $document->metaschema_uri;
 
 =head1 DESCRIPTION
 
@@ -295,8 +295,9 @@ The original passed-in value is saved in L</original_uri>.
 
 Sets the metaschema that is used to describe the document (or more specifically, any JSON Schemas
 contained within the document), which determines the
-specification version and vocabularies used during evaluation. Does not override any
-C<$schema> keyword actually present in the schema document.
+specification version and vocabularies used during evaluation.
+Does not override any C<$schema> keyword actually present in the schema document, and normally you
+should use this keyword instead.
 
 =head2 specification_version
 
