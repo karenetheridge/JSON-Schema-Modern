@@ -46,7 +46,8 @@ has valid => (
   is => 'ro',
   isa => Bool|InstanceOf('JSON::PP::true')|InstanceOf('JSON::PP::false'),
   coerce => sub { $_[0] ? true : false }, # might be JSON::PP::* or builtin::* booleans
-  required => 1,
+  lazy => 1,
+  default => sub ($self) { $self->error_count == 0 },
 );
 sub result { goto \&valid } # backcompat only
 
@@ -307,6 +308,8 @@ appended to those of the first in a new Result object).
 =head2 valid
 
 A boolean. Indicates whether validation was successful or failed.
+
+Optional, as it can be calculated from the presence of C<errors> or C<annotations>.
 
 =head2 errors
 
