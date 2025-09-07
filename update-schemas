@@ -10,7 +10,7 @@ no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use Path::Tiny;
-use HTTP::Tiny;
+use Mojo::UserAgent;
 use Digest::MD5 'md5_hex';
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use lib 'lib';
@@ -48,18 +48,20 @@ my %files = (
   'LICENSE' => 'https://raw.githubusercontent.com/json-schema-org/json-schema-spec/main/LICENSE',
 );
 
+my $ua = Mojo::UserAgent->new(max_redirects => 3);
 my %checksums;
 
-foreach my $target (keys %files) {
-  my $source_uri = $files{$target};
+foreach my $target (sort keys %files) {
+  my $uri = $files{$target};
+
+  say "# fetching $uri -> share/$target" if $ENV{DEBUG};
+  my $res = $ua->get($uri)->result;
+  die "Failed to fetch $uri", $res->code, " ", $res->message if $res->is_error;
+
   $target = path('share', $target);
   $target->parent->mkpath;
-
-  my $response = HTTP::Tiny->new->get($source_uri);
-  die "Failed to fetch $source_uri: $response->{status} $response->{reason}" if not $response->{success};
-
-  $target->spew_raw($response->{content});
-  $checksums{$target} = md5_hex($response->{content});
+  $target->spew_raw(my $content = $res->body);
+  $checksums{$target} = md5_hex($content);
 }
 
 # lazy-load this to make sure we load the files we just downloaded
@@ -68,13 +70,14 @@ require JSON::Schema::Modern;
 my $json_decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->utf8(1);
 
 # all files must be updated before any of them can be validated, since they depend on each other via
-# the '$schema' keyword
+# the '$schema' and '$vocabulary' keywords
 foreach my $target (sort keys %files) {
   $target = path('share', $target);
   next if $target->basename eq 'LICENSE';
 
   my $schema = $json_decoder->decode($target->slurp_raw);
-  print '# validating ', $schema->{'$id'}//$schema->{id}, "\n" if $ENV{DEBUG};
+  say '# validating ', $schema->{'$id'}//$schema->{id}, ' -> ', $target if $ENV{DEBUG};
+
   my $result = JSON::Schema::Modern::Document->validate(schema => $schema);
   die $result->dump if not $result->valid;
 }
