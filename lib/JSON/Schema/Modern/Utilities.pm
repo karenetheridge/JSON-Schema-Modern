@@ -377,10 +377,8 @@ sub E ($state, $error_string, @args) {
 # - data_path
 # - traversed_schema_path
 # - schema_path
-# - _schema_path_suffix (optional)
 # - annotations
 # - collect_annotations
-# - specification_version
 # - _unknown (boolean)
 # - depth
 sub A ($state, $annotation) {
