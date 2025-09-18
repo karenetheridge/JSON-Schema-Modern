@@ -50,8 +50,8 @@ my $initial_state = {
   collect_annotations => 1<<8,
   initial_schema_uri => Mojo::URL->new,
   data_path => '',
-  schema_path => '',
-  traversed_schema_path => '',
+  keyword_path => '',
+  traversed_keyword_path => '',
   specification_version => 'draft2019-09',
   vocabularies => [
     (map load_module($_),

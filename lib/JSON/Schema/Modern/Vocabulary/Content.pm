@@ -104,7 +104,7 @@ sub _eval_keyword_contentSchema ($class, $data, $schema, $state) {
     return 1 if not exists $state->{_content_ref};  # contentMediaType failed to decode the content
     return E($state, 'subschema is not valid')
       if not $class->eval($state->{_content_ref}->$*, $schema->{contentSchema},
-        { %$state, schema_path => $state->{schema_path}.'/contentSchema' });
+        { %$state, keyword_path => $state->{keyword_path}.'/contentSchema' });
   }
 
   return A($state, is_ref($schema->{contentSchema}) ? dclone($schema->{contentSchema}) : $schema->{contentSchema});

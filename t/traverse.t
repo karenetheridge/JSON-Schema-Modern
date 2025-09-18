@@ -49,7 +49,7 @@ subtest 'traversal with callbacks' => sub {
         my $canonical_uri = canonical_uri($state);
         my $ref_uri = Mojo::URL->new($schema->{'$ref'});
         $ref_uri = $ref_uri->to_abs($canonical_uri) if not $ref_uri->is_abs;
-        $refs{$state->{traversed_schema_path}.$state->{schema_path}} = $ref_uri->to_string;
+        $refs{$state->{traversed_keyword_path}.$state->{keyword_path}} = $ref_uri->to_string;
       },
       if => sub { $if_callback_called = 1; },
     }});
@@ -566,7 +566,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     {
       metaschema_uri => 'https://metaschema/with/wrong/spec',
       initial_schema_uri => 'https://my-poor-schema/foo.json#/$my_dialect_is',
-      traversed_schema_path => '/$ref/$ref/some_keyword/$ref/$my_dialect_is',
+      traversed_keyword_path => '/$ref/$ref/some_keyword/$ref/$my_dialect_is',
     });
 
   cmp_result(
@@ -713,7 +713,7 @@ subtest 'start traversing below the document root' => sub {
     },
     {
       initial_schema_uri => 'dir/my_subdocument#/subid',
-      traversed_schema_path => '/components/alpha/subid',
+      traversed_keyword_path => '/components/alpha/subid',
     },
   );
 
@@ -752,7 +752,7 @@ subtest 'start traversing below the document root' => sub {
     },
     {
       initial_schema_uri => 'dir/my_subdocument#/subid',
-      traversed_schema_path => '/components/alpha/subid',
+      traversed_keyword_path => '/components/alpha/subid',
     },
   );
 
@@ -800,7 +800,7 @@ subtest 'start traversing below the document root' => sub {
       # this is used for adjusting canonical_uri in extracted 'identifiers'; and for errors.
       # we can infer that there is an identifier 'dir/mysubdocument' at path '/components/alpha'
       initial_schema_uri => 'dir/my_subdocument#/subid',
-      traversed_schema_path => '/components/alpha/subid',
+      traversed_keyword_path => '/components/alpha/subid',
     },
   );
 

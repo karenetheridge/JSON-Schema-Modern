@@ -81,7 +81,7 @@ sub _eval_keyword_allOf ($class, $data, $schema, $state) {
   my @invalid;
   foreach my $idx (0 .. $schema->{allOf}->$#*) {
     if ($class->eval($data, $schema->{allOf}[$idx], +{ %$state,
-        schema_path => $state->{schema_path}.'/allOf/'.$idx })) {
+        keyword_path => $state->{keyword_path}.'/allOf/'.$idx })) {
     }
     else {
       push @invalid, $idx;
@@ -102,7 +102,7 @@ sub _eval_keyword_anyOf ($class, $data, $schema, $state) {
   my @errors;
   foreach my $idx (0 .. $schema->{anyOf}->$#*) {
     next if not $class->eval($data, $schema->{anyOf}[$idx],
-      +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/anyOf/'.$idx });
+      +{ %$state, errors => \@errors, keyword_path => $state->{keyword_path}.'/anyOf/'.$idx });
     ++$valid;
     last if $state->{short_circuit};
   }
@@ -118,7 +118,7 @@ sub _eval_keyword_oneOf ($class, $data, $schema, $state) {
   my (@valid, @errors);
   foreach my $idx (0 .. $schema->{oneOf}->$#*) {
     next if not $class->eval($data, $schema->{oneOf}[$idx],
-      +{ %$state, errors => \@errors, schema_path => $state->{schema_path}.'/oneOf/'.$idx });
+      +{ %$state, errors => \@errors, keyword_path => $state->{keyword_path}.'/oneOf/'.$idx });
     push @valid, $idx;
     last if @valid > 1 and $state->{short_circuit};
   }
@@ -140,7 +140,7 @@ sub _eval_keyword_not ($class, $data, $schema, $state) {
   return !$schema->{not} || E($state, 'subschema is true') if is_type('boolean', $schema->{not});
 
   return 1 if not $class->eval($data, $schema->{not},
-    +{ %$state, schema_path => $state->{schema_path}.'/not',
+    +{ %$state, keyword_path => $state->{keyword_path}.'/not',
       short_circuit_suggested => 1, # errors do not propagate upward from this subschema
       collect_annotations => 0,     # nor do annotations
       errors => [] });
@@ -156,7 +156,7 @@ sub _eval_keyword_if ($class, $data, $schema, $state) {
   return 1 if not exists $schema->{then} and not exists $schema->{else}
     and not $state->{collect_annotations};
   my $keyword = $class->eval($data, $schema->{if},
-     +{ %$state, schema_path => $state->{schema_path}.'/if',
+     +{ %$state, keyword_path => $state->{keyword_path}.'/if',
         short_circuit_suggested => !$state->{collect_annotations},
         errors => [],
       })
@@ -168,7 +168,7 @@ sub _eval_keyword_if ($class, $data, $schema, $state) {
     if is_type('boolean', $schema->{$keyword});
 
   return 1 if $class->eval($data, $schema->{$keyword},
-    +{ %$state, schema_path => $state->{schema_path}.'/'.$keyword });
+    +{ %$state, keyword_path => $state->{keyword_path}.'/'.$keyword });
   return E({ %$state, keyword => $keyword }, 'subschema is not valid');
 }
 
@@ -182,7 +182,7 @@ sub _eval_keyword_dependentSchemas ($class, $data, $schema, $state) {
     next if not exists $data->{$property};
 
     if ($class->eval($data, $schema->{dependentSchemas}{$property},
-        +{ %$state, schema_path => jsonp($state->{schema_path}, 'dependentSchemas', $property) })) {
+        +{ %$state, keyword_path => jsonp($state->{keyword_path}, 'dependentSchemas', $property) })) {
       next;
     }
 
@@ -203,11 +203,11 @@ sub _traverse_keyword_dependencies ($class, $schema, $state) {
       # as in dependentRequired
 
       foreach my $index (0..$schema->{dependencies}{$property}->$#*) {
-        $valid = E({ %$state, _schema_path_suffix => [ $property, $index ] }, 'element #%d is not a string', $index)
+        $valid = E({ %$state, _keyword_path_suffix => [ $property, $index ] }, 'element #%d is not a string', $index)
           if not is_type('string', $schema->{dependencies}{$property}[$index]);
       }
 
-      $valid = E({ %$state, _schema_path_suffix => $property }, 'elements are not unique')
+      $valid = E({ %$state, _keyword_path_suffix => $property }, 'elements are not unique')
         if not is_elements_unique($schema->{dependencies}{$property});
 
       $valid = E($state, '"dependencies" array for %s is empty', $property)
@@ -231,14 +231,14 @@ sub _eval_keyword_dependencies ($class, $data, $schema, $state) {
     if (is_type('array', $schema->{dependencies}{$property})) {
       # as in dependentRequired
       if (my @missing = grep !exists($data->{$_}), $schema->{dependencies}{$property}->@*) {
-        $valid = E({ %$state, _schema_path_suffix => $property },
+        $valid = E({ %$state, _keyword_path_suffix => $property },
           'object is missing propert%s: %s', @missing > 1 ? 'ies' : 'y', join(', ', @missing));
       }
     }
     else {
       # as in dependentSchemas
       if ($class->eval($data, $schema->{dependencies}{$property},
-          +{ %$state, schema_path => jsonp($state->{schema_path}, 'dependencies', $property) })) {
+          +{ %$state, keyword_path => jsonp($state->{keyword_path}, 'dependencies', $property) })) {
         next;
       }
 
@@ -292,12 +292,12 @@ sub _eval_keyword__items_array_schemas ($class, $data, $schema, $state) {
     if (is_type('boolean', $schema->{$state->{keyword}}[$idx])) {
       next if $schema->{$state->{keyword}}[$idx];
       $valid = E({ %$state, data_path => $state->{data_path}.'/'.$idx,
-        _schema_path_suffix => $idx, collect_annotations => $state->{collect_annotations} & ~1 },
+        _keyword_path_suffix => $idx, collect_annotations => $state->{collect_annotations} & ~1 },
         'item not permitted');
     }
     elsif ($class->eval($data->[$idx], $schema->{$state->{keyword}}[$idx],
         +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx,
+          keyword_path => $state->{keyword_path}.'/'.$state->{keyword}.'/'.$idx,
           collect_annotations => $state->{collect_annotations} & ~1 })) {
       next;
     }
@@ -331,7 +331,7 @@ sub _eval_keyword__items_schema ($class, $data, $schema, $state) {
     else {
       if ($class->eval($data->[$idx], $schema->{$state->{keyword}},
         +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/'.$state->{keyword},
+          keyword_path => $state->{keyword_path}.'/'.$state->{keyword},
           collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }
@@ -361,7 +361,7 @@ sub _eval_keyword_contains ($class, $data, $schema, $state) {
     if ($class->eval($data->[$idx], $schema->{contains},
         +{ %$state, errors => \@errors,
           data_path => $state->{data_path}.'/'.$idx,
-          schema_path => $state->{schema_path}.'/contains',
+          keyword_path => $state->{keyword_path}.'/contains',
           collect_annotations => $state->{collect_annotations} & ~1 })) {
       ++$state->{_num_contains};
       push @valid, $idx;
@@ -412,12 +412,12 @@ sub _eval_keyword_properties ($class, $data, $schema, $state) {
     if (is_type('boolean', $schema->{properties}{$property})) {
       next if $schema->{properties}{$property};
       $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
-        _schema_path_suffix => $property }, 'property not permitted');
+        _keyword_path_suffix => $property }, 'property not permitted');
     }
     else {
       if ($class->eval($data->{$property}, $schema->{properties}{$property},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
-            schema_path => jsonp($state->{schema_path}, 'properties', $property),
+            keyword_path => jsonp($state->{keyword_path}, 'properties', $property),
             collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }
@@ -437,7 +437,7 @@ sub _traverse_keyword_patternProperties ($class, $schema, $state) {
 
   my $valid = 1;
   foreach my $property (sort keys $schema->{patternProperties}->%*) {
-    $valid = 0 if not assert_pattern({ %$state, _schema_path_suffix => $property }, $property);
+    $valid = 0 if not assert_pattern({ %$state, _keyword_path_suffix => $property }, $property);
     $valid = 0 if not $class->traverse_property_schema($schema, $state, $property);
   }
   return $valid;
@@ -454,12 +454,12 @@ sub _eval_keyword_patternProperties ($class, $data, $schema, $state) {
       if (is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
         next if $schema->{patternProperties}{$property_pattern};
         $valid = E({ %$state, data_path => jsonp($state->{data_path}, $property),
-          _schema_path_suffix => $property_pattern }, 'property not permitted');
+          _keyword_path_suffix => $property_pattern }, 'property not permitted');
       }
       else {
         if ($class->eval($data->{$property}, $schema->{patternProperties}{$property_pattern},
             +{ %$state, data_path => jsonp($state->{data_path}, $property),
-              schema_path => jsonp($state->{schema_path}, 'patternProperties', $property_pattern),
+              keyword_path => jsonp($state->{keyword_path}, 'patternProperties', $property_pattern),
               collect_annotations => $state->{collect_annotations} & ~1 })) {
           next;
         }
@@ -496,7 +496,7 @@ sub _eval_keyword_additionalProperties ($class, $data, $schema, $state) {
     else {
       if ($class->eval($data->{$property}, $schema->{additionalProperties},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
-            schema_path => $state->{schema_path}.'/additionalProperties',
+            keyword_path => $state->{keyword_path}.'/additionalProperties',
             collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }
@@ -520,7 +520,7 @@ sub _eval_keyword_propertyNames ($class, $data, $schema, $state) {
   foreach my $property (sort keys %$data) {
     if ($class->eval($property, $schema->{propertyNames},
         +{ %$state, data_path => jsonp($state->{data_path}, $property),
-          schema_path => $state->{schema_path}.'/propertyNames',
+          keyword_path => $state->{keyword_path}.'/propertyNames',
           collect_annotations => $state->{collect_annotations} & ~1 })) {
       next;
     }

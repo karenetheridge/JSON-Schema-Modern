@@ -290,22 +290,22 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
 # Returns the internal $state object accumulated during the traversal.
 sub traverse ($self, $schema_reference, $config_override = {}) {
   my %overrides = %$config_override;
-  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_schema_path specification_version)};
+  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_keyword_path specification_version)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in traverse'
     if keys %overrides;
 
   # Note: the starting position is not guaranteed to be at the root of the $document,
   # nor is the fragment portion of this uri necessarily empty
   my $initial_uri = Mojo::URL->new($config_override->{initial_schema_uri} // ());
-  my $initial_path = $config_override->{traversed_schema_path} // '';
+  my $initial_path = $config_override->{traversed_keyword_path} // '';
   my $spec_version = $config_override->{specification_version} // $self->specification_version // SPECIFICATION_VERSION_DEFAULT;
 
-  croak 'traversed_schema_path must be a json pointer' if $initial_path !~ m{^(?:/|$)};
+  croak 'traversed_keyword_path must be a json pointer' if $initial_path !~ m{^(?:/|$)};
 
   if (length(my $uri_path = $initial_uri->fragment)) {
     croak 'initial_schema_uri fragment must be a json pointer' if $uri_path !~ m{^/};
 
-    croak 'traversed_schema_path does not match initial_schema_uri path fragment'
+    croak 'traversed_keyword_path does not match initial_schema_uri path fragment'
       if substr($initial_path, -length($uri_path)) ne $uri_path;
   }
 
@@ -313,8 +313,8 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     depth => 0,
     data_path => '',                        # this never changes since we don't have an instance yet
     initial_schema_uri => $initial_uri,     # the canonical URI as of the start of this method or last $id
-    traversed_schema_path => $initial_path, # the accumulated traversal path as of the start or last $id
-    schema_path => '',                      # the rest of the path, since the start of this method or last $id
+    traversed_keyword_path => $initial_path, # the accumulated traversal path as of the start or last $id
+    keyword_path => '',                      # the rest of the path, since the start of this method or last $id
     specification_version => $spec_version,
     errors => [],
     identifiers => {},
@@ -375,15 +375,15 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
   my %overrides = %$config_override;
-  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks effective_base_uri data_path traversed_schema_path _strict_schema_data)};
+  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks effective_base_uri data_path traversed_keyword_path _strict_schema_data)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
     if keys %overrides;
 
   my $state = {
     data_path => $config_override->{data_path} // '',
-    traversed_schema_path => $config_override->{traversed_schema_path} // '', # the accumulated path as of the start of evaluation or last $id or $ref
+    traversed_keyword_path => $config_override->{traversed_keyword_path} // '', # the accumulated path as of the start of evaluation or last $id or $ref
     initial_schema_uri => Mojo::URL->new,   # the canonical URI as of the start of evaluation or last $id or $ref
-    schema_path => '',                  # the rest of the path, since the start of evaluation or last $id or $ref
+    keyword_path => '',                  # the rest of the path, since the start of evaluation or last $id or $ref
     errors => [],
     depth => 0,
   };
@@ -582,7 +582,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   return E($state, 'EXCEPTION: maximum traversal depth (%d) exceeded', $self->max_traversal_depth)
     if $state->{depth}++ > $self->max_traversal_depth;
 
-  push $state->{subschemas}->@*, $state->{traversed_schema_path}.$state->{schema_path};
+  push $state->{subschemas}->@*, $state->{traversed_keyword_path}.$state->{keyword_path};
 
   my $schema_type = get_type($schema);
   return 1 if $schema_type eq 'boolean';
@@ -697,7 +697,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   # find all schema locations in effect at this data path + uri combination
   # if any of them are absolute prefix of this schema location, we are in a loop.
   my $canonical_uri = canonical_uri($state);
-  my $schema_location = $state->{traversed_schema_path}.$state->{schema_path};
+  my $schema_location = $state->{traversed_keyword_path}.$state->{keyword_path};
   {
     use autovivification qw(fetch store);
     abort($state, 'EXCEPTION: infinite loop detected (same location evaluated twice)')
@@ -975,13 +975,13 @@ sub _fetch_vocabulary_data ($self, $state, $schema_info) {
 
   foreach my $uri (sort keys $schema_info->{schema}{'$vocabulary'}->%*) {
     my $class_info = $self->_get_vocabulary_class($uri);
-    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
+    $valid = E({ %$state, _keyword_path_suffix => $uri }, '"%s" is not a known vocabulary', $uri), next
       if $schema_info->{schema}{'$vocabulary'}{$uri} and not $class_info;
 
     next if not $class_info;  # vocabulary is not known, but marked as false in the metaschema
 
     my ($spec_version, $class) = @$class_info;
-    $valid = E({ %$state, _schema_path_suffix => $uri }, '"%s" uses %s, but the metaschema itself uses %s',
+    $valid = E({ %$state, _keyword_path_suffix => $uri }, '"%s" uses %s, but the metaschema itself uses %s',
         $uri, $spec_version, $schema_info->{specification_version}), next
       if $spec_version ne $schema_info->{specification_version};
 
@@ -1478,7 +1478,7 @@ applications that contain embedded JSON Schemas):
 
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
-* C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the recorded absolute keyword location of the start of evaluation
 * C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
   useful when providing an inline schema that does not declare an absolute base URI for itself)
@@ -1511,7 +1511,7 @@ applications that contain embedded JSON Schemas):
 
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
-* C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
   useful when providing an inline schema that does not declare an absolute base URI for itself)
 
@@ -1555,7 +1555,7 @@ behaviour (these are generally only used by custom validation
 applications that contain embedded JSON Schemas):
 
 =for :list
-* C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the absolute keyword location as of the start of evaluation
 * C<metaschema_uri>: use the indicated URI as the metaschema
 

@@ -37,7 +37,7 @@ sub traverse ($class, $schema, $state) {
 
 sub traverse_subschema ($class, $schema, $state) {
   $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}},
-    +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword} });
+    +{ %$state, keyword_path => $state->{keyword_path}.'/'.$state->{keyword} });
 }
 
 sub traverse_array_schemas ($class, $schema, $state) {
@@ -47,7 +47,7 @@ sub traverse_array_schemas ($class, $schema, $state) {
   my $valid = 1;
   foreach my $idx (0 .. $schema->{$state->{keyword}}->$#*) {
     $valid = 0 if not $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}[$idx],
-      +{ %$state, schema_path => $state->{schema_path}.'/'.$state->{keyword}.'/'.$idx });
+      +{ %$state, keyword_path => $state->{keyword_path}.'/'.$state->{keyword}.'/'.$idx });
   }
   return $valid;
 }
@@ -58,7 +58,7 @@ sub traverse_object_schemas ($class, $schema, $state) {
   my $valid = 1;
   foreach my $property (sort keys $schema->{$state->{keyword}}->%*) {
     $valid = 0 if not $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}{$property},
-      +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
+      +{ %$state, keyword_path => jsonp($state->{keyword_path}, $state->{keyword}, $property) });
   }
   return $valid;
 }
@@ -67,7 +67,7 @@ sub traverse_property_schema ($class, $schema, $state, $property) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   $state->{evaluator}->_traverse_subschema($schema->{$state->{keyword}}{$property},
-    +{ %$state, schema_path => jsonp($state->{schema_path}, $state->{keyword}, $property) });
+    +{ %$state, keyword_path => jsonp($state->{keyword_path}, $state->{keyword}, $property) });
 }
 
 sub eval ($class, $data, $schema, $state) {
@@ -84,10 +84,10 @@ sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
     +{
       %$state,
       # keyword is assumed to be json pointer-encoded (if a suffix path is needed), so we just concat
-      traversed_schema_path => $state->{traversed_schema_path}.$state->{schema_path}.'/'.$state->{keyword},
+      traversed_keyword_path => $state->{traversed_keyword_path}.$state->{keyword_path}.'/'.$state->{keyword},
       initial_schema_uri => $schema_info->{canonical_uri},
       $schema_info->%{qw(document specification_version vocabularies)},
-      schema_path => '',
+      keyword_path => '',
     });
 }
 

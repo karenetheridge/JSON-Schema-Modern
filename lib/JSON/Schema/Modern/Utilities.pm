@@ -312,12 +312,12 @@ sub local_annotations ($state) {
 
 # shorthand for finding the current uri of the present schema location
 # ensure that this code is kept consistent with the absolute_keyword_location builder in ResultNode
-# Note that this may not be canonical if schema_path has not yet been reset via the processing of a
+# Note that this may not be canonical if keyword_path has not yet been reset via the processing of a
 # local identifier keyword (e.g. '$id').
 sub canonical_uri ($state, @extra_path) {
-  return $state->{initial_schema_uri} if not @extra_path and not length($state->{schema_path});
+  return $state->{initial_schema_uri} if not @extra_path and not length($state->{keyword_path});
   my $uri = $state->{initial_schema_uri}->clone;
-  my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($state->{schema_path}, @extra_path) : $state->{schema_path});
+  my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($state->{keyword_path}, @extra_path) : $state->{keyword_path});
   undef $fragment if not length($fragment);
   $uri->fragment($fragment);
   $uri;
@@ -329,9 +329,9 @@ sub canonical_uri ($state, @extra_path) {
 # - effective_base_uri (optional)
 # - keyword (optional)
 # - data_path
-# - traversed_schema_path
-# - schema_path
-# - _schema_path_suffix (optional)
+# - traversed_keyword_path
+# - keyword_path
+# - _keyword_path_suffix (optional)
 # - errors
 # - exception (optional; set by abort())
 # - recommended_response (optional)
@@ -343,15 +343,15 @@ sub E ($state, $error_string, @args) {
   croak 'E called in void context' if not defined wantarray;
 
   # sometimes the keyword shouldn't be at the very end of the schema path
-  my $sps = delete $state->{_schema_path_suffix};
-  my @schema_path_suffix = defined $sps && is_plain_arrayref($sps) ? $sps->@* : $sps//();
+  my $sps = delete $state->{_keyword_path_suffix};
+  my @keyword_path_suffix = defined $sps && is_plain_arrayref($sps) ? $sps->@* : $sps//();
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->@{qw(initial_schema_uri schema_path)}, $state->{keyword}//(), @schema_path_suffix, $state->{effective_base_uri} ];
+  my $uri = [ $state->@{qw(initial_schema_uri keyword_path)}, $state->{keyword}//(), @keyword_path_suffix, $state->{effective_base_uri} ];
 
-  my $keyword_location = $state->{traversed_schema_path}
-    .jsonp($state->@{qw(schema_path keyword)}, @schema_path_suffix);
+  my $keyword_location = $state->{traversed_keyword_path}
+    .jsonp($state->@{qw(keyword_path keyword)}, @keyword_path_suffix);
 
   require JSON::Schema::Modern::Error;
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
@@ -375,8 +375,8 @@ sub E ($state, $error_string, @args) {
 # - initial_schema_uri
 # - keyword (mandatory)
 # - data_path
-# - traversed_schema_path
-# - schema_path
+# - traversed_keyword_path
+# - keyword_path
 # - annotations
 # - collect_annotations
 # - _unknown (boolean)
@@ -386,9 +386,9 @@ sub A ($state, $annotation) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->@{qw(initial_schema_uri schema_path keyword effective_base_uri)} ];
+  my $uri = [ $state->@{qw(initial_schema_uri keyword_path keyword effective_base_uri)} ];
 
-  my $keyword_location = $state->{traversed_schema_path}.jsonp($state->@{qw(schema_path keyword)});
+  my $keyword_location = $state->{traversed_keyword_path}.jsonp($state->@{qw(keyword_path keyword)});
 
   push $state->{annotations}->@*, {
     depth => $state->{depth} // 0,

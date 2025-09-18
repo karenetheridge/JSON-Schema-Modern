@@ -88,14 +88,14 @@ sub __create_identifier ($class, $uri, $state) {
     if exists $state->{identifiers}{$uri};
 
   $state->{initial_schema_uri} = $uri;
-  $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  $state->{schema_path} = '';
+  $state->{traversed_keyword_path} = $state->{traversed_keyword_path}.$state->{keyword_path};
+  $state->{keyword_path} = '';
 
   # Note that since '$schema' is considered ahead of '$id' in the keyword list, the dialect
   # (specification_version and vocabularies) is known to be correct.
 
   $state->{identifiers}{$uri} = {
-    path => $state->{traversed_schema_path},
+    path => $state->{traversed_keyword_path},
     canonical_uri => $uri,
     $state->%{qw(specification_version vocabularies)},
   };
@@ -109,7 +109,7 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   return 1
     if $state->{specification_version} =~ /^draft[467]$/ and $schema->{$state->{keyword}} =~ /^#/;
 
-  my $schema_info = $state->{evaluator}->_fetch_from_uri($state->{initial_schema_uri}->clone->fragment($state->{schema_path}));
+  my $schema_info = $state->{evaluator}->_fetch_from_uri($state->{initial_schema_uri}->clone->fragment($state->{keyword_path}));
 
   # this should never happen, if the pre-evaluation traversal was performed correctly
   abort($state, 'failed to resolve "%s" to canonical uri', $state->{keyword}) if not $schema_info;
@@ -122,8 +122,8 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   # these will all be set when we are at the document root, or if we are here via a $ref,
   # but not if we are organically passing through this subschema.
   $state->{initial_schema_uri} = $schema_info->{canonical_uri};
-  $state->{traversed_schema_path} = $state->{traversed_schema_path}.$state->{schema_path};
-  $state->{schema_path} = '';
+  $state->{traversed_keyword_path} = $state->{traversed_keyword_path}.$state->{keyword_path};
+  $state->{keyword_path} = '';
   $state->@{qw(specification_version vocabularies)} = $schema_info->@{qw(specification_version vocabularies)};
 
   push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
@@ -158,7 +158,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     else {
       ($spec_version, $vocabularies) = $state->{evaluator}->_fetch_vocabulary_data({ %$state,
           keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
-          traversed_schema_path => jsonp($state->{traversed_schema_path}.$state->{schema_path}, $state->{keyword}) },
+          traversed_keyword_path => jsonp($state->{traversed_keyword_path}.$state->{keyword_path}, $state->{keyword}) },
         $schema_info);
     }
   }
@@ -172,7 +172,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
   # document root)
   return E($state, '$schema can only appear at the schema resource root')
     if not exists $schema->{$spec_version eq 'draft4' ? 'id' : '$id'}
-      and length($state->{schema_path});
+      and length($state->{keyword_path});
 
   # This is a bit of a chicken-and-egg situation. If we start off at draft2020-12, then all
   # keywords are valid, so we inspect and process the $schema keyword; this switches us to draft7
@@ -218,7 +218,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
     use autovivification 'store';
     $state->{identifiers}{$base_uri}{anchors}{$anchor} = {
       canonical_uri => $canonical_uri,
-      path => $state->{traversed_schema_path}.$state->{schema_path},
+      path => $state->{traversed_keyword_path}.$state->{keyword_path},
     };
   }
   # we need not be at the root of the resource schema, and we need not even have an entry
@@ -228,10 +228,10 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
     my $base_path = '';
     if (my $fragment = $canonical_uri->fragment) {
       # this shouldn't happen, as we also check this at the start of traverse
-      return E($state, 'something is wrong; "%s" is not the suffix of "%s"', $fragment, $state->{traversed_schema_path}.$state->{schema_path})
-        if substr($state->{traversed_schema_path}.$state->{schema_path}, -length($fragment))
+      return E($state, 'something is wrong; "%s" is not the suffix of "%s"', $fragment, $state->{traversed_keyword_path}.$state->{keyword_path})
+        if substr($state->{traversed_keyword_path}.$state->{keyword_path}, -length($fragment))
           ne $fragment;
-      $base_path = substr($state->{traversed_schema_path}.$state->{schema_path}, 0, -length($fragment));
+      $base_path = substr($state->{traversed_keyword_path}.$state->{keyword_path}, 0, -length($fragment));
     }
 
     $state->{identifiers}{$base_uri} = {
@@ -247,7 +247,7 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
       anchors => {
         $anchor => {
           canonical_uri => $canonical_uri,
-          path => $state->{traversed_schema_path}.$state->{schema_path},
+          path => $state->{traversed_keyword_path}.$state->{keyword_path},
         },
       },
     };
@@ -265,7 +265,7 @@ sub _traverse_keyword_recursiveAnchor ($class, $schema, $state) {
   # this is required because the location is used as the base URI for future resolution
   # of $recursiveRef, and the fragment would be disregarded in the base
   return E($state, '"$recursiveAnchor" keyword used without "$id"')
-    if length($state->{schema_path});
+    if length($state->{keyword_path});
   return 1;
 }
 
@@ -350,19 +350,19 @@ sub _traverse_keyword_vocabulary ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'object');
 
   return E($state, '$vocabulary can only appear at the schema resource root')
-    if length($state->{schema_path});
+    if length($state->{keyword_path});
 
   my $valid = 1;
 
   my @vocabulary_classes;
   foreach my $uri (sort keys $schema->{'$vocabulary'}->%*) {
     if (not is_type('boolean', $schema->{'$vocabulary'}{$uri})) {
-      ()= E({ %$state, _schema_path_suffix => $uri }, '$vocabulary value at "%s" is not a boolean', $uri);
+      ()= E({ %$state, _keyword_path_suffix => $uri }, '$vocabulary value at "%s" is not a boolean', $uri);
       $valid = 0;
       next;
     }
 
-    $valid = 0 if not assert_uri({ %$state, _schema_path_suffix => $uri }, undef, $uri);
+    $valid = 0 if not assert_uri({ %$state, _keyword_path_suffix => $uri }, undef, $uri);
   }
 
   # we cannot return an error here for invalid or incomplete vocabulary lists, because

@@ -84,7 +84,7 @@ sub _eval_keyword_unevaluatedItems ($class, $data, $schema, $state) {
     else {
       if ($class->eval($data->[$idx], $schema->{unevaluatedItems},
           +{ %$state, data_path => $state->{data_path}.'/'.$idx,
-            schema_path => $state->{schema_path}.'/unevaluatedItems',
+            keyword_path => $state->{keyword_path}.'/unevaluatedItems',
             collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }
@@ -132,7 +132,7 @@ sub _eval_keyword_unevaluatedProperties ($class, $data, $schema, $state) {
     else {
       if ($class->eval($data->{$property}, $schema->{unevaluatedProperties},
           +{ %$state, data_path => jsonp($state->{data_path}, $property),
-            schema_path => $state->{schema_path}.'/unevaluatedProperties',
+            keyword_path => $state->{keyword_path}.'/unevaluatedProperties',
             collect_annotations => $state->{collect_annotations} & ~1 })) {
         next;
       }

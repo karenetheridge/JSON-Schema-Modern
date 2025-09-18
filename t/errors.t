@@ -1137,8 +1137,8 @@ subtest 'JSON pointer escaping' => sub {
         },
       ],
     },
-    # all the other _schema_path_suffix cases are tested in the earlier test case
-    'use of _schema_path_suffix in a fatal error',
+    # all the other _keyword_path_suffix cases are tested in the earlier test case
+    'use of _keyword_path_suffix in a fatal error',
   ) if "$]" >= 5.022;
 };
 
@@ -1414,7 +1414,7 @@ subtest 'effective_base_uri and overriding starting locations' => sub {
       '/api#/$defs/alpha',
       {
         data_path => '/html/body/div/div/h1/div/p',     # reported data location
-        traversed_schema_path => '/some/other/document/$ref',   # reported keywords passed through before we start
+        traversed_keyword_path => '/some/other/document/$ref',   # reported keywords passed through before we start
         effective_base_uri => 'https://example.com',    # base uri to use for document locations
       },
     )->TO_JSON,
@@ -1435,7 +1435,7 @@ subtest 'effective_base_uri and overriding starting locations' => sub {
         },
       ],
     },
-    'can alter locations with data_path, traversed_schema_path, effective_base_uri',
+    'can alter locations with data_path, traversed_keyword_path, effective_base_uri',
   );
 };
 
