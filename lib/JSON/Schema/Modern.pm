@@ -122,6 +122,8 @@ has _format_validations => (
 sub _get_format_validation ($self, $format) { ($self->{_format_validations}//{})->{$format} }
 
 sub add_format_validation ($self, $format, $definition) {
+  return if exists(($self->{_format_validations}//{})->{$format});
+
   $definition = { type => 'string', sub => $definition } if not is_plain_hashref($definition);
   $format_type->({ $format => $definition });
 
@@ -1643,7 +1645,7 @@ do not apply arithmetic operators to it -- or subsequent type checks on this val
 See L<https://spec.openapis.org/registry/format/> for a registry of known and useful formats; for
 compatibility reasons, avoid defining a format listed here with different semantics.
 
-Format definitions can be overridden with a new call to C<add_format_validation>.
+Format definitions cannot be overridden with a new definition.
 
 =head2 add_vocabulary
 

@@ -261,8 +261,8 @@ subtest 'override a format sub' => sub {
     'swapping out format implementation turns success into failure; wrong types are still valid',
   );
 
-  # do allow overriding mult_5 to support a different type than originally defined.
-  $js->add_format_validation(mult_5 => +{ type => 'object', sub => sub { keys($_[0]->%*) > 2 } });
+  # create a new format definition which uses a different type
+  $js->add_format_validation(keys_mult_2 => +{ type => 'object', sub => sub { keys($_[0]->%*) > 2 } });
 
   cmp_result(
     $js->evaluate(
@@ -274,7 +274,7 @@ subtest 'override a format sub' => sub {
         [],
         'a',
       ],
-      { items => { format => 'mult_5' } },
+      { items => { format => 'keys_mult_2' } },
     )->TO_JSON,
     {
       valid => false,
@@ -282,7 +282,7 @@ subtest 'override a format sub' => sub {
         (map +{
           instanceLocation => '/'.$_,
           keywordLocation => '/items/format',
-          error => 'not a valid mult_5 object',
+          error => 'not a valid keys_mult_2 object',
         }, 0, 1, 2),
         {
           instanceLocation => '',
@@ -291,7 +291,7 @@ subtest 'override a format sub' => sub {
         },
       ],
     },
-    'can override a custom format definition to use a different type',
+    'can create a custom format definition to use a different type',
   );
 };
 
