@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.618
+version 0.619
 
 =head1 SYNOPSIS
 
@@ -260,7 +260,7 @@ C<data_path>: adjusts the effective path of the data instance as of the start of
 
 =item *
 
-C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 
 =item *
 
@@ -314,7 +314,7 @@ C<data_path>: adjusts the effective path of the data instance as of the start of
 
 =item *
 
-C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 
 =item *
 
@@ -365,7 +365,7 @@ applications that contain embedded JSON Schemas):
 
 =item *
 
-C<traversed_schema_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 
 =item *
 
@@ -461,7 +461,7 @@ do not apply arithmetic operators to it -- or subsequent type checks on this val
 See L<https://spec.openapis.org/registry/format/> for a registry of known and useful formats; for
 compatibility reasons, avoid defining a format listed here with different semantics.
 
-Format definitions can be overridden with a new call to C<add_format_validation>.
+Format definitions cannot be overridden with a new definition.
 
 =head2 add_vocabulary
 
