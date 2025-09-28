@@ -443,7 +443,7 @@ sub assert_uri_reference ($state, $schema) {
   croak 'assert_uri_reference called in void context' if not defined wantarray;
 
   my $string = $schema->{$state->{keyword}};
-  return E($state, '%s value is not a valid URI reference', $state->{keyword})
+  return E($state, '%s value is not a valid uri-reference', $state->{keyword})
     # see also uri-reference format sub
     if fc(Mojo::URL->new($string)->to_unsafe_string) ne fc($string)
       or $string =~ /[^[:ascii:]]/            # ascii characters only
