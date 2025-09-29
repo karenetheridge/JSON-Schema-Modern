@@ -1642,7 +1642,10 @@ the data type(s) supported by that format may not be changed.
 Be careful to not mutate the type of the value while checking it -- for example, if it is a string,
 do not apply arithmetic operators to it -- or subsequent type checks on this value may fail.
 
-See L<https://spec.openapis.org/registry/format/> for a registry of known and useful formats; for
+=for stopwords OpenAPI
+
+See the official L<OpenAPI Format Registry|https://spec.openapis.org/registry/format>
+for a registry of known and useful formats; for
 compatibility reasons, avoid defining a format listed here with different semantics.
 
 Format definitions cannot be overridden with a new definition.
@@ -1686,6 +1689,10 @@ These media types are already known:
 * C<text/*> - passes strings through unchanged
 
 Media-type definitions can be overridden with a new call to C<add_media_type>.
+
+See the official L<OpenAPI Media Type Registry|https://spec.openapis.org/registry/media-type>
+for a registry of known and useful media types; for
+compatibility reasons, avoid defining a media type listed here with different semantics.
 
 =head2 get_media_type
 
@@ -1912,6 +1919,8 @@ These specification meta-schemas are bundled with this distribution and loaded a
 * L<OpenAPI::Modern>: a parser and evaluator for OpenAPI v3.1 documents
 * L<Mojolicious::Plugin::OpenAPI::Modern>: a Mojolicious plugin providing OpenAPI functionality
 * L<Test::Mojo::Role::OpenAPI::Modern>: test your Mojolicious application's OpenAPI compliance
+* L<https://spec.openapis.org/registry/format>
+* L<https://spec.openapis.org/registry/media-type>
 
 =head1 AVAILABILITY
 
