@@ -53,6 +53,17 @@ subtest 'multiple types' => sub {
     },
     'result object serializes correctly',
   );
+
+  cmp_result(
+    my $e = ($result->errors)[0]->clone(error => 'oh noes'),
+    methods(
+      instance_location => '',
+      keyword_location => '/type',
+      absolute_keyword_location => undef,
+      error => 'oh noes',
+    ),
+    'cloning leaves absolute_keyword_location as-is',
+  );
 };
 
 subtest 'multipleOf' => sub {
@@ -1495,6 +1506,15 @@ subtest 'recommended_response' => sub {
     $result3->recommended_response,
     [ 401, 'Unauthorized' ],
     'recommended_response uses the one from the error that is explicitly set',
+  );
+
+  cmp_result(
+    my $e = ($result3->errors)[-1]->clone(error => 'oh noes'),
+    methods(
+      error => 'oh noes',
+      recommended_response => [ 401, 'Unauthorized' ],
+    ),
+    'cloning copies recommended_response',
   );
 };
 

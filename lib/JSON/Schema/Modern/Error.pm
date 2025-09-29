@@ -58,6 +58,15 @@ sub stringify ($self) {
     : '\''.$self->instance_location.'\': '.$self->error;
 }
 
+sub clone ($self, %overrides) {
+  $self->new(
+    $self->%{qw(instance_location keyword_location keyword depth)},
+    (map +(exists $self->{$_} ? $self->%{$_} : ()), qw(absolute_keyword_location _uri recommended_response)),
+    $self->%{qw(error exception mode)},
+    %overrides,
+  );
+}
+
 sub __thing { 'error' }
 
 around BUILDARGS => sub ($orig, $class, @args) {
@@ -162,5 +171,11 @@ if the distinction is important to you.)
 
 Returns a JSON string representing the error object, according to
 the L<specification|https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10>.
+
+=head2 clone
+
+  my $new_error = $error->clone(instance_location => '/new/location');
+
+Creates a clone of an existing error object, with some optional modifications to existing properties.
 
 =cut
