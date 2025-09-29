@@ -389,9 +389,9 @@ sub _eval_keyword_contains ($class, $data, $schema, $state) {
   # here, to be evaluated after 'contains'
   if ($state->{specification_version} !~ /^draft[467]$/
       and grep $_ eq 'JSON::Schema::Modern::Vocabulary::Validation', $state->{vocabularies}->@*) {
-    $valid = E($state, 'array contains more than %d matching items', $schema->{maxContains})
+    $valid = E($state, 'array contains more than %d matching item%s', $schema->{maxContains}, $schema->{maxContains} != 1 ? 's' : '')
       if exists $schema->{maxContains} and $state->{_num_contains} > $schema->{maxContains};
-    $valid = E($state, 'array contains fewer than %d matching items', $schema->{minContains}) && $valid
+    $valid = E($state, 'array contains fewer than %d matching item%s', $schema->{minContains}, $schema->{minContains} != 1 ? 's' : '') && $valid
       if exists $schema->{minContains} and $state->{_num_contains} < $schema->{minContains};
   }
 
