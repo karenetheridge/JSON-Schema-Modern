@@ -59,7 +59,7 @@ subtest 'equality, using inflated data' => sub {
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
     foreach my $idx (0, 1) {
-      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK), "arg $idx did not gain a POK")
         if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
 
       ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
@@ -103,7 +103,7 @@ subtest 'equality, using JSON strings' => sub {
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
     foreach my $idx (0, 1) {
-      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK), "arg $idx did not gain a POK")
         if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
 
       ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
@@ -135,7 +135,7 @@ subtest 'equality, using scalarref_booleans' => sub {
     ok(is_type($types[1], $y), 'type of arg 1 was not mutated while making equality check');
 
     foreach my $idx (0, 1) {
-      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK), "arg $idx did not gain a POK")
         if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
 
       ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")
@@ -187,7 +187,7 @@ subtest 'equality, using stringy_numbers' => sub {
     ) if $types[1] ne 'ambiguous type';
 
     foreach my $idx (0, 1) {
-      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK ), "arg $idx did not gain a POK")
+      ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & B::SVf_POK), "arg $idx did not gain a POK")
         if $types[$idx] eq 'integer' or $types[$idx] eq 'number';
 
       ok(!(B::svref_2object(\[$x, $y]->[$idx])->FLAGS & (B::SVf_IOK | B::SVf_NOK)), "arg $idx did not gain an NOK or IOK")

@@ -32,13 +32,13 @@ my @warnings = warnings {
     },
     output_file => $version.'-additional-tests.txt',
     test => {
-      $ENV{NO_TODO} ? () : ( todo_tests => [
+      $ENV{NO_TODO} ? () : (todo_tests => [
         { file => [
             # these all depend on optional prereqs
             !eval { require Time::Moment; 1 } ? map "format-$_.json", qw(date-time date time) : (),
             !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
           ] },
-      ] ),
+      ]),
     },
   );
 };
@@ -50,7 +50,7 @@ cmp_result(
   $test_sub->(
     # these are all in unknownKeyword.json
     map +(
-      ( re(qr/^no-longer-supported "$_" keyword present/) ) x (4 * ($ENV{NO_SHORT_CIRCUIT} ? 1 : 2)),
+      (re(qr/^no-longer-supported "$_" keyword present/)) x (4 * ($ENV{NO_SHORT_CIRCUIT} ? 1 : 2)),
     ), qw(dependencies id),
   ),
   'got unsupported keyword warnings'.($ENV{AUTHOR_TESTING} ? '; no unexpected warnings' : ''),

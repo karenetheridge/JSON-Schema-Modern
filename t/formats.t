@@ -534,7 +534,7 @@ subtest 'unknown custom formats' => sub {
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(
       specification_version => $spec_version,
-      $spec_version !~ /^draft[467]$/ ? ( collect_annotations => 1 ) : (),
+      $spec_version !~ /^draft[467]$/ ? (collect_annotations => 1) : (),
       validate_formats => 1,
     );
 

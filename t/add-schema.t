@@ -340,13 +340,13 @@ subtest 'add a schema associated with a uri' => sub {
   cmp_result(
     { $js->_resource_index },
     {
-      map +( $_ => {
+      map +($_ => {
         path => '',
         canonical_uri => str('https://bar.com'),
         document => shallow($document),
         specification_version => 'draft2020-12',
         vocabularies => $vocabularies{'draft2020-12'},
-      } ), qw(https://foo.com https://bar.com https://bloop.com)
+      }), qw(https://foo.com https://bar.com https://bloop.com)
     },
     'now the document is available as all three uris, with the same canonical_uri',
   );

@@ -58,7 +58,7 @@ acceptance_tests(
   },
   output_file => $version.'-acceptance-format.txt',
   test => {
-    $ENV{NO_TODO} ? () : ( todo_tests => [
+    $ENV{NO_TODO} ? () : (todo_tests => [
       { file => [
           'iri-reference.json',                       # all strings are considered valid
           'uri-template.json',                        # not yet implemented
@@ -77,7 +77,7 @@ acceptance_tests(
       { file => 'uri.json',
         test_description => 'validation of URIs',
         test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate
-    ] ),
+    ]),
   },
 );
 

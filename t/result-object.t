@@ -603,7 +603,7 @@ subtest 'data_only' => sub {
       valid => 0,
       errors => [
         map JSON::Schema::Modern::Error->new(
-          do { my $e = $_; map +( $_ => $e->$_ ), qw(depth keyword instance_location keyword_location error) },
+          do { my $e = $_; map +($_ => $e->$_), qw(depth keyword instance_location keyword_location error) },
           mode => 'traverse',
         ), $result->errors
       ],

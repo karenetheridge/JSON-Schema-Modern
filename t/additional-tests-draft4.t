@@ -30,12 +30,12 @@ acceptance_tests(
   },
   output_file => $version.'-additional-tests.txt',
   test => {
-    $ENV{NO_TODO} ? () : ( todo_tests => [
+    $ENV{NO_TODO} ? () : (todo_tests => [
       { file => [
           # these depend on optional prereqs
           !eval { require Time::Moment; require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
         ] },
-    ] ),
+    ]),
   },
 );
 

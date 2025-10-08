@@ -91,7 +91,7 @@ sub TO_JSON ($self) {
     instanceLocation => $self->instance_location,
     keywordLocation => $self->keyword_location,
     !defined($self->absolute_keyword_location) ? ()
-      : ( absoluteKeywordLocation => $self->absolute_keyword_location->to_string ),
+      : (absoluteKeywordLocation => $self->absolute_keyword_location->to_string),
     $thing => $self->$thing,  # TODO: allow localization in error message
   };
 }

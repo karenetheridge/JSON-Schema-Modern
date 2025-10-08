@@ -248,7 +248,7 @@ sub add_document {
 
     # this might croak if there are duplicates or malformed entries.
     $self->_add_resource($uri_string => $new_resource);
-    @root = ( $uri_string => $new_resource ) if $new_resource->{path} eq '' and $uri_string !~ /#./;
+    @root = ($uri_string => $new_resource) if $new_resource->{path} eq '' and $uri_string !~ /#./;
   }
 
   # associate the root resource with the base uri we were provided, if it does not already exist
@@ -428,7 +428,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       evaluator => $self,
       (map {
         my $val = $config_override->{$_} // $self->$_;
-        defined $val ? ( $_ => $val ) : ()
+        defined $val ? ($_ => $val) : ()
         # note: this is a subset of the allowed overrides defined above
       } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict)),
     };

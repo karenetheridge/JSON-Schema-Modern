@@ -65,8 +65,8 @@ use constant _BUILTIN_BOOLS => 0;
 use constant {
   _BUILTIN_BOOLS && HAVE_BUILTIN && eval { +require Storable; Storable->VERSION(3.27); 1 }
       && Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION(4.38); 1 }
-    ? ( true => builtin::true, false => builtin::false )
-    : ( true => JSON::PP::true, false => JSON::PP::false )
+    ? (true => builtin::true, false => builtin::false)
+    : (true => JSON::PP::true, false => JSON::PP::false)
 };
 
 # supports the six core types, plus integer (which is also a number)
@@ -398,7 +398,7 @@ sub A ($state, $annotation) {
     # we calculate absolute_keyword_location when instantiating the Annotation object for Result
     _uri => $uri,
     annotation => $annotation,
-    $state->{_unknown} ? ( unknown => 1 ) : (),
+    $state->{_unknown} ? (unknown => 1) : (),
   };
 
   return 1;

@@ -195,7 +195,7 @@ sub traverse ($self, $evaluator, $config_override = {}) {
   my $state = $evaluator->traverse($self->schema,
     {
       initial_schema_uri => $original_uri,
-      $self->_has_metaschema_uri ? ( metaschema_uri => $self->metaschema_uri ) : (),
+      $self->_has_metaschema_uri ? (metaschema_uri => $self->metaschema_uri) : (),
       %$config_override,
     }
   );

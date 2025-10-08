@@ -80,7 +80,7 @@ subtest 'boolean document' => sub {
 subtest 'object document' => sub {
   cmp_result(
     JSON::Schema::Modern::Document->new(
-      defined $_ ? ( canonical_uri => $_ ) : (),
+      defined $_ ? (canonical_uri => $_) : (),
       schema => {},
     ),
     listmethods(
@@ -123,7 +123,7 @@ subtest 'object document' => sub {
 
   cmp_result(
     JSON::Schema::Modern::Document->new(
-      defined $_ ? ( canonical_uri => $_ ) : (),
+      defined $_ ? (canonical_uri => $_) : (),
       schema => { '$id' => 'https://foo.com' },
     ),
     listmethods(

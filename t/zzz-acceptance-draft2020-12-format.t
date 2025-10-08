@@ -58,7 +58,7 @@ acceptance_tests(
   },
   output_file => $version.'-acceptance-format.txt',
   test => {
-    $ENV{NO_TODO} ? () : ( todo_tests => [
+    $ENV{NO_TODO} ? () : (todo_tests => [
       { file => [
           'iri-reference.json',                       # all strings are considered valid
           'uri-template.json',                        # not yet implemented
@@ -80,7 +80,7 @@ acceptance_tests(
         test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate
       # note this test was added in TJSA 1.027
       { file => 'ecmascript-regex.json', group_description => '\a is not an ECMA 262 control escape', test_description => 'when used as a pattern' },
-    ] ),
+    ]),
   },
 );
 

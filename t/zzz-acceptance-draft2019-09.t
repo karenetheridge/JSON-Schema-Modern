@@ -47,7 +47,7 @@ acceptance_tests(
   },
   output_file => $version.'-acceptance.txt',
   test => {
-    $ENV{NO_TODO} ? () : ( todo_tests => [
+    $ENV{NO_TODO} ? () : (todo_tests => [
       # I am not interested in back-supporting "dependencies"
       { file => 'optional/dependencies-compatibility.json' },
       # various edge cases that are difficult to accomodate
@@ -61,7 +61,7 @@ acceptance_tests(
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' },
       # things we will never do
       { file => 'optional/refOfUnknownKeyword.json' },
-    ] ),
+    ]),
   },
 );
 
