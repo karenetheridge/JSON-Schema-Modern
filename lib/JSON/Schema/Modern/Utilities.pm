@@ -490,10 +490,11 @@ sub sprintf_num ($value) {
 
 # returns a reusable Types::Standard type for json pointers
 # TODO: move this off into its own distribution, see JSON::Schema::Types
-use constant json_pointer_type => Str->where('!length || m{^/} && !m{~(?![01])}');
+sub json_pointer_type () { Str->where('!length || m{^/} && !m{~(?![01])}'); }
 
-use constant canonical_uri_type =>
+sub canonical_uri_type () {
   (InstanceOf['Mojo::URL'])->where(q{!defined($_->fragment) || $_->fragment =~ m{^/} && $_->fragment !~ m{~(?![01])}});
+}
 
 1;
 __END__
