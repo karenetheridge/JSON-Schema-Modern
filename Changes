@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.620     2025-10-15 23:36:52Z
           - new "clone" method for Error objects
           - work around an issue with using an object overload as a constant
             on perl 5.20
