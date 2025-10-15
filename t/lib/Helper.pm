@@ -15,7 +15,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test2::V0 qw(!bag !bool !warnings), -no_pragmas => 1;  # prefer Test::Deep's versions of these exports
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
-use if $ENV{AUTHOR_TESTING}, 'Test2::Plugin::BailOnFail';
+use if $ENV{AUTHOR_TESTING} && (caller(2))[1] !~ /acceptance/, 'Test2::Plugin::BailOnFail';
 use Test::Deep qw(!array !hash !blessed); # import symbols: ignore, re etc
 use Test2::API 'context_do';
 use JSON::Schema::Modern;
