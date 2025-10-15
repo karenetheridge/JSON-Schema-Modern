@@ -99,7 +99,9 @@ else {
   $data = parse_input($data);
   $schema = parse_input($schema);
 
-  $result = $js->evaluate($data, $schema, { effective_base_uri => 'file://'.$schema_filename });
+  # if there is no $id within the document, the filename will be used instead
+  $js->add_schema(my $uri = 'file://'.$schema_filename, $schema) if length $schema_filename;
+  $result = $js->evaluate($data, $uri // $schema);
 }
 
 say $result->output_format eq 'data_only' ? $result : $result->dump;

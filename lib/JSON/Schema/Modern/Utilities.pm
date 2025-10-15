@@ -326,7 +326,6 @@ sub canonical_uri ($state, @extra_path) {
 # shorthand for creating error objects
 # uses these keys from $state:
 # - initial_schema_uri
-# - effective_base_uri (optional)
 # - keyword (optional)
 # - data_path
 # - traversed_keyword_path
@@ -348,7 +347,7 @@ sub E ($state, $error_string, @args) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->@{qw(initial_schema_uri keyword_path)}, $state->{keyword}//(), @keyword_path_suffix, $state->{effective_base_uri} ];
+  my $uri = [ $state->@{qw(initial_schema_uri keyword_path)}, $state->{keyword}//(), @keyword_path_suffix ];
 
   my $keyword_location = $state->{traversed_keyword_path}
     .jsonp($state->@{qw(keyword_path keyword)}, @keyword_path_suffix);
@@ -386,7 +385,7 @@ sub A ($state, $annotation) {
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
-  my $uri = [ $state->@{qw(initial_schema_uri keyword_path keyword effective_base_uri)} ];
+  my $uri = [ $state->@{qw(initial_schema_uri keyword_path keyword)} ];
 
   my $keyword_location = $state->{traversed_keyword_path}.jsonp($state->@{qw(keyword_path keyword)});
 

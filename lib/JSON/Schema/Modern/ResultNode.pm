@@ -39,22 +39,19 @@ has absolute_keyword_location => (
   lazy => 1,
   default => sub ($self) {
     # _uri contains data as populated from A() and E():
-    # [ $state->{initial_schema_uri}, $state->{keyword_path}, @extra_path, $state->{effective_base_uri} ]
+    # [ $state->{initial_schema_uri}, $state->{keyword_path}, @extra_path ]
     # we do the equivalent of:
-    # canonical_uri($state, @extra_path)->to_abs($state->{effective_base_uri});
+    # canonical_uri($state, @extra_path);
     if (my $uri_bits = delete $self->{_uri}) {
-      my $effective_base_uri = pop @$uri_bits;
       my ($initial_schema_uri, $keyword_path, @extra_path) = @$uri_bits;
 
       return($initial_schema_uri eq '' && $self->{keyword_location} eq '' ? undef : $initial_schema_uri)
-        if not @extra_path and not length($keyword_path) and not length $effective_base_uri;
+        if not @extra_path and not length($keyword_path);
 
       my $uri = $initial_schema_uri->clone;
       my $fragment = ($uri->fragment//'').(@extra_path ? jsonp($keyword_path, @extra_path) : $keyword_path);
       undef $fragment if not length($fragment);
       $uri->fragment($fragment);
-
-      $uri = $uri->to_abs($effective_base_uri) if length $effective_base_uri;
 
       undef $uri if $uri eq '' and $self->{keyword_location} eq ''
         or ($uri->fragment // '') eq $self->{keyword_location} and $uri->clone->fragment(undef) eq '';

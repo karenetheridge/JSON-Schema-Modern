@@ -377,7 +377,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
   my %overrides = %$config_override;
-  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks effective_base_uri data_path traversed_keyword_path _strict_schema_data)};
+  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks data_path traversed_keyword_path _strict_schema_data)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
     if keys %overrides;
 
@@ -389,13 +389,6 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     errors => [],
     depth => 0,
   };
-
-  # resolve locations against this for errors and annotations, if locations are not already absolute
-  if (length $config_override->{effective_base_uri}) {
-    $state->{effective_base_uri} = Mojo::URL->new($config_override->{effective_base_uri});
-    croak 'it is meaningless for effective_base_uri to have a fragment'
-      if defined $state->{effective_base_uri}->fragment;
-  }
 
   my $valid;
   try {
@@ -1482,8 +1475,6 @@ applications that contain embedded JSON Schemas):
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the recorded absolute keyword location of the start of evaluation
-* C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
-  useful when providing an inline schema that does not declare an absolute base URI for itself)
 
 The return value is a L<JSON::Schema::Modern::Result> object, which can also be used as a boolean.
 
@@ -1514,8 +1505,6 @@ applications that contain embedded JSON Schemas):
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
-* C<effective_base_uri>: locations in errors and annotations are resolved against this URI (only
-  useful when providing an inline schema that does not declare an absolute base URI for itself)
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 identifying various data that are not exposed by annotations.
