@@ -1277,7 +1277,7 @@ __END__
 =pod
 
 =for :header
-=for stopwords schema subschema metaschema validator evaluator listref
+=for stopwords schema subschema metaschema validator evaluator
 
 =head1 SYNOPSIS
 
