@@ -58,6 +58,7 @@ sub acceptance_tests (%options) {
 
   my $add_resource = sub ($uri, $schema, %resource_options) {
     return if $uri =~ m{/draft-next/};
+    return if $uri =~ m{/v1/};
     try {
       my $doc = my $document = JSON::Schema::Modern::Document->new(
         schema => $schema,

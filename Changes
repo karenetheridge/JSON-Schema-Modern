@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - adjust acceptance tests to handle new failure cases in the test
+            suite for hostname, idn-hostname formats
 
 0.620     2025-10-15 23:36:52Z
           - new "clone" method for Error objects
