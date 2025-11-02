@@ -34,6 +34,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw(
   is_type
   get_type
+  is_bool
   is_schema
   is_bignum
   is_equal

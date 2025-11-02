@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - allow export of JSON::Schema::Modern::Utilities::is_bool
 
 0.621     2025-10-30 17:56:52Z
           - adjust acceptance tests to handle new failure cases in the test
