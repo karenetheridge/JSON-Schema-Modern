@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.029
-with commit:                 9ad349be933f1e74810cb4fd3ad19780694dc77e (Test-JSON-Schema-Acceptance-1.027-29-g9ad349b)
+generated with:              Test::JSON::Schema::Acceptance 1.030
+with commit:                 be58fa98d5f79bb8d20f45a15e540332669ad947 (Test-JSON-Schema-Acceptance-1.029-43-gbe58fa9)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft2019-09
 optional tests included:     yes
@@ -13,7 +13,7 @@ allOf.json                                  30          0     0
 anchor.json                                  8          0     0
 anyOf.json                                  18          0     0
 boolean_schema.json                         18          0     0
-const.json                                  50          0     0
+const.json                                  54          0     0
 contains.json                               21          0     0
 content.json                                18          0     0
 default.json                                 7          0     0
@@ -45,12 +45,12 @@ patternProperties.json                      23          0     0
 properties.json                             28          0     0
 propertyNames.json                          20          0     0
 recursiveRef.json                           34          0     0
-ref.json                                    79          0     0
+ref.json                                    81          0     0
 refRemote.json                              31          0     0
 required.json                               16          0     0
 type.json                                   80          0     0
-unevaluatedItems.json                       55          0     0
-unevaluatedProperties.json                 122          0     0
+unevaluatedItems.json                       56          0     0
+unevaluatedProperties.json                 123          0     0
 uniqueItems.json                            69          0     0
 vocabulary.json                              5          0     0
 optional/anchor.json                         4          0     0
@@ -62,7 +62,7 @@ optional/float-overflow.json                 1          0     0
 optional/id.json                             3          0     0
 optional/no-schema.json                      3          0     0
 optional/non-bmp-regex.json                 12          0     0
-optional/refOfUnknownKeyword.json            3          3     0
+optional/refOfUnknownKeyword.json            5          5     0
 optional/unknownKeyword.json                 3          0     0
 ---------------------------------------------------------------
-TOTAL                                     1350         31     0
+TOTAL                                     1360         33     0

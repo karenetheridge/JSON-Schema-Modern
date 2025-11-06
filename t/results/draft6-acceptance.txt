@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.029
-with commit:                 9ad349be933f1e74810cb4fd3ad19780694dc77e (Test-JSON-Schema-Acceptance-1.027-29-g9ad349b)
+generated with:              Test::JSON::Schema::Acceptance 1.030
+with commit:                 be58fa98d5f79bb8d20f45a15e540332669ad947 (Test-JSON-Schema-Acceptance-1.029-43-gbe58fa9)
 from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
 specification version:       draft6
 optional tests included:     yes
@@ -12,7 +12,7 @@ additionalProperties.json                   16          0     0
 allOf.json                                  30          0     0
 anyOf.json                                  18          0     0
 boolean_schema.json                         18          0     0
-const.json                                  50          0     0
+const.json                                  54          0     0
 contains.json                               19          0     0
 default.json                                 7          0     0
 definitions.json                             2          0     0
@@ -50,4 +50,4 @@ optional/id.json                             7          0     0
 optional/non-bmp-regex.json                 12          0     0
 optional/unknownKeyword.json                 3          0     0
 ---------------------------------------------------------------
-TOTAL                                      921         14     0
+TOTAL                                      925         14     0
