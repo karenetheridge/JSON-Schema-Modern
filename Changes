@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.622     2025-11-08 22:22:19Z
           - allow export of JSON::Schema::Modern::Utilities::is_bool
           - adjust acceptance tests to handle new failure cases in the test
             suite for the hostname format
