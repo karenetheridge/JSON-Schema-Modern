@@ -112,7 +112,7 @@ subtest 'media_type and encoding handlers' => sub {
   $js = JSON::Schema::Modern->new;
 
   # MIME::Base64::decode("eyJmb28iOiAiYmFyIn0K") -> {"foo": "bar"}
-  # JSON::MaybeXS->new(allow_nonref => 1, utf8 => 0)->decode(q!{"foo": "bar"}!) -> { foo => 'bar' }
+  # Cpanel::JSON::XS->new->allow_nonref(1)->utf8(0)->decode(q!{"foo": "bar"}!) -> { foo => 'bar' }
 
   cmp_result(
     $js->get_media_type('application/json')->($js->get_encoding('base64')->(\'eyJmb28iOiAiYmFyIn0K')),
