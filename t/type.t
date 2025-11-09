@@ -13,7 +13,6 @@ no feature 'switch';
 use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Fatal;
 use Scalar::Util qw(isdual dualvar);
 use JSON::Schema::Modern::Utilities qw(is_type get_type);
 use Math::BigInt;

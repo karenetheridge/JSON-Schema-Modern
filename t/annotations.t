@@ -13,13 +13,13 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use builtin::compat 'load_module';
-use Test::Fatal;
+use Test2::Tools::Exception;
 use lib 't/lib';
 use Helper;
 
 subtest 'draft7' => sub {
   like(
-    exception {
+    dies {
       JSON::Schema::Modern->new(collect_annotations => 1, specification_version => 'draft7');
     },
     qr/collect_annotations cannot be used with specification_version draft7/,

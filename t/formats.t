@@ -13,7 +13,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test2::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
-use Test::Fatal;
+use Test2::Tools::Exception;
 use JSON::Schema::Modern::Utilities qw(get_type);
 
 use lib 't/lib';
@@ -121,7 +121,7 @@ subtest 'simple validation' => sub {
 
 subtest 'override a format sub' => sub {
   like(
-    exception {
+    dies {
       JSON::Schema::Modern->new(
         validate_formats => 1,
         format_validations => +{ uuid => 1 },
@@ -133,24 +133,24 @@ subtest 'override a format sub' => sub {
 
   my $js = JSON::Schema::Modern->new(validate_formats => 1);
   like(
-    exception { $js->add_format_validation([] => 1) },
+    dies { $js->add_format_validation([] => 1) },
     qr/Value .* did not pass type constraint /,
     'check syntax of override format name to existing format via setter',
   );
   like(
-    exception { $js->add_format_validation(uuid => 1) },
+    dies { $js->add_format_validation(uuid => 1) },
     qr/Value .* did not pass type constraint /,
     'check syntax of override definition value to existing format via setter',
   );
 
   like(
-    exception { $js->add_format_validation(uuid => { sub => sub { 0 }}) },
+    dies { $js->add_format_validation(uuid => { sub => sub { 0 }}) },
     qr/Reference .* did not pass type constraint /,
     'type is required if passing a hashref',
   );
 
   like(
-    exception { $js->add_format_validation(uuid => { type => 'number', sub => sub { 0 }}) },
+    dies { $js->add_format_validation(uuid => { type => 'number', sub => sub { 0 }}) },
     qr/Type for override of format uuid does not match original type/,
     'cannot override a core format to support a different data type',
   );
@@ -187,7 +187,7 @@ subtest 'override a format sub' => sub {
   );
 
   like(
-    exception {
+    dies {
       JSON::Schema::Modern->new(
         validate_formats => 1,
         format_validations => +{ mult_5 => 1 },
@@ -207,13 +207,13 @@ subtest 'override a format sub' => sub {
   );
 
   like(
-    exception { $js->add_format_validation(uuid_bad => 1) },
+    dies { $js->add_format_validation(uuid_bad => 1) },
     qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
     'check syntax of implementation when adding an override to existing format',
   );
 
   like(
-    exception { $js->add_format_validation(mult_5_bad => 1) },
+    dies { $js->add_format_validation(mult_5_bad => 1) },
     qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
     'check syntax of implementation when adding a new format',
   );
@@ -610,13 +610,13 @@ subtest 'format: invalid base type(s)' => sub {
   my $js = JSON::Schema::Modern->new(validate_formats => 1);
 
   like(
-    exception { $js->add_format_validation(my_integer => { type => 'integer', sub => sub {} }) },
+    dies { $js->add_format_validation(my_integer => { type => 'integer', sub => sub {} }) },
     qr/Value .* did not pass type constraint /,
     'integer is not a valid base type for a format validation',
   );
 
   like(
-    exception { $js->add_format_validation(my_integer => { type => [qw(integer string)], sub => sub {} }) },
+    dies { $js->add_format_validation(my_integer => { type => [qw(integer string)], sub => sub {} }) },
     qr/Reference .* did not pass type constraint /,
     'integer, string is not a valid base type for a format validation',
   );

@@ -13,7 +13,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test2::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
-use Test::Fatal;
+use Test2::Tools::Exception;
 use lib 't/lib';
 use Helper;
 
@@ -1691,19 +1691,19 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
   my $js = JSON::Schema::Modern->new;
 
   like(
-    exception { $js->add_vocabulary('MyVocabulary::Does::Not::Exist') },
+    dies { $js->add_vocabulary('MyVocabulary::Does::Not::Exist') },
     qr!an't locate MyVocabulary/Does/Not/Exist.pm in \@INC!,
     'vocabulary class must exist',
   );
 
   like(
-    exception { $js->add_vocabulary('MyVocabulary::MissingRole') },
+    dies { $js->add_vocabulary('MyVocabulary::MissingRole') },
     qr/Value "MyVocabulary::MissingRole" did not pass type constraint/,
     'vocabulary class must implement the role',
   );
 
   like(
-    exception { $js->add_vocabulary('MyVocabulary::MissingSub') },
+    dies { $js->add_vocabulary('MyVocabulary::MissingSub') },
     qr/Can't apply JSON::Schema::Modern::Vocabulary to MyVocabulary::MissingSub - missing vocabulary, keywords/,
     'vocabulary class must implement some subs',
   );
@@ -1711,7 +1711,7 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
   cmp_result(
     [ warnings {
       like(
-        exception { $js->add_vocabulary('MyVocabulary::BadVocabularySub1') },
+        dies { $js->add_vocabulary('MyVocabulary::BadVocabularySub1') },
         qr/Undef did not pass type constraint/,
         'vocabulary() sub in the vocabulary class must return uri => specification_version pairs',
       )
@@ -1721,21 +1721,20 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
   );
 
   like(
-    exception { $js->add_vocabulary('MyVocabulary::BadVocabularySub2') },
+    dies { $js->add_vocabulary('MyVocabulary::BadVocabularySub2') },
     qr!Value "https://some/uri#/invalid/uri" did not pass type constraint!,
     'vocabulary() sub in the vocabulary class must contain valid absolute, fragmentless URIs',
   );
 
   like(
-    exception { $js->add_vocabulary('MyVocabulary::BadVocabularySub3') },
+    dies { $js->add_vocabulary('MyVocabulary::BadVocabularySub3') },
     qr/Value "wrongdraft" did not pass type constraint/,
     'vocabulary() sub in the vocabulary class must reference a known specification version',
   );
 
 
-  is(
-    exception { $js->add_vocabulary('MyVocabulary::BadEvaluationOrder') },
-    undef,
+  ok(
+    lives { $js->add_vocabulary('MyVocabulary::BadEvaluationOrder') },
     'added a vocabulary sub',
   );
 
@@ -1774,9 +1773,8 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     'custom vocabulary class has a conflicting evaluation_order',
   );
 
-  is(
-    exception { $js->add_vocabulary('MyVocabulary::StringComparison') },
-    undef,
+  ok(
+    lives { $js->add_vocabulary('MyVocabulary::StringComparison') },
     'added another vocabulary sub',
   );
 
@@ -1813,15 +1811,14 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
 
 
   like(
-    exception { $js->add_vocabulary('MyVocabulary::ReservedKeyword') },
+    dies { $js->add_vocabulary('MyVocabulary::ReservedKeyword') },
     qr/^keywords starting with "\$" are reserved for core and cannot be used/,
     '$ keywords are prohibited',
   );
 
 
-  is(
-    exception { $js->add_vocabulary('MyVocabulary::ConflictingKeyword') },
-    undef,
+  ok(
+    lives { $js->add_vocabulary('MyVocabulary::ConflictingKeyword') },
     'added another vocabulary sub',
   );
 

@@ -13,13 +13,13 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test2::Warnings qw(warnings :no_end_test had_no_warnings);
-use Test::Fatal;
+use Test2::Tools::Exception;
 use lib 't/lib';
 use Helper;
 
 {
   like(
-    exception { ()= JSON::Schema::Modern->new(specification_version => 'ohhai')->evaluate(true, true) },
+    dies { ()= JSON::Schema::Modern->new(specification_version => 'ohhai')->evaluate(true, true) },
     qr/^Value "ohhai" did not pass type constraint/,
     'unrecognized specification_version',
   );

@@ -12,7 +12,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Fatal;
+use Test2::Tools::Exception;
 use lib 't/lib';
 use Helper;
 
@@ -33,7 +33,7 @@ my @tests = (
 foreach my $test (@tests) {
   my $data = 'hello';
   is(
-    exception {
+    dies {
       my $result = $js->evaluate($data, $test->{schema});
       ok(!($result->exception xor $test->{exception}), json_sprintf('%s is not a schema', $test->{schema}));
       ok(!($result->valid xor $test->{valid}), json_sprintf('schema: %s evaluates to: %s', $test->{schema}, $test->{valid}));

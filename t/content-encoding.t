@@ -12,7 +12,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use utf8;
 
-use Test::Fatal;
+use Test2::Tools::Exception;
 use lib 't/lib';
 use Helper;
 
@@ -56,7 +56,7 @@ subtest 'media_type and encoding handlers' => sub {
   my $js = JSON::Schema::Modern->new;
 
   like(
-    exception { $js->add_media_type('FOO/BAR' => sub { \1 }) },
+    dies { $js->add_media_type('FOO/BAR' => sub { \1 }) },
     qr!Value "FOO/BAR" did not pass type constraint !,
     'upper-cased names are not accepted',
   );
@@ -103,7 +103,7 @@ subtest 'media_type and encoding handlers' => sub {
   );
 
   like(
-    exception { $js->get_media_type('application/x-ndjson')->(\qq!{"foo":1,"bar":2}\n["a","b",]!) },
+    dies { $js->get_media_type('application/x-ndjson')->(\qq!{"foo":1,"bar":2}\n["a","b",]!) },
     qr/^parse error at line 2: malformed JSON string/,
     'application/x-ndjson dies with line number of the bad data',
   );

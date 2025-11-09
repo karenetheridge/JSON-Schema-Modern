@@ -12,7 +12,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Fatal;
+use Test2::Tools::Exception;
 use builtin::compat 'refaddr';
 use lib 't/lib';
 use Helper;
@@ -513,7 +513,7 @@ subtest 'AND two result objects together' => sub {
   );
 
   like(
-    exception { $results[0] & 0 },
+    dies { $results[0] & 0 },
     qr/wrong type for \& operation/,
     'only Result objects can be processed',
   );
@@ -624,26 +624,24 @@ subtest 'construction errors' => sub {
   );
 
   like(
-    exception { JSON::Schema::Modern::Result->new(valid => true, errors => [$error]) },
+    dies { JSON::Schema::Modern::Result->new(valid => true, errors => [$error]) },
     qr/^inconsistent inputs: errors is not empty but valid is true/,
     'valid results must not have errors',
   );
 
   like(
-    exception { JSON::Schema::Modern::Result->new(valid => false, errors => []) },
+    dies { JSON::Schema::Modern::Result->new(valid => false, errors => []) },
     qr/^inconsistent inputs: errors is empty but valid is false/,
     'invalid results must have errors',
   );
 
-  is(
-    exception { JSON::Schema::Modern::Result->new(valid => true, errors => []) },
-    undef,
+  ok(
+    lives { JSON::Schema::Modern::Result->new(valid => true, errors => []) },
     'no errors when valid is true and errors is empty',
   );
 
-  is(
-    exception { JSON::Schema::Modern::Result->new(valid => false, errors => [$error]) },
-    undef,
+  ok(
+    lives { JSON::Schema::Modern::Result->new(valid => false, errors => [$error]) },
     'no errors when valid is false and errors is not empty',
   );
 };

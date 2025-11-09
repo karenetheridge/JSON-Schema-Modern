@@ -12,7 +12,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test::Deep::UnorderedPairs;
-use Test::Fatal;
+use Test2::Tools::Exception;
 use Test::Memory::Cycle;
 use List::Util 'unpairs';
 use lib 't/lib';
@@ -46,7 +46,7 @@ subtest 'boolean document' => sub {
   );
 
   like(
-    exception {
+    dies {
       JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com#/x/y/z'),
         schema => false,
@@ -885,19 +885,18 @@ subtest 'JSON pointer and URI escaping' => sub {
 };
 
 subtest 'resource collisions' => sub {
-  is(
-    exception {
+  ok(
+    lives {
       JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
         schema => { '$id' => '/x/y/z' },
       );
     },
-    undef,
     'no collision when adding an identical resource (after resolving with base uri)',
   );
 
   like(
-    exception {
+    dies {
       JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
         schema => {
@@ -943,23 +942,22 @@ subtest 'resource collisions' => sub {
   my $doc2 = JSON::Schema::Modern::Document->new(schema => { '$id' => 'b' });
   my $js = JSON::Schema::Modern->new;
 
-  is(
+  ok(
     # id resolves to https://foo.com/a/b
-    exception { $js->add_document('https://foo.com' => $doc1) },
-    undef,
+    lives { $js->add_document('https://foo.com' => $doc1) },
     'add first document, resolving resources to a base uri',
   );
 
   like(
     # id resolves to https://foo.com/a/b
-    exception { $js->add_document('https://foo.com/a/' => $doc2) },
+    dies { $js->add_document('https://foo.com/a/' => $doc2) },
     qr{^uri "https://foo.com/a/b" conflicts with an existing schema resource},
     'the resource in the second document resolves to the same uri as from the first document',
   );
 
 
-  is(
-    exception {
+  ok(
+    lives {
       JSON::Schema::Modern::Document->new(
         canonical_uri => Mojo::URL->new('https://foo.com/x/y/z'),
         schema => {
@@ -976,7 +974,6 @@ subtest 'resource collisions' => sub {
         },
       );
     },
-    undef,
     'ignored "duplicate" uris embedded in non-schemas',
   );
 };

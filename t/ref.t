@@ -11,7 +11,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Fatal;
+use Test2::Tools::Exception;
 use Storable 'dclone';
 use lib 't/lib';
 use Helper;
@@ -31,8 +31,8 @@ subtest 'local JSON pointer' => sub {
     'can follow local $ref to a false schema',
   );
 
-  is(
-    exception {
+  ok(
+    lives {
       my $result = $js->evaluate(true, { '$ref' => '#/$defs/nowhere' });
       like(
         (($result->errors)[0])->error,
@@ -40,7 +40,6 @@ subtest 'local JSON pointer' => sub {
         'got error for unresolvable ref',
       );
     },
-    undef,
     'no exception',
   );
 };
@@ -94,7 +93,7 @@ subtest 'local anchor' => sub {
   );
 
   is(
-    exception {
+    dies {
       my $result = $js->evaluate(true, { '$ref' => '#nowhere' });
       like(
         (($result->errors)[0])->error,

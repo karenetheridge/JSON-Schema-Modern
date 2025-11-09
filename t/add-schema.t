@@ -11,7 +11,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Fatal;
+use Test2::Tools::Exception;
 use Test2::Warnings qw(warnings :no_end_test had_no_warnings);
 use List::Util 'unpairs';
 use lib 't/lib';
@@ -231,7 +231,7 @@ subtest 'add a schema associated with a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
   like(
-    exception { $js->add_schema('https://foo.com#/x/y/z', {}) },
+    dies { $js->add_schema('https://foo.com#/x/y/z', {}) },
     qr/^cannot add a schema with a uri with a fragment/,
     'cannot use a uri with a fragment',
   );
@@ -694,13 +694,13 @@ subtest 'register a document against multiple uris, with absolute root uri' => s
   );
 
   like(
-    exception { $js->add_schema('https://uri2.com', { x => 1 }) },
+    dies { $js->add_schema('https://uri2.com', { x => 1 }) },
     qr!^\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
     'cannot call add_schema with the same URI as for another schema',
   );
 
   like(
-    exception { $js->add_schema('https://uri3.com', { '$id' => 'https://foo.com', x => 1 }) },
+    dies { $js->add_schema('https://uri3.com', { '$id' => 'https://foo.com', x => 1 }) },
     qr!^\Quri "https://foo.com" conflicts with an existing schema resource\E!,
     'cannot reuse the same $id in another document',
   );
@@ -862,13 +862,13 @@ subtest 'register a document against multiple uris, with relative root uri' => s
   );
 
   like(
-    exception { $js->add_schema('https://uri2.com', { x => 1 }) },
+    dies { $js->add_schema('https://uri2.com', { x => 1 }) },
     qr!^\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
     'cannot call add_schema with the same URI as for another schema',
   );
 
   like(
-    exception { $js->add_schema('https://uri3.com', { '$id' => 'https://uri2.com', x => 1 }) },
+    dies { $js->add_schema('https://uri3.com', { '$id' => 'https://uri2.com', x => 1 }) },
     qr!^\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
     'cannot reuse the same $id in another document',
   );
@@ -1024,13 +1024,13 @@ subtest 'register a document against multiple uris, with no root uri' => sub {
   );
 
   like(
-    exception { $js->add_schema('https://uri2.com', { x => 1 }) },
+    dies { $js->add_schema('https://uri2.com', { x => 1 }) },
     qr!^\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
     'cannot call add_schema with the same URI as for another schema',
   );
 
   like(
-    exception { $js->add_schema('https://uri3.com', { '$id' => 'https://uri2.com', x => 1 }) },
+    dies { $js->add_schema('https://uri3.com', { '$id' => 'https://uri2.com', x => 1 }) },
     qr!^\Quri "https://uri2.com" conflicts with an existing schema resource\E!,
     'cannot reuse the same $id in another document',
   );

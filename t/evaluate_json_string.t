@@ -12,7 +12,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Fatal;
+use Test2::Tools::Exception;
 
 use lib 't/lib';
 use Helper;
@@ -21,16 +21,15 @@ my $js = JSON::Schema::Modern->new;
 
 like(ref($js->_json_decoder), qr/^(?:Cpanel::JSON::XS|JSON::PP)$/, 'we have a JSON decoder');
 
-is(
-  exception {
+ok(
+  lives {
     ok($js->evaluate_json_string('true', {})->valid, 'json data "true" is evaluated successfully');
   },
-  undef,
   'no exceptions in evaluate_json_string on good json',
 );
 
-is(
-  exception {
+ok(
+  lives {
     cmp_result(
       $js->evaluate_json_string('blargh', {})->TO_JSON,
       {
@@ -46,7 +45,6 @@ is(
       'evaluating bad json data returns false, with error',
     );
   },
-  undef,
   'no exceptions in evaluate_json_string on bad json',
 );
 
