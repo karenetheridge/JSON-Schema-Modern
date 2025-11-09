@@ -12,7 +12,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test2::V0 -no_pragmas => 1;
-use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
+use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings';
 use Digest::MD5 'md5_hex';
 use Path::Tiny;
 
