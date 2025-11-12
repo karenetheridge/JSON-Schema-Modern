@@ -1293,4 +1293,65 @@ subtest 'evaluate at a non-schema location' => sub {
   );
 };
 
+subtest 'evaluate at a subschema, with $dynamicRef' => sub {
+  # from a real bug I encountered while writing a t/parameters.t test in OpenAPI-Modern!
+  # if we evaluate in the middle of a document, and a $dynamicRef is involved, mayhem ensues.
+  $js->{_resource_index} = {};
+  $js->add_schema({
+    '$id' => 'http://strict_metaschema',
+    '$defs' => {
+      schema => {
+        '$dynamicAnchor' => 'meta',
+        type => 'object', # disallows boolean
+      },
+      parameter => {
+        '$ref' => 'http://loose_metaschema#/$defs/parameter',
+      },
+    },
+    '$ref' => 'http://loose_metaschema#/intentionally/bad/reference',
+  });
+
+  $js->add_schema({
+    '$id' => 'http://loose_metaschema',
+    '$defs' => {
+      schema => {
+        '$dynamicAnchor' => 'meta',
+        type => [ 'object', 'boolean' ],
+      },
+      parameter => {
+        type => 'object',
+        properties => {
+          name => { type => 'string' },
+          schema => { '$dynamicRef' => '#meta' },
+        },
+      },
+    },
+  });
+
+  cmp_result(
+    $js->evaluate(
+      { name => 'hi', schema => false },
+      'http://strict_metaschema#/$defs/parameter',
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/schema',
+          keywordLocation => '/$ref/properties/schema/$dynamicRef/type',
+          absoluteKeywordLocation => 'http://strict_metaschema#/$defs/schema/type',
+          error => 'got boolean, not object',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/properties',
+          absoluteKeywordLocation => 'http://loose_metaschema#/$defs/parameter/properties',
+          error => 'not all properties are valid',
+        },
+      ],
+    },
+    'correctly navigated a $dynamicRef while evaluating in the middle of a document',
+  );
+};
+
 done_testing;

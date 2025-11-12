@@ -336,6 +336,7 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
     # "$dynamicAnchor".
     foreach my $scope_uri ($state->{dynamic_scope}->@*) {
       my $resource = $state->{evaluator}->_get_or_load_resource($scope_uri);
+      die 'bad dynamic scope uri: ', $scope_uri if not $resource;
       if (exists(($resource->{anchors}//{})->{$anchor}) and $resource->{anchors}{$anchor}{dynamic}) {
         $uri = Mojo::URL->new($scope_uri)->fragment($anchor);
         last;

@@ -414,7 +414,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       %$state,
       initial_schema_uri => $schema_info->{canonical_uri}, # the canonical URI as of the start of evaluation, or last $id or $ref
       $schema_info->%{qw(document specification_version vocabularies)},
-      dynamic_scope => [ $schema_info->{canonical_uri} ],
+      dynamic_scope => [ $schema_info->{canonical_uri}->clone->fragment(undef) ],
       annotations => [],
       seen => {},
       callbacks => $config_override->{callbacks} // {},
@@ -843,7 +843,10 @@ has _resource_index => (
     ]],
 );
 
-sub _get_resource { ($_[0]->{_resource_index}//{})->{$_[1]} }
+sub _get_resource {
+  die 'bad resource: ', $_[1] if $_[1] =~ /#/;
+  ($_[0]->{_resource_index}//{})->{$_[1]}
+}
 
 # does not check for duplicate entries, or for malformed uris
 sub _add_resources_unsafe {
