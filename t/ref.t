@@ -1041,6 +1041,72 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
   );
 };
 
+subtest 'multiple layers in the dynamic scope' => sub {
+  $js->{_resource_index} = {};
+  my $schema = {
+    # We $ref from base -> first#/$defs/stuff -> second#/$defs/stuff -> third#/$defs/stuff
+    # and then follow a $dynamicRef to #length.
+    # At no point do we ever actually evaluate at the root schema for each scope.
+    # The dynamic scope is [ base, first, second, third ] and we check the scopes in order,
+    # therefore the first scope we find with a dynamic anchor "length" is "second".
+    '$id' => 'base',
+    '$ref' => 'first#/$defs/stuff',
+    '$defs' => {
+      first => {
+        '$id' => 'first',
+        '$defs' => {
+          stuff => {    # first#/$defs/stuff
+            '$ref' => 'second#/$defs/stuff',
+          },
+          length => {   # first#length
+            # no $dynamicAnchor here!
+            maxLength => 1,
+          },
+        },
+      },
+      second => {
+        '$id' => 'second',
+        '$defs' => {
+          stuff => {    # second#/$defs/stuff
+            '$ref' => 'third#/$defs/stuff',
+          },
+          length => {   # second#length
+            '$dynamicAnchor' => 'length',
+            maxLength => 2,               # <-- this is the scope that we should find and evaluate
+          },
+        },
+      },
+      third => {
+        '$id' => 'third',
+        '$defs' => {
+          stuff => {    # third#/$defs/stuff
+            '$dynamicRef' => '#length',
+          },
+          length => {   # third#length
+            '$dynamicAnchor' => 'length',
+            maxLength => 3,         # this should never get evaluated
+          }
+        },
+      },
+    },
+  };
+  cmp_result(
+    $js->evaluate('hello', $schema)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/$ref/$ref/$ref/$dynamicRef/maxLength',
+          absoluteKeywordLocation => 'second#/$defs/length/maxLength',
+          error => 'length is greater than 2',
+        },
+      ],
+    },
+    'dynamic scopes are pushed onto the stack even when its root resource (and $id keyword) are not directly evaluated',
+  );
+};
+
 subtest 'after leaving a dynamic scope, it should not be used by a $dynamicRef' => sub {
   $js->{_resource_index} = {};
   my $schema = {

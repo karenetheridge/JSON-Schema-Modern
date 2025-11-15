@@ -126,7 +126,8 @@ sub _eval_keyword_id ($class, $data, $schema, $state) {
   $state->{keyword_path} = '';
   $state->@{qw(specification_version vocabularies)} = $schema_info->@{qw(specification_version vocabularies)};
 
-  push $state->{dynamic_scope}->@*, $state->{initial_schema_uri};
+  push $state->{dynamic_scope}->@*, $state->{initial_schema_uri}
+    if $state->{dynamic_scope}->[-1] ne $schema_info->{canonical_uri};
 
   return 1;
 }

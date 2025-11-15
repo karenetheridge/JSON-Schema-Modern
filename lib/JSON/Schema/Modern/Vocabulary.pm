@@ -80,6 +80,9 @@ sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
   abort($state, 'EXCEPTION: bad reference to "%s": not a schema', $schema_info->{canonical_uri})
     if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
+  my $scope_uri = $schema_info->{canonical_uri}->clone->fragment(undef);
+  push $state->{dynamic_scope}->@*, $scope_uri if $state->{dynamic_scope}->[-1] ne $scope_uri;
+
   return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
     +{
       %$state,
