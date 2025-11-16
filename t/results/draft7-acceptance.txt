@@ -1,6 +1,6 @@
-generated with:              Test::JSON::Schema::Acceptance 1.030
-with commit:                 be58fa98d5f79bb8d20f45a15e540332669ad947 (Test-JSON-Schema-Acceptance-1.029-43-gbe58fa9)
-from repository:             git://github.com/json-schema-org/JSON-Schema-Test-Suite.git
+generated with:              Test::JSON::Schema::Acceptance 1.034
+with commit:                 8da0a7bcb23f3516590e70bc5c3e396400c27741 (Test-JSON-Schema-Acceptance-1.033)
+from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft7
 optional tests included:     yes
 skipping directory:          optional/format
