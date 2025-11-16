@@ -138,7 +138,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
 
   # Note that because this keyword is parsed ahead of "id"/"$id", location information may not
   # be correct if an error occurs when parsing this keyword.
-  ()= E($state, '$schema value is not a string'), return if not is_type('string', $schema->{'$schema'});
+  return E($state, '$schema value is not a string') if not is_type('string', $schema->{'$schema'});
   return if not assert_uri($state, $schema, $schema->{'$schema'});
 
   my ($spec_version, $vocabularies);
