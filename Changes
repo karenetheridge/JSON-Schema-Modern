@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.623     2025-11-17 00:14:31Z
           - fix error when navigating a $dynamicRef after initial evaluation
             at a subschema
           - fix incorrect $dynamicRef target following changing scopes into a
