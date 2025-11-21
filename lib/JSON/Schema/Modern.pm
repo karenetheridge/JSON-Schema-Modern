@@ -1170,7 +1170,10 @@ sub _prefix_match_length ($x, $y) {
 # and also checks if Cpanel::JSON::XS is installed.
 # Mojo::JSON falls back to its own pure-perl encoder/decoder but does not support all the options
 # that we require here.
-use constant _JSON_BACKEND => Mojo::JSON::JSON_XS ? 'Cpanel::JSON::XS' : 'JSON::PP';
+use constant _JSON_BACKEND =>
+    Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION('4.38'); 1 } ? 'Cpanel::JSON::XS'
+  : eval { JSON::PP->VERSION('4.11'); 1 } ? 'JSON::PP'
+  : die 'Cpanel::JSON::XS 4.38 or JSON::PP 4.11 is required';
 
 # used for internal encoding as well (when caching serialized schemas)
 has _json_decoder => (
