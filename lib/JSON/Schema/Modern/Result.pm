@@ -19,11 +19,11 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use MooX::TypeTiny;
-use Types::Standard qw(ArrayRef InstanceOf Enum Bool Str Maybe Tuple);
+use Types::Standard qw(ArrayRef InstanceOf Enum Bool Str Maybe Tuple Map Any);
 use Types::Common::Numeric 'PositiveInt';
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
-use JSON::Schema::Modern::Utilities qw(true false);
+use JSON::Schema::Modern::Utilities qw(true false json_pointer_type);
 use JSON::PP ();
 use List::Util 1.45 'uniq';
 use if "$]" < 5.041010, 'List::Util' => qw(any all);
@@ -115,6 +115,11 @@ has formatted_annotations => (
   default => 1,
 );
 
+has defaults => (
+  is => 'ro',
+  isa => Map[json_pointer_type, Any],
+);
+
 around BUILDARGS => sub ($orig, $class, @args) {
   my $args = $class->$orig(@args);
 
@@ -154,6 +159,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
       $self->valid
         ? ($formatted_annotations && $self->annotation_count ? (annotations => [ map $_->TO_JSON, $self->annotations ]) : ())
         : (errors => [ map $_->TO_JSON, $self->errors ]),
+      $self->valid && $self->defaults ? (defaults => $self->defaults) : (),
     };
   }
   # note: strict_basic will NOT be supported after draft 2019-09!
@@ -374,6 +380,13 @@ obfuscate normal validation errors, in which case you should check for C<400> an
 to C<'Bad Request'>.
 
 Also available as a read/write accessor.
+
+=head2 defaults
+
+A hashref, mapping json pointer locations in the instance data to the default value assigned
+to the property at this location, taken from C<default> keywords in the schema under C<properties>
+and C<patternProperties> keywords.  This data will also be included in the "basic" output format
+when it is defined.
 
 =head1 METHODS
 

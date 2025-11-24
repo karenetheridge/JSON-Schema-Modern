@@ -276,7 +276,6 @@ sub _eval_keyword_additionalItems ($class, $data, $schema, $state) {
 # "prefixItems" (draft 2020-12), array-based "items" (pre-draft2020-12))
 sub _eval_keyword__items_array_schemas ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
-  return 1 if ($state->{_last_items_index}//-1) == $data->$#*;
 
   my $valid = 1;
 
@@ -304,7 +303,16 @@ sub _eval_keyword__items_array_schemas ($class, $data, $schema, $state) {
     };
   }
 
-  A($state, $state->{_last_items_index} == $data->$#* ? true : $state->{_last_items_index});
+  if ($state->{defaults}) {
+    foreach my $idx ($data->$#*+1 .. $schema->{$state->{keyword}}->$#*) {
+      $state->{defaults}{$state->{data_path}.'/'.$idx} = $schema->{$state->{keyword}}[$idx]{default}
+        if $valid and ref $schema->{$state->{keyword}}[$idx] eq 'HASH'
+          and exists $schema->{$state->{keyword}}[$idx]{default};
+    }
+  }
+
+  A($state, $state->{_last_items_index} == $data->$#* ? true : $state->{_last_items_index})
+    if exists $state->{_last_items_index};
   return E($state, 'not all items are valid') if not $valid;
   return 1;
 }
@@ -407,6 +415,15 @@ sub _eval_keyword_properties ($class, $data, $schema, $state) {
   my $valid = 1;
   my @properties;
   foreach my $property (sort keys $schema->{properties}->%*) {
+    if (not exists $data->{$property} and $state->{defaults}) {
+      $state->{defaults}{jsonp($state->{data_path}, $property)} = $schema->{properties}{$property}{default}
+        if $valid and $state->{defaults}
+          and ref $schema->{properties}{$property} eq 'HASH'
+          and exists $schema->{properties}{$property}{default};
+
+      next;
+    }
+
     next if not exists $data->{$property};
     push @properties, $property;
 

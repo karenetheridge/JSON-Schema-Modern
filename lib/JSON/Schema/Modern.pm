@@ -97,7 +97,7 @@ has validate_content_schemas => (
   default => sub { ($_[0]->specification_version//'') eq 'draft7' },
 );
 
-has [qw(collect_annotations scalarref_booleans stringy_numbers strict)] => (
+has [qw(collect_annotations scalarref_booleans stringy_numbers strict with_defaults)] => (
   is => 'ro',
   isa => Bool,
 );
@@ -381,7 +381,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   croak 'evaluate called in void context' if not defined wantarray;
 
   my %overrides = %$config_override;
-  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict callbacks data_path traversed_keyword_path _strict_schema_data)};
+  delete @overrides{qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict with_defaults callbacks data_path traversed_keyword_path _strict_schema_data)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in evaluate'
     if keys %overrides;
 
@@ -425,6 +425,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
         defined $val ? ($_ => $val) : ()
         # note: this is a subset of the allowed overrides defined above
       } qw(validate_formats validate_content_schemas short_circuit collect_annotations scalarref_booleans stringy_numbers strict)),
+      $config_override->{with_defaults} // $self->with_defaults ? (defaults => {}) : (),
     };
 
     # this hash will be added to at each level of schema evaluation
@@ -477,6 +478,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       ? ($config_override->{collect_annotations} // $self->collect_annotations
           ? (annotations => $state->{annotations}) : ())
       : (errors => $state->{errors}),
+    $state->{defaults} ? (defaults => $state->{defaults}) : (),
   );
 }
 
@@ -726,6 +728,11 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       || ((my $is_object_data = ref $data eq 'HASH')
         && (exists $schema->{unevaluatedProperties} || !!$state->{seen_data_properties})));
 
+  # set aside defaults collected so far; we need to keep the subschema's defaults separated in
+  # case they must be discarded due to overall invalidity of the subschema
+  my $defaults = $state->{defaults};
+  $state->{defaults} = {} if $state->{defaults};
+
   # we use an index rather than iterating through the lists directly because the lists of
   # vocabularies and keywords can change after we have started. However, only the Core vocabulary
   # and $schema keyword can make this change, and they both come first, therefore a simple index
@@ -834,6 +841,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
   # only keep new annotations if schema is valid
   push $parent_annotations->@*, $state->{annotations}->@* if $valid;
+
+  # only keep new defaults if schema is valid
+  $defaults->@{keys $state->{defaults}->%*} = values $state->{defaults}->%*
+    if $valid and $state->{defaults};
 
   return $valid;
 }
@@ -1448,6 +1459,61 @@ in L</traverse> or L</evaluate>), with the exception of keywords starting with C
 
 Defaults to false.
 
+=head2 with_defaults
+
+When true, for any property name referenced by a C<properties> keyword, or array item referenced
+by a C<prefixItems> keyword (or the array form of C<items> in earlier specification versions), that
+does not exist in the object currently being evaluated, will result in an entry being added to the
+C<defaults> property in the result object (see L<JSON::Schema::Modern::Result/defaults>),
+indicating that the application may wish to add this default value to their instance data.
+
+Defaults data accumulated in subschemas that are subsequently determined to be invalid are
+discarded, with the final results from all subschemas accumulated together in one hash.  No attempt
+is made to resolve conflicting entries (last one wins).
+
+For example, this data instance:
+
+  {
+    "my_object": {
+      "alpha": 1,
+      "gamma": 3
+    },
+    "my_array": [
+      "yellow"
+    ]
+  }
+
+evaluated against this schema:
+
+  type: object
+  properties:
+    my_object:
+      type: object
+      properties:
+        alpha:
+          type: integer
+          default: 10
+        beta:
+          type: integer
+          default: 10
+        gamma:
+          type: integer
+          default: 10
+    my_array:
+      type: array
+      prefixItems:
+        - type: string
+          default: red
+        - type: string
+          default: green
+
+will result in an C<defaults> entry of:
+
+  {
+    '/my_object/beta' => 10,
+    '/my_array/1' => 'green'
+  }
+
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW
@@ -1471,7 +1537,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
-L</stringy_numbers>, L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</stringy_numbers>, L</strict>, L</with_defaults>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation
@@ -1502,7 +1568,7 @@ The schema must be in one of these forms:
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
-L</stringy_numbers>, L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</stringy_numbers>, L</strict>, L</with_defaults>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation
