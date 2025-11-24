@@ -255,6 +255,7 @@ sub _traverse_keyword_prefixItems { shift->traverse_array_schemas(@_) }
 
 sub _eval_keyword_prefixItems { goto \&_eval_keyword__items_array_schemas }
 
+# array- or schema-based before draft2020-12; schema-based only for draft2020-12+
 sub _traverse_keyword_items ($class, $schema, $state) {
   if (is_plain_arrayref($schema->{items})) {
     return E($state, 'array form of "items" not supported in %s', $state->{specification_version})
@@ -271,6 +272,7 @@ sub _eval_keyword_items ($class, $data, $schema, $state) {
   goto \&_eval_keyword__items_schema;
 }
 
+# pre-draft2020-12 only
 sub _traverse_keyword_additionalItems { shift->traverse_subschema(@_) }
 
 sub _eval_keyword_additionalItems ($class, $data, $schema, $state) {
@@ -278,7 +280,7 @@ sub _eval_keyword_additionalItems ($class, $data, $schema, $state) {
   goto \&_eval_keyword__items_schema;
 }
 
-# prefixItems (draft 2020-12), array-based items (all drafts)
+# "prefixItems" (draft 2020-12), array-based "items" (pre-draft2020-12))
 sub _eval_keyword__items_array_schemas ($class, $data, $schema, $state) {
   return 1 if not is_type('array', $data);
   return 1 if ($state->{_last_items_index}//-1) == $data->$#*;
