@@ -15,6 +15,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use lib 't/lib';
 use Helper;
 use Acceptance;
+use Config;
 
 my $version = 'draft4';
 
@@ -39,6 +40,9 @@ acceptance_tests(
       JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' ? (
         { file => 'integers.json', group_description => 'type checks', test_description => [ 'beyond int64 lower boundary', 'beyond uint64 upper boundary' ] },
         { file => 'integers.json', group_description => 'int64 range checks', test_description => 'beyond lower boundary' },
+      ) : (),
+      $Config{ivsize} < 8 ? (
+        { file => 'integers.json', group_description => 'type checks', test_description => [ 'beind int32 lower boundary', 'beyond uint32 upper boundary' ] },
       ) : (),
     ]),
   },
