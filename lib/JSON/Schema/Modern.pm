@@ -869,11 +869,14 @@ sub _add_resource ($self, @kvs) {
       # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
       # lack all identifiers altogether, but preserve other resources from the original document
       if ($key ne '') {
-        next if $existing->{path} eq $value->{path}
-          and $existing->{canonical_uri} eq $value->{canonical_uri}
-          and $existing->{specification_version} eq $value->{specification_version}
-          and refaddr($existing->{document}) == refaddr($value->{document});
-        croak 'uri "'.$key.'" conflicts with an existing schema resource';
+        my @diffs = (
+          ($existing->{path} eq $value->{path} ? () : 'path'),
+          ($existing->{canonical_uri} eq $value->{canonical_uri} ? () : 'canonical_uri'),
+          ($existing->{specification_version} eq $value->{specification_version} ? () : 'specification_version'),
+          (refaddr($existing->{document}) == refaddr($value->{document}) ? () : 'refaddr'));
+        next if not @diffs;
+        croak 'uri "'.$key.'" conflicts with an existing schema resource: documents differ by ',
+          join(', ', @diffs);
       }
     }
     elsif ($self->CACHED_METASCHEMAS->{$key}) {
