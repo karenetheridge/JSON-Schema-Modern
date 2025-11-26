@@ -812,6 +812,10 @@ sub _eval_subschema ($self, $data, $schema, $state) {
 
     # tick off properties that were recognized by this subschema
     $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 1 foreach @evaluated_properties;
+
+    # weird! the draft4 metaschema doesn't know about '$ref' at all!
+    $state->{seen_data_properties}{$state->{data_path}.'/$ref'} |= 1
+      if exists $data->{'$ref'} and $state->{specification_version} eq 'draft4';
   }
 
   if ($valid and $state->{collect_annotations} and $state->{specification_version} !~ /^draft(?:[467]|2019-09)$/) {

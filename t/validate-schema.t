@@ -91,4 +91,14 @@ cmp_result(
   'validate_schema with schema that validates against the metaschema, but fails in extra traverse checks',
 );
 
+cmp_result(
+  $js->validate_schema({
+    'id' => 'foo',
+    '$schema' => 'http://json-schema.org/draft-04/schema#',
+    allOf => [ { '$ref' => '/some-location' } ],
+  }, { strict => 1 })->TO_JSON,
+  { valid => true },
+  'draft4 schemas can be validated, even though there is no representation for $ref in the metaschema',
+);
+
 done_testing;

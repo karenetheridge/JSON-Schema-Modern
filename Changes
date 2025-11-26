@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix strict (unknown keyword checks) validation for draft4 schemas
 
 0.623     2025-11-17 00:14:31Z
           - fix error when navigating a $dynamicRef after initial evaluation
