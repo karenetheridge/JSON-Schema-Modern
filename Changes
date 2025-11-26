@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.624     2025-11-26 20:57:48Z
           - fix strict (unknown keyword checks) validation for draft4 schemas
 
