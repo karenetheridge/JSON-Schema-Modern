@@ -12,9 +12,9 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::Warnings qw(warnings :no_end_test had_no_warnings);
 use lib 't/lib';
 use Helper;
+use Test2::Warnings qw(warnings :no_end_test had_no_warnings);
 
 my %strings = (
   id => qr/^no-longer-supported "id" keyword present \(at location ""\): this should be rewritten as "\$id" at /,

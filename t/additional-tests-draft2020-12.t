@@ -12,10 +12,10 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::Warnings 'warnings', ':no_end_test';
 use lib 't/lib';
 use Helper;
 use Acceptance;
+use Test2::Warnings 'warnings', ':no_end_test';
 
 my $version = 'draft2020-12';
 

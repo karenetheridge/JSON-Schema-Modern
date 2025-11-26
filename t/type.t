@@ -14,12 +14,12 @@ use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Scalar::Util qw(isdual dualvar);
-use JSON::Schema::Modern::Utilities qw(is_type get_type);
 use Math::BigInt;
 use Math::BigFloat;
 use JSON::PP ();
 use lib 't/lib';
 use Helper;
+use JSON::Schema::Modern::Utilities qw(is_type get_type);
 
 use constant HAVE_BUILTIN => "$]" >= 5.035010;
 use if HAVE_BUILTIN, experimental => 'builtin';

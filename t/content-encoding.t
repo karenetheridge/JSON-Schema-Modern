@@ -12,9 +12,9 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use utf8;
 
-use Test2::Tools::Exception;
 use lib 't/lib';
 use Helper;
+use Test2::Tools::Exception;
 
 subtest 'unrecognized encoding formats do not result in errors, when not asserting' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);

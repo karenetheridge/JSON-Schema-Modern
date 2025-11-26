@@ -11,9 +11,9 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use JSON::Schema::Modern::Utilities 'canonical_uri';
 use lib 't/lib';
 use Helper;
+use JSON::Schema::Modern::Utilities 'canonical_uri';
 
 subtest 'traversal with callbacks' => sub {
   my $schema = {

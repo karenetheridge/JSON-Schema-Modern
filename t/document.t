@@ -11,12 +11,12 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Deep::UnorderedPairs;
-use Test2::Tools::Exception;
-use Test::Memory::Cycle;
 use List::Util 'unpairs';
 use lib 't/lib';
 use Helper;
+use Test::Deep::UnorderedPairs;
+use Test2::Tools::Exception;
+use Test::Memory::Cycle;
 
 # spec version -> vocab classes
 my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabulary_classes);

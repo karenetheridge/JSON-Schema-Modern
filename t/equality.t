@@ -13,10 +13,10 @@ no feature 'switch';
 use utf8;
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal);
 use Scalar::Util qw(dualvar isdual);
 use lib 't/lib';
 use Helper;
+use JSON::Schema::Modern::Utilities qw(is_type get_type is_equal);
 
 subtest 'equality, using inflated data' => sub {
   foreach my $test (

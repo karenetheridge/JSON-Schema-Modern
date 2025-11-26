@@ -11,11 +11,11 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::Tools::Exception;
-use Test2::Warnings 0.038 qw(warnings :no_end_test had_no_warnings);
 use List::Util 'unpairs';
 use lib 't/lib';
 use Helper;
+use Test2::Tools::Exception;
+use Test2::Warnings 0.038 qw(warnings :no_end_test had_no_warnings);
 
 use constant METASCHEMA => 'https://json-schema.org/draft/2019-09/schema';
 

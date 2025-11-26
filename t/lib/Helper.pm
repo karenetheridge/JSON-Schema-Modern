@@ -18,9 +18,9 @@ use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings';
 use if $ENV{AUTHOR_TESTING} && (caller(2))[1] !~ /acceptance/, 'Test2::Plugin::BailOnFail';
 use Test::Deep qw(!array !hash !blessed); # import symbols: ignore, re etc
 use Test2::API 'context_do';
+use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use JSON::Schema::Modern;
 use JSON::Schema::Modern::Utilities qw(jsonp true false);
-use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 
 my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
   ->allow_nonref(1)

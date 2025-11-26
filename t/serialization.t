@@ -11,10 +11,10 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test::Needs qw(Sereal::Encoder Sereal::Decoder);
-use Test2::Warnings qw(:no_end_test had_no_warnings);
 use lib 't/lib';
 use Helper;
+use Test::Needs qw(Sereal::Encoder Sereal::Decoder);
+use Test2::Warnings qw(:no_end_test had_no_warnings);
 
 my $js = JSON::Schema::Modern->new(
   collect_annotations => 1,
