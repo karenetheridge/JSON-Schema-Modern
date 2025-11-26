@@ -28,7 +28,7 @@ use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use builtin::compat qw(refaddr load_module);
 use Mojo::URL;
 use Safe::Isa;
-use Path::Tiny;
+use Mojo::File 'path';
 use Storable 'dclone';
 use File::ShareDir 'dist_dir';
 use MooX::TypeTiny 0.002002;
@@ -1061,7 +1061,7 @@ sub _get_or_load_resource ($self, $uri) {
     my $document;
     if (not $document = $metaschema_cache->{$local_filename}) {
       my $file = path(dist_dir('JSON-Schema-Modern'), $local_filename);
-      my $schema = $self->_json_decoder->decode($file->slurp_raw);
+      my $schema = $self->_json_decoder->decode($file->slurp);
       my $_document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $self);
 
       # this should be caught by the try/catch in evaluate()
@@ -1778,8 +1778,8 @@ L<encodings|/add_encoding> are not serialized, as they are represented by subrou
 will need to be manually added after thawing.
 
   sub get_evaluator (...) {
-    my $serialized_file = Path::Tiny::path($filename);
-    my $schema_file = Path::Tiny::path($schema_filename);
+    my $serialized_file = path($filename);
+    my $schema_file = path($schema_filename);
     my $js;
     if ($serialized_file->stat->mtime < $schema_file->stat->mtime)) {
       $js = JSON::Schema::Modern->new;

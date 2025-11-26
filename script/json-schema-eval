@@ -14,7 +14,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Getopt::Long::Descriptive;
-use Path::Tiny;
+use Mojo::File 'path';
 use Safe::Isa;
 use Feature::Compat::Try;
 use JSON::Schema::Modern;
@@ -51,7 +51,7 @@ my $js = JSON::Schema::Modern->new(%$opt);
 
 foreach my $add_schema_file (@{$opt->add_schema//[]}) {
   try {
-    $js->add_schema('file://'.$add_schema_file => parse_input(path($add_schema_file)->slurp_utf8));
+    $js->add_schema('file://'.$add_schema_file => parse_input(path($add_schema_file)->slurp('UTF-8')));
   }
   catch ($e) {
     say $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump: '"'.$e.'"';
@@ -64,7 +64,7 @@ my $schema_filename = '';
 
 if (defined $validate_schema) {
   if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename
-    $schema = path($schema_filename = $validate_schema)->slurp_utf8;
+    $schema = path($schema_filename = $validate_schema)->slurp('UTF-8');
   }
   else {
     say 'enter schema, followed by ^D:';
@@ -77,7 +77,7 @@ if (defined $validate_schema) {
 }
 else {
   if (defined $data) {
-    $data = path($data)->slurp_utf8;
+    $data = path($data)->slurp('UTF-8');
   }
   else {
     say 'enter data instance, followed by ^D:';
@@ -87,7 +87,7 @@ else {
   }
 
   if (defined $schema) {
-    $schema = path($schema_filename = $schema)->slurp_utf8;
+    $schema = path($schema_filename = $schema)->slurp('UTF-8');
   }
   else {
     say 'enter schema, followed by ^D:';

@@ -12,6 +12,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use builtin::compat 'load_module';
+use Mojo::File 'path';
 use lib 't/lib';
 use Helper;
 
@@ -358,7 +359,7 @@ subtest 'valid keywords' => sub {
     map 'JSON::Schema::Modern::Vocabulary::'.$_,
     map $_->basename =~ s/\.pm$//r,
     grep /\.pm$/,
-    Path::Tiny::path('lib/JSON/Schema/Modern/Vocabulary/')->children;
+    path('lib/JSON/Schema/Modern/Vocabulary/')->list->each;
 
   my $table = {
     map {
