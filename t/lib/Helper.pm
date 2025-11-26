@@ -59,4 +59,8 @@ sub cmp_result ($got, $expected, $test_name) {
   } $got, $expected, $test_name;
 }
 
+sub is_passing () {
+  context_do { shift->hub->is_passing };
+}
+
 1;

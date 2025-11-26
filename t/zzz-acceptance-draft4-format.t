@@ -83,7 +83,7 @@ Attention CPANTesters: you do not need to file a ticket when this test fails. I 
 
 ###############################
 DIAG
-  if not Test::Builder->new->is_passing;
+  if not is_passing;
 }
 
 done_testing;
