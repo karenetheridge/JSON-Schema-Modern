@@ -27,19 +27,14 @@ MetaCPAN page: https://metacpan.org/pod/JSON::Schema::Modern
 
 Untar the tarball, install configure prerequisites (see below), then build it:
 
-    % perl Build.PL
-    % ./Build && ./Build test
+    % perl Makefile.PL
+    % make && make test
 
 Then install it:
 
-    % ./Build install
+    % make install
 
-Or the more portable variation:
-
-    % perl Build.PL
-    % perl Build
-    % perl Build test
-    % perl Build install
+On Windows platforms, you should use `dmake` or `nmake`, instead of `make`.
 
 If your perl is system-managed, you can create a local::lib in your home
 directory to install modules to. For details, see the local::lib documentation:
@@ -59,10 +54,10 @@ distribution's installer can be run.  They can be found under the
 ## Other Prerequisites
 
 This distribution may require additional modules to be installed after running
-Build.PL.
+Makefile.PL.
 Look for prerequisites in the following phases:
 
-* to run ./Build, PHASE = build
+* to run make, PHASE = build
 * to use the module code itself, PHASE = runtime
 * to run tests, PHASE = test
 

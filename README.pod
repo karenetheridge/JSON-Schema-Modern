@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.623
+version 0.624
 
 =head1 SYNOPSIS
 
@@ -621,8 +621,8 @@ L<encodings|/add_encoding> are not serialized, as they are represented by subrou
 will need to be manually added after thawing.
 
   sub get_evaluator (...) {
-    my $serialized_file = Path::Tiny::path($filename);
-    my $schema_file = Path::Tiny::path($schema_filename);
+    my $serialized_file = path($filename);
+    my $schema_file = path($schema_filename);
     my $js;
     if ($serialized_file->stat->mtime < $schema_file->stat->mtime)) {
       $js = JSON::Schema::Modern->new;
