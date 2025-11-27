@@ -218,30 +218,36 @@ sub add_document {
     exception => 1,
   ) if $document->has_errors;
 
+  if (not length $base_uri){
+    foreach my $res_pair ($document->resource_pairs) {
+      my ($uri_string, $doc_resource) = @$res_pair;
+
+      # this might croak if there are duplicates or malformed entries.
+      $self->_add_resource($uri_string => +{ $doc_resource->%*, document => $document });
+    }
+
+    return $document;
+  }
+
   my @root; # uri_string => resource hash of the resource at path ''
 
   # document resources are added after resolving each resource against our provided base uri
   foreach my $res_pair ($document->resource_pairs) {
     my ($uri_string, $doc_resource) = @$res_pair;
-    $uri_string = Mojo::URL->new($uri_string)->to_abs($base_uri)->to_string if length $base_uri;
+    $uri_string = Mojo::URL->new($uri_string)->to_abs($base_uri)->to_string;
 
     my $new_resource = {
+      canonical_uri => Mojo::URL->new($doc_resource->{canonical_uri})->to_abs($base_uri),
       $doc_resource->%{qw(path specification_version vocabularies)},
       document => $document,
     };
-
-    $new_resource->{canonical_uri} = length $base_uri
-      ? Mojo::URL->new($doc_resource->{canonical_uri})->to_abs($base_uri)
-      : $doc_resource->{canonical_uri};
 
     foreach my $anchor (keys (($doc_resource->{anchors}//{})->%*)) {
       use autovivification 'store';
       $new_resource->{anchors}{$anchor} = {
         $doc_resource->{anchors}{$anchor}->%{path},
         (map +($_->[1] ? @$_ : ()), [ $doc_resource->{anchors}{$anchor}->%{dynamic} ]),
-        canonical_uri => length $base_uri
-          ? Mojo::URL->new($doc_resource->{anchors}{$anchor}{canonical_uri})->to_abs($base_uri)
-          : $doc_resource->{anchors}{$anchor}{canonical_uri},
+        canonical_uri => Mojo::URL->new($doc_resource->{anchors}{$anchor}{canonical_uri})->to_abs($base_uri),
       };
     }
 
@@ -251,7 +257,7 @@ sub add_document {
   }
 
   # associate the root resource with the base uri we were provided, if it does not already exist
-  $self->_add_resource($base_uri.'' => $root[1]) if length $base_uri and $root[0] ne $base_uri;
+  $self->_add_resource($base_uri.'' => $root[1]) if $root[0] ne $base_uri;
 
   return $document;
 }
