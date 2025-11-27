@@ -19,7 +19,7 @@ use lib 't/lib';
 use Helper;
 
 my $hub = Test2::API::test2_stack->top;
-$hub->set_count(13);
+$hub->set_count(14);
 
 # this is a test that is run from t/serialization.t, incorporating its results into that file.
 

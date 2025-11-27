@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - introduce a global schema document cache that can be used by other
+            distributions (such as OpenAPI::Modern)
 
 0.624     2025-11-26 20:57:48Z
           - fix strict (unknown keyword checks) validation for draft4 schemas

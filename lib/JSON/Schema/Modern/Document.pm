@@ -239,8 +239,8 @@ sub THAW ($class, $serializer, $data) {
 
   my $self = bless($data, $class);
 
-  foreach my $attr (qw(schema _entities _checksum)) {
-    croak "serialization missing attribute '$attr': perhaps your serialized data was produced for an older version of $class?"
+  foreach my $attr (qw(schema _entities)) {
+    croak "serialization missing attribute '$attr' on document for identifier '$self->{canonical_uri}': perhaps your serialized data was produced for an older version of $class?"
       if not exists $self->{$attr};
   }
   return $self;

@@ -37,7 +37,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema json_pointer_type canonical_uri_type);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema json_pointer_type canonical_uri_type load_cached_document);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -885,8 +885,8 @@ sub _add_resource ($self, @kvs) {
           join(', ', @diffs);
       }
     }
-    elsif ($self->CACHED_METASCHEMAS->{$canonical_uri}) {
-      croak 'uri "'.$canonical_uri.'" conflicts with an existing meta-schema resource';
+    elsif (JSON::Schema::Modern::Utilities::get_schema_filename($canonical_uri)) {
+      croak 'uri "'.$canonical_uri.'" conflicts with an existing cached schema resource';
     }
 
     use autovivification 'store';
@@ -1030,7 +1030,8 @@ use constant METASCHEMA_URIS => {
   'draft4' => 'http://json-schema.org/draft-04/schema',
 };
 
-use constant CACHED_METASCHEMAS => {
+# for internal use only. files are under share/
+use constant _CACHED_METASCHEMAS => {
   'https://json-schema.org/draft/2020-12/meta/applicator'     => 'draft2020-12/meta/applicator.json',
   'https://json-schema.org/draft/2020-12/meta/content'        => 'draft2020-12/meta/content.json',
   'https://json-schema.org/draft/2020-12/meta/core'           => 'draft2020-12/meta/core.json',
@@ -1060,35 +1061,18 @@ use constant CACHED_METASCHEMAS => {
 # simple runtime-wide cache of metaschema document objects that are sourced from disk
 my $metaschema_cache = {};
 
+{
+  my $share_dir = dist_dir('JSON-Schema-Modern');
+  JSON::Schema::Modern::Utilities::register_schema($_, $share_dir.'/'._CACHED_METASCHEMAS->{$_})
+    foreach keys _CACHED_METASCHEMAS->%*;
+}
+
 # returns the same as _get_resource
 sub _get_or_load_resource ($self, $uri) {
   my $resource = $self->_get_resource($uri);
   return $resource if $resource;
 
-  if (my $local_filename = $self->CACHED_METASCHEMAS->{$uri}) {
-    my $document;
-    if (not $document = $metaschema_cache->{$local_filename}) {
-      my $file = path(dist_dir('JSON-Schema-Modern'), $local_filename);
-      my $schema = $self->_json_decoder->decode($file->slurp);
-      my $_document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $self);
-
-      # this should be caught by the try/catch in evaluate()
-      die JSON::Schema::Modern::Result->new(
-        output_format => $self->output_format,
-        valid => 0,
-        errors => [ $_document->errors ],
-        exception => 1,
-      ) if $_document->has_errors;
-
-      $metaschema_cache->{$local_filename} = $document = $_document;
-    }
-
-    # we have already performed the appropriate collision checks, so we bypass them here
-    $self->_add_resources_unsafe(
-      map +($_->[0] => +{ $_->[1]->%*, document => $document }),
-        $document->resource_pairs
-    );
-
+  if (my $document = load_cached_document($self, $uri)) {
     return $self->_get_resource($uri);
   }
 
@@ -1463,7 +1447,7 @@ Defaults to false.
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW
-CACHED_METASCHEMAS METASCHEMA_URIS SPECIFICATION_VERSIONS_SUPPORTED SPECIFICATION_VERSION_DEFAULT
+METASCHEMA_URIS SPECIFICATION_VERSIONS_SUPPORTED SPECIFICATION_VERSION_DEFAULT
 
 =head2 evaluate_json_string
 

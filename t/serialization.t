@@ -129,6 +129,15 @@ cmp_result(
   'in thawed object, evaluate data against schema with custom dialect; format and unknown keywords are collected as annotations',
 );
 
+ok(
+  lives {
+    my $js = JSON::Schema::Modern->new;
+    my $document = $js->_fetch_from_uri('https://json-schema.org/draft/2019-09/schema')->{document};
+    my $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($document);
+    my $thawed = Sereal::Decoder->new->decode($frozen);
+  },
+  'can successfully freeze and thaw a document that resides in the global cache',
+);
 
 $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
 $thawed = Sereal::Decoder->new->decode($frozen);

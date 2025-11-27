@@ -69,7 +69,22 @@ subtest 'resource collision with cached metaschema' => sub {
         {
           instanceLocation => '',
           keywordLocation => '',
-          error => re(qr{^EXCEPTION: \Quri "https://json-schema.org/draft/2019-09/schema" conflicts with an existing meta-schema resource\E}),
+          error => re(qr{^EXCEPTION: \Quri "${ \METASCHEMA }" conflicts with an existing cached schema resource\E}),
+        },
+      ],
+    },
+    'cannot introduce another schema whose id collides with a cached schema that exists in global cache',
+  );
+
+  cmp_result(
+    $js->evaluate(1, { '$id' => 'http://json-schema.org/draft-07/schema#' })->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '',
+          error => re(qr{^EXCEPTION: \Quri "http://json-schema.org/draft-07/schema" conflicts with an existing cached schema resource\E}),
         },
       ],
     },
