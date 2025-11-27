@@ -863,28 +863,28 @@ sub _resource_pairs { pairs(($_[0]->{_resource_index}//{})->%*) }
 
 sub _add_resource ($self, @kvs) {
   foreach my $pair (sort { $a->[0] cmp $b->[0] } pairs @kvs) {
-    my ($key, $value) = @$pair;
+    my ($canonical_uri, $resource) = @$pair;
 
-    if (my $existing = $self->_get_resource($key)) {
+    if (my $existing = $self->_get_resource($canonical_uri)) {
       # we allow overwriting canonical_uri = '' to allow for ad hoc evaluation of schemas that
       # lack all identifiers altogether, but preserve other resources from the original document
-      if ($key ne '') {
+      if ($canonical_uri ne '') {
         my @diffs = (
-          ($existing->{path} eq $value->{path} ? () : 'path'),
-          ($existing->{canonical_uri} eq $value->{canonical_uri} ? () : 'canonical_uri'),
-          ($existing->{specification_version} eq $value->{specification_version} ? () : 'specification_version'),
-          (refaddr($existing->{document}) == refaddr($value->{document}) ? () : 'refaddr'));
+          ($existing->{path} eq $resource->{path} ? () : 'path'),
+          ($existing->{canonical_uri} eq $resource->{canonical_uri} ? () : 'canonical_uri'),
+          ($existing->{specification_version} eq $resource->{specification_version} ? () : 'specification_version'),
+          (refaddr($existing->{document}) == refaddr($resource->{document}) ? () : 'refaddr'));
         next if not @diffs;
-        croak 'uri "'.$key.'" conflicts with an existing schema resource: documents differ by ',
+        croak 'uri "'.$canonical_uri.'" conflicts with an existing schema resource: documents differ by ',
           join(', ', @diffs);
       }
     }
-    elsif ($self->CACHED_METASCHEMAS->{$key}) {
-      croak 'uri "'.$key.'" conflicts with an existing meta-schema resource';
+    elsif ($self->CACHED_METASCHEMAS->{$canonical_uri}) {
+      croak 'uri "'.$canonical_uri.'" conflicts with an existing meta-schema resource';
     }
 
     use autovivification 'store';
-    $self->{_resource_index}{$resource_key_type->($key)} = $resource_type->($value);
+    $self->{_resource_index}{$resource_key_type->($canonical_uri)} = $resource_type->($resource);
   }
 }
 
