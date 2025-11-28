@@ -15,7 +15,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use lib 't/lib';
 use Helper;
 use Test2::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
-use Test2::Tools::Exception;
 use JSON::Schema::Modern::Utilities qw(get_type);
 
 use Test::Without::Module 0.19 qw(

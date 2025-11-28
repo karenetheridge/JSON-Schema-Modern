@@ -14,7 +14,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use lib 't/lib';
 use Helper;
-use Test2::Tools::Exception;
 
 my $js = JSON::Schema::Modern->new;
 

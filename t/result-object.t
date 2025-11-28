@@ -15,7 +15,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use builtin::compat 'refaddr';
 use lib 't/lib';
 use Helper;
-use Test2::Tools::Exception;
 
 my $js = JSON::Schema::Modern->new(short_circuit => 0, collect_annotations => 1);
 is($js->output_format, 'basic', 'output_format defaults to basic');

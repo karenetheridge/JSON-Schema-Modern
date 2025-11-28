@@ -14,7 +14,6 @@ use utf8;
 
 use lib 't/lib';
 use Helper;
-use Test2::Tools::Exception;
 
 subtest 'unrecognized encoding formats do not result in errors, when not asserting' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);

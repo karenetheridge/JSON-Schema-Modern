@@ -15,7 +15,6 @@ use List::Util 'unpairs';
 use lib 't/lib';
 use Helper;
 use Test::Deep::UnorderedPairs;
-use Test2::Tools::Exception;
 use Test::Memory::Cycle;
 
 # spec version -> vocab classes

@@ -15,7 +15,6 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use builtin::compat 'load_module';
 use lib 't/lib';
 use Helper;
-use Test2::Tools::Exception;
 
 subtest 'draft7' => sub {
   like(
