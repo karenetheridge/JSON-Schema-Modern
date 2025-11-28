@@ -21,7 +21,6 @@ no feature 'switch';
 use List::Util 1.45 'uniqstr';
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
-use Ref::Util 0.100 'is_plain_arrayref';
 use Sub::Install;
 use JSON::Schema::Modern::Utilities qw(is_type jsonp E A assert_keyword_type assert_pattern true is_elements_unique);
 use JSON::Schema::Modern::Vocabulary::Unevaluated;
@@ -257,7 +256,7 @@ sub _eval_keyword_prefixItems { goto \&_eval_keyword__items_array_schemas }
 
 # array- or schema-based before draft2020-12; schema-based only for draft2020-12+
 sub _traverse_keyword_items ($class, $schema, $state) {
-  if (is_plain_arrayref($schema->{items})) {
+  if (ref $schema->{items} eq 'ARRAY') {
     return E($state, 'array form of "items" not supported in %s', $state->{specification_version})
       if $state->{specification_version} !~ /^draft(?:[467]|2019-09)$/;
 
@@ -268,7 +267,7 @@ sub _traverse_keyword_items ($class, $schema, $state) {
 }
 
 sub _eval_keyword_items ($class, $data, $schema, $state) {
-  goto \&_eval_keyword__items_array_schemas if is_plain_arrayref($schema->{items});
+  goto \&_eval_keyword__items_array_schemas if ref $schema->{items} eq 'ARRAY';
   goto \&_eval_keyword__items_schema;
 }
 

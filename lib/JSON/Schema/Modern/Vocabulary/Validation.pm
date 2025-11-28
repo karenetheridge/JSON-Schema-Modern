@@ -20,7 +20,6 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
-use Ref::Util 0.100 'is_plain_arrayref';
 use Scalar::Util 'looks_like_number';
 use JSON::Schema::Modern::Utilities qw(is_type get_type is_bignum is_equal is_elements_unique E assert_keyword_type assert_pattern jsonp sprintf_num);
 use Math::BigFloat;
@@ -48,7 +47,7 @@ sub keywords ($class, $spec_version) {
 }
 
 sub _traverse_keyword_type ($class, $schema, $state) {
-  if (is_plain_arrayref($schema->{type})) {
+  if (ref $schema->{type} eq 'ARRAY') {
     # Note: this is not actually in the spec, but the restriction exists in the metaschema
     return E($state, 'type array is empty') if not $schema->{type}->@*;
 
@@ -68,7 +67,7 @@ sub _traverse_keyword_type ($class, $schema, $state) {
 
 sub _eval_keyword_type ($class, $data, $schema, $state) {
   my $type = get_type($data, $state->{specification_version} eq 'draft4' ? { legacy_ints => 1 } : ());
-  my @want = is_plain_arrayref($schema->{type}) ? $schema->{type}->@* : $schema->{type};
+  my @want = ref $schema->{type} eq 'ARRAY' ? $schema->{type}->@* : $schema->{type};
 
   return 1 if any {
     $type eq $_ or ($_ eq 'number' and $type eq 'integer')

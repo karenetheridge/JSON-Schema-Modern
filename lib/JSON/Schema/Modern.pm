@@ -24,7 +24,6 @@ use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap uniq min);
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
-use Ref::Util 0.100 qw(is_ref is_plain_hashref);
 use builtin::compat qw(refaddr load_module);
 use Mojo::URL;
 use Safe::Isa;
@@ -124,7 +123,7 @@ sub _get_format_validation ($self, $format) { ($self->{_format_validations}//{})
 sub add_format_validation ($self, $format, $definition) {
   return if exists(($self->{_format_validations}//{})->{$format});
 
-  $definition = { type => 'string', sub => $definition } if not is_plain_hashref($definition);
+  $definition = { type => 'string', sub => $definition } if ref $definition ne 'HASH';
   $format_type->({ $format => $definition });
 
   # all core formats are of type string (so far); changing type of custom format is permitted
@@ -145,7 +144,7 @@ around BUILDARGS => sub ($orig, $class, @args) {
     if $args->{collect_annotations} and ($args->{specification_version}//'') =~ /^draft[467]$/;
 
   $args->{format_validations} = +{
-    map +($_->[0] => is_plain_hashref($_->[1]) ? $_->[1] : +{ type => 'string', sub => $_->[1] }),
+    map +($_->[0] => ref $_->[1] eq 'HASH' ? $_->[1] : +{ type => 'string', sub => $_->[1] }),
       pairs $args->{format_validations}->%*
   } if $args->{format_validations};
 
@@ -334,7 +333,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     # a subsequent "$schema" keyword can still change these values, and it is always processed
     # first, so the override is skipped if the keyword exists in the schema
     $state->{metaschema_uri} =
-      (is_plain_hashref($schema_reference) && exists $schema_reference->{'$schema'} ? undef
+      (ref $schema_reference eq 'HASH' && exists $schema_reference->{'$schema'} ? undef
         : $config_override->{metaschema_uri}) // $self->METASCHEMA_URIS->{$spec_version};
 
     if (my $metaschema_info = $self->_get_metaschema_vocabulary_classes($state->{metaschema_uri})) {
@@ -396,7 +395,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
       # traverse is called via add_schema -> ::Document->new -> ::Document->BUILD
       $schema_reference = $self->add_schema($schema_reference)->canonical_uri;
     }
-    elsif (is_ref($schema_reference) and not $schema_reference->$_isa('Mojo::URL')) {
+    elsif (ref $schema_reference and not $schema_reference->$_isa('Mojo::URL')) {
       abort($state, 'invalid schema type: %s', get_type($schema_reference));
     }
 
@@ -475,7 +474,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 sub validate_schema ($self, $schema, $config_override = {}) {
   croak 'validate_schema called in void context' if not defined wantarray;
 
-  my $metaschema_uri = is_plain_hashref($schema) && $schema->{'$schema'} ? $schema->{'$schema'}
+  my $metaschema_uri = ref $schema eq 'HASH' && $schema->{'$schema'} ? $schema->{'$schema'}
     : $self->METASCHEMA_URIS->{$self->specification_version // $self->SPECIFICATION_VERSION_DEFAULT};
 
   my $result = $self->evaluate($schema, $metaschema_uri,
@@ -498,11 +497,11 @@ sub get ($self, $uri_reference) {
   if (wantarray) {
     my $schema_info = $self->_fetch_from_uri($uri_reference);
     return if not $schema_info;
-    my $subschema = is_ref($schema_info->{schema}) ? dclone($schema_info->{schema}) : $schema_info->{schema};
+    my $subschema = ref $schema_info->{schema} ? dclone($schema_info->{schema}) : $schema_info->{schema};
     return ($subschema, $schema_info->{canonical_uri});
   }
   else {  # abridged version of _fetch_from_uri
-    $uri_reference = Mojo::URL->new($uri_reference) if not is_ref($uri_reference);
+    $uri_reference = Mojo::URL->new($uri_reference) if not ref $uri_reference;
     my $fragment = $uri_reference->fragment;
     my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
     return if not $resource;
@@ -515,7 +514,7 @@ sub get ($self, $uri_reference) {
       return if not my $subresource = ($resource->{anchors}//{})->{$fragment};
       $schema = $resource->{document}->get($subresource->{path});
     }
-    return is_ref($schema) ? dclone($schema) : $schema;
+    return ref $schema ? dclone($schema) : $schema;
   }
 }
 
@@ -713,7 +712,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   # We also set it when _strict_schema_data is set, but only for object data instances.
   $state->{collect_annotations} |=
     0+(exists $schema->{unevaluatedItems} || exists $schema->{unevaluatedProperties}
-      || !!$state->{seen_data_properties} && (my $is_object_data = is_plain_hashref($data)));
+      || !!$state->{seen_data_properties} && (my $is_object_data = ref $data eq 'HASH'));
 
   # in order to collect annotations for unevaluated* keywords, we sometimes need to ignore the
   # suggestion to short_circuit evaluation at this scope (but lower scopes are still fine)

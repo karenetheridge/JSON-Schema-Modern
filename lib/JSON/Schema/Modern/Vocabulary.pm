@@ -18,7 +18,6 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
-use Ref::Util 0.100 'is_plain_arrayref';
 use JSON::Schema::Modern::Utilities qw(jsonp assert_keyword_type abort);
 use Carp ();
 use namespace::clean;

@@ -19,7 +19,6 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use B;
 use Carp 'croak';
-use Ref::Util 0.100 qw(is_ref is_plain_arrayref is_plain_hashref);
 use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
@@ -84,10 +83,10 @@ sub is_type ($type, $value, $config = {}) {
     return is_bool($value);
   }
   if ($type eq 'object') {
-    return is_plain_hashref($value);
+    return ref $value eq 'HASH';
   }
   if ($type eq 'array') {
-    return is_plain_arrayref($value);
+    return ref $value eq 'ARRAY';
   }
 
   if ($type eq 'string' or $type eq 'number' or $type eq 'integer') {
@@ -101,7 +100,7 @@ sub is_type ($type, $value, $config = {}) {
 
     if ($type eq 'string') {
       # like created_as_string, but rejects dualvars with stringwise-unequal string and numeric parts
-      return !is_ref($value)
+      return !length ref($value)
         && !(HAVE_BUILTIN && builtin::is_bool($value))
         && $flags & B::SVf_POK
         && (!($flags & (B::SVf_IOK | B::SVf_NOK))
@@ -143,14 +142,14 @@ sub is_type ($type, $value, $config = {}) {
 # pass { legacy_ints => 1 } in $config to use draft4 integer behaviour
 # behaviour is consistent with is_type().
 sub get_type ($value, $config = {}) {
-  return 'object' if is_plain_hashref($value);
+  return 'object' if ref $value eq 'HASH';
   return 'boolean' if is_bool($value);
   return 'null' if not defined $value;
-  return 'array' if is_plain_arrayref($value);
+  return 'array' if ref $value eq 'ARRAY';
 
   # floats in json will always be parsed into Math::BigFloat, when allow_bignum is enabled
-  if (is_ref($value)) {
-    my $ref = ref($value);
+  if (length ref $value) {
+    my $ref = ref $value;
     return $ref eq 'Math::BigInt' ? 'integer'
       : $ref eq 'Math::BigFloat' ? (!$config->{legacy_ints} && $value->is_int ? 'integer' : 'number')
       : (defined blessed($value) ? '' : 'reference to ').$ref;
@@ -201,7 +200,7 @@ sub is_bool ($value) {
 }
 
 sub is_schema ($value) {
-  is_plain_hashref($value) || is_bool($value);
+  ref $value eq 'HASH' || is_bool($value);
 }
 
 sub is_bignum ($value) {
@@ -344,7 +343,7 @@ sub E ($state, $error_string, @args) {
 
   # sometimes the keyword shouldn't be at the very end of the schema path
   my $sps = delete $state->{_keyword_path_suffix};
-  my @keyword_path_suffix = defined $sps && is_plain_arrayref($sps) ? $sps->@* : $sps//();
+  my @keyword_path_suffix = defined $sps && ref $sps eq 'ARRAY' ? $sps->@* : $sps//();
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
@@ -479,7 +478,7 @@ sub assert_uri ($state, $schema, $override = undef) {
 # produces an annotation whose value is the same as that of the current schema keyword
 # makes a copy as this is passed back to the user, who cannot be trusted to not mutate it
 sub annotate_self ($state, $schema) {
-  A($state, is_ref($schema->{$state->{keyword}}) ? dclone($schema->{$state->{keyword}})
+  A($state, ref $schema->{$state->{keyword}} ? dclone($schema->{$state->{keyword}})
     : $schema->{$state->{keyword}});
 }
 

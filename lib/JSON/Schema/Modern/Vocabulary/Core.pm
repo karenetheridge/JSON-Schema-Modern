@@ -18,7 +18,6 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
-use Ref::Util 'is_plain_hashref';
 use JSON::Schema::Modern::Utilities qw(is_type abort assert_keyword_type canonical_uri E assert_uri_reference assert_uri jsonp);
 use namespace::clean;
 
@@ -153,7 +152,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     return E($state, 'EXCEPTION: bad reference to $schema "%s": not a schema', $schema_info->{canonical_uri})
       if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
-    if (not is_plain_hashref($schema_info->{schema})) {
+    if (ref $schema_info->{schema} ne 'HASH') {
       ()= E($state, 'metaschemas must be objects');
     }
     else {
@@ -307,7 +306,7 @@ sub _eval_keyword_recursiveRef ($class, $data, $schema, $state) {
   abort($state, 'EXCEPTION: bad reference to "%s": not a schema', $schema_info->{canonical_uri})
     if $schema_info->{document}->get_entity_at_location($schema_info->{document_path}) ne 'schema';
 
-  if (is_plain_hashref($schema_info->{schema})
+  if (ref $schema_info->{schema} eq 'HASH'
       and is_type('boolean', $schema_info->{schema}{'$recursiveAnchor'})
       and $schema_info->{schema}{'$recursiveAnchor'}) {
     $uri = Mojo::URL->new($schema->{'$recursiveRef'})
@@ -329,7 +328,7 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
   # If the initially resolved starting point URI includes a fragment that was created by the
   # "$dynamicAnchor" keyword, ...
   if (length $uri->fragment
-      and is_plain_hashref($schema_info->{schema})
+      and ref $schema_info->{schema} eq 'HASH'
       and exists $schema_info->{schema}{'$dynamicAnchor'}
       and $uri->fragment eq (my $anchor = $schema_info->{schema}{'$dynamicAnchor'})) {
     # ...the initial URI MUST be replaced by the URI (including the fragment) for the outermost

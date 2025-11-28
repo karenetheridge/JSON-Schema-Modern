@@ -19,7 +19,6 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use Storable 'dclone';
-use Ref::Util 0.100 'is_ref';
 use Feature::Compat::Try;
 use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type E abort);
 use namespace::clean;
@@ -107,7 +106,7 @@ sub _eval_keyword_contentSchema ($class, $data, $schema, $state) {
         { %$state, keyword_path => $state->{keyword_path}.'/contentSchema' });
   }
 
-  return A($state, is_ref($schema->{contentSchema}) ? dclone($schema->{contentSchema}) : $schema->{contentSchema});
+  return A($state, ref $schema->{contentSchema} ? dclone($schema->{contentSchema}) : $schema->{contentSchema});
 }
 
 1;

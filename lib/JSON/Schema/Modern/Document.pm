@@ -21,7 +21,6 @@ no feature 'switch';
 use Mojo::URL;
 use Carp 'croak';
 use List::Util 1.29 'pairs';
-use Ref::Util 0.100 'is_plain_hashref';
 use builtin::compat qw(refaddr blessed);
 use Safe::Isa 1.000008;
 use MooX::TypeTiny;
@@ -188,7 +187,7 @@ sub BUILD ($self, $args) {
 # a subclass's method will override this one
 sub traverse ($self, $evaluator, $config_override = {}) {
   die 'wrong class - use JSON::Schema::Modern::Document::OpenAPI instead'
-    if is_plain_hashref($self->schema) and exists $self->schema->{openapi};
+    if ref $self->schema eq 'HASH' and exists $self->schema->{openapi};
 
   my $original_uri = $self->original_uri;
 
