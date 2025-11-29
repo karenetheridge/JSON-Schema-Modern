@@ -585,7 +585,9 @@ sub _traverse_subschema ($self, $schema, $state) {
   push $state->{subschemas}->@*, $state->{traversed_keyword_path}.$state->{keyword_path};
 
   my $schema_type = get_type($schema);
-  return 1 if $schema_type eq 'boolean';
+  return 1 if $schema_type eq 'boolean'
+    and ($state->{specification_version} ne 'draft4'
+      or $state->{keyword_path} =~ m{/(?:additional(?:Items|Properties)|uniqueItems)$});
 
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 

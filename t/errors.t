@@ -1575,4 +1575,137 @@ subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
   );
 };
 
+subtest 'boolean schemas in draft4' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft4', strict => 1);
+  cmp_result (
+    $js->evaluate(
+      1,
+      {
+        allOf => [ true ],
+        anyOf => [ true ],
+        oneOf => [ true ],
+        not => true,
+        items => true,
+        additionalItems => true,          # ok
+        properties => { foo => true },
+        patternProperties => { foo => false },
+        additionalProperties => false,    # ok
+        uniqueItems => true,              # ok
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        (map +{
+          instanceLocation => '',
+          keywordLocation => '/'.$_.'/0',
+          error => 'invalid schema type: boolean',
+        }, qw(allOf anyOf oneOf)),
+        (map +{
+          instanceLocation => '',
+          keywordLocation => '/'.$_,
+          error => 'invalid schema type: boolean',
+        }, qw(not items)),
+        (map +{
+          instanceLocation => '',
+          keywordLocation => '/'.$_.'/foo',
+          error => 'invalid schema type: boolean',
+        }, qw(properties patternProperties)),
+      ],
+    },
+    'got all traverse errors from use of booleans in schemas for draft4',
+  );
+
+  cmp_result(
+    $js->evaluate(
+      {
+        array => [ 1, 1 ],
+        object => { foo => 1 },
+      },
+      my $schema = {
+        allOf => [
+          {
+            properties => {
+              array => {
+                type => 'array',
+                uniqueItems => true,
+                items => [ {} ],
+                additionalItems => false,
+              },
+              object => {
+                type => 'object',
+                additionalProperties => false,
+              },
+            },
+          },
+        ],
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '/array',
+          keywordLocation => '/allOf/0/properties/array/uniqueItems',
+          error => 'items at indices 0 and 1 are not unique',
+        },
+        {
+          instanceLocation => '/array/1',
+          keywordLocation => '/allOf/0/properties/array/additionalItems',
+          error => 'additional item not permitted',
+        },
+        {
+          instanceLocation => '/array',
+          keywordLocation => '/allOf/0/properties/array/additionalItems',
+          error => 'subschema is not valid against all additional items',
+        },
+        {
+          instanceLocation => '/object/foo',
+          keywordLocation => '/allOf/0/properties/object/additionalProperties',
+          error => 'additional property not permitted',
+        },
+        {
+          instanceLocation => '/object',
+          keywordLocation => '/allOf/0/properties/object/additionalProperties',
+          error => 'not all additional properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/properties',
+          error => 'not all properties are valid',
+        },
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf',
+          error => 'subschema 0 is not valid',
+        },
+      ],
+    },
+    'booleans are okay in uniqueItems, additionalItems, additionalProperties',
+  );
+
+  push $schema->{allOf}->@*, false;
+
+  cmp_result(
+    $js->evaluate(
+      {
+        array => [ 1 ],
+        object => { foo => 1 },
+      },
+      $schema,
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/1',
+          error => 'invalid schema type: boolean',
+        },
+      ],
+    },
+    'boolean schemas did not exist in draft4',
+  );
+};
+
 done_testing;

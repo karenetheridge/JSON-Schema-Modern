@@ -963,7 +963,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
           type => 'string',
           allOf => [
             { format => 'date-time' },
-            true,
+            $spec_version eq 'draft4' ? {} : true,
           ],
         },
       )->TO_JSON,

@@ -890,9 +890,9 @@ subtest 'changing specification versions within documents' => sub {
           {
             id => 'https://iam.draft4-5.com',
             '$schema' => 'http://json-schema.org/draft-04/schema#',
-            definitions => { blah => false },
-            dependencies => { foo => false },
-            dependentSchemas => { foo => false }, # this should be ignored
+            definitions => { blah => { not => {} } },
+            dependencies => { foo => { not => {} } },
+            dependentSchemas => { foo => { not => {} } }, # this should be ignored
             allOf => [ { '$ref' => '#/definitions/blah' } ],
             additionalProperties => { format => 'ipv4' },
           },
@@ -908,9 +908,9 @@ subtest 'changing specification versions within documents' => sub {
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/allOf/0/allOf/0/$ref',
-          absoluteKeywordLocation => 'https://iam.draft4-5.com#/definitions/blah',
-          error => 'subschema is false',
+          keywordLocation => '/allOf/0/allOf/0/$ref/not',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/definitions/blah/not',
+          error => 'subschema is valid',
         },
         {
           instanceLocation => '',
@@ -920,9 +920,9 @@ subtest 'changing specification versions within documents' => sub {
         },
         {
           instanceLocation => '',
-          keywordLocation => '/allOf/0/dependencies/foo',
-          absoluteKeywordLocation => 'https://iam.draft4-5.com#/dependencies/foo',
-          error => 'subschema is false',
+          keywordLocation => '/allOf/0/dependencies/foo/not',
+          absoluteKeywordLocation => 'https://iam.draft4-5.com#/dependencies/foo/not',
+          error => 'subschema is valid',
         },
         {
           instanceLocation => '',

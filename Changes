@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - now correctly disallowing booleans in draft4 subschemas
 
 0.625     2025-11-28 22:34:54Z
           - introduce a global schema document cache that can be used by other

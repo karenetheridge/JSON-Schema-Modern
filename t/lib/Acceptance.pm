@@ -18,7 +18,7 @@ use Mojo::File 'path';
 use builtin::compat 'blessed';
 
 use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings' => ':fail_on_warning'; # hooks into done_testing unless overridden
-use Test::JSON::Schema::Acceptance 1.029;
+use Test::JSON::Schema::Acceptance 1.035;
 use Test::Memory::Cycle;
 use JSON::Schema::Modern;
 
