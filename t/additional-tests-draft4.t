@@ -42,7 +42,7 @@ acceptance_tests(
         { file => 'integers.json', group_description => 'int64 range checks', test_description => 'beyond lower boundary' },
       ) : (),
       $Config{ivsize} < 8 ? (
-        { file => 'integers.json', group_description => 'type checks', test_description => [ 'beind int32 lower boundary', 'beyond uint32 upper boundary' ] },
+        { file => 'integers.json', group_description => 'type checks', test_description => [ 'beyond int32 lower boundary', 'beyond uint32 upper boundary' ] },
       ) : (),
     ]),
   },
