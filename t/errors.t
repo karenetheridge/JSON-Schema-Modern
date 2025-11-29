@@ -612,7 +612,7 @@ subtest 'exceptions' => sub {
         },
       ],
     },
-    'a subschema of an invalid type returns an error at the right position, and evaluation continues',
+    'a subschema of an invalid type returns an error at the right position, and traversal continues',
   );
   ok($result->exception, 'exception flag is true on the result');
 
