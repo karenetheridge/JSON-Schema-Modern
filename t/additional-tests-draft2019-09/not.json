@@ -1,0 +1,28 @@
+[
+    {
+        "description": "'not' discards annotations",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": {
+                "type": "object",
+                "properties": {
+                    "foo": {}
+                },
+                "unevaluatedProperties": false
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "object contains an unevaluated property",
+                "data": { "bar": 1 },
+                "valid": false
+            },
+            {
+                "description": "even when the property is evaluated, the overall schema fails",
+                "data": { "foo": 1 },
+                "valid": false
+            }
+        ]
+    }
+]

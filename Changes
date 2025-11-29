@@ -1,6 +1,11 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - improved efficiency of "short_circuit" mode, disabling it
+            in fewer and more tightly constrained conditions while allowing
+            other functionality to still work (e.g. "strict" mode to detect
+            unknown keywords, or when unevaluatedProperties or
+            unevaluatedItems are present)
 
 0.626     2025-12-02 00:29:17Z
           - now correctly disallowing booleans in draft4 subschemas

@@ -103,7 +103,7 @@ sub _eval_keyword_anyOf ($class, $data, $schema, $state) {
     next if not $class->eval($data, $schema->{anyOf}[$idx],
       +{ %$state, errors => \@errors, keyword_path => $state->{keyword_path}.'/anyOf/'.$idx });
     ++$valid;
-    last if $state->{short_circuit};
+    last if $state->{short_circuit} and not $state->{collect_annotations};
   }
 
   return 1 if $valid;
@@ -140,7 +140,7 @@ sub _eval_keyword_not ($class, $data, $schema, $state) {
 
   return 1 if not $class->eval($data, $schema->{not},
     +{ %$state, keyword_path => $state->{keyword_path}.'/not',
-      short_circuit_suggested => 1, # errors do not propagate upward from this subschema
+      short_circuit => 1,           # errors do not propagate upward from this subschema
       collect_annotations => 0,     # nor do annotations
       errors => [] });
 
@@ -155,10 +155,7 @@ sub _eval_keyword_if ($class, $data, $schema, $state) {
   return 1 if not exists $schema->{then} and not exists $schema->{else}
     and not $state->{collect_annotations};
   my $keyword = $class->eval($data, $schema->{if},
-     +{ %$state, keyword_path => $state->{keyword_path}.'/if',
-        short_circuit_suggested => !$state->{collect_annotations},
-        errors => [],
-      })
+     +{ %$state, keyword_path => $state->{keyword_path}.'/if', short_circuit => 1, errors => [] })
     ? 'then' : 'else';
 
   return 1 if not exists $schema->{$keyword};
@@ -368,8 +365,14 @@ sub _eval_keyword_contains ($class, $data, $schema, $state) {
       push @valid, $idx;
 
       last if $state->{short_circuit}
-        and (not exists $schema->{maxContains} or $state->{_num_contains} > $schema->{maxContains})
-        and ($state->{_num_contains} >= ($schema->{minContains}//1));
+          # must continue until maxContains fails, but once it does we are guaranteed to be invalid,
+          # so can always stop evaluating immediately
+        and (exists $schema->{maxContains} and $state->{_num_contains} > $schema->{maxContains})
+          # once minContains succeeds, we can stop evaluating if no unevaluatedItems present
+          # (but only draft2020-12 collects annotations for "contains" evaluations)
+          or (not exists $schema->{maxContains}
+            and (not $state->{collect_annotations} or $state->{specification_version} ne 'draft2020-12')
+            and $state->{_num_contains} >= ($schema->{minContains}//1));
     }
   }
 

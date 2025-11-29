@@ -178,4 +178,81 @@ cmp_result(
   'strict mode detects unknown keywords using draft7',
 );
 
+
+subtest 'strict and short-circuit' => sub {
+  cmp_result(
+    JSON::Schema::Modern->new->evaluate(
+      { foo => 1, bar => 2 },
+      {
+        if => {
+          required => ['bar'],
+          properties => {
+            bar => { const => 1 },
+          },
+          additionalProperties => false,
+          bloop => 1,
+        },
+        then => false,
+        else => true,
+      },
+      { strict => 1 },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/if',
+          error => 'unknown keyword found: bloop',
+        },
+        # no errors from additionalProperties, because we abort from within the 'if' subschema,
+        # and 'if' doesn't preserve its errors
+      ],
+    },
+    'strict mode will work properly even when some keywords short-circuit',
+  );
+
+  cmp_result(
+    JSON::Schema::Modern->new->evaluate(
+      { alpha => { beta => 2, gamma => 3 } },
+      # this is not a valid test, because we never preserve errors from 'if'.
+      # so we need something with a subschema that preserves errors, like properties.
+      my $schema = {
+        properties => {
+          alpha => {
+            required => ['beta'],
+            properties => {
+              beta => { const => 2 },
+            },
+            additionalProperties => false,
+            bloop => 1,
+          },
+        },
+      },
+      { strict => 1, short_circuit => 1 },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+         instanceLocation => '/alpha/gamma',
+         keywordLocation => '/properties/alpha/additionalProperties',
+         error => 'additional property not permitted',
+        },
+        {
+         instanceLocation => '/alpha',
+         keywordLocation => '/properties/alpha/additionalProperties',
+         error => 'not all additional properties are valid',
+        },
+        {
+         instanceLocation => '/alpha',
+         keywordLocation => '/properties/alpha',
+         error => 'unknown keyword found: bloop',
+        },
+      ],
+    },
+    'strict mode will still work even when enabled together with short_circuit',
+  )
+};
+
 done_testing;

@@ -1,6 +1,6 @@
 [
     {
-        "description": "items (schema form) does not improperly short-circuit",
+        "description": "short-circuit with items (schema form)",
         "schema": {
             "items": { "multipleOf": 2 }
         },
@@ -18,7 +18,7 @@
         ]
     },
     {
-        "description": "items (array form) does not improperly short-circuit",
+        "description": "short-circuit with items (array form)",
         "schema": {
             "items": [
                 { "multipleOf": 2 },
@@ -39,7 +39,7 @@
         ]
     },
     {
-        "description": "additionalItems does not improperly short-circuit",
+        "description": "short-circuit with additionalItems",
         "schema": {
             "items": [ true ],
             "additionalItems": { "multipleOf": 2 }
@@ -58,7 +58,7 @@
         ]
     },
     {
-        "description": "unevaluatedItems does not improperly short-circuit",
+        "description": "short-circuit with unevaluatedItems",
         "schema": {
             "unevaluatedItems": { "multipleOf": 2 }
         },
@@ -76,7 +76,7 @@
         ]
     },
     {
-        "description": "properties does not improperly short-circuit",
+        "description": "short-circuit with properties",
         "schema": {
             "properties": {
                 "alpha": { "multipleOf": 2 },
@@ -97,28 +97,30 @@
         ]
     },
     {
-        "description": "properties does not improperly short-circuit (boolean schemas)",
+        "description": "short-circuit with properties and unevaluatedProperties",
         "schema": {
             "properties": {
                 "alpha": true,
-                "beta": false
-            }
+                "beta": false,
+                "gamma": true
+            },
+            "unevaluatedProperties": false
         },
         "tests": [
             {
                 "description": "single property is valid",
-                "data": { "alpha": 2 },
+                "data": { "alpha": 1 },
                 "valid": true
             },
             {
                 "description": "second property is invalid",
-                "data": { "alpha": 2, "beta": 1 },
+                "data": { "alpha": 1, "beta": 2 },
                 "valid": false
             }
         ]
     },
     {
-        "description": "patternProperties does not improperly short-circuit",
+        "description": "short-circuit with patternProperties",
         "schema": {
             "patternProperties": {
                 "^a": { "multipleOf": 2 },
@@ -139,7 +141,7 @@
         ]
     },
     {
-        "description": "patternProperties does not improperly short-circuit (boolean schemas)",
+        "description": "short-circuit with patternProperties and boolean schemas",
         "schema": {
             "patternProperties": {
                 "^a": true,
@@ -160,7 +162,7 @@
         ]
     },
     {
-        "description": "additionalProperties does not improperly short-circuit",
+        "description": "short-circuit with additionalProperties",
         "schema": {
             "additionalProperties": { "multipleOf": 2 }
         },
@@ -178,7 +180,7 @@
         ]
     },
     {
-        "description": "unevaluatedProperties does not improperly short-circuit",
+        "description": "short-circuit with unevaluatedProperties",
         "schema": {
             "unevaluatedProperties": { "multipleOf": 2 }
         },
@@ -191,6 +193,98 @@
             {
                 "description": "second property is invalid",
                 "data": { "alpha": 2, "beta": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "short-circuit with allOf",
+        "schema": {
+            "allOf": [
+                false,
+                {
+                    "properties": {
+                        "alpha": {},
+                        "beta": {}
+                    }
+                }
+            ],
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "'unevaluated' errors are produced iff short_circuit is false",
+                "data": { "alpha": 1, "gamma": 3 },
+                "valid": false
+            },
+            {
+                "description": "/allOf/0 guarantees a false result even when all branches are evaluated",
+                "data": { "alpha": 1, "beta": 2 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "short-circuit with anyOf",
+        "schema": {
+            "anyOf": [
+                true,
+                {
+                    "properties": {
+                        "alpha": {},
+                        "beta": {}
+                    }
+                }
+            ],
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "some properties are unevaluated",
+                "data": { "alpha": 1, "gamma": 1 },
+                "valid": false
+            },
+            {
+                "description": "all branches are still evaluated, even though we would have wanted to abort earlier",
+                "data": { "alpha": 1, "beta": 2 },
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "short-circuit with oneOf",
+        "schema": {
+            "oneOf": [
+                {
+                    "required": ["alpha"],
+                    "properties": {
+                        "alpha": { "const": 1 }
+                    }
+                },
+                {
+                    "required": ["beta"],
+                    "properties": {
+                        "beta": { "const": 2 }
+                    }
+                },
+                {
+                    "required": ["gamma"],
+                    "properties": {
+                        "gamma": { "const": 3 }
+                    }
+                }
+            ],
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "we can safely short-circuit after two valid oneOfs; gamma never gets evaluated; incorrect unevaluated error is not produced",
+                "data": { "alpha": 1, "beta": 2, "gamma": 3 },
+                "valid": false
+            },
+            {
+                "description": "all branches are still evaluated, even though we would have wanted to abort earlier",
+                "data": { "alpha": 1, "delta": 4 },
                 "valid": false
             }
         ]

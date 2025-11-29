@@ -48,8 +48,6 @@ sub _eval_keyword_unevaluatedItems ($class, $data, $schema, $state) {
   # these should never happen
   die '"unevaluatedItems" keyword present, but annotation collection is disabled'
     if not $state->{collect_annotations};
-  die '"unevaluatedItems" keyword present, but short_circuit is enabled: results unreliable'
-    if $state->{short_circuit};
 
   my @annotations = local_annotations($state);
 
@@ -109,8 +107,6 @@ sub _eval_keyword_unevaluatedProperties ($class, $data, $schema, $state) {
   # these should never happen
   die '"unevaluatedProperties" keyword present, but annotation collection is disabled'
     if not $state->{collect_annotations};
-  die '"unevaluatedProperties" keyword present, but short_circuit is enabled: results unreliable'
-    if $state->{short_circuit};
 
   my @evaluated_properties = map {
     my $keyword = $_->{keyword};

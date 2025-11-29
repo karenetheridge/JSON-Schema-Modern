@@ -22,11 +22,12 @@ id.json                                      6          0     0
 integers.json                               33          0     0
 keyword-independence.json                  884          0     0
 loose-types-const-enum.json                  8          0     0
+not.json                                     2          0     0
 recursive-dynamic.json                       2          0     0
 ref-and-id.json                              6          0     0
 ref.json                                    10          0     0
-short-circuit.json                          20          0     0
+short-circuit.json                          34          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                             11          0     0
 ---------------------------------------------------------------
-TOTAL                                     1067          0     0
+TOTAL                                     1083          0     0

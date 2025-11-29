@@ -720,11 +720,6 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       || ((my $is_object_data = ref $data eq 'HASH')
         && (exists $schema->{unevaluatedProperties} || !!$state->{seen_data_properties})));
 
-  # in order to collect annotations for unevaluated* keywords, we sometimes need to ignore the
-  # suggestion to short_circuit evaluation at this scope (but lower scopes are still fine)
-  $state->{short_circuit} = ($state->{short_circuit} || delete($state->{short_circuit_suggested}))
-    && !exists($schema->{unevaluatedItems}) && !exists($schema->{unevaluatedProperties});
-
   # we use an index rather than iterating through the lists directly because the lists of
   # vocabularies and keywords can change after we have started. However, only the Core vocabulary
   # and $schema keyword can make this change, and they both come first, therefore a simple index
@@ -751,6 +746,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]$/;
 
       delete $unknown_keywords{$keyword};
+      next if not $valid and $state->{short_circuit} and $state->{strict};
+
       $state->{keyword} = $keyword;
 
       if ($sub) {
@@ -763,7 +760,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
               if $error_count == $state->{errors}->@*;
             $valid = 0;
 
-            last ALL_KEYWORDS if $state->{short_circuit};
+            last ALL_KEYWORDS if $state->{short_circuit} and not $state->{strict};
             next;
           }
 
@@ -787,7 +784,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
             if $error_count == $state->{errors}->@*;
           $valid = 0;
 
-          last ALL_KEYWORDS if $state->{short_circuit};
+          last ALL_KEYWORDS if $state->{short_circuit} and not $state->{strict};
           next;
         }
         warn 'callback result is true but there are errors (keyword: '.$keyword.')'
