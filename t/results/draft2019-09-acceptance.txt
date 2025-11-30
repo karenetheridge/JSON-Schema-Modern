@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.034
-with commit:                 8da0a7bcb23f3516590e70bc5c3e396400c27741 (Test-JSON-Schema-Acceptance-1.033)
+generated with:              Test::JSON::Schema::Acceptance 1.035
+with commit:                 d69537acea93fd7481ad80ff3015d88ab0b13d5a (Test-JSON-Schema-Acceptance-1.034-20-gd69537a)
 from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft2019-09
 optional tests included:     yes
@@ -7,7 +7,7 @@ skipping directory:          optional/format
 
 filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
-additionalItems.json                        20          0     0
+additionalItems.json                        19          0     0
 additionalProperties.json                   21          0     0
 allOf.json                                  30          0     0
 anchor.json                                  8          0     0
@@ -65,4 +65,4 @@ optional/non-bmp-regex.json                 12          0     0
 optional/refOfUnknownKeyword.json            5          5     0
 optional/unknownKeyword.json                 3          0     0
 ---------------------------------------------------------------
-TOTAL                                     1360         33     0
+TOTAL                                     1359         33     0

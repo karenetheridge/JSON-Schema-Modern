@@ -1,4 +1,4 @@
-generated with:              Test::JSON::Schema::Acceptance 1.034
+generated with:              Test::JSON::Schema::Acceptance 1.035
 specification version:       draft4
 using custom test directory: t/additional-tests-draft4
 optional tests included:     yes
