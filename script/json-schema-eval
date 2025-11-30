@@ -23,21 +23,21 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   "$0 %o",
   ['help|usage|?|h', 'print usage information and exit', { shortcircuit => 1 } ],
   [],
-  ['specification_version|version=s', 'which version of the JSON Schema specification to use'],
-  ['output_format=s', 'output format (flag, basic, terse)'],
-  ['short_circuit', 'return early in any execution path as soon as the outcome can be determined'],
-  ['max_traversal_depth=i', 'the maximum number of levels deep a schema traversal may go'],
-  ['validate_formats', 'treat the "format" keyword as an assertion, not merely an annotation'],
-  ['validate_content_schemas', 'treat the "contentMediaType" and "contentSchema" keywords as assertions'],
-  ['collect_annotations', 'collect annotations'],
+  ['specification-version|version=s', 'which version of the JSON Schema specification to use'],
+  ['output-format=s', 'output format (flag, basic, terse)'],
+  ['short-circuit', 'return early in any execution path as soon as the outcome can be determined'],
+  ['max-traversal-depth=i', 'the maximum number of levels deep a schema traversal may go'],
+  ['validate-formats', 'treat the "format" keyword as an assertion, not merely an annotation'],
+  ['validate-content-schemas', 'treat the "contentMediaType" and "contentSchema" keywords as assertions'],
+  ['collect-annotations', 'collect annotations'],
   ['strict', 'disallow unknown keywords'],
-  # scalarref_booleans, stringy_numbers make no sense in json-encoded data
+  # scalarref-booleans, stringy-numbers make no sense in json-encoded data
+  ['dump-identifiers', 'print a list of all identifiers found in the schema'],
   [],
   ['validate-schema:s', 'validate the provided schema against its meta-schema and the specification. do not provide --data or --schema.' ],
   ['add-schema=s@', 'the filename of an extra schema to load, so it can be used by $ref' ],
   ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used)'],
   ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used)'],
-  ['dump-identifiers', 'print a list of all identifiers found in the schema'],
 );
 
 print($usage->text), exit if $opt->help;
@@ -154,22 +154,22 @@ __END__
 
 =head1 SYNOPSIS
 
+  json-schema-eval --help
+
   json-schema-eval \
-    [ --specification_version|version <version> ] \
-    [ --output_format <format> ] \
-    [ --short_circuit ] \
-    [ --max_traversal_depth <depth> ] \
-    [ --validate_formats ] \
-    [ --validate_content_schemas ] \
-    [ --collect_annotations ] \
+    [ --specification-version|version <version> ] \
+    [ --output-format <format> ] \
+    [ --short-circuit ] \
+    [ --max-traversal-depth <depth> ] \
+    [ --validate-formats ] \
+    [ --validate-content-schemas ] \
+    [ --collect-annotations ] \
     [ --strict ] \
-    [ --data <filename> ] \
-    [ --schema <filename> ] \
-    [ --validate-schema [filename] ]
-    [ --add-schema <filename> ]
-    [ --data <filename> ]
-    [ --schema <filename> ]
-    [ --dump-identifiers ]
+    [ --dump-identifiers ] \
+    [ --validate-schema [ <filename> ] ] \
+    [ --add-schema [ <filename> ] [ ... ] ] \
+    [ --data [ <filename> ] ] \
+    [ --schema [ <filename> ] ]
 
 =head1 DESCRIPTION
 
