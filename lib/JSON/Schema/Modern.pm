@@ -717,8 +717,9 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   # bit if we see a local unevaluated* keyword, and clear it again as we move on to a new data path.
   # We also set it when _strict_schema_data is set, but only for object data instances.
   $state->{collect_annotations} |=
-    0+(exists $schema->{unevaluatedItems} || exists $schema->{unevaluatedProperties}
-      || !!$state->{seen_data_properties} && (my $is_object_data = ref $data eq 'HASH'));
+    0+((ref $data eq 'ARRAY' && exists $schema->{unevaluatedItems})
+      || ((my $is_object_data = ref $data eq 'HASH')
+        && (exists $schema->{unevaluatedProperties} || !!$state->{seen_data_properties})));
 
   # in order to collect annotations for unevaluated* keywords, we sometimes need to ignore the
   # suggestion to short_circuit evaluation at this scope (but lower scopes are still fine)
