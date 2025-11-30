@@ -17,6 +17,7 @@ use Getopt::Long::Descriptive;
 use Mojo::File 'path';
 use Safe::Isa;
 use Feature::Compat::Try;
+use List::Util 'max';
 use JSON::Schema::Modern;
 
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
@@ -34,9 +35,9 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   # scalarref-booleans, stringy-numbers make no sense in json-encoded data
   ['dump-identifiers', 'print a list of all identifiers found in the schema'],
   [],
-  ['validate-schema:s', 'validate the provided schema against its meta-schema and the specification. do not provide --data or --schema.' ],
+  ['validate-schema:s@', 'validate the provided schema against its meta-schema and the specification. do not provide --data or --schema; can be used more than once' ],
   ['add-schema=s@', 'the filename of an extra schema to load, so it can be used by $ref; can be used more than once' ],
-  ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used)'],
+  ['data=s@', 'the filename to use for the instance data (if not provided, STDIN is used); can be used more than once'],
   ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used)'],
 );
 
@@ -47,7 +48,8 @@ die '--validate-schema and --schema should not be used together' if defined $opt
 
 my $js = JSON::Schema::Modern->new(%$opt);
 
-foreach my $add_schema_file (@{$opt->add_schema//[]}) {
+
+foreach my $add_schema_file (($opt->add_schema//[])->@*) {
   try {
     $js->add_schema('file://'.$add_schema_file => parse_input(path($add_schema_file)->slurp('UTF-8')));
   }
@@ -57,40 +59,47 @@ foreach my $add_schema_file (@{$opt->add_schema//[]}) {
   }
 }
 
-my $exit_val;
+my $exit_val = 0;
 
 if (defined $opt->validate_schema) {
   my $encoded_schema;
 
-  if (length $opt->validate_schema) { # boolean flag is passed as ''; some other value = filename
-    $encoded_schema = path($opt->validate_schema)->slurp('UTF-8');
-  }
-  else {
-    say 'enter schema, followed by ^D:';
-    local $/;
-    $encoded_schema = <STDIN>;
-    say '';
-  }
+  foreach my $schema_filename ($opt->validate_schema->@*) {
+    # boolean flag is passed as ''; some other value = filename
+    if (length $schema_filename) {
+      $encoded_schema = path($schema_filename)->slurp('UTF-8');
+    }
+    else {
+      say 'enter schema, followed by ^D:';
+      local $/;
+      $encoded_schema = <STDIN>;
+      say '';
+    }
 
-  my $result = $js->validate_schema(my $schema = parse_input($encoded_schema));
-  $js->add_schema($schema) if $opt->dump_identifiers;
+    my $result = $js->validate_schema(my $schema = parse_input($encoded_schema));
+    $js->add_schema($schema) if $opt->dump_identifiers;
 
-  $exit_val = $result->valid ? 0 : $result->exception ? 2 : 1;
-  say $result->output_format eq 'data_only' ? $result : $result->dump;
+    $exit_val = max($exit_val, $result->valid ? 0 : $result->exception ? 2 : 1);
+
+    # possible FIXME: can output_format ever be data_only here? it does not jsonify
+    say encode($opt->validate_schema->@* > 1 ? { $schema_filename => $result } : $result);
+  }
 }
 else {
-  my ($schema_filename, $encoded_data, $encoded_schema);
-
-  if (defined $opt->data) {
-    $encoded_data = path($opt->data)->slurp('UTF-8');
+  my @encoded_data;
+  foreach my $data_filename (($opt->data//[''])->@*) {
+    if (length $data_filename) {
+      push @encoded_data, [ $data_filename => path($data_filename)->slurp('UTF-8') ];
+    }
+    else {
+      say 'enter data instance, followed by ^D:';
+      local $/;
+      push @encoded_data, [ '' => <STDIN> ];
+      STDIN->clearerr;
+    }
   }
-  else {
-    say 'enter data instance, followed by ^D:';
-    local $/;
-    $encoded_data = <STDIN>;
-    STDIN->clearerr;
-  }
 
+  my ($schema_filename, $encoded_schema);
   if (defined $opt->schema) {
     $encoded_schema = path($schema_filename = $opt->schema)->slurp('UTF-8');
   }
@@ -101,15 +110,19 @@ else {
     say '';
   }
 
-  my $data = parse_input($encoded_data);
-  my $schema = parse_input($encoded_schema);
-
   # if there is no $id within the document, the filename will be used instead
+  my $schema = parse_input($encoded_schema);
   $js->add_schema(my $uri = 'file://'.$schema_filename, $schema) if length $schema_filename;
-  my $result = $js->evaluate($data, $uri // $schema);
 
-  $exit_val = $result->valid ? 0 : $result->exception ? 2 : 1;
-  say $result->output_format eq 'data_only' ? $result : $result->dump;
+  foreach my $encoded_data (@encoded_data) {  # [ filename, data string ]
+    my $data = parse_input($encoded_data->[1]);
+
+    my $result = $js->evaluate($data, $uri // $schema);
+    $exit_val = max($exit_val, $result->valid ? 0 : $result->exception ? 2 : 1);
+
+    # possible FIXME: can output_format ever be data_only here? it does not jsonify
+    say encode(($opt->data//[])->@* > 1 ? { $encoded_data->[0] => $result } : $result);
+  }
 }
 
 
@@ -173,9 +186,9 @@ __END__
     [ --collect-annotations ] \
     [ --strict ] \
     [ --dump-identifiers ] \
-    [ --validate-schema [ <filename> ] ] \
+    [ --validate-schema [ <filename> ] [ ... ] ] \
     [ --add-schema [ <filename> ] [ ... ] ] \
-    [ --data [ <filename> ] ] \
+    [ --data [ <filename> ] [ ... ] ] \
     [ --schema [ <filename> ] ]
 
 =head1 DESCRIPTION
@@ -234,6 +247,8 @@ JSON::Schema::Modern|JSON::Schema::Modern/CONFIGURATION OPTIONS> are available.
 
 Additionally, C<--data> is used to provide the filename containing a JSON- or YAML-encoded data
 instance, and C<--schema> provides the filename containing a JSON- or YAML-encoded schema.
+You can use the C<--data> option more than once to validate multiple data instances against the same
+schema.
 
 If either or both of these are not provided, STDIN is used as input.
 
@@ -243,6 +258,7 @@ content of the first line of the data.
 Alternatively, you can use C<--validate-schema> and either provide a filename containing a
 JSON-encoded schema, or omit the argument to read a schema from STDIN. The schema
 will be evaluated against its meta-schema for the corresponding specification version.
+You can use this option more than once to validate multiple schemas in the same runtime instance.
 
 Additional schemas, that you wish to use via the C<$ref> keyword, can be added with
 C<< --add-schema <filename> >>. The actual filename is insignificant: Make sure you use an C<$id>
