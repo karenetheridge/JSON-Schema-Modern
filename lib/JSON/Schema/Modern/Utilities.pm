@@ -494,6 +494,7 @@ sub sprintf_num ($value) {
 # TODO: move this off into its own distribution, see JSON::Schema::Types
 sub json_pointer_type () { Str->where('!length || m{^/} && !m{~(?![01])}'); }
 
+# a URI without a fragment, or with a json pointer fragment
 sub canonical_uri_type () {
   (InstanceOf['Mojo::URL'])->where(q{!defined($_->fragment) || $_->fragment =~ m{^/} && $_->fragment !~ m{~(?![01])}});
 }
