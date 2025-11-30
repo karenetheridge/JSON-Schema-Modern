@@ -35,17 +35,15 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['dump-identifiers', 'print a list of all identifiers found in the schema'],
   [],
   ['validate-schema:s', 'validate the provided schema against its meta-schema and the specification. do not provide --data or --schema.' ],
-  ['add-schema=s@', 'the filename of an extra schema to load, so it can be used by $ref' ],
+  ['add-schema=s@', 'the filename of an extra schema to load, so it can be used by $ref; can be used more than once' ],
   ['data=s', 'the filename to use for the instance data (if not provided, STDIN is used)'],
   ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used)'],
 );
 
 print($usage->text), exit if $opt->help;
 
-my ($data, $schema, $validate_schema) = delete $opt->@{qw(data schema validate_schema)};
-
-die '--validate-schema and --data should not be used together' if defined $data and defined $validate_schema;
-die '--validate-schema and --schema should not be used together' if defined $schema and defined $validate_schema;
+die '--validate-schema and --data should not be used together' if defined $opt->data and defined $opt->validate_schema;
+die '--validate-schema and --schema should not be used together' if defined $opt->schema and defined $opt->validate_schema;
 
 my $js = JSON::Schema::Modern->new(%$opt);
 
@@ -59,56 +57,63 @@ foreach my $add_schema_file (@{$opt->add_schema//[]}) {
   }
 }
 
-my $result;
-my $schema_filename = '';
+my $exit_val;
 
-if (defined $validate_schema) {
-  if (length $validate_schema) { # boolean flag is passed as ''; some other value = filename
-    $schema = path($schema_filename = $validate_schema)->slurp('UTF-8');
+if (defined $opt->validate_schema) {
+  my $encoded_schema;
+
+  if (length $opt->validate_schema) { # boolean flag is passed as ''; some other value = filename
+    $encoded_schema = path($opt->validate_schema)->slurp('UTF-8');
   }
   else {
     say 'enter schema, followed by ^D:';
     local $/;
-    $schema = <STDIN>;
+    $encoded_schema = <STDIN>;
     say '';
   }
 
-  $result = $js->validate_schema(parse_input($schema));
+  my $result = $js->validate_schema(my $schema = parse_input($encoded_schema));
+  $js->add_schema($schema) if $opt->dump_identifiers;
+
+  $exit_val = $result->valid ? 0 : $result->exception ? 2 : 1;
+  say $result->output_format eq 'data_only' ? $result : $result->dump;
 }
 else {
-  if (defined $data) {
-    $data = path($data)->slurp('UTF-8');
+  my ($schema_filename, $encoded_data, $encoded_schema);
+
+  if (defined $opt->data) {
+    $encoded_data = path($opt->data)->slurp('UTF-8');
   }
   else {
     say 'enter data instance, followed by ^D:';
     local $/;
-    $data = <STDIN>;
+    $encoded_data = <STDIN>;
     STDIN->clearerr;
   }
 
-  if (defined $schema) {
-    $schema = path($schema_filename = $schema)->slurp('UTF-8');
+  if (defined $opt->schema) {
+    $encoded_schema = path($schema_filename = $opt->schema)->slurp('UTF-8');
   }
   else {
     say 'enter schema, followed by ^D:';
     local $/;
-    $schema = <STDIN>;
+    $encoded_schema = <STDIN>;
     say '';
   }
 
-  $data = parse_input($data);
-  $schema = parse_input($schema);
+  my $data = parse_input($encoded_data);
+  my $schema = parse_input($encoded_schema);
 
   # if there is no $id within the document, the filename will be used instead
   $js->add_schema(my $uri = 'file://'.$schema_filename, $schema) if length $schema_filename;
-  $result = $js->evaluate($data, $uri // $schema);
+  my $result = $js->evaluate($data, $uri // $schema);
+
+  $exit_val = $result->valid ? 0 : $result->exception ? 2 : 1;
+  say $result->output_format eq 'data_only' ? $result : $result->dump;
 }
 
-say $result->output_format eq 'data_only' ? $result : $result->dump;
 
 if ($opt->dump_identifiers) {
-  $js->add_schema($schema) if $validate_schema;
-
   my %identifiers = map +(
     $_->[0] => {
       canonical_uri => $_->[1]{canonical_uri},
@@ -119,10 +124,12 @@ if ($opt->dump_identifiers) {
   grep $_->[0] !~ m{^https://json-schema.org/},
   $js->_resource_pairs;
 
-  say encode(\%identifiers);
+  say encode({identifiers => \%identifiers });
 }
 
-exit($result->valid ? 0 : $result->exception ? 2 : 1);
+exit $exit_val;
+
+### END
 
 sub parse_input ($input) {
   if ($input =~ /^(\{|\[\|["0-9]|true\b|false\b|null\b)/) {
