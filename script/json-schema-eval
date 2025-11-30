@@ -119,14 +119,7 @@ if ($opt->dump_identifiers) {
   grep $_->[0] !~ m{^https://json-schema.org/},
   $js->_resource_pairs;
 
-  my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
-    ->convert_blessed(1)
-    ->utf8(0)
-    ->canonical(1)
-    ->pretty(1);
-  $encoder->indent_length(2) if $encoder->can('indent_length');
-
-  say $encoder->encode(\%identifiers);
+  say encode(\%identifiers);
 }
 
 exit($result->valid ? 0 : $result->exception ? 2 : 1);
@@ -143,6 +136,16 @@ sub parse_input ($input) {
     state $yaml_decoder = YAML::PP->new(boolean => 'JSON::PP');
     return $yaml_decoder->load_string($input);
   }
+}
+
+sub encode ($input) {
+  my $encoder = JSON::Schema::Modern::_JSON_BACKEND()->new
+    ->convert_blessed(1)
+    ->utf8(0)
+    ->canonical(1)
+    ->pretty(1);
+  $encoder->indent_length(2) if $encoder->can('indent_length');
+  $encoder->encode($input);
 }
 
 __END__
