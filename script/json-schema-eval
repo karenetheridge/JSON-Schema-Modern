@@ -51,7 +51,10 @@ my $js = JSON::Schema::Modern->new(%$opt);
 
 foreach my $add_schema_file (($opt->add_schema//[])->@*) {
   try {
-    $js->add_schema('file://'.$add_schema_file => parse_input(path($add_schema_file)->slurp('UTF-8')));
+    my $schema = parse_input(path($add_schema_file)->slurp('UTF-8'));
+    die "this looks like an OpenAPI file: try 'openapi-validate' (install OpenAPI::Modern), instead\n"
+      if ref $schema eq 'HASH' and $schema->{openapi};
+    $js->add_schema('file://'.$add_schema_file => $schema);
   }
   catch ($e) {
     say $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump: '"'.$e.'"';
@@ -76,7 +79,11 @@ if (defined $opt->validate_schema) {
       say '';
     }
 
-    my $result = $js->validate_schema(my $schema = parse_input($encoded_schema));
+    my $schema = parse_input($encoded_schema);
+    die "this looks like an OpenAPI file: try 'openapi-validate' (install OpenAPI::Modern), instead\n"
+      if ref $schema eq 'HASH' and $schema->{openapi};
+
+    my $result = $js->validate_schema($schema);
     $js->add_schema($schema) if $opt->dump_identifiers;
 
     $exit_val = max($exit_val, $result->valid ? 0 : $result->exception ? 2 : 1);
@@ -112,6 +119,8 @@ else {
 
   # if there is no $id within the document, the filename will be used instead
   my $schema = parse_input($encoded_schema);
+  die "this looks like an OpenAPI file: try 'openapi-validate' (install OpenAPI::Modern), instead\n"
+    if ref $schema eq 'HASH' and $schema->{openapi};
   $js->add_schema(my $uri = 'file://'.$schema_filename, $schema) if length $schema_filename;
 
   foreach my $encoded_data (@encoded_data) {  # [ filename, data string ]
