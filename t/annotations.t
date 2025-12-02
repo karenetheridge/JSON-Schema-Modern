@@ -26,18 +26,34 @@ subtest 'draft7' => sub {
   );
 
   cmp_result(
-    JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(1, true, { collect_annotations => 1 })->TO_JSON,
+    JSON::Schema::Modern->new(specification_version => 'draft7')
+      ->evaluate(
+        1,
+        {
+          title => 'draft7 title',
+          allOf => [ { '$ref' => '#/definitions/draft2020-12-schema' } ],
+          definitions => {
+            'draft2020-12-schema' => {
+              '$id' => 'my_draft2020-12_schema',
+              '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+              title => 'draft2020-12 title'
+            },
+          },
+        },
+        { collect_annotations => 1 },
+      )->TO_JSON,
     {
-      valid => false,
-      errors => [
+      valid => true,
+      annotations => [
         {
           instanceLocation => '',
-          keywordLocation => '',
-          error => 'EXCEPTION: collect_annotations cannot be used with specification_version draft7',
+          keywordLocation => '/allOf/0/$ref/title',
+          absoluteKeywordLocation => 'my_draft2020-12_schema#/title',
+          annotation => 'draft2020-12 title',
         },
       ],
     },
-    'user cannot enable annotations for draft7 even as an override',
+    'annotation collection can be enabled even when defaulting to draft7, but they are still only collected for later drafts',
   );
 };
 

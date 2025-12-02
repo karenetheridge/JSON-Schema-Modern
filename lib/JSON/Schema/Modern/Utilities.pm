@@ -384,7 +384,11 @@ sub E ($state, $error_string, @args) {
 # - _unknown (boolean)
 # - depth
 sub A ($state, $annotation) {
-  return 1 if not $state->{collect_annotations};
+  # even if the user requested annotations, we only collect them for later drafts
+  # ..but we always collect them if the lowest bit is set, indicating the presence of unevaluated*
+  # keywords necessary for accurate validation
+  return 1 if not ($state->{collect_annotations}
+    & ($state->{specification_version} =~ /^draft[467]$/ ? ~(1<<8) : ~0));
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
