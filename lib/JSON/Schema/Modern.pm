@@ -455,9 +455,16 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
 
   if ($state->{seen_data_properties}) {
     my @unevaluated_properties = grep !$state->{seen_data_properties}{$_}, keys $state->{seen_data_properties}->%*;
+    my %unknown_keywords;
     foreach my $property (sort @unevaluated_properties) {
-      $valid = E({ %$state, data_path => $property }, 'unknown keyword found in schema: %s',
-        $property =~ m{/([^/]+)$});
+      my ($parent, $keyword) = ($property =~ m{^(.*)/([^/]*)$});
+      push(($unknown_keywords{$parent}//=[])->@*, $keyword);
+    }
+
+    foreach my $parent (sort keys %unknown_keywords) {
+      $valid = E({ %$state, data_path => $parent },
+        'unknown keyword%s seen in schema: %s', $unknown_keywords{$parent}->@* > 1 ? 's' : '',
+        join(', ', sort $unknown_keywords{$parent}->@*));
     }
   }
 
@@ -653,7 +660,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   delete $state->{keyword};
 
   if ($self->strict and keys %unknown_keywords) {
-    $valid = E($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
+    $valid = E($state, 'unknown keyword%s seen in schema: %s', keys %unknown_keywords > 1 ? 's' : '',
       join(', ', sort keys %unknown_keywords));
   }
 
@@ -796,7 +803,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   delete $state->{keyword};
 
   if ($state->{strict} and keys %unknown_keywords) {
-    abort($state, 'unknown keyword%s found: %s', keys %unknown_keywords > 1 ? 's' : '',
+    abort($state, 'unknown keyword%s seen in schema: %s', keys %unknown_keywords > 1 ? 's' : '',
       join(', ', sort keys %unknown_keywords));
   }
 
