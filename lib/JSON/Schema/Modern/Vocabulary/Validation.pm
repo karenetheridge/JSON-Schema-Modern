@@ -145,7 +145,7 @@ sub _eval_keyword_maximum ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_exclusiveMaximum ($class, $schema, $state) {
-  return _assert_number($class, $schema, $state) if $state->{specification_version} ne 'draft4';
+  return assert_keyword_type($state, $schema, 'number') if $state->{specification_version} ne 'draft4';
 
   return if not assert_keyword_type($state, $schema, 'boolean');
   return E($state, 'use of exclusiveMaximum requires the presence of maximum')
@@ -181,7 +181,7 @@ sub _eval_keyword_minimum ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_exclusiveMinimum ($class, $schema, $state) {
-  return _assert_number($class, $schema, $state) if $state->{specification_version} ne 'draft4';
+  return assert_keyword_type($state, $schema, 'number') if $state->{specification_version} ne 'draft4';
 
   return if not assert_keyword_type($state, $schema, 'boolean');
   return E($state, 'use of exclusiveMinimum requires the presence of minimum')

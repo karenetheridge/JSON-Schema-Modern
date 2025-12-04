@@ -434,14 +434,10 @@ sub _eval_keyword_properties ($class, $data, $schema, $state) {
 }
 
 sub _traverse_keyword_patternProperties ($class, $schema, $state) {
-  return if not assert_keyword_type($state, $schema, 'object');
+  return if not $class->traverse_object_schemas($schema, $state);
 
-  my $valid = 1;
-  foreach my $property (sort keys $schema->{patternProperties}->%*) {
-    $valid = 0 if not assert_pattern({ %$state, _keyword_path_suffix => $property }, $property);
-    $valid = 0 if not $class->traverse_property_schema($schema, $state, $property);
-  }
-  return $valid;
+  0+!grep !assert_pattern({ %$state, _keyword_path_suffix => $_ }, $_),
+    sort keys $schema->{patternProperties}->%*;
 }
 
 sub _eval_keyword_patternProperties ($class, $data, $schema, $state) {
