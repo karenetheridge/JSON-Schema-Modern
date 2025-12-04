@@ -113,15 +113,14 @@ sub _eval_keyword_multipleOf ($class, $data, $schema, $state) {
 
   my $remainder;
 
-  # if either value is a float, use the bignum library for the calculation for an accurate remainder
-  if (is_bignum($data) or is_bignum($schema->{multipleOf})
-      or get_type($data) eq 'number' or get_type($schema->{multipleOf}) eq 'number') {
+  if (get_type($data) eq 'integer' and get_type($schema->{multipleOf}) eq 'integer') {
+    $remainder = $data % $schema->{multipleOf};
+  }
+  else {
+    # if either value is a float, use the bignum library for the calculation for an accurate remainder
     my $dividend = is_bignum($data) ? $data->copy : Math::BigFloat->new($data);
     my $divisor = is_bignum($schema->{multipleOf}) ? $schema->{multipleOf} : Math::BigFloat->new($schema->{multipleOf});
     $remainder = $dividend->bmod($divisor);
-  }
-  else {
-    $remainder = $data % $schema->{multipleOf};
   }
 
   return 1 if $remainder == 0;
