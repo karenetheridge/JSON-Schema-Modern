@@ -177,6 +177,22 @@ cmp_result(
   'strict mode detects unknown keywords using draft7',
 );
 
+subtest 'strict and if/then/else' => sub {
+  cmp_result(
+    JSON::Schema::Modern->new(strict => 1)->evaluate(
+      $_,
+      {
+        if => { const => 0 },
+        then => true,
+        else => true,
+      },
+      { strict => 1 },
+    )->TO_JSON,
+
+    { valid => true },
+    'no unknown keywords are identified, even though "' . ($_?'else':'then').'" is never evaluated',
+  ) foreach (0..1);
+};
 
 subtest 'strict and short-circuit' => sub {
   cmp_result(
