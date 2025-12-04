@@ -143,7 +143,7 @@ if ($opt->dump_identifiers) {
       document_path => $_->[1]{path},
     }
   ),
-  grep $_->[0] !~ m{^https://json-schema.org/},
+  grep $_->[0] !~ m{^https?://json-schema.org/},
   $js->_resource_pairs;
 
   say encode({identifiers => \%identifiers });
