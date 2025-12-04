@@ -443,8 +443,8 @@ sub assert_pattern ($state, $pattern) {
 }
 
 # this is only suitable for checking URIs within schemas themselves
-# note that we cannot use $state->{specification_version} to more tightly constrain the plain-name fragment
-# syntax, as we could be checking a $ref to a schema using a different version
+# note that we cannot use $state->{specification_version} to more tightly constrain the plain-name
+# fragment syntax, as we could be checking a $ref to a schema using a different version
 sub assert_uri_reference ($state, $schema) {
   croak 'assert_uri_reference called in void context' if not defined wantarray;
 

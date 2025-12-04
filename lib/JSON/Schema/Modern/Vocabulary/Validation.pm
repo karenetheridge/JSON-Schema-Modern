@@ -154,7 +154,7 @@ sub _traverse_keyword_exclusiveMaximum ($class, $schema, $state) {
 }
 
 sub _eval_keyword_exclusiveMaximum ($class, $data, $schema, $state) {
-  # we do the work in maximum for draft4 so we don't generate multiple errors
+  # we do the work in "maximum" for draft4 so we don't generate multiple errors
   return 1 if $state->{specification_version} eq 'draft4';
 
   return 1 if not is_type('number', $data)
@@ -190,7 +190,7 @@ sub _traverse_keyword_exclusiveMinimum ($class, $schema, $state) {
 }
 
 sub _eval_keyword_exclusiveMinimum ($class, $data, $schema, $state) {
-  # we do the work in minimum for draft4 so we don't generate multiple errors
+  # we do the work in "minimum" for draft4 so we don't generate multiple errors
   return 1 if $state->{specification_version} eq 'draft4';
 
   return 1 if not is_type('number', $data)
