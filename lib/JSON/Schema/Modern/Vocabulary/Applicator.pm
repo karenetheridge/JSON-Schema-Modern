@@ -21,7 +21,6 @@ no feature 'switch';
 use List::Util 1.45 'uniqstr';
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
-use Sub::Install;
 use JSON::Schema::Modern::Utilities qw(is_type jsonp E A assert_keyword_type assert_pattern true is_elements_unique);
 use JSON::Schema::Modern::Vocabulary::Unevaluated;
 use namespace::clean;
@@ -64,13 +63,11 @@ sub keywords ($class, $spec_version) {
 foreach my $phase (qw(traverse eval)) {
   foreach my $type (qw(Items Properties)) {
     my $method = '_'.$phase.'_keyword_unevaluated'.$type;
-    Sub::Install::install_sub({
-      as   => $method,
-      code => sub {
-        shift;
-        JSON::Schema::Modern::Vocabulary::Unevaluated->$method(@_);
-      }
-    }),
+    no strict 'refs';
+    *{__PACKAGE__.'::'.$method} = sub {
+      shift;
+      JSON::Schema::Modern::Vocabulary::Unevaluated->$method(@_);
+    };
   }
 }
 
