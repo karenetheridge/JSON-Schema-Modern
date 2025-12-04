@@ -282,8 +282,13 @@ sub _eval_keyword_minProperties ($class, $data, $schema, $state) {
 sub _traverse_keyword_required ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'array');
   return E($state, '"required" array is empty') if $state->{specification_version} eq 'draft4' and not $schema->{required}->@*;
-  return E($state, '"required" element is not a string')
-    if any { !is_type('string', $_) } $schema->{required}->@*;
+
+  if (my @non_string = grep !is_type('string', $schema->{required}->[$_]), 0 .. $schema->{required}->$#*) {
+    ()= E({ %$state, _keyword_path_suffix => $_ }, '"required" element is not a string')
+      foreach @non_string;
+    return;
+  }
+
   return E($state, '"required" values are not unique') if not is_elements_unique($schema->{required});
   return 1;
 }
