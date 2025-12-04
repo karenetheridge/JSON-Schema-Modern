@@ -1317,7 +1317,7 @@ subtest dependentRequired => sub {
         {
           instanceLocation => '',
           keywordLocation => '/dependentRequired/foo/0',
-          error => 'element #0 is not a string',
+          error => 'element is not a string',
         },
       ],
     },

@@ -310,7 +310,7 @@ sub _traverse_keyword_dependentRequired ($class, $schema, $state) {
       if not is_type('array', $schema->{dependentRequired}{$property});
 
     foreach my $index (0..$schema->{dependentRequired}{$property}->$#*) {
-      $valid = E({ %$state, _keyword_path_suffix => [ $property, $index ] }, 'element #%d is not a string', $index)
+      $valid = E({ %$state, _keyword_path_suffix => [ $property, $index ] }, 'element is not a string')
         if not is_type('string', $schema->{dependentRequired}{$property}[$index]);
     }
 
