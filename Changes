@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.627     2025-12-04 21:10:22Z
           - improved efficiency of "short_circuit" mode, disabling it
             in fewer and more tightly constrained conditions while allowing
             other functionality to still work (e.g. "strict" mode to detect
