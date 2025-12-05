@@ -454,9 +454,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
   }
 
   if ($state->{seen_data_properties}) {
-    my @unevaluated_properties = grep !$state->{seen_data_properties}{$_}, keys $state->{seen_data_properties}->%*;
     my %unknown_keywords;
-    foreach my $property (sort @unevaluated_properties) {
+    foreach my $property (sort grep !$state->{seen_data_properties}{$_},
+        keys $state->{seen_data_properties}->%*) {
       my ($parent, $keyword) = ($property =~ m{^(.*)/([^/]*)$});
       push(($unknown_keywords{$parent}//=[])->@*, $keyword);
     }
@@ -598,7 +598,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   return 1 if not keys %$schema;
 
   my $valid = 1;
-  my %unknown_keywords = map +($_ => undef), keys %$schema;
+  my %unknown_keywords = map +($_ => undef), grep !/^x-/, keys %$schema;
 
   # we use an index rather than iterating through the lists directly because the lists of
   # vocabularies and keywords can change after we have started. However, only the Core vocabulary
@@ -713,7 +713,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   }
 
   my $valid = 1;
-  my %unknown_keywords = map +($_ => undef), keys %$schema;
+  my %unknown_keywords = map +($_ => undef), grep !/^x-/, keys %$schema;
 
   # set aside annotations collected so far; they are not used in the current scope's evaluation
   my $parent_annotations = $state->{annotations};
@@ -811,7 +811,8 @@ sub _eval_subschema ($self, $data, $schema, $state) {
   # the traverse phase and replace with evaluate-against-metaschema.
   if ($state->{seen_data_properties} and $is_object_data) {
     # record the locations of all local properties
-    $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 0 foreach keys %$data;
+    $state->{seen_data_properties}{jsonp($state->{data_path}, $_)} |= 0
+      foreach grep !/^x-/, keys %$data;
 
     my @evaluated_properties = map {
       my $keyword = $_->{keyword};
@@ -1444,7 +1445,7 @@ Defaults to false.
 =head2 strict
 
 When true, unrecognized keywords are disallowed in schemas (they will cause an immediate abort
-in L</traverse> or L</evaluate>).
+in L</traverse> or L</evaluate>), with the exception of keywords starting with C<x->.
 
 Defaults to false.
 

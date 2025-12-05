@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - "strict" mode now ignores keywords starting with "x-".
 
 0.627     2025-12-04 21:10:22Z
           - improved efficiency of "short_circuit" mode, disabling it
