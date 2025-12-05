@@ -111,7 +111,7 @@ sub has_errors { scalar(($_[0]->{errors}//[])->@*) }
 # json pointer => entity name (indexed by integer)
 has _entities => (
   is => 'ro',
-  isa => HashRef[PositiveOrZeroInt],
+  isa => Map[json_pointer_type, PositiveOrZeroInt],
   lazy => 1,
   default => sub { {} },
 );
