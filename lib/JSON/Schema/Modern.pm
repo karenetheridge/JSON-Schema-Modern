@@ -277,9 +277,8 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
       errors => [
         JSON::Schema::Modern::Error->new(
           depth => 0,
-          mode => 'evaluate',
+          mode => 'traverse',
           keyword => undef,
-          instance_location => '',
           keyword_location => '',
           error => $e,
         )

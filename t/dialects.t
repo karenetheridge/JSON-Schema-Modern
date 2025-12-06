@@ -33,7 +33,6 @@ subtest 'invalid use of the $schema keyword' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/1/$schema',
           error => '$schema can only appear at the schema resource root',
         },
@@ -57,7 +56,6 @@ subtest 'invalid use of the $schema keyword' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/1/$schema',
           absoluteKeywordLocation => 'https://bloop.com#/allOf/1/$schema',
           error => '$schema can only appear at the schema resource root',
@@ -84,7 +82,6 @@ subtest 'invalid use of the $schema keyword' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs/my_def/$schema',
           absoluteKeywordLocation => 'https://bloop3.com#/$defs/my_def/$schema',
           error => '$schema can only appear at the schema resource root',
@@ -151,7 +148,6 @@ subtest 'defaults without a $schema keyword' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs/foo/not',
           error => 'invalid schema type: string',
         },
@@ -1020,12 +1016,10 @@ subtest '$vocabulary syntax' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => jsonp('/$vocabulary', '#/notauri'),
           error => '"#/notauri" is not a valid URI',
         },
         {
-          instanceLocation => '',
           keywordLocation => jsonp('/$vocabulary', 'https://foo'),
           error => '$vocabulary value at "https://foo" is not a boolean',
         },
@@ -1046,7 +1040,6 @@ subtest '$vocabulary syntax' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/items/$vocabulary',
           absoluteKeywordLocation => 'http://mymetaschema#/items/$vocabulary',
           error => '$vocabulary can only appear at the schema resource root',
@@ -1430,7 +1423,6 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '$schema value is not a string',
         },
@@ -1445,7 +1437,6 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"#/not_a_uri" is not a valid URI',
         },
@@ -1460,7 +1451,6 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => 'EXCEPTION: unable to find resource "https://unknown/metaschema"',
         },
@@ -1482,13 +1472,11 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema/$vocabulary',
           absoluteKeywordLocation => 'https://metaschema/with/misplaced/vocabulary/keyword/subschema#/$vocabulary',
           error => '$vocabulary can only appear at the document root',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://metaschema/with/misplaced/vocabulary/keyword/subschema" is not a valid metaschema',
         },
@@ -1506,13 +1494,11 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema/$vocabulary',
           absoluteKeywordLocation => 'https://metaschema/with/no/id#/$vocabulary',
           error => 'metaschemas must have an $id',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://metaschema/with/no/id" is not a valid metaschema',
         },
@@ -1537,19 +1523,16 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => jsonp(qw(/$schema $vocabulary https://json-schema.org/draft/2019-09/vocab/validation)),
           absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#'.jsonp(qw(/$vocabulary https://json-schema.org/draft/2019-09/vocab/validation)),
           error => '"https://json-schema.org/draft/2019-09/vocab/validation" uses draft2019-09, but the metaschema itself uses draft2020-12',
         },
         {
-          instanceLocation => '',
           keywordLocation => jsonp(qw(/$schema $vocabulary https://unknown)),
           absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#'.jsonp(qw(/$vocabulary https://unknown)),
           error => '"https://unknown" is not a known vocabulary',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://metaschema/with/wrong/spec" is not a valid metaschema',
         },
@@ -1574,13 +1557,11 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => jsonp(qw(/$schema $vocabulary https://json-schema.org/draft/2020-12/vocab/applicator)),
           absoluteKeywordLocation => 'https://my/mismatched/metaschema#'.jsonp(qw(/$vocabulary https://json-schema.org/draft/2020-12/vocab/applicator)),
           error => '"https://json-schema.org/draft/2020-12/vocab/applicator" uses draft2020-12, but the metaschema itself uses draft2019-09',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://my/mismatched/metaschema" is not a valid metaschema',
         },
@@ -1599,13 +1580,11 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema/$vocabulary',
           absoluteKeywordLocation => 'https://metaschema/missing/vocabs#/$vocabulary',
           error => 'the first vocabulary (by evaluation_order) must be Core',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://metaschema/missing/vocabs" is not a valid metaschema',
         },
@@ -1626,13 +1605,11 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema/$vocabulary',
           absoluteKeywordLocation => 'https://metaschema/missing/core#/$vocabulary',
           error => 'the first vocabulary (by evaluation_order) must be Core',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://metaschema/missing/core" is not a valid metaschema',
         },
@@ -1757,13 +1734,11 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema/$vocabulary',
           absoluteKeywordLocation => 'https://my/first/metaschema#/$vocabulary',
           error => 'JSON::Schema::Modern::Vocabulary::Validation and MyVocabulary::BadEvaluationOrder have a conflicting evaluation_order',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://my/first/metaschema" is not a valid metaschema',
         },
@@ -1843,13 +1818,11 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema/$vocabulary',
           absoluteKeywordLocation => 'https://colliding/keyword/metaschema#/$vocabulary',
           error => 'MyVocabulary::ConflictingKeyword keyword "minLength" conflicts with keyword of the same name from JSON::Schema::Modern::Vocabulary::Validation',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://colliding/keyword/metaschema" is not a valid metaschema',
         },
@@ -1875,13 +1848,11 @@ subtest '$schema points to a boolean schema' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           # we haven't processed $id yet, so we don't know the absolute location
           error => 'metaschemas must be objects',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"https://my_boolean_schema" is not a valid metaschema',
         },

@@ -34,7 +34,6 @@ ok(
         valid => false,
         errors => [
           {
-            instanceLocation => '',
             keywordLocation => '',
             error => re(qr/malformed JSON string/),
           },

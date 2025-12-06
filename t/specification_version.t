@@ -57,7 +57,6 @@ subtest '$ref and older specification versions' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '$schema and $ref cannot be used together in older drafts',
         },
@@ -148,7 +147,6 @@ subtest '$defs support' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs',
           error => '$defs value is not an object',
         },
@@ -194,7 +192,6 @@ subtest 'definitions support' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/definitions',
           error => 'definitions value is not an object',
         },
@@ -379,7 +376,6 @@ subtest 'prefixItems, items and additionalItems' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/items',
           error => 'array form of "items" not supported in draft2020-12',
         },
@@ -425,9 +421,8 @@ subtest 'prefixItems, items and additionalItems' => sub {
       valid => false,
       errors => [
         {
-          error => "array form of \"items\" not supported in draft2020-12",
-          instanceLocation => '',
           keywordLocation => '/items',
+          error => "array form of \"items\" not supported in draft2020-12",
         },
       ],
     },

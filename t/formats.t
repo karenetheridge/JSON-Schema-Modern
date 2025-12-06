@@ -475,7 +475,6 @@ subtest 'unimplemented core formats' => sub {
         valid => false,
         errors => [
           {
-            instanceLocation => '',
             keywordLocation => '/format',
             error => 'unimplemented core format "uri-template"',
           },
@@ -499,7 +498,6 @@ subtest 'unimplemented core formats' => sub {
         valid => false,
         errors => [
           {
-            instanceLocation => '',
             keywordLocation => '/anyOf/1/format',
             error => 'unimplemented core format "uri-template"',
           },

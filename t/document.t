@@ -519,7 +519,6 @@ subtest '$id with a non-empty fragment' => sub {
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/foo/properties/bar/$id',
         absoluteKeywordLocation => 'http://secondary.com#/properties/bar/$id',
         error => '$id value "http://localhost:4242/my_foo#hello" cannot have a non-empty fragment',
@@ -546,7 +545,6 @@ subtest '$anchor not conforming to syntax' => sub {
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/foo/$anchor',
         error => '$anchor value "my_#bad_anchor" does not match required syntax',
       },
@@ -572,12 +570,10 @@ subtest '$anchor not conforming to syntax' => sub {
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/foo/$anchor',
         error => '$anchor value "my:bad_anchor" does not match required syntax',
       },
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/qux/$id',
         error => '$id value "https://foo.com#my_bad_id" cannot have a non-empty fragment',
       },
@@ -603,12 +599,10 @@ subtest '$anchor not conforming to syntax' => sub {
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/foo/$anchor',
         error => '$anchor value "_my_bad_anchor" does not match required syntax',
       },
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/qux/$id',
         error => '$id value "https://foo.com#my_bad_id" cannot have a non-empty fragment',
       },
@@ -635,12 +629,10 @@ subtest '$anchor not conforming to syntax' => sub {
       [ map $_->TO_JSON, $doc->errors ],
       [
         {
-          instanceLocation => '',
           keywordLocation => '/definitions/foo/$id',
           error => '$id value "#_my_bad_anchor" does not match required syntax',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/definitions/qux/$id',
           error => '$id cannot change the base uri at the same time as declaring an anchor',
         },
@@ -664,7 +656,6 @@ subtest '$anchor not conforming to syntax' => sub {
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/definitions/foo/id',
         error => 'id value "#_my_bad_anchor" does not match required syntax',
       },
@@ -724,7 +715,6 @@ subtest '$schema not conforming to syntax' => sub {
       resource_index => [],
       errors => [
         methods(TO_JSON => {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           error => '"foo" is not a valid URI',
         }),
@@ -925,7 +915,6 @@ subtest 'resource collisions' => sub {
         resource_index => [],
         errors => [
           methods(TO_JSON => {
-            instanceLocation => '',
             keywordLocation => '/allOf/1/$id',
             absoluteKeywordLocation => 'https://foo.com#/allOf/1/$id',
             error => 'duplicate canonical uri "https://foo.com/x/y/z" found (original at path "/allOf/0")',
@@ -1018,7 +1007,6 @@ subtest 'canonical_uri identification from a document with errors' => sub {
       canonical_uri => [ str('https://bar.com') ],
       errors => [
         methods(TO_JSON => {
-          instanceLocation => '',
           keywordLocation => '/allOf/0/oneOf/1',
           absoluteKeywordLocation => 'https://baz.com#/oneOf/1',
           error => 'invalid schema type: array',

@@ -577,7 +577,6 @@ subtest 'exceptions' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '',
           error => re(qr/malformed JSON string/),
         },
@@ -601,12 +600,10 @@ subtest 'exceptions' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/0/properties/x',
           error => 'invalid schema type: integer',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/1/properties/x',
           error => 'invalid schema type: string',
         },
@@ -630,12 +627,10 @@ subtest 'exceptions' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/0/type',
           error => 'unrecognized type "whargarbl"',
         },
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/1/type',
           error => 'unrecognized type "whoops"',
         },
@@ -877,7 +872,6 @@ subtest 'abort due to a schema error' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/oneOf/2/type',
           error => 'unrecognized type "whargarbl"',
         },
@@ -968,12 +962,10 @@ subtest 'bad regex in schema' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/properties/my_pattern/pattern',
           error => re(qr/^Unmatched \( in regex/),
         },
         {
-          instanceLocation => '',
           keywordLocation => '/properties/my_patternProperties/patternProperties/(',
           error => re(qr/^Unmatched \( in regex/),
         },
@@ -1142,7 +1134,6 @@ subtest 'JSON pointer escaping' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs/mydef/properties/{}/patternProperties/a{',
           error => re(qr/^Unescaped left brace in regex is (deprecated|illegal|passed through)/),
         },
@@ -1315,7 +1306,6 @@ subtest dependentRequired => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/dependentRequired/foo/0',
           error => 'element is not a string',
         },
@@ -1597,17 +1587,14 @@ subtest 'boolean schemas in draft4' => sub {
       valid => false,
       errors => [
         (map +{
-          instanceLocation => '',
           keywordLocation => '/'.$_.'/0',
           error => 'invalid schema type: boolean',
         }, qw(allOf anyOf oneOf)),
         (map +{
-          instanceLocation => '',
           keywordLocation => '/'.$_,
           error => 'invalid schema type: boolean',
         }, qw(not items)),
         (map +{
-          instanceLocation => '',
           keywordLocation => '/'.$_.'/foo',
           error => 'invalid schema type: boolean',
         }, qw(properties patternProperties)),
@@ -1698,7 +1685,6 @@ subtest 'boolean schemas in draft4' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/1',
           error => 'invalid schema type: boolean',
         },

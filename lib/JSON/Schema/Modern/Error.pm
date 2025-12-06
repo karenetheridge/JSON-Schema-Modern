@@ -24,6 +24,7 @@ use Types::Standard qw(Str Bool Enum Tuple);
 use Types::Common::Numeric qw(PositiveInt);
 use builtin::compat 'refaddr';
 use Mojo::Message::Response;
+use Carp 'croak';
 use namespace::clean;
 
 use overload
@@ -75,6 +76,9 @@ around BUILDARGS => sub ($orig, $class, @args) {
   $args->{recommended_response}[1] =
       Mojo::Message::Response->default_message($args->{recommended_response}[0]) // 'Unknown Error'
     if $args->{recommended_response} and $args->{recommended_response}->@* == 1;
+
+  croak 'instance_location must be defined when mode=evaluate'
+    if not defined $args->{instance_location} and ($args->{mode}//'') eq 'evaluate';
 
   return $args;
 };

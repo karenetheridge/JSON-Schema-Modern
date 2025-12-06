@@ -24,10 +24,13 @@ use Types::Common::Numeric 'PositiveOrZeroInt';
 use JSON::Schema::Modern::Utilities qw(jsonp json_pointer_type);
 use namespace::clean;
 
-has [qw(
-  instance_location
-  keyword_location
-)] => (
+# not provided when Error and mode = traverse
+has instance_location => (
+  is => 'ro',
+  isa => json_pointer_type,
+);
+
+has keyword_location => (
   is => 'ro',
   isa => json_pointer_type,
   required => 1,
@@ -85,7 +88,7 @@ sub TO_JSON ($self) {
 
   return +{
     # note that locations are JSON pointers, not uri fragments!
-    instanceLocation => $self->instance_location,
+    !defined($self->instance_location) ? () : (instanceLocation => $self->instance_location),
     keywordLocation => $self->keyword_location,
     !defined($self->absolute_keyword_location) ? ()
       : (absoluteKeywordLocation => $self->absolute_keyword_location->to_string),

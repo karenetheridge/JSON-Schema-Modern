@@ -299,7 +299,6 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs/myobject/$recursiveAnchor',
           error => '"$recursiveAnchor" keyword used without "$id"',
         },
@@ -338,7 +337,6 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs/inner/$recursiveAnchor',
           error => '"$recursiveAnchor" keyword used without "$id"',
         },
@@ -364,7 +362,6 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/allOf/0/$recursiveAnchor',
           error => '"$recursiveAnchor" keyword used without "$id"',
         },
@@ -1327,7 +1324,6 @@ subtest 'reference to a non-schema location' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$schema',
           # we haven't processed $id yet, so we don't know the absolute location
           error => 'EXCEPTION: bad reference to $schema "https://my_non_schema": not a schema',

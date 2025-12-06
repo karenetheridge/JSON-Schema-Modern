@@ -359,7 +359,7 @@ sub E ($state, $error_string, @args) {
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
     depth => $state->{depth} // 0,
     keyword => $state->{keyword},
-    instance_location => $state->{data_path},
+    $state->{traverse} ? () : (instance_location => $state->{data_path}),
     keyword_location => $keyword_location,
     # we calculate absolute_keyword_location when instantiating the Error object for Result
     _uri => $uri,

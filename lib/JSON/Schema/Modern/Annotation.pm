@@ -24,6 +24,10 @@ use Types::Standard 'Bool';
 use Carp 'croak';
 use namespace::clean;
 
+has '+instance_location' => (
+  required => 1,
+);
+
 # https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.7.7.1
 has annotation => (
   is => 'ro',

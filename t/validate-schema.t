@@ -82,7 +82,6 @@ cmp_result(
     valid => false,
     errors => [
       {
-        instanceLocation => '',
         keywordLocation => '/$id',
         error => '$id value "#/$defs/foo" does not match required syntax',
       },

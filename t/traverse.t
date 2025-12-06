@@ -58,7 +58,6 @@ subtest 'traversal with callbacks' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/if',
         absoluteKeywordLocation => 'https://foo.com#/if',
         error => 'invalid schema type: integer',
@@ -106,7 +105,6 @@ subtest 'errors when parsing $schema keyword' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$schema',
         error => '$schema value is not a string',
       },
@@ -119,7 +117,6 @@ subtest 'errors when parsing $schema keyword' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$schema',
         error => '"whargarbl" is not a valid URI',
       },
@@ -158,7 +155,6 @@ subtest 'default metaschema' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/foo/properties',
         error => 'properties value is not an object',
       },
@@ -183,7 +179,6 @@ subtest 'traversing a dialect with different core keywords' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/definitions/alpha',
         absoluteKeywordLocation => 'http://localhost:1234/root#/definitions/alpha',
         error => 'invalid schema type: integer',
@@ -266,7 +261,6 @@ subtest 'traversing a dialect with different core keywords' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/definitions/alpha',
         error => 'invalid schema type: integer',
       },
@@ -291,7 +285,6 @@ subtest 'traversing a dialect with different core keywords' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/alpha/definitions/alpha',
         absoluteKeywordLocation => 'http://localhost:1234/inner#/definitions/alpha',
         error => 'invalid schema type: integer',
@@ -318,7 +311,6 @@ subtest '$schema without an $id, below the root' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/$defs/alpha/$schema',
         error => '$schema can only appear at the schema resource root',
       },
@@ -341,7 +333,6 @@ subtest 'duplicate identifiers' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/allOf/1/$id',
         absoluteKeywordLocation => 'https://base.com#/allOf/1/$id',
         error => 'duplicate canonical uri "https://foo.com" found (original at path "/allOf/0")',
@@ -374,7 +365,6 @@ subtest 'duplicate identifiers' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/allOf/1/$anchor',
         absoluteKeywordLocation => 'https://base.com#/allOf/1/$anchor',
         error => 'duplicate anchor uri "https://base.com#foo" found (original at path "/allOf/0")',
@@ -503,7 +493,6 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     my $errors = [
       {
-        instanceLocation => '',
         keywordLocation => '',
         error => 'EXCEPTION: unable to find resource "https://unknown/metaschema"',
       },
@@ -527,19 +516,16 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     $errors = [
       {
-        instanceLocation => '',
         keywordLocation => jsonp(qw(/$vocabulary https://unknown)),
         absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#'.jsonp(qw(/$vocabulary https://unknown)),
         error => '"https://unknown" is not a known vocabulary',
       },
       {
-        instanceLocation => '',
         keywordLocation => '/$vocabulary',
         absoluteKeywordLocation => 'https://metaschema/with/wrong/spec#/$vocabulary',
         error => 'the first vocabulary (by evaluation_order) must be Core',
       },
       {
-        instanceLocation => '',
         keywordLocation => '',
         error => '"https://metaschema/with/wrong/spec" is not a valid metaschema',
       },
@@ -721,13 +707,11 @@ subtest 'start traversing below the document root' => sub {
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
-        instanceLocation => '',
         keywordLocation => '/components/alpha/subid/type',
         absoluteKeywordLocation => 'dir/my_subdocument#/subid/type',
         error => 'unrecognized type "not a valid type"',
       },
       {
-        instanceLocation => '',
         keywordLocation => '/components/alpha/subid/properties/myprop/allOf/0/properties/foo',
         absoluteKeywordLocation => 'dir/inner_document#/properties/foo',
         error => 'invalid schema type: string',

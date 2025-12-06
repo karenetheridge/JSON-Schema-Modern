@@ -25,7 +25,6 @@ foreach my $config (0, 1) {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/'.$_,
           error => $_.' value is not a number',
         }

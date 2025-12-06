@@ -326,13 +326,11 @@ subtest 'invalid $id and $anchor' => sub {
       valid => false,
       errors => [
         {
-          instanceLocation => '',
           keywordLocation => '/$defs/a_bad_id/$id',
           absoluteKeywordLocation => 'foo.json#/$defs/a_bad_id/$id',
           error => '$id value "foo.json#/foo/bar" cannot have a non-empty fragment',
         },
         map +{
-          instanceLocation => '',
           keywordLocation => '/$defs/anchor_'.substr($_,0,1).'/$anchor',
           absoluteKeywordLocation => 'foo.json#/$defs/anchor_'.substr($_,0,1).'/$anchor',
           error => '$anchor value "'.$_.'" does not match required syntax',

@@ -105,12 +105,11 @@ cmp_result(
     valid => false,
     errors => [
       {
-        instanceLocation => '', # note no instance location - indicating evaluation has not started
+        # note no instance location - indicating evaluation has not started
         keywordLocation => '/properties/alpha',
         error => 'unknown keywords seen in schema: barf, bloop',
       },
       {
-        instanceLocation => '',
         keywordLocation => '/properties/beta',
         error => 'unknown keywords seen in schema: dah, zip',
       },
