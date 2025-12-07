@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.627
+version 0.628
 
 =head1 SYNOPSIS
 
@@ -211,7 +211,7 @@ Defaults to false.
 =head2 strict
 
 When true, unrecognized keywords are disallowed in schemas (they will cause an immediate abort
-in L</traverse> or L</evaluate>).
+in L</traverse> or L</evaluate>), with the exception of keywords starting with C<x->.
 
 Defaults to false.
 
