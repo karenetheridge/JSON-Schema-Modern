@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.628     2025-12-07 06:50:22Z
           - "strict" mode now ignores keywords starting with "x-".
           - drop the use of an empty "instanceLocation" in errors resulting
