@@ -1514,6 +1514,9 @@ will result in an C<defaults> entry of:
     '/my_array/1' => 'green'
   }
 
+To modify your data by adding the missing default data, see
+L<JSON::Schema::Modern::Utilities/jsonp_set>.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW

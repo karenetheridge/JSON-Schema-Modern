@@ -41,6 +41,7 @@ our @EXPORT_OK = qw(
   is_elements_unique
   jsonp
   unjsonp
+  jsonp_set
   local_annotations
   canonical_uri
   E
@@ -307,6 +308,54 @@ sub jsonp {
 sub unjsonp {
   warn q{argument to unjsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
   return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $_[0];
+}
+
+# assigns a value to a data structure at a specific json pointer location
+# operates destructively, in place, unless the root data or type is being modified
+sub jsonp_set ($data, $pointer, $value) {
+  if (not grep ref $data eq $_, qw(HASH ARRAY)) {
+    return $value if defined wantarray;
+    croak 'cannot write into non-reference in void context';
+  }
+
+  # assigning to the root overwrites existing data
+  if (not length $pointer) {
+    if (ref $data eq 'HASH' and ref $value ne 'HASH'
+        or ref $data eq 'ARRAY' and ref $value ne 'ARRAY') {
+      return $value if defined wantarray;
+      croak 'cannot write into reference of different type in void context';
+    }
+
+    $data->%* = $value->%* if ref $data eq 'HASH';
+    $data->@* = $value->@* if ref $data eq 'ARRAY';
+    return $data;
+  }
+
+  my @keys = map +(s!~0!~!gr =~ s!~1!/!gr),
+    (length $pointer ? (split /\//, $pointer, -1) : ($pointer));
+
+  croak 'cannot write hashref into a reference to an array in void context'
+    if @keys >= 2 and $keys[1] !~ /^\d+$/a and ref $data eq 'ARRAY' and not defined wantarray;
+
+  shift @keys;  # always '', indicating the root
+  my $curp = \$data;
+
+  foreach my $key (@keys) {
+    # if needed, first remove the existing data so we can replace with a new hash key or array index
+    undef $curp->$*
+      if not ref $curp->$*
+        or ref $curp->$* eq 'ARRAY' and $key !~ /^\d+$/a;
+
+    # use this existing hash key or array index location, or create new position
+    use autovivification 'store';
+    $curp = \(
+      ref $curp->$* eq 'HASH' || $key !~ /^\d+$/a
+        ? $curp->$*->{$key}
+        : $curp->$*->[$key]);
+  }
+
+  $curp->$* = $value;
+  return $data;
 }
 
 # returns a reusable Types::Standard type for json pointers
@@ -671,6 +720,25 @@ are appended.
   my @components = unjsonp('/paths/~1foo~1{foo_id}/get/responses');
 
 Splits a json pointer string into its path components, with correct unescaping.
+
+=head2 jsonp_set
+
+  my $data = { a => 1, b => { c => 3, d => 4 } };
+  my $defaults = {
+    '/b/d' => 5,
+    '/b/e' => 6,
+    '/f' => 7,
+    '/g/h/i/1' => [ 10 ],
+  };
+  jsonp_set($data, $_, $defaults->{$_}) foreach keys %$defaults;
+
+  # data is now:
+  # { a => 1, b => { c => 3, d => 5, e => 6 }, f => 7, g => { h => { i => [ undef, [ 10 ] ] } } }
+
+Given an arbitrary data structure, a json pointer string, and an arbitrary value, assigns that value
+to the given position in the data structure. This is a destructive operation, overwriting whatever
+data was there before if needed (even if an incompatible type: e.g. a hash key will overwrite an
+existing arrayref). Intermediary keys or indexes will spring into existence as needed.
 
 =head2 json_pointer_type
 
