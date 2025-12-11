@@ -307,6 +307,66 @@ sub unjsonp {
   return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $_[0];
 }
 
+# returns a reusable Types::Standard type for json pointers
+# TODO: move this off into its own distribution, see JSON::Schema::Types
+sub json_pointer_type () { Str->where('!length || m{^/} && !m{~(?![01])}'); }
+
+# a URI without a fragment, or with a json pointer fragment
+sub canonical_uri_type () {
+  (InstanceOf['Mojo::URL'])->where(q{!defined($_->fragment) || $_->fragment =~ m{^/} && $_->fragment !~ m{~(?![01])}});
+}
+
+# simple runtime-wide cache of $ids to schema document objects that are sourced from disk
+{
+  my $document_cache = {};
+
+  # Fetches a document from the cache (reading it from disk and creating the document if necessary),
+  # and add it to the evaluator.
+  # Normally this will just be a cache of schemas that are bundled with this distribution or a related
+  # distribution (such as OpenAPI-Modern), as duplicate identifiers are not checked for, unlike for
+  # normal schema additions.
+  # Only JSON-encoded files are supported at this time.
+  sub load_cached_document ($evaluator, $uri) {
+    $uri =~ s/#$//; # older draft $ids use an empty fragment
+
+    # see if it already exists as a document in the cache
+    my $document = $document_cache->{$uri};
+
+    # otherwise, load it from disk using our filename cache and create the document
+    if (not $document and my $filename = get_schema_filename($uri)) {
+      my $file = path($filename);
+      die "uri $uri maps to file $file which does not exist" if not -f $file;
+      my $schema = $evaluator->_json_decoder->decode($file->slurp);
+
+      # avoid calling add_schema, which checksums the file to look for duplicates
+      $document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $evaluator);
+
+      # avoid calling add_document, which checks for duplicate identifiers (and would result in an
+      # infinite loop)
+      die JSON::Schema::Modern::Result->new(
+        output_format => $evaluator->output_format,
+        valid => 0,
+        errors => [ $document->errors ],
+        exception => 1,
+      ) if $document->has_errors;
+
+      $document_cache->{$uri} = $document;
+    }
+
+    return if not $document;
+
+    # bypass the normal collision checks, to avoid an infinite loop: these documents are presumed safe
+    $evaluator->_add_resources_unsafe(
+      map +($_->[0] => +{ $_->[1]->%*, document => $document }),
+        $document->resource_pairs
+    );
+
+    return $document;
+  }
+}
+
+######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
+
 # get all annotations produced for the current instance data location (that are visible to this
 # schema location) - remember these are hashrefs, not Annotation objects
 sub local_annotations ($state) {
@@ -494,73 +554,19 @@ sub sprintf_num ($value) {
   is_bignum($value) ? $value->bstr : sprintf('%s', $value);
 }
 
-# returns a reusable Types::Standard type for json pointers
-# TODO: move this off into its own distribution, see JSON::Schema::Types
-sub json_pointer_type () { Str->where('!length || m{^/} && !m{~(?![01])}'); }
+{
+  # simple runtime-wide cache of $ids to filenames that are sourced from disk
+  my $schema_filename_cache = {};
 
-# a URI without a fragment, or with a json pointer fragment
-sub canonical_uri_type () {
-  (InstanceOf['Mojo::URL'])->where(q{!defined($_->fragment) || $_->fragment =~ m{^/} && $_->fragment !~ m{~(?![01])}});
-}
-
-# simple runtime-wide cache of $ids to filenames that are sourced from disk
-my $schema_filename_cache = {};
-
-# adds a mapping from a URI to an absolute filename in the global runtime
-# (available to all instances of the evaluator running in the same process).
-sub register_schema ($uri, $filename) {
-  $schema_filename_cache->{$uri} = $filename;
-}
-
-sub get_schema_filename ($uri) {
-  $schema_filename_cache->{$uri};
-}
-
-# simple runtime-wide cache of $ids to schema document objects that are sourced from disk
-my $document_cache = {};
-
-# Fetches a document from the cache (reading it from disk and creating the document if necessary),
-# and add it to the evaluator.
-# Normally this will just be a cache of schemas that are bundled with this distribution or a related
-# distribution (such as OpenAPI-Modern), as duplicate identifiers are not checked for, unlike for
-# normal schema additions.
-# Only JSON-encoded files are supported at this time.
-sub load_cached_document ($evaluator, $uri) {
-  $uri =~ s/#$//; # older draft $ids use an empty fragment
-
-  # see if it already exists as a document in the cache
-  my $document = $document_cache->{$uri};
-
-  # otherwise, load it from disk using our filename cache and create the document
-  if (not $document and my $filename = $schema_filename_cache->{$uri}) {
-    my $file = path($filename);
-    die "uri $uri maps to file $file which does not exist" if not -f $file;
-    my $schema = $evaluator->_json_decoder->decode($file->slurp);
-
-    # avoid calling add_schema, which checksums the file to look for duplicates
-    $document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $evaluator);
-
-    # avoid calling add_document, which checks for duplicate identifiers (and would result in an
-    # infinite loop)
-    die JSON::Schema::Modern::Result->new(
-      output_format => $evaluator->output_format,
-      valid => 0,
-      errors => [ $document->errors ],
-      exception => 1,
-    ) if $document->has_errors;
-
-    $document_cache->{$uri} = $document;
+  # adds a mapping from a URI to an absolute filename in the global runtime
+  # (available to all instances of the evaluator running in the same process).
+  sub register_schema ($uri, $filename) {
+    $schema_filename_cache->{$uri} = $filename;
   }
 
-  return if not $document;
-
-  # bypass the normal collision checks, to avoid an infinite loop: these documents are presumed safe
-  $evaluator->_add_resources_unsafe(
-    map +($_->[0] => +{ $_->[1]->%*, document => $document }),
-      $document->resource_pairs
-  );
-
-  return $document;
+  sub get_schema_filename ($uri) {
+    $schema_filename_cache->{$uri};
+  }
 }
 
 1;
