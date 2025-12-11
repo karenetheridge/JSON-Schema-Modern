@@ -583,7 +583,7 @@ register_schema get_schema_filename load_cached_document
 
 =head1 FUNCTIONS
 
-=for stopwords schemas metaschemas
+=for stopwords schema metaschema
 
 =head2 load_cached_document
 

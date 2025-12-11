@@ -89,7 +89,7 @@ __END__
 =pod
 
 =for :header
-=for stopwords schema fragmentless subschemas
+=for stopwords schema fragmentless subschema
 
 =head1 SYNOPSIS
 

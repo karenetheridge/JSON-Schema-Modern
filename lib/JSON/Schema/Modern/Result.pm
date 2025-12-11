@@ -325,7 +325,7 @@ An array of L<JSON::Schema::Modern::Annotation> objects.
 
 =head2 output_format
 
-=for stopwords subschemas
+=for stopwords subschema
 
 Also available as a read/write accessor.
 
