@@ -213,9 +213,10 @@ sub is_bignum ($value) {
 # compares two arbitrary data payloads for equality, as per
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.2
 # $state hashref supports the following fields:
+# - scalarref_booleans (input): treats \0 and \1 as boolean values
 # - stringy_numbers (input): strings will also be compared numerically
 # - path (output): location of the first difference
-# - error (output): description of the difference
+# - error (output): description of the first difference
 sub is_equal ($x, $y, $state = {}) {
   $state->{path} //= '';
 
@@ -279,6 +280,8 @@ sub is_equal ($x, $y, $state = {}) {
 # $state hashref supports the following fields:
 # - scalarref_booleans (input): treats \0 and \1 as boolean values
 # - stringy_numbers (input): strings will also be compared numerically
+# - path (output): location of the first difference
+# - error (output): description of the first difference
 # - equal_indices (output): the indices of identical items
 sub is_elements_unique ($array, $state = {}) {
   foreach my $idx0 (0 .. $array->$#*-1) {
@@ -581,14 +584,102 @@ __END__
 
 This class contains internal utilities to be used by L<JSON::Schema::Modern>, and other useful helpers.
 
-=for Pod::Coverage is_type get_type is_bignum is_bool is_schema is_equal is_elements_unique jsonp unjsonp local_annotations
+=for Pod::Coverage is_bignum local_annotations
 canonical_uri E A abort assert_keyword_exists assert_keyword_type assert_pattern assert_uri_reference assert_uri
-annotate_self sprintf_num HAVE_BUILTIN true false json_pointer_type canonical_uri_type
-register_schema get_schema_filename load_cached_document
+annotate_self sprintf_num HAVE_BUILTIN true false
+register_schema get_schema_filename
 
 =head1 FUNCTIONS
 
-=for stopwords schema metaschema
+=for stopwords schema metaschema dualvar jsonp unjsonp
+
+=head2 is_type
+
+  if (is_type('string', $value)) { ... }
+
+Returns a boolean indicating whether the provided value is of the specified core type (C<null>,
+C<boolean>, C<string>, C<number>, C<object>, C<array>) or C<integer>. Also optionally takes a hashref
+C<{ legacy_ints => 1 }> indicating that draft4 number semantics should apply (where unlike later
+drafts, C<2.0> is B<not> an integer).
+
+=head2 get_type
+
+  my $type = get_type($value);
+
+Returns one of the core types (C<null>, C<boolean>, C<string>, C<number>, C<object>, C<array>) or
+C<integer>. Also optionally takes a hashref C<{ legacy_ints => 1 }> indicating that draft4 number
+semantics should apply. Behaviour is consistent with L</is_type>.
+
+=head2 is_bool
+
+  if (is_bool($value)) { ... }
+
+Equivalent to C<is_type('boolean', $value)>.
+Accepts JSON booleans and L<builtin> booleans, but not dualvars (because JSON encoders do not
+recognize these as booleans).
+
+=head2 is_schema
+
+  if (is_schema($value)) { ... }
+
+Equivalent to C<is_type('object') || is_type('boolean')>.
+
+=head2 is_equal
+
+  if (not is_equal($x, $y, my $state = {})) {
+    say "values differ starting at $state->{path}: $state->{error}";
+  }
+
+Compares two arbitrary data payloads for equality, as per
+L<Instance Equality in the JSON Schema draft2020-12 specification|https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.2>.
+
+The optional third argument hashref supports the following fields:
+
+=for :list
+* C<scalarref_booleans> (provided by caller input): as in L<JSON::Schema::Modern/scalarref_booleans>
+* C<stringy_numbers> (provided by caller input): when set, strings will also be compared numerically,
+  as in L<JSON::Schema::Modern/stringy_numbers>
+* C<path> (populated by function): if result is false, the json pointer location of the first difference
+* C<error> (populated by function): if result is false, an error description of the first difference
+
+=head2 is_elements_unique
+
+  if (not is_elements_unique($arrayref, my $state = {}) {
+    say "lists differ starting at $state->{path}: $state->{error}";
+  }
+
+Compares all elements of an arrayref for uniqueness.
+
+The optional second argument hashref supports the same options as L</is_equal>, plus:
+
+=for :list
+* C<equal_indices> (populated by function): if result is false, the list of indices of the (first
+  set of) equal items found.
+
+=head2 jsonp
+
+  # '/paths/~1foo~1{foo_id}/get/responses'
+  my $jsonp = jsonp(qw(/paths /foo/{foo_id} get responses));
+
+Constructs a json pointer string from a list of path components, with correct escaping; the first
+argument must be C<''> or an already-escaped json pointer, to which the rest of the path components
+are appended.
+
+=head2 unjsonp
+
+  # ('', 'paths', '/foo/{foo_id}', 'get', 'responses')
+  my @components = unjsonp('/paths/~1foo~1{foo_id}/get/responses');
+
+Splits a json pointer string into its path components, with correct unescaping.
+
+=head2 json_pointer_type
+
+A L<Type::Tiny> type representing a json pointer string.
+
+=head2 canonical_uri_type
+
+A L<Type::Tiny> type representing a canonical URI: a L<Mojo::URL> with either no fragment, or with a
+json pointer fragment.
 
 =head2 load_cached_document
 
