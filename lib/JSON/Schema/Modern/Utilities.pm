@@ -276,16 +276,15 @@ sub is_equal ($x, $y, $state = {}) {
 }
 
 # checks array elements for uniqueness. short-circuits on first pair of matching elements
-# if second arrayref is provided, it is populated with the indices of identical items
 # $state hashref supports the following fields:
 # - scalarref_booleans (input): treats \0 and \1 as boolean values
 # - stringy_numbers (input): strings will also be compared numerically
-sub is_elements_unique ($array, $equal_indices = undef, $state = {}) {
-  my %s = $state->%{qw(scalarref_booleans stringy_numbers)};
+# - equal_indices (output): the indices of identical items
+sub is_elements_unique ($array, $state = {}) {
   foreach my $idx0 (0 .. $array->$#*-1) {
     foreach my $idx1 ($idx0+1 .. $array->$#*) {
-      if (is_equal($array->[$idx0], $array->[$idx1], \%s)) {
-        push @$equal_indices, $idx0, $idx1 if defined $equal_indices;
+      if (is_equal($array->[$idx0], $array->[$idx1], $state)) {
+        push $state->{equal_indices}->@*, $idx0, $idx1 if exists $state->{equal_indices};
         return 0;
       }
     }
