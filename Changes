@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.629     2025-12-12 18:17:28Z
           - "json-schema-eval" script can now accept multiple --data options,
             or multiple --validate-schema options
