@@ -318,8 +318,8 @@ sub _eval_keyword_recursiveRef ($class, $data, $schema, $state) {
 
 *_traverse_keyword_dynamicRef = \&_traverse_keyword_ref;
 
-sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
-  my $uri = Mojo::URL->new($schema->{'$dynamicRef'})->to_abs($state->{initial_schema_uri});
+sub __resolve_dynamicRef ($class, $uri, $state) {
+  $uri = Mojo::URL->new($uri)->to_abs($state->{initial_schema_uri});
   my $schema_info = $state->{evaluator}->_fetch_from_uri($uri);
   abort($state, 'EXCEPTION: unable to find resource "%s"', $uri) if not $schema_info;
   abort($state, 'EXCEPTION: bad reference to "%s": not a schema', $schema_info->{canonical_uri})
@@ -344,6 +344,11 @@ sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
     }
   }
 
+  return $uri;
+}
+
+sub _eval_keyword_dynamicRef ($class, $data, $schema, $state) {
+  my $uri = $class->__resolve_dynamicRef($schema->{'$dynamicRef'}, $state);
   return $class->eval_subschema_at_uri($data, $schema, $state, $uri);
 }
 
