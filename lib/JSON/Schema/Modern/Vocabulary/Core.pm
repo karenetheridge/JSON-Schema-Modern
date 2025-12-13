@@ -102,7 +102,7 @@ sub __create_identifier ($class, $uri, $state) {
   return 1;
 }
 
-sub _eval_keyword_id ($class, $data, $schema, $state) {
+sub _eval_keyword_id ($class, $, $schema, $state) {
   # we already indexed the anchor uri, so there is nothing more to do at evaluation time.
   # we explicitly do NOT set $state->{initial_schema_uri} or change any other $state values.
   return 1
@@ -187,7 +187,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
   return 1;
 }
 
-sub _eval_keyword_schema ($class, $data, $schema, $state) {
+sub _eval_keyword_schema ($class, $, $schema, $state) {
   # the dialect can change at any time, even in the middle of a document, where subsequent keywords
   # and vocabularies can change; however if we came to this schema via a $ref it will already be
   # set correctly
@@ -269,7 +269,7 @@ sub _traverse_keyword_recursiveAnchor ($class, $schema, $state) {
   return 1;
 }
 
-sub _eval_keyword_recursiveAnchor ($class, $data, $schema, $state) {
+sub _eval_keyword_recursiveAnchor ($class, $, $schema, $state) {
   return 1 if not $schema->{'$recursiveAnchor'} or exists $state->{recursive_anchor_uri};
 
   # record the canonical location of the current position, to be used against future resolution
