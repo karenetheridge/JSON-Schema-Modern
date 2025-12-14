@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.629
+version 0.630
 
 =head1 SYNOPSIS
 
@@ -215,6 +215,64 @@ in L</traverse> or L</evaluate>), with the exception of keywords starting with C
 
 Defaults to false.
 
+=head2 with_defaults
+
+When true, for any property name referenced by a C<properties> keyword, or array item referenced
+by a C<prefixItems> keyword (or the array form of C<items> in earlier specification versions), that
+does not exist in the object currently being evaluated, will result in an entry being added to the
+C<defaults> property in the result object (see L<JSON::Schema::Modern::Result/defaults>),
+indicating that the application may wish to add this default value to their instance data.
+
+Defaults data accumulated in subschemas that are subsequently determined to be invalid are
+discarded, with the final results from all subschemas accumulated together in one hash.  No attempt
+is made to resolve conflicting entries (last one wins).
+
+For example, this data instance:
+
+  {
+    "my_object": {
+      "alpha": 1,
+      "gamma": 3
+    },
+    "my_array": [
+      "yellow"
+    ]
+  }
+
+evaluated against this schema:
+
+  type: object
+  properties:
+    my_object:
+      type: object
+      properties:
+        alpha:
+          type: integer
+          default: 10
+        beta:
+          type: integer
+          default: 10
+        gamma:
+          type: integer
+          default: 10
+    my_array:
+      type: array
+      prefixItems:
+        - type: string
+          default: red
+        - type: string
+          default: green
+
+will result in an C<defaults> entry of:
+
+  {
+    '/my_object/beta' => 10,
+    '/my_array/1' => 'green'
+  }
+
+To modify your data by adding the missing default data, see
+L<JSON::Schema::Modern::Utilities/jsonp_set>.
+
 =head1 METHODS
 
 =for Pod::Coverage BUILDARGS FREEZE THAW
@@ -246,7 +304,7 @@ or a URI string indicating the identity of such a schema.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
-L</stringy_numbers>, L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</stringy_numbers>, L</strict>, L</with_defaults>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation
@@ -296,7 +354,7 @@ or a URI string (or L<Mojo::URL>) indicating the identity of such a schema.
 
 Optionally, a hashref can be passed as a third parameter which allows changing the values of the
 L</short_circuit>, L</collect_annotations>, L</scalarref_booleans>,
-L</stringy_numbers>, L</strict>, L</validate_formats>, and/or L</validate_content_schemas>
+L</stringy_numbers>, L</strict>, L</with_defaults>, L</validate_formats>, and/or L</validate_content_schemas>
 settings for just this evaluation call.
 
 You can also pass use these keys to alter behaviour (these are generally only used by custom validation

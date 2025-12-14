@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.630     2025-12-14 19:53:33Z
           - new "with_defaults" option (also available in "json-schema-eval"),
             for returning a list of missing values (from "default" keywords)
             to add to the instance data, and a "jsonp_set" helper for
