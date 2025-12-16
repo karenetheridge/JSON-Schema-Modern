@@ -238,6 +238,9 @@ sub combine ($self, $other, $swap) {
     ],
     output_format => $self->output_format,
     formatted_annotations => $self->formatted_annotations || $other->formatted_annotations,
+    $self->defaults || $other->defaults
+      ? (defaults => +{ ($self->defaults//{})->%*, ($other->defaults//{})->%* })
+      : (),
   );
 }
 

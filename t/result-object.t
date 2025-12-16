@@ -444,13 +444,20 @@ subtest 'AND two result objects together' => sub {
           $valid ? (annotation => 'annotation '.$count.'-'.$_) : (error => 'error '.$count.'-'.$_),
         ), 0..1
       ],
+      defaults => { '/a/b/'.$count => 1 },
     )
   } 0..3;
 
   cmp_result(
     (my $one_true = $results[0] & $results[1]),
     all(
-      methods(valid => bool(0)),
+      methods(
+        valid => bool(0),
+        defaults => {
+          '/a/b/0' => 1,
+          '/a/b/1' => 1,
+        },
+      ),
       listmethods(
         errors => [
           map methods(TO_JSON => {
@@ -494,7 +501,13 @@ subtest 'AND two result objects together' => sub {
   cmp_result(
     (my $both_false = $results[0] & $results[2]),
     all(
-      methods(valid => bool(0)),
+      methods(
+        valid => bool(0),
+        defaults => {
+          '/a/b/0' => 1,
+          '/a/b/2' => 1,
+        },
+      ),
       listmethods(
         errors => [
           map {
