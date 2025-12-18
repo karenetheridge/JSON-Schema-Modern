@@ -35,7 +35,7 @@ sub evaluation_order ($class) { 2 }
 
 sub keywords ($class, $spec_version) {
   return (
-    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? qw(format) : (),
+    $spec_version !~ /^draft(?:[467]|2019-09)\z/ ? qw(format) : (),
   );
 }
 
@@ -59,7 +59,7 @@ sub keywords ($class, $spec_version) {
   };
   my $is_ipv4 = sub {     # ipv4, ipv6
     my @o = split(/\./, $_[0], 5);
-    @o == 4 && (grep /^(?:0|[1-9][0-9]{0,2})$/, @o) == 4 && (grep $_ < 256, @o) == 4;
+    @o == 4 && (grep /^(?:0|[1-9][0-9]{0,2})\z/, @o) == 4 && (grep $_ < 256, @o) == 4;
   };
   # https://datatracker.ietf.org/doc/html/rfc3339#appendix-A with some additions for the 2000 version
   # as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
@@ -74,13 +74,13 @@ sub keywords ($class, $spec_version) {
     my $year = qr{${num}Y};
     my $week = qr{${num}W};
     my $date = qr{(?=[0-9])(?:$year)?(?:$month)?(?:$day)?};
-    qr{^P(?:(?=.)(?:$date)?(?:$time)?|$week)$};
+    qr{^P(?:(?=.)(?:$date)?(?:$time)?|$week)\z};
   };
 
   my $formats = +{
     'date-time' => sub {
       # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6
-      $_[0] =~ m/^\d{4}-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:Z|[+-](\d\d):(\d\d))$/ia
+      $_[0] =~ m/^\d{4}-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:Z|[+-](\d\d):(\d\d))\z/ia
         && $1 >= 1 && $1 <= 12        # date-month
         && $2 >= 1 && $2 <= 31        # date-mday
         && $3 <= 23                   # time-hour
@@ -101,7 +101,7 @@ sub keywords ($class, $spec_version) {
     },
     date => sub {
       # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6 full-date
-      $_[0] =~ m/^(\d{4})-(\d\d)-(\d\d)$/a
+      $_[0] =~ m/^(\d{4})-(\d\d)-(\d\d)\z/a
         && $2 >= 1 && $2 <= 12        # date-month
         && $3 >= 1 && $3 <= 31        # date-mday
         && do {
@@ -110,7 +110,7 @@ sub keywords ($class, $spec_version) {
         };
     },
     time => sub {
-      return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))$/a
+      return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))\z/a
         or $1 > 23
         or $2 > 59
         or $3 > 60
@@ -134,12 +134,12 @@ sub keywords ($class, $spec_version) {
     'idn-hostname' => sub { $is_hostname->($idn_decode->($_[0])) },
     ipv4 => $is_ipv4,
     ipv6 => sub {
-      ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,8}[[:xdigit:]]{0,4}$/
-        || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){1,6}((?:[0-9]{1,3}\.){3}[0-9]{1,3})$/
+      ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,8}[[:xdigit:]]{0,4}\z/
+        || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){1,6}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\z/
             && $is_ipv4->($1))
         && $_[0] !~ /:::/
         && $_[0] !~ /^:[^:]/
-        && $_[0] !~ /[^:]:$/
+        && $_[0] !~ /[^:]:\z/
         && do {
           my $double_colons = ()= ($_[0] =~ /::/g);
           my $colon_components = grep length, split(/:+/, $_[0], -1);
@@ -158,9 +158,9 @@ sub keywords ($class, $spec_version) {
       fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
     },
     iri => sub { Mojo::URL->new($_[0])->is_abs },
-    uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}$/ },
+    uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}\z/ },
     'json-pointer' => sub { (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])} },
-    'relative-json-pointer' => sub { $_[0] =~ m{^(?:0|[1-9][0-9]*)(?:#$|$|/)} && $_[0] !~ m{~(?![01])} },
+    'relative-json-pointer' => sub { $_[0] =~ m{^(?:0|[1-9][0-9]*)(?:#\z|\z|/)} && $_[0] !~ m{~(?![01])} },
     regex => sub {
       local $SIG{__WARN__} = sub { die @_ };
       eval { qr/$_[0]/; 1 };

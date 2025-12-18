@@ -46,12 +46,12 @@ sub evaluation_order ($class) { 3 }
 sub keywords ($class, $spec_version) {
   return (
     qw(allOf anyOf oneOf not),
-    $spec_version !~ /^draft[46]$/ ? qw(if then else) : (),
-    $spec_version =~ /^draft[467]$/ ? 'dependencies' : (),
-    $spec_version !~ /^draft[467]$/ ? 'dependentSchemas' : (),
-    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? 'prefixItems' : (),
+    $spec_version !~ /^draft[46]\z/ ? qw(if then else) : (),
+    $spec_version =~ /^draft[467]\z/ ? 'dependencies' : (),
+    $spec_version !~ /^draft[467]\z/ ? 'dependentSchemas' : (),
+    $spec_version !~ /^draft(?:[467]|2019-09)\z/ ? 'prefixItems' : (),
     'items',
-    $spec_version =~ /^draft(?:[467]|2019-09)$/ ? 'additionalItems' : (),
+    $spec_version =~ /^draft(?:[467]|2019-09)\z/ ? 'additionalItems' : (),
     $spec_version ne 'draft4' ? 'contains' : (),
     qw(properties patternProperties additionalProperties),
     $spec_version ne 'draft4' ? 'propertyNames' : (),
@@ -252,7 +252,7 @@ sub _eval_keyword_prefixItems { goto \&_eval_keyword__items_array_schemas }
 sub _traverse_keyword_items ($class, $schema, $state) {
   if (ref $schema->{items} eq 'ARRAY') {
     return E($state, 'array form of "items" not supported in %s', $state->{specification_version})
-      if $state->{specification_version} !~ /^draft(?:[467]|2019-09)$/;
+      if $state->{specification_version} !~ /^draft(?:[467]|2019-09)\z/;
 
     return $class->traverse_array_schemas($schema, $state);
   }
@@ -383,20 +383,20 @@ sub _eval_keyword_contains ($class, $data, $schema, $state) {
 
   # note: no items contained is only valid when minContains is explicitly 0
   if (not $state->{_num_contains}
-      and (($schema->{minContains}//1) > 0 or $state->{specification_version} =~ /^draft[467]$/)) {
+      and (($schema->{minContains}//1) > 0 or $state->{specification_version} =~ /^draft[467]\z/)) {
     push $state->{errors}->@*, @errors;
     return E($state, 'subschema is not valid against any item');
   }
 
   # only draft2020-12 and later can produce annotations
-  A($state, @valid == @$data ? true : \@valid) if $state->{specification_version} !~ /^draft(?:[467]|2019-09)$/;
+  A($state, @valid == @$data ? true : \@valid) if $state->{specification_version} !~ /^draft(?:[467]|2019-09)\z/;
 
   my $valid = 1;
 
   # 'maxContains' and 'minContains' are owned by the Validation vocabulary, but do nothing if the
   # Applicator vocabulary is omitted and depend on the result of 'contains', so they are implemented
   # here, to be evaluated after 'contains'
-  if ($state->{specification_version} !~ /^draft[467]$/
+  if ($state->{specification_version} !~ /^draft[467]\z/
       and grep $_ eq 'JSON::Schema::Modern::Vocabulary::Validation', $state->{vocabularies}->@*) {
     $valid = E($state, 'array contains more than %d matching item%s', $schema->{maxContains}, $schema->{maxContains} != 1 ? 's' : '')
       if exists $schema->{maxContains} and $state->{_num_contains} > $schema->{maxContains};

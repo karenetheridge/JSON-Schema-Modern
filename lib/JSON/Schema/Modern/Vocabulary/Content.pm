@@ -34,8 +34,8 @@ sub evaluation_order ($class) { 4 }
 
 sub keywords ($class, $spec_version) {
   return (
-    $spec_version !~ /^draft[46]$/ ? qw(contentEncoding contentMediaType) : (),
-    $spec_version !~ /^draft[467]$/ ? 'contentSchema' : (),
+    $spec_version !~ /^draft[46]\z/ ? qw(contentEncoding contentMediaType) : (),
+    $spec_version !~ /^draft[467]\z/ ? 'contentSchema' : (),
   );
 }
 

@@ -100,7 +100,7 @@ sub acceptance_tests (%options) {
         diag 'evaluation generated an exception: '.$_->dump
           foreach
             grep +($_->{error} =~ /^EXCEPTION/
-                && $_->{error} !~ /(max|min)imum value is not a number$/)   # optional/bignum.json
+                && $_->{error} !~ /(max|min)imum value is not a number\z/)   # optional/bignum.json
                 && !($in_todo //= grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*),
               $r->errors;
       }

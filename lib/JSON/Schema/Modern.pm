@@ -85,7 +85,7 @@ has validate_formats => (
   isa => Bool,
   lazy => 1,
   # as specified by https://json-schema.org/draft/<version>/schema#/$vocabulary
-  default => sub { ($_[0]->specification_version//SPECIFICATION_VERSION_DEFAULT) =~ /^draft[467]$/ ? 1 : 0 },
+  default => sub { ($_[0]->specification_version//SPECIFICATION_VERSION_DEFAULT) =~ /^draft[467]\z/ ? 1 : 0 },
 );
 
 has validate_content_schemas => (
@@ -141,7 +141,7 @@ around BUILDARGS => sub ($orig, $class, @args) {
       and ($args->{specification_version}//'') ne 'draft2019-09';
 
   croak 'collect_annotations cannot be used with specification_version '.$args->{specification_version}
-    if $args->{collect_annotations} and ($args->{specification_version}//'') =~ /^draft[467]$/;
+    if $args->{collect_annotations} and ($args->{specification_version}//'') =~ /^draft[467]\z/;
 
   $args->{format_validations} = +{
     map +($_->[0] => ref $_->[1] eq 'HASH' ? $_->[1] : +{ type => 'string', sub => $_->[1] }),
@@ -306,7 +306,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
   my $initial_path = $config_override->{traversed_keyword_path} // '';
   my $spec_version = $config_override->{specification_version} // $self->specification_version // SPECIFICATION_VERSION_DEFAULT;
 
-  croak 'traversed_keyword_path must be a json pointer' if $initial_path !~ m{^(?:/|$)};
+  croak 'traversed_keyword_path must be a json pointer' if $initial_path !~ m{^(?:/|\z)};
 
   if (length(my $uri_path = $initial_uri->fragment)) {
     croak 'initial_schema_uri fragment must be a json pointer' if $uri_path !~ m{^/};
@@ -457,7 +457,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     my %unknown_keywords;
     foreach my $property (sort grep !$state->{seen_data_properties}{$_},
         keys $state->{seen_data_properties}->%*) {
-      my ($parent, $keyword) = ($property =~ m{^(.*)/([^/]*)$});
+      my ($parent, $keyword) = ($property =~ m{^(.*)/([^/]*)\z});
       push(($unknown_keywords{$parent}//=[])->@*, $keyword);
     }
 
@@ -592,7 +592,7 @@ sub _traverse_subschema ($self, $schema, $state) {
   my $schema_type = get_type($schema);
   return 1 if $schema_type eq 'boolean'
     and ($state->{specification_version} ne 'draft4'
-      or $state->{keyword_path} =~ m{/(?:additional(?:Items|Properties)|uniqueItems)$});
+      or $state->{keyword_path} =~ m{/(?:additional(?:Items|Properties)|uniqueItems)\z});
 
   return E($state, 'invalid schema type: %s', $schema_type) if $schema_type ne 'object';
 
@@ -623,7 +623,7 @@ sub _traverse_subschema ($self, $schema, $state) {
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
-      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]$/;
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]\z/;
 
       delete $unknown_keywords{$keyword};
       $state->{keyword} = $keyword;
@@ -756,7 +756,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       next if not exists $schema->{$keyword};
 
       # keywords adjacent to $ref are not evaluated before draft2019-09
-      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]$/;
+      next if $keyword ne '$ref' and exists $schema->{'$ref'} and $state->{specification_version} =~ /^draft[467]\z/;
 
       delete $unknown_keywords{$keyword};
       next if not $valid and $state->{short_circuit} and $state->{strict};
@@ -834,7 +834,7 @@ sub _eval_subschema ($self, $data, $schema, $state) {
       if exists $data->{'$ref'} and $state->{specification_version} eq 'draft4';
   }
 
-  if ($valid and $state->{collect_annotations} and $state->{specification_version} !~ /^draft(?:[467]|2019-09)$/) {
+  if ($valid and $state->{collect_annotations} and $state->{specification_version} !~ /^draft(?:[467]|2019-09)\z/) {
     annotate_self(+{ %$state, keyword => $_, _unknown => 1 }, $schema)
       foreach sort keys %unknown_keywords;
   }
@@ -975,8 +975,8 @@ has _metaschema_vocabulary_classes => (
   },
 );
 
-sub _get_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#$//r} }
-sub _set_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#$//r} = $mvc_type->($_[2]) }
+sub _get_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#\z//r} }
+sub _set_metaschema_vocabulary_classes { $_[0]->__metaschema_vocabulary_classes->{$_[1] =~ s/#\z//r} = $mvc_type->($_[2]) }
 sub __all_metaschema_vocabulary_classes { values $_[0]->__metaschema_vocabulary_classes->%* }
 
 # translate vocabulary URIs into classes, caching the results (if any)
@@ -1238,7 +1238,7 @@ sub get_media_type ($self, $type) {
   my $mt = $types->{fc $type};
   return $mt if $mt;
 
-  return $types->{(first { m{([^/]+)/\*$} && fc($type) =~ m{^\Q$1\E/[^/]+$} } keys %$types) // '*/*'};
+  return $types->{(first { m{([^/]+)/\*\z} && fc($type) =~ m{^\Q$1\E/[^/]+\z} } keys %$types) // '*/*'};
 };
 
 has _encoding => (
@@ -1692,9 +1692,9 @@ otherwise it returns the L<JSON::Schema::Modern::Document> object.
 
 or
 
-  $js->add_format_validation(no_nines => { type => 'number', sub => sub ($value) { $value =~ m/^[0-8]+$/ });
+  $js->add_format_validation(no_nines => { type => 'number', sub => sub ($value) { $value =~ m/^[0-8]+\z/ });
 
-  $js->add_format_validation(8bits => { type => 'string', sub => sub ($value) { $value =~ m/^[\x00-\xFF]+$/ });
+  $js->add_format_validation(8bits => { type => 'string', sub => sub ($value) { $value =~ m/^[\x00-\xFF]+\z/ });
 
 Adds support for a custom format. If not supplied, the data type(s) that this format applies to
 defaults to string; all values of any other type will automatically be deemed to be valid, and will

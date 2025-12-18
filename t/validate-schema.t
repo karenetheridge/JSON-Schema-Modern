@@ -24,7 +24,7 @@ cmp_result(
     errors => supersetof(
       {
         instanceLocation => '/type',
-        keywordLocation => re(qr{/enum$}),
+        keywordLocation => re(qr{/enum\z}),
         absoluteKeywordLocation => 'https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes/enum',
         error => 'value does not match',
       },
@@ -43,7 +43,7 @@ cmp_result(
     errors => supersetof(
       {
         instanceLocation => '/type',
-        keywordLocation => re(qr{/enum$}),
+        keywordLocation => re(qr{/enum\z}),
         absoluteKeywordLocation => 'https://json-schema.org/draft/2019-09/meta/validation#/$defs/simpleTypes/enum',
         error => 'value does not match',
       },

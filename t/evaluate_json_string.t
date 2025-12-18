@@ -17,7 +17,7 @@ use Helper;
 
 my $js = JSON::Schema::Modern->new;
 
-like(ref($js->_json_decoder), qr/^(?:Cpanel::JSON::XS|JSON::PP)$/, 'we have a JSON decoder');
+like(ref($js->_json_decoder), qr/^(?:Cpanel::JSON::XS|JSON::PP)\z/, 'we have a JSON decoder');
 
 ok(
   lives {

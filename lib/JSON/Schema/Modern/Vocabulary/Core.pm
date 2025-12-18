@@ -34,15 +34,15 @@ sub keywords ($class, $spec_version) {
   return (
     '$schema',  # must be first to ensure we use the correct Core keywords and subsequent vocabularies
     $spec_version eq 'draft4' ? 'id' : '$id',
-    $spec_version !~ /^draft[467]$/ ? '$anchor' : (),
+    $spec_version !~ /^draft[467]\z/ ? '$anchor' : (),
     $spec_version eq 'draft2019-09' ? '$recursiveAnchor' : (),
-    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? '$dynamicAnchor' : (),
+    $spec_version !~ /^draft(?:[467]|2019-09)\z/ ? '$dynamicAnchor' : (),
     '$ref',
     $spec_version eq 'draft2019-09' ? '$recursiveRef' : (),
-    $spec_version !~ /^draft(?:[467]|2019-09)$/ ? '$dynamicRef' : (),
-    $spec_version !~ /^draft[467]$/ ? '$vocabulary' : (),
-    $spec_version =~ /^draft[467]$/ ? 'definitions' : '$defs',
-    $spec_version !~ /^draft[46]$/ ? '$comment' : (),
+    $spec_version !~ /^draft(?:[467]|2019-09)\z/ ? '$dynamicRef' : (),
+    $spec_version !~ /^draft[467]\z/ ? '$vocabulary' : (),
+    $spec_version =~ /^draft[467]\z/ ? 'definitions' : '$defs',
+    $spec_version !~ /^draft[46]\z/ ? '$comment' : (),
   );
 }
 
@@ -59,11 +59,11 @@ sub _traverse_keyword_id ($class, $schema, $state) {
 
   if (length $uri->fragment) {
     return E($state, '%s value "%s" cannot have a non-empty fragment', $state->{keyword}, $schema->{$state->{keyword}})
-      if $state->{specification_version} !~ /^draft[467]$/;
+      if $state->{specification_version} !~ /^draft[467]\z/;
 
     if (length(my $base = $uri->clone->fragment(undef))) {
       return E($state, '$id cannot change the base uri at the same time as declaring an anchor')
-        if $state->{specification_version} =~ /^draft[67]$/;
+        if $state->{specification_version} =~ /^draft[67]\z/;
 
       # only permitted in draft4: add an id and an anchor via the single 'id' keyword
       return if not $class->__create_identifier($base, $state);
@@ -106,7 +106,7 @@ sub _eval_keyword_id ($class, $, $schema, $state) {
   # we already indexed the anchor uri, so there is nothing more to do at evaluation time.
   # we explicitly do NOT set $state->{initial_schema_uri} or change any other $state values.
   return 1
-    if $state->{specification_version} =~ /^draft[467]$/ and $schema->{$state->{keyword}} =~ /^#/;
+    if $state->{specification_version} =~ /^draft[467]\z/ and $schema->{$state->{keyword}} =~ /^#/;
 
   my $schema_info = $state->{evaluator}->_fetch_from_uri($state->{initial_schema_uri}->clone->fragment($state->{keyword_path}));
 
@@ -180,10 +180,10 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
   # $schema keyword never happened, so now we're back to draft2020-12 again, and...?!
   # The only winning move is not to play.
   return E($state, '$schema and $ref cannot be used together in older drafts')
-    if exists $schema->{'$ref'} and $spec_version =~ /^draft[467]$/;
+    if exists $schema->{'$ref'} and $spec_version =~ /^draft[467]\z/;
 
   $state->{evaluator}->_set_metaschema_vocabulary_classes($schema->{'$schema'}, [ $spec_version, $vocabularies ]);
-  $state->@{qw(specification_version vocabularies metaschema_uri)} = ($spec_version, $vocabularies, $schema->{'$schema'} =~ s/#$//r);
+  $state->@{qw(specification_version vocabularies metaschema_uri)} = ($spec_version, $vocabularies, $schema->{'$schema'} =~ s/#\z//r);
   return 1;
 }
 
@@ -200,13 +200,13 @@ sub _traverse_keyword_anchor ($class, $schema, $state) {
 
   my $anchor = $schema->{$state->{keyword}};
   return E($state, '%s value "%s" does not match required syntax', $state->{keyword}, $anchor)
-    if $state->{specification_version} =~ /^draft[467]$/  and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*$/
-      or $state->{specification_version} eq 'draft2019-09' and $anchor !~ /^[A-Za-z][A-Za-z0-9_:.-]*$/
-      or $state->{specification_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*$/;
+    if $state->{specification_version} =~ /^draft[467]\z/  and $anchor !~ /^#[A-Za-z][A-Za-z0-9_:.-]*\z/
+      or $state->{specification_version} eq 'draft2019-09' and $anchor !~ /^[A-Za-z][A-Za-z0-9_:.-]*\z/
+      or $state->{specification_version} eq 'draft2020-12' and $anchor !~ /^[A-Za-z_][A-Za-z0-9._-]*\z/;
 
   my $canonical_uri = canonical_uri($state);
 
-  $anchor =~ s/^#// if $state->{specification_version} =~ /^draft[467]$/;
+  $anchor =~ s/^#// if $state->{specification_version} =~ /^draft[467]\z/;
   my $uri = Mojo::URL->new->to_abs($canonical_uri)->fragment($anchor);
   my $base_uri = $canonical_uri->clone->fragment(undef);
 

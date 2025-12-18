@@ -40,9 +40,9 @@ sub keywords ($class, $spec_version) {
     $spec_version ne 'draft4' ? 'const' : (),
     qw(multipleOf maximum exclusiveMaximum minimum exclusiveMinimum
       maxLength minLength pattern maxItems minItems uniqueItems),
-    $spec_version !~ /^draft[467]$/ ? qw(maxContains minContains) : (),
+    $spec_version !~ /^draft[467]\z/ ? qw(maxContains minContains) : (),
     qw(maxProperties minProperties required),
-    $spec_version !~ /^draft[467]$/ ? 'dependentRequired' : (),
+    $spec_version !~ /^draft[467]\z/ ? 'dependentRequired' : (),
   );
 }
 

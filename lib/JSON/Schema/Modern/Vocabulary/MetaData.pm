@@ -33,8 +33,8 @@ sub evaluation_order ($class) { 5 }
 sub keywords ($class, $spec_version) {
   return (
     qw(title description default),
-    $spec_version !~ /^draft[467]$/ ? 'deprecated' : (),
-    $spec_version !~ /^draft[46]$/ ? qw(readOnly writeOnly) : (),
+    $spec_version !~ /^draft[467]\z/ ? 'deprecated' : (),
+    $spec_version !~ /^draft[46]\z/ ? qw(readOnly writeOnly) : (),
     $spec_version ne 'draft4' ? 'examples' : (),
   );
 }

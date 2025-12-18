@@ -153,7 +153,7 @@ subtest 'override a format sub' => sub {
     'cannot override a core format to support a different data type',
   );
 
-  $js->add_format_validation(uuid => sub { $_[0] =~ /^[a-z0-9-]+$/ });
+  $js->add_format_validation(uuid => sub { $_[0] =~ /^[a-z0-9-]+\z/ });
   cmp_result(
     $js->evaluate(
       [
@@ -199,7 +199,7 @@ subtest 'override a format sub' => sub {
     collect_annotations => 1,
     validate_formats => 1,
     format_validations => +{
-      uuid => sub { $_[0] =~ /^[A-Z]+$/ },
+      uuid => sub { $_[0] =~ /^[A-Z]+\z/ },
       mult_5 => +{ type => 'number', sub => sub { ($_[0] % 5) == 0 } },
     },
   );
@@ -450,15 +450,15 @@ subtest 'unimplemented core formats' => sub {
 
   # specification version draft2020-12 and later, format-assertion vocabulary
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
-    next if $spec_version =~ /^draft(?:[467]|2019-09)$/;
+    next if $spec_version =~ /^draft(?:[467]|2019-09)\z/;
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
     $js->add_schema({
       '$id' => 'https://my_metaschema',
       '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
       '$vocabulary' => {
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/applicator}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/format-assertion}r => true,
       },
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });
@@ -530,7 +530,7 @@ subtest 'unknown custom formats' => sub {
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(
       specification_version => $spec_version,
-      $spec_version !~ /^draft[467]$/ ? (collect_annotations => 1) : (),
+      $spec_version !~ /^draft[467]\z/ ? (collect_annotations => 1) : (),
       validate_formats => 1,
     );
 
@@ -538,7 +538,7 @@ subtest 'unknown custom formats' => sub {
       $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
       {
         valid => true,
-        $spec_version =~ /^draft[467]$/ ? () : (annotations => [
+        $spec_version =~ /^draft[467]\z/ ? () : (annotations => [
           {
             instanceLocation => '',
             keywordLocation => '/format',
@@ -547,7 +547,7 @@ subtest 'unknown custom formats' => sub {
         ]),
       },
       $spec_version . ': for format validation with the Format-Annotation vocabulary, unrecognized format attributes do not cause validation failure'
-        . ($spec_version !~ /^draft[467]$/ ? '; annotation is still produced' : ''),
+        . ($spec_version !~ /^draft[467]\z/ ? '; annotation is still produced' : ''),
     );
   }
 
@@ -555,17 +555,17 @@ subtest 'unknown custom formats' => sub {
   # "When the Format-Assertion vocabulary is specified, implementations MUST fail upon encountering
   # unknown formats."
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
-    next if $spec_version =~ /^draft[467]$/ or $spec_version eq 'draft2019-09';
+    next if $spec_version =~ /^draft[467]\z/ or $spec_version eq 'draft2019-09';
 
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
     $js->add_schema({
       '$id' => 'https://my_metaschema',
       '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
       '$vocabulary' => {
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/validation}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/applicator}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/validation}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/format-assertion}r => true,
       },
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });
@@ -861,9 +861,9 @@ subtest 'stringy numbers with a numeric format' => sub {
     '$id' => 'https://my_metaschema',
     '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     '$vocabulary' => {
-      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
-      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
-      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/core}r => true,
+      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/applicator}r => true,
+      JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/format-assertion}r => true,
     },
     '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
   });
@@ -971,16 +971,16 @@ subtest 'assertion formats using implementations that rely on optional dependenc
   }
 
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
-    next if $spec_version =~ /^draft[467]$/ or $spec_version eq 'draft2019-09';
+    next if $spec_version =~ /^draft[467]\z/ or $spec_version eq 'draft2019-09';
 
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version);
     $js->add_schema({
       '$id' => 'https://my_metaschema',
       '$schema' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
       '$vocabulary' => {
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/core}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/applicator}r => true,
-        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema$}{vocab/format-assertion}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/core}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/applicator}r => true,
+        JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version} =~ s{schema\z}{vocab/format-assertion}r => true,
       },
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });

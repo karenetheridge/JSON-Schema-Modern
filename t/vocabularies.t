@@ -340,7 +340,7 @@ subtest 'valid keywords' => sub {
       foreach my $metaschema_info ($js->_get_metaschema_vocabulary_classes($metaschema_uri)) {
         print STDERR "  '$spec_version' => {\n";
         foreach my $class (sort $metaschema_info->[1]->@*) {
-          my ($short_class) = $class =~ /::([^:]+)$/;
+          my ($short_class) = $class =~ /::([^:]+)\z/;
           print STDERR "    $short_class => [qw(\n";
           print STDERR "      $_\n" foreach $class->keywords($spec_version);
           print STDERR "    )],\n";
@@ -357,8 +357,8 @@ subtest 'valid keywords' => sub {
   my @classes =
     grep load_module($_)->does('JSON::Schema::Modern::Vocabulary'),
     map 'JSON::Schema::Modern::Vocabulary::'.$_,
-    map $_->basename =~ s/\.pm$//r,
-    grep /\.pm$/,
+    map $_->basename =~ s/\.pm\z//r,
+    grep /\.pm\z/,
     path('lib/JSON/Schema/Modern/Vocabulary/')->list->each;
 
   my $table = {
@@ -368,7 +368,7 @@ subtest 'valid keywords' => sub {
         map {
           my $class = $_;
           my @keywords = eval { $class->keywords($spec_version) };
-          @keywords ? (($class =~ /::([^:]+)$/) => \@keywords) : ();
+          @keywords ? (($class =~ /::([^:]+)\z/) => \@keywords) : ();
         } @classes,
       };
     }

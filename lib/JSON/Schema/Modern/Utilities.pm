@@ -134,7 +134,7 @@ sub is_type ($type, $value, $config = {}) {
     }
   }
 
-  if ($type =~ /^reference to (.+)$/) {
+  if ($type =~ /^reference to (.+)\z/) {
     return !blessed($value) && ref($value) eq $1;
   }
 
@@ -208,7 +208,7 @@ sub is_schema ($value) {
 }
 
 sub is_bignum ($value) {
-  ref($value) =~ /^Math::Big(?:Int|Float)$/;
+  ref($value) =~ /^Math::Big(?:Int|Float)\z/;
 }
 
 # compares two arbitrary data payloads for equality, as per
@@ -335,7 +335,7 @@ sub jsonp_set ($data, $pointer, $value) {
     (length $pointer ? (split /\//, $pointer, -1) : ($pointer));
 
   croak 'cannot write hashref into a reference to an array in void context'
-    if @keys >= 2 and $keys[1] !~ /^\d+$/a and ref $data eq 'ARRAY' and not defined wantarray;
+    if @keys >= 2 and $keys[1] !~ /^\d+\z/a and ref $data eq 'ARRAY' and not defined wantarray;
 
   shift @keys;  # always '', indicating the root
   my $curp = \$data;
@@ -344,12 +344,12 @@ sub jsonp_set ($data, $pointer, $value) {
     # if needed, first remove the existing data so we can replace with a new hash key or array index
     undef $curp->$*
       if not ref $curp->$*
-        or ref $curp->$* eq 'ARRAY' and $key !~ /^\d+$/a;
+        or ref $curp->$* eq 'ARRAY' and $key !~ /^\d+\z/a;
 
     # use this existing hash key or array index location, or create new position
     use autovivification 'store';
     $curp = \(
-      ref $curp->$* eq 'HASH' || $key !~ /^\d+$/a
+      ref $curp->$* eq 'HASH' || $key !~ /^\d+\z/a
         ? $curp->$*->{$key}
         : $curp->$*->[$key]);
   }
@@ -378,7 +378,7 @@ sub canonical_uri_type () {
   # normal schema additions.
   # Only JSON-encoded files are supported at this time.
   sub load_cached_document ($evaluator, $uri) {
-    $uri =~ s/#$//; # older draft $ids use an empty fragment
+    $uri =~ s/#\z//; # older draft $ids use an empty fragment
 
     # see if it already exists as a document in the cache
     my $document = $document_cache->{$uri};
@@ -499,7 +499,7 @@ sub A ($state, $annotation) {
   # ..but we always collect them if the lowest bit is set, indicating the presence of unevaluated*
   # keywords necessary for accurate validation
   return 1 if not ($state->{collect_annotations}
-    & ($state->{specification_version} =~ /^draft[467]$/ ? ~(1<<8) : ~0));
+    & ($state->{specification_version} =~ /^draft[467]\z/ ? ~(1<<8) : ~0));
 
   # we store the absolute uri in unresolved form until needed,
   # and perform the rest of the calculations later.
@@ -565,9 +565,9 @@ sub assert_uri_reference ($state, $schema) {
     if fc(Mojo::URL->new($string)->to_unsafe_string) ne fc($string)
       or $string =~ /[^[:ascii:]]/            # ascii characters only
       or $string =~ /#/                       # no fragment, except...
-        and $string !~ m{#$}                          # allow empty fragment
-        and $string !~ m{#[A-Za-z_][A-Za-z0-9_:.-]*$} # allow plain-name fragment, superset of all drafts
-        and $string !~ m{#/(?:[^~]|~[01])*$};         # allow json pointer fragment
+        and $string !~ m{#\z}                          # allow empty fragment
+        and $string !~ m{#[A-Za-z_][A-Za-z0-9_:.-]*\z} # allow plain-name fragment, superset of all drafts
+        and $string !~ m{#/(?:[^~]|~[01])*\z};         # allow json pointer fragment
 
   return 1;
 }
@@ -586,9 +586,9 @@ sub assert_uri ($state, $schema, $override = undef) {
       or $string =~ /[^[:ascii:]]/            # ascii characters only
       or not $uri->is_abs                     # must have a scheme
       or $string =~ /#/                       # no fragment, except...
-        and $string !~ m{#$}                          # empty fragment
-        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*$}  # plain-name fragment
-        and $string !~ m{#/(?:[^~]|~[01])*$};         # json pointer fragment
+        and $string !~ m{#\z}                          # empty fragment
+        and $string !~ m{#[A-Za-z][A-Za-z0-9_:.-]*\z}  # plain-name fragment
+        and $string !~ m{#/(?:[^~]|~[01])*\z};         # json pointer fragment
 
   return 1;
 }
