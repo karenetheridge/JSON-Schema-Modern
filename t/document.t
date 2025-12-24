@@ -1081,11 +1081,11 @@ subtest 'custom metaschema_uri' => sub {
         {
           instanceLocation => '',
           keywordLocation => '',
-          error => 'EXCEPTION: unable to find resource "https://my/first/metaschema"',
+          error => 'EXCEPTION: unable to find resource "https://my/first/metaschema" (did you forget to provide "evaluator" to ->validate?)',
         },
       ],
     },
-    'when not providing the original evaluator, the metaschema cannot be found',
+    'when not providing the original evaluator, the metaschema cannot be found (and a hint is provided)',
   );
 
   cmp_result(

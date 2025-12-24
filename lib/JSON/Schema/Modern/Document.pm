@@ -227,6 +227,10 @@ sub validate ($class, @args) {
   my $evaluator = $args->{evaluator} // JSON::Schema::Modern->new(validate_formats => 1);
   my $eval_result = $evaluator->evaluate($document->schema, $document->metaschema_uri);
 
+  if (my ($missing_resource) = grep $_->error =~ /EXCEPTION: unable to find resource/, $eval_result->errors) {
+    $missing_resource->{error} .= ' (did you forget to provide "evaluator" to ->validate?)';
+  }
+
   return $doc_result & $eval_result;
 }
 
