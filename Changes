@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - now allowing the use of a "$schema" keyword with a fragment, as
+            per strict reading of the specification(s)
 
 0.630     2025-12-14 19:53:33Z
           - new "with_defaults" option (also available in "json-schema-eval"),

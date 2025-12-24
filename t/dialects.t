@@ -1414,7 +1414,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
   );
 };
 
-subtest 'custom metaschemas, with custom vocabularies' => sub {
+subtest 'other $schema usage' => sub {
   my $js = JSON::Schema::Modern->new;
 
   cmp_result(
@@ -1458,6 +1458,46 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
     },
     'custom metaschemas are okay, but the document must be known',
   );
+
+
+  $js->add_schema({
+    '$id' => 'https://example.com/hello',
+    '$defs' => {
+      metaschema => {
+        '$comment' => 'a metaschema based on draft2020-12 that requires a minimum of 5 keywords',
+        '$dynamicAnchor' => 'meta',
+        type => 'object',
+        minProperties => 5,
+        '$ref' => 'https://json-schema.org/draft/2020-12/schema',
+      },
+    },
+  });
+
+  my $doc = $js->add_schema({
+    '$id' => 'my_schema',
+    '$schema' => 'https://example.com/hello#/$defs/metaschema'
+  });
+  cmp_result([ map $_->TO_JSON, $doc->errors ], [], 'no document errors');
+
+  cmp_result(
+    $doc->validate(evaluator => $js)->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/minProperties',
+          absoluteKeywordLocation => 'https://example.com/hello#/$defs/metaschema/minProperties',
+          error => 'object has fewer than 5 properties',
+        },
+      ],
+    },
+    '$schema keyword can use a URI with a fragment',
+  );
+};
+
+subtest 'custom metaschemas, with custom vocabularies' => sub {
+  my $js = JSON::Schema::Modern->new;
 
   $js->add_schema({
     '$id' => 'https://metaschema/with/misplaced/vocabulary/keyword/base',

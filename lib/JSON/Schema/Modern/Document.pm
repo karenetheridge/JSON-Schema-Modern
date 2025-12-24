@@ -54,7 +54,7 @@ has original_uri => (
 
 has metaschema_uri => (
   is => 'rwp',
-  isa => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
+  isa => InstanceOf['Mojo::URL'],
   coerce => sub { $_[0]->$_isa('Mojo::URL') ? $_[0] : Mojo::URL->new($_[0]) },
   predicate => '_has_metaschema_uri',
   # default not defined here, but might be defined in a subclass
