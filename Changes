@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.631     2025-12-25 00:31:41Z
           - now allowing the use of a "$schema" keyword with a fragment, as
             per strict reading of the specification(s)
 
