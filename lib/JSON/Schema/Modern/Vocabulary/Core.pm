@@ -289,6 +289,14 @@ sub _traverse_keyword_dynamicAnchor ($class, $schema, $state) {
 sub _traverse_keyword_ref ($class, $schema, $state) {
   return if not assert_keyword_type($state, $schema, 'string')
     or not assert_uri_reference($state, $schema);
+
+  push $state->{references}->@*, [
+    $state->{keyword},
+    ($state->{traversed_keyword_path}//'').$state->{keyword_path},
+    Mojo::URL->new($schema->{$state->{keyword}})->to_abs($state->{initial_schema_uri}//()),
+    'schema',
+  ] if $state->{references};
+
   return 1;
 }
 

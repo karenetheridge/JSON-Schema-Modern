@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - now checking for references that target an unknown or incorrect
+            location when schema documents are parsed
 
 0.631     2025-12-25 00:31:41Z
           - now allowing the use of a "$schema" keyword with a fragment, as

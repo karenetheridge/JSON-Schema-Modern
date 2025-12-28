@@ -325,6 +325,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     errors => [],
     identifiers => {},
     subschemas => [],
+    references => [],   # TODO: disable this with a config value
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
     traverse => 1,
@@ -372,7 +373,6 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     }
   }
 
-  delete $state->{traverse};
   return $state;
 }
 

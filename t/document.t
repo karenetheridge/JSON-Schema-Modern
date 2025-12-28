@@ -16,6 +16,7 @@ use lib 't/lib';
 use Helper;
 use Test::Deep::UnorderedPairs;
 use Test::Memory::Cycle;
+use YAML::PP;
 
 # spec version -> vocab classes
 my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabulary_classes);
@@ -1301,6 +1302,112 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
       ],
     },
     'when evaluating using the second base uri, error locations are relative to the original evaluation location',
+  );
+};
+
+subtest 'bad references' => sub {
+  my $js = JSON::Schema::Modern->new;
+
+  my $doc1 = JSON::Schema::Modern::Document->new(
+    canonical_uri => 'http://example.com/api1',
+    evaluator => $js,
+    schema => YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
+$defs:
+  schema00: { type: string }
+  schema01: { $anchor: my_schema }
+  schema02:
+    $id: subschema1
+    properties:
+      foo: true
+      bar: false
+      baz: { $anchor: another_subschema }
+YAML
+
+  cmp_result([ map $_->TO_JSON, $doc1->errors ], [], 'no errors from first document');
+  $js->add_document($doc1);
+
+  my $doc2 = JSON::Schema::Modern::Document->new(
+    canonical_uri => 'http://example.com/api2',
+    evaluator => $js,
+    schema => YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
+$defs:
+  schema00: { type: string }
+  schema01: { $anchor: my_schema }
+  schema02: { $id: subschema2, properties: { foo: true, bar: false } }
+  schema03: { $dynamicAnchor: foo }
+
+  # valid references
+  schema10: { $ref: '#/$defs/schema00' }
+  schema11: { $ref: '#my_schema' }
+  schema12: { $ref: http://example.com/api1#/$defs/schema00 }
+  schema13: { $ref: http://example.com/subschema1#another_subschema }
+  schema14: { $ref: http://example.com/api2#/$defs/schema00 }
+  schema15: { $ref: http://example.com/api2#my_schema }
+  schema16: { $ref: http://unknown.com#/foo/bar }
+  schema17: { $dynamicRef: '#foo' }
+
+  # invalid references
+  schema20: { $ref: '#/$defs/does_not_exist' }                              # local DNE, json pointer
+  schema21: { $ref: '#does_not_exist' }                                     # local DNE, anchor
+  schema22: { $ref: '#/$defs' }                                             # local bad entity
+  schema23: { $ref: http://example.com/subschema1#/$defs/does_not_exist }   # remote DNE, json pointer
+  schema24: { $ref: http://example.com/subschema1#does_not_exist }          # remote DNE, anchor
+  schema25: { $ref: http://example.com/api1#/$defs/schema02/properties }    # remote bad entity
+  schema26: { $ref: http://example.com/subschema2#/$defs/schema00 }         # exists at root, not sub$id
+  schema27: { $dynamicRef: '#bar' }                                         # local DNE
+  schema28: { $dynamicRef: http://example.com/api1#foo }                    # remote DNE
+YAML
+
+  cmp_result(
+    [ map $_->TO_JSON, $doc2->errors ],
+    [
+      {
+        keywordLocation => '/$defs/schema20/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema20/$ref',
+        error => '$ref target "http://example.com/api2#/$defs/does_not_exist" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema21/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema21/$ref',
+        error => '$ref target "http://example.com/api2#does_not_exist" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema22/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema22/$ref',
+        error => '$ref target "http://example.com/api2#/$defs" is not a referenceable location',
+      },
+      {
+        keywordLocation => '/$defs/schema23/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema23/$ref',
+        error => '$ref target "http://example.com/subschema1#/$defs/does_not_exist" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema24/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema24/$ref',
+        error => '$ref target "http://example.com/subschema1#does_not_exist" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema25/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema25/$ref',
+        error => '$ref target "http://example.com/api1#/$defs/schema02/properties" is not a referenceable location',
+      },
+      {
+        keywordLocation => '/$defs/schema26/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema26/$ref',
+        error => '$ref target "http://example.com/subschema2#/$defs/schema00" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema27/$dynamicRef',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema27/$dynamicRef',
+        error => '$dynamicRef target "http://example.com/api2#bar" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema28/$dynamicRef',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema28/$dynamicRef',
+        error => '$dynamicRef target "http://example.com/api1#foo" is a non-existent location',
+      },
+    ],
+    'bad references to local and known remote destinations are identified',
   );
 };
 
