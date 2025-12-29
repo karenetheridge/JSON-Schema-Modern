@@ -390,7 +390,11 @@ sub canonical_uri_type () {
       my $schema = $evaluator->_json_decoder->decode($file->slurp);
 
       # avoid calling add_schema, which checksums the file to look for duplicates
-      $document = JSON::Schema::Modern::Document->new(schema => $schema, evaluator => $evaluator);
+      $document = JSON::Schema::Modern::Document->new(
+        schema => $schema,
+        evaluator => $evaluator,
+        skip_ref_checks => 1,
+      );
 
       # avoid calling add_document, which checks for duplicate identifiers (and would result in an
       # infinite loop)

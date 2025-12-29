@@ -1329,7 +1329,7 @@ YAML
   my $doc2 = JSON::Schema::Modern::Document->new(
     canonical_uri => 'http://example.com/api2',
     evaluator => $js,
-    schema => YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
+    schema => my $schema = YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
 $defs:
   schema00: { type: string }
   schema01: { $anchor: my_schema }
@@ -1409,6 +1409,15 @@ YAML
     ],
     'bad references to local and known remote destinations are identified',
   );
+
+  my $doc3 = JSON::Schema::Modern::Document->new(
+    canonical_uri => 'http://example.com/api3',
+    evaluator => $js,
+    schema => $schema,
+    skip_ref_checks => 1,
+  );
+
+  cmp_result([ map $_->TO_JSON, $doc3->errors ], [], 'no errors when skipping ref checks');
 };
 
 done_testing;

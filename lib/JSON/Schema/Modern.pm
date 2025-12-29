@@ -296,7 +296,7 @@ sub evaluate_json_string ($self, $json_data, $schema, $config_override = {}) {
 # Returns the internal $state object accumulated during the traversal.
 sub traverse ($self, $schema_reference, $config_override = {}) {
   my %overrides = %$config_override;
-  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_keyword_path specification_version)};
+  delete @overrides{qw(callbacks initial_schema_uri metaschema_uri traversed_keyword_path specification_version skip_ref_checks)};
   croak join(', ', sort keys %overrides), ' not supported as a config override in traverse'
     if keys %overrides;
 
@@ -325,7 +325,7 @@ sub traverse ($self, $schema_reference, $config_override = {}) {
     errors => [],
     identifiers => {},
     subschemas => [],
-    references => [],   # TODO: disable this with a config value
+    $config_override->{skip_ref_checks} ? () : (references => []),
     callbacks => $config_override->{callbacks} // {},
     evaluator => $self,
     traverse => 1,

@@ -158,7 +158,10 @@ sub BUILD ($self, $args) {
   # metaschema_uri
   my $state = $self->traverse(
     $args->{evaluator} // JSON::Schema::Modern->new,
-    $args->{specification_version} ? +{ $args->%{specification_version} } : (),
+    {
+      $args->{specification_version} ? $args->%{specification_version} : (),
+      $args->{skip_ref_checks} ? $args->%{skip_ref_checks} : (),
+    },
   );
 
   if ($state->{errors}->@*) {
@@ -375,6 +378,13 @@ A L<JSON::Schema::Modern> object. Optional, unless custom metaschemas are used (
 under L</validate>).
 
 This argument is not preserved by the constructor, so it is not available as an accessor.
+
+=head2 skip_ref_checks
+
+Only a constructor argument, not an accessor method.
+
+When true, the normal checks for bad reference targets are skipped. This should only be used for
+large documents that are known to be valid, such as specification metaschemas.
 
 =head1 METHODS
 
