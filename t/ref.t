@@ -32,10 +32,10 @@ subtest 'local JSON pointer' => sub {
 
   ok(
     lives {
-      my $result = $js->evaluate(true, { '$ref' => '#/$defs/nowhere' });
+      my $result = $js->evaluate(true, { '$ref' => 'http://example.com#/$defs/nowhere' });
       like(
         (($result->errors)[0])->error,
-        qr{^EXCEPTION: unable to find resource "\#/\$defs/nowhere"},
+        qr{^EXCEPTION: unable to find resource "http://example.com\#/\$defs/nowhere"},
         'got error for unresolvable ref',
       );
     },
@@ -93,10 +93,10 @@ subtest 'local anchor' => sub {
 
   is(
     dies {
-      my $result = $js->evaluate(true, { '$ref' => '#nowhere' });
+      my $result = $js->evaluate(true, { '$ref' => 'http://example.com#nowhere' });
       like(
         (($result->errors)[0])->error,
-        qr{^EXCEPTION: unable to find resource "\#nowhere"},
+        qr{^EXCEPTION: unable to find resource "http://example.com\#nowhere"},
         'got error for unresolvable ref',
       );
     },
@@ -1209,23 +1209,24 @@ subtest 'anchors do not match' => sub {
 subtest 'reference to a non-schema location' => sub {
   $js->{_resource_index} = {};
   my $schema = {
-    example => { not_a_schema => true },
     '$defs' => {
       anchor => {
         '$dynamicAnchor' => 'my_anchor',
-        '$dynamicRef' => '#/example/not_a_schema',
+        '$dynamicRef' => 'http://example.com/otherdoc#/example/not_a_schema',
       },
     },
     type => 'object',
     properties => {
       '$ref' => {
-        '$ref' => '#/example/not_a_schema',
+        '$ref' => 'http://example.com/otherdoc#/example/not_a_schema',
       },
       '$dynamicRef' => {
-        '$dynamicRef' => '#/example/not_a_schema',
+        '$dynamicRef' => 'http://example.com/otherdoc#/example/not_a_schema',
       },
     },
   };
+  $js->add_schema('http://example.com/mydoc', $schema);
+  $js->add_schema({ '$id' => 'http://example.com/otherdoc', example => { not_a_schema => true } });
 
   cmp_result(
     $js->evaluate({ '$ref' => 1 }, $schema)->TO_JSON,
@@ -1235,7 +1236,7 @@ subtest 'reference to a non-schema location' => sub {
         {
           instanceLocation => '/$ref',
           keywordLocation => '/properties/$ref/$ref',
-          error => 'EXCEPTION: bad reference to "#/example/not_a_schema": not a schema',
+          error => 'EXCEPTION: bad reference to "http://example.com/otherdoc#/example/not_a_schema": not a schema',
         },
       ],
     },
@@ -1250,7 +1251,7 @@ subtest 'reference to a non-schema location' => sub {
         {
           instanceLocation => '/$dynamicRef',
           keywordLocation => '/properties/$dynamicRef/$dynamicRef',
-          error => 'EXCEPTION: bad reference to "#/example/not_a_schema": not a schema',
+          error => 'EXCEPTION: bad reference to "http://example.com/otherdoc#/example/not_a_schema": not a schema',
         },
       ],
     },
@@ -1262,14 +1263,16 @@ subtest 'reference to a non-schema location' => sub {
     '$id' => '/foo',
     '$schema' => 'https://json-schema.org/draft/2019-09/schema',
     '$recursiveAnchor' => true,
-    example => { not_a_schema => true },
     type => 'object',
     properties => {
       '$recursiveRef' => {
-        '$recursiveRef' => '#/example/not_a_schema',
+        '$recursiveRef' => 'http://example.com/otherdoc#/example/not_a_schema',
       },
     },
   };
+
+  $js->add_schema('http://example.com/mydoc', $schema);
+  $js->add_schema({ '$id' => 'http://example.com/otherdoc', example => { not_a_schema => true } });
 
   cmp_result(
     $js->evaluate({ '$recursiveRef' => 1 }, $schema)->TO_JSON,
@@ -1280,7 +1283,7 @@ subtest 'reference to a non-schema location' => sub {
           instanceLocation => '/$recursiveRef',
           keywordLocation => '/properties/$recursiveRef/$recursiveRef',
           absoluteKeywordLocation => '/foo#/properties/$recursiveRef/$recursiveRef',
-          error => 'EXCEPTION: bad reference to "/foo#/example/not_a_schema": not a schema',
+          error => 'EXCEPTION: bad reference to "http://example.com/otherdoc#/example/not_a_schema": not a schema',
         },
       ],
     },

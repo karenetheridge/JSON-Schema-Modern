@@ -773,36 +773,6 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
   );
 };
 
-subtest 'unresolvable $ref to a local resource' => sub {
-  cmp_result(
-    (my $result = $js->evaluate(
-      1,
-      {
-        '$ref' => '#/$defs/myint',
-        '$defs' => {
-          myint => {
-            '$ref' => '#/$defs/does-not-exist',
-          },
-        },
-        anyOf => [ false ],
-      },
-    ))->TO_JSON,
-    {
-      valid => false,
-      errors => [
-        {
-          instanceLocation => '',
-          keywordLocation => '/$ref/$ref',
-          absoluteKeywordLocation => '#/$defs/myint/$ref',
-          error => 'EXCEPTION: unable to find resource "#/$defs/does-not-exist"',
-        },
-      ],
-    },
-    'error for a bad $ref reports the correct absolute location that was referred to',
-  );
-  ok($result->exception, 'exception flag is true on the result');
-};
-
 subtest 'unresolvable $ref to a remote resource' => sub {
   # new evaluator, with no resources remembered
   my $js = JSON::Schema::Modern->new;
@@ -838,16 +808,16 @@ subtest 'unresolvable $ref to a remote resource' => sub {
   ok($result->exception, 'exception flag is true on the result');
 };
 
-subtest 'unresolvable $ref to plain-name fragment' => sub {
+subtest 'unresolvable $ref to remote plain-name fragment' => sub {
   cmp_result(
-    (my $result = $js->evaluate(1, { '$ref' => '#nowhere' }))->TO_JSON,
+    (my $result = $js->evaluate(1, { '$ref' => 'http://localhost:4242#nowhere' }))->TO_JSON,
     {
       valid => false,
       errors => [
         {
           instanceLocation => '',
           keywordLocation => '/$ref',
-          error => 'EXCEPTION: unable to find resource "#nowhere"',
+          error => 'EXCEPTION: unable to find resource "http://localhost:4242#nowhere"',
         },
       ],
     },
@@ -1165,14 +1135,14 @@ subtest 'absoluteKeywordLocation' => sub {
   );
 
   cmp_result(
-    $js->evaluate(1, { '$ref' => '#does_not_exist' })->TO_JSON,
+    $js->evaluate(1, { '$ref' => 'http://example.com#does_not_exist' })->TO_JSON,
     {
       valid => false,
       errors => [
         {
           instanceLocation => '',
           keywordLocation => '/$ref',
-          error => 'EXCEPTION: unable to find resource "#does_not_exist"',
+          error => 'EXCEPTION: unable to find resource "http://example.com#does_not_exist"',
         },
       ],
     },

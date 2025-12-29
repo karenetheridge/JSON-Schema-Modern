@@ -17,6 +17,7 @@ use Config;
 use lib 't/lib';
 use Helper;
 use Acceptance;
+use Test::Needs;
 
 BEGIN {
   my @variables = qw(AUTHOR_TESTING AUTOMATED_TESTING EXTENDED_TESTING);
@@ -24,6 +25,8 @@ BEGIN {
   plan skip_all => 'These tests may fail if the test suite continues to evolve! They should only be run with '
       .join(', ', map $_.'=1', head(-1, @variables)).' or '.$variables[-1].'=1'
     if not grep $ENV{$_}, @variables;
+
+  test_needs({ 'Test::JSON::Schema::Acceptance' => '1.036' });  # bad remotes
 }
 
 my $version = 'draft4';

@@ -88,30 +88,32 @@ subtest '<= draft7: $ref in combination with any other keyword causes the other 
 };
 
 subtest '$ref adjacent to a path used in a $ref' => sub {
-  cmp_result(
-    JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
+
+  $js->add_schema('http://example.com/mydoc', {
+    '$ref' => 'http://example.com/otherdoc#/allOf/1/anyOf/1',
+  });
+
+  $js->add_schema('http://example.com/otherdoc', {
+    allOf => [
       true,
       {
-        allOf => [
-          true,
-          {
-            anyOf => [ false, true ],
-            '$ref' => '#/allOf/0',
-          },
-          {
-            # a reference that cannot be resolved
-            '$ref' => '#/allOf/1/anyOf/1',
-          },
-        ],
+        anyOf => [ false, true ],
+        '$ref' => '#/allOf/0',
       },
-    )->TO_JSON,
+    ],
+  });
+
+  cmp_result(
+    $js->evaluate(true, { '$ref' => 'http://example.com/mydoc' })->TO_JSON,
     {
       valid => false,
       errors => [
         {
           instanceLocation => '',
-          keywordLocation => '/allOf/2/$ref',
-          error => 'EXCEPTION: bad reference to "#/allOf/1/anyOf/1": not a schema',
+          keywordLocation => '/$ref/$ref',
+          absoluteKeywordLocation => 'http://example.com/mydoc#/$ref',
+          error => 'EXCEPTION: bad reference to "http://example.com/otherdoc#/allOf/1/anyOf/1": not a schema',
         },
       ],
     },
@@ -120,21 +122,24 @@ subtest '$ref adjacent to a path used in a $ref' => sub {
 };
 
 subtest '$defs support' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
+
+  $js->add_schema('http://example.com/mydoc', {
+    allOf => [ { '$ref' => 'http://example.com/otherdoc#/$defs/foo' } ],
+  });
+
+  $js->add_schema('http://example.com/otherdoc', { '$defs' => { foo => true } });
+
   cmp_result(
-    JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(
-      1,
-      my $schema = {
-        '$defs' => 1,
-        allOf => [ { '$ref' => '#/$defs/foo' } ],
-      }
-    )->TO_JSON,
+    $js->evaluate(1, 'http://example.com/mydoc')->TO_JSON,
     {
       valid => false,
       errors => [
         {
           instanceLocation => '',
           keywordLocation => '/allOf/0/$ref',
-          error => 'EXCEPTION: unable to find resource "#/$defs/foo"',
+          absoluteKeywordLocation => 'http://example.com/mydoc#/allOf/0/$ref',
+          error => 'EXCEPTION: bad reference to "http://example.com/otherdoc#/$defs/foo": not a schema',
         },
       ],
     },
@@ -142,7 +147,8 @@ subtest '$defs support' => sub {
   );
 
   cmp_result(
-    JSON::Schema::Modern->new(specification_version => 'draft2019-09')->evaluate(1, $schema)->TO_JSON,
+    JSON::Schema::Modern->new(specification_version => 'draft2019-09')
+      ->evaluate(1, {'$defs' => 1})->TO_JSON,
     {
       valid => false,
       errors => [
@@ -157,33 +163,36 @@ subtest '$defs support' => sub {
 };
 
 subtest 'definitions support' => sub {
+  my $js = JSON::Schema::Modern->new(specification_version => 'draft2019-09');
+
+  $js->add_schema('http://example.com/mydoc', {
+    allOf => [ { '$ref' => 'http://example.com/otherdoc#/definitions/foo' } ],
+  });
+
   my $schema;
   my @warnings = warnings {
-    cmp_result(
-      JSON::Schema::Modern->new(specification_version => 'draft2019-09')->evaluate(
-        1,
-        $schema = {
-          definitions => 1,
-          allOf => [ { '$ref' => '#/definitions/foo' } ],
-        }
-      )->TO_JSON,
-      {
-        valid => false,
-        errors => [
-          {
-            instanceLocation => '',
-            keywordLocation => '/allOf/0/$ref',
-            error => 'EXCEPTION: unable to find resource "#/definitions/foo"',
-          },
-        ],
-      },
-      'definitions is not recognized in >= draft2019-09',
-    );
+    $js->add_schema('http://example.com/otherdoc', $schema = { definitions => 1 });
   };
   cmp_result(
     \@warnings,
     [ re(qr/^no-longer-supported "definitions" keyword present/) ],
     'warned when using no-longer-supported keyword',
+  );
+
+  cmp_result(
+    $js->evaluate(1, 'http://example.com/mydoc')->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          instanceLocation => '',
+          keywordLocation => '/allOf/0/$ref',
+          absoluteKeywordLocation => 'http://example.com/mydoc#/allOf/0/$ref',
+          error => 'EXCEPTION: unable to find resource "http://example.com/otherdoc#/definitions/foo"',
+        },
+      ],
+    },
+    'definitions is not recognized in >= draft2019-09',
   );
 
   cmp_result(
