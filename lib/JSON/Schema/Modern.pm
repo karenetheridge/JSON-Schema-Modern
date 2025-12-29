@@ -1580,6 +1580,7 @@ applications that contain embedded JSON Schemas):
 =for :list
 * C<data_path>: adjusts the effective path of the data instance as of the start of evaluation
 * C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
+* C<callbacks>: see below
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 identifying various data that are not exposed by annotations.
@@ -1624,6 +1625,8 @@ applications that contain embedded JSON Schemas):
 * C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 * C<initial_schema_uri>: adjusts the absolute keyword location as of the start of evaluation
 * C<metaschema_uri>: use the indicated URI as the metaschema
+* C<callbacks>: see below
+* C<specification_version>: overrides the specification version to be used
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
 extracting data from within schemas and skipping properties that may look like keywords but actually
