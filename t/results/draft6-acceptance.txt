@@ -1,5 +1,5 @@
-generated with:              Test::JSON::Schema::Acceptance 1.035
-with commit:                 d69537acea93fd7481ad80ff3015d88ab0b13d5a (Test-JSON-Schema-Acceptance-1.034-20-gd69537a)
+generated with:              Test::JSON::Schema::Acceptance 1.036
+with commit:                 3fc541796930c64960f334917629a221e4d74ceb (Test-JSON-Schema-Acceptance-1.035-13-g3fc5417)
 from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft6
 optional tests included:     yes
