@@ -195,7 +195,8 @@ sub BUILD ($self, $args) {
     my $document = $self;
 
     if (not $resource) {
-      $resource = $args->{evaluator}->_get_resource($uri) or next;
+      $resource = $args->{evaluator}->_get_resource($uri) if $args->{evaluator};
+      next if not $resource;
       $document = $resource->{document};
     }
 
