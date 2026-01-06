@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.631
+version 0.632
 
 =head1 SYNOPSIS
 
@@ -370,6 +370,10 @@ C<data_path>: adjusts the effective path of the data instance as of the start of
 
 C<traversed_keyword_path>: adjusts the accumulated path as of the start of evaluation (or last C<$id> or C<$ref>)
 
+=item *
+
+C<callbacks>: see below
+
 =back
 
 You can pass a series of callback subs to this method corresponding to keywords, which is useful for
@@ -424,6 +428,14 @@ C<initial_schema_uri>: adjusts the absolute keyword location as of the start of 
 =item *
 
 C<metaschema_uri>: use the indicated URI as the metaschema
+
+=item *
+
+C<callbacks>: see below
+
+=item *
+
+C<specification_version>: overrides the specification version to be used
 
 =back
 
