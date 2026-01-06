@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.632     2026-01-06 18:43:29Z
           - now checking for references that target an unknown or incorrect
             location when schema documents are parsed
