@@ -37,7 +37,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema json_pointer_type canonical_uri_type load_cached_document);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema json_pointer_type canonical_uri_type core_types_type core_formats_type load_cached_document);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -102,17 +102,12 @@ has [qw(collect_annotations scalarref_booleans stringy_numbers strict with_defau
   isa => Bool,
 );
 
-# Validation §7.1-2: "Note that the "type" keyword in this specification defines an "integer" type
-# which is not part of the data model. Therefore a format attribute can be limited to numbers, but
-# not specifically to integers."
-my $core_types = Enum[qw(null object array boolean string number)];
-my @core_formats = qw(date-time date time duration email idn-email hostname idn-hostname ipv4 ipv6 uri uri-reference iri iri-reference uuid uri-template json-pointer relative-json-pointer regex);
 
 # { $format_name => { type => ..., sub => ... }, ... }
 has _format_validations => (
   is => 'bare',
   isa => my $format_type = HashRef[Dict[
-      type => $core_types|ArrayRef[$core_types],
+      type => core_types_type|ArrayRef[core_types_type],
       sub => CodeRef,
     ]],
   init_arg => 'format_validations',
@@ -128,7 +123,7 @@ sub add_format_validation ($self, $format, $definition) {
 
   # all core formats are of type string (so far); changing type of custom format is permitted
   croak "Type for override of format $format does not match original type"
-    if any { $format eq $_ } @core_formats and $definition->{type} ne 'string';
+    if core_formats_type->check($format) and $definition->{type} ne 'string';
 
   use autovivification 'store';
   $self->{_format_validations}{$format} = $definition;
