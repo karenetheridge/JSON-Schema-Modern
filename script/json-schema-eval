@@ -173,7 +173,8 @@ sub encode ($input) {
     ->convert_blessed(1)
     ->utf8(0)
     ->canonical(1)
-    ->pretty(1);
+    ->pretty(1)
+    ->space_before(0);
   $encoder->indent_length(2) if $encoder->can('indent_length');
   $encoder->encode($input);
 }
