@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix "hostname" format to reject IP addresses
 
 0.632     2026-01-06 18:43:29Z
           - now checking for references that target an unknown or incorrect

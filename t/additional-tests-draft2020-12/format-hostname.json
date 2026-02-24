@@ -1,0 +1,25 @@
+[
+    {
+        "description": "IPv4 addresses are not hostnames",
+        "schema": {
+            "format": "hostname"
+        },
+        "tests": [
+            {
+                "description": "IP address is rejected",
+                "data": "192.168.0.1",
+                "valid": false
+            },
+            {
+                "description": "dotted triplet is okay",
+                "data": "192.168.0",
+                "valid": true
+            },
+            {
+                "description": "partial digits in host are ok",
+                "data": "192.168.0.1.example.com",
+                "valid": true
+            }
+        ]
+    }
+]
