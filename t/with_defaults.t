@@ -59,7 +59,7 @@ subtest 'basic example' => sub {
   );
 
   my $defaults = $result->defaults;
-  jsonp_set($data, $_, $defaults->{$_}) foreach keys %$defaults;
+  jsonp_set($data, $defaults->%{$_}) foreach keys %$defaults;
 
   cmp_result(
     $data,
@@ -649,7 +649,7 @@ subtest 'jsonp_set permutations' => sub {
     '/f' => 7,
     '/g/h/i/1' => [ 10 ],
   };
-  jsonp_set($data, $_, $defaults->{$_}) foreach keys %$defaults;
+  jsonp_set($data, $defaults->%{$_}) foreach keys %$defaults;
   cmp_result(
     $data,
     { a => 1, b => { c => 3, d => 5, e => 6 }, f => 7, g => { h => { i => [ undef, [ 10 ] ] } } },
