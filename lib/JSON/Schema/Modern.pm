@@ -387,6 +387,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     keyword_path => '',                  # the rest of the path, since the start of evaluation or last $id or $ref
     errors => [],
     depth => 0,
+    data => ref $data ? dclone($data) : $data,
   };
 
   my $valid;
@@ -474,6 +475,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
           ? (annotations => $state->{annotations}) : ())
       : (errors => $state->{errors}),
     $state->{defaults} ? (defaults => $state->{defaults}) : (),
+    data => $state->{data},
   );
 }
 
@@ -1390,7 +1392,7 @@ C<contentEncoding> (when present) is used to decode the applied data payload and
 C<contentMediaType> will be used as the media-type for decoding to produce the data payload which is
 then applied to the schema in C<contentSchema> for validation. (Note that treating these keywords as
 anything beyond simple annotations is contrary to the specification, therefore this option defaults
-to false.)
+to false.) The decoded data is also reflected in L<JSON::Schema::Modern::Result/data>.
 
 See L</add_media_type> and L</add_encoding> for adding additional type support.
 
@@ -1511,8 +1513,8 @@ will result in an C<defaults> entry of:
     '/my_array/1' => 'green'
   }
 
-To modify your data by adding the missing default data, see
-L<JSON::Schema::Modern::Utilities/jsonp_set>.
+This data can be manipulated with L<JSON::Schema::Modern::Utilities/jsonp_set>; it is also available
+already populated into the instance data via L<JSON::Schema::Modern::Result/data>.
 
 =head1 METHODS
 

@@ -20,7 +20,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use Storable 'dclone';
 use Feature::Compat::Try;
-use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type E abort);
+use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type E abort jsonp_set);
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -54,6 +54,7 @@ sub _eval_keyword_contentEncoding ($class, $data, $schema, $state) {
     # decode the data now, so we can report errors for the right keyword
     try {
       $state->{_content_ref} = $decoder->(\$data);
+      jsonp_set($state->{data}, $state->{data_path}, $state->{_content_ref}->$*);
     }
     catch ($e) {
       chomp $e;
@@ -80,6 +81,7 @@ sub _eval_keyword_contentMediaType ($class, $data, $schema, $state) {
     # decode the data now, so we can report errors for the right keyword
     try {
       $state->{_content_ref} = $decoder->($state->{_content_ref} // \$data);
+      jsonp_set($state->{data}, $state->{data_path}, $state->{_content_ref}->$*);
     }
     catch ($e) {
       chomp $e;

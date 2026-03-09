@@ -22,6 +22,7 @@ subtest 'unrecognized encoding formats do not result in errors, when not asserti
     $js->evaluate(
       'hello',
       {
+        type => 'string',
         contentEncoding => 'base64',
         contentMediaType => 'image/png',
         contentSchema => false,
@@ -136,10 +137,17 @@ subtest 'draft2020-12 assertions' => sub {
         type => 'object',
         properties => {
           encoded_object => {
+            type => 'string',
             contentEncoding => 'base64',
             contentMediaType => 'application/json',
             contentSchema => {
               type => 'object',
+              properties => {
+                x => {
+                  type => 'string',
+                  default => 'default value',
+                },
+              },
               additionalProperties => {
                 const => 'ಠ_ಠ',
               },
@@ -264,13 +272,42 @@ subtest 'draft2020-12 assertions' => sub {
   );
 
   is_equal(
-    $js->evaluate(
+    (my $result = $js->evaluate(
       { encoded_object => 'eyJoaSI6IuCyoF/gsqAifQ==' }, # base64-encoded, json-encoded { hi => "ಠ_ಠ" }
       $schema,
-      { validate_content_schemas => 1 },
-    )->TO_JSON,
-    { valid => true },
+      {
+        validate_content_schemas => 1,
+        with_defaults => 1,
+        callbacks => {
+          type => sub ($self, $schema, $state) {
+            return 1 if $state->{data_path} ne '/properties/encoded_object';
+            is_equal(
+              $state->{data},
+              'eyJoaSI6IuCyoF/gsqAifQ==',
+              'before the content* keywords are evaluated, the instance data is still a string',
+            );
+          },
+        },
+      },
+    ))->TO_JSON,
+    {
+      valid => true,
+      defaults => {
+        '/encoded_object/x' => 'default value',
+      },
+    },
     'contentSchema successfully evaluates the decoded data',
+  );
+
+  is_equal(
+    $result->data,
+    {
+      encoded_object => {
+        hi => 'ಠ_ಠ',
+        x => 'default value',
+      },
+    },
+    'result object contains the instance data with the encoded data fully deserialized',
   );
 };
 

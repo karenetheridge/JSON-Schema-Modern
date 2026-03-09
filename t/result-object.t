@@ -658,4 +658,19 @@ subtest 'construction errors' => sub {
   );
 };
 
+subtest 'instance data in result' => sub {
+  my $result = JSON::Schema::Modern->new->evaluate(
+    my $data = {
+      foo => 1,
+      bar => 2,
+      baz => [ 1, 2, 3 ],
+    },
+    {},
+  );
+
+  is_equal($result->TO_JSON, { valid => true }, 'evaluation is successful');
+  is_equal($result->data, $data, 'result object contains the instance data');
+  isnt(refaddr($result->data), refaddr($data), 'data is cloned, rather than using the same reference');
+};
+
 done_testing;

@@ -1,6 +1,10 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - "default" data is now made directly available in the instance data
+            via the "data" attribute on JSON::Schema::Modern::Result,
+            optionally with missing values populated from "default" keywords
+            (when the "with_defaults" configuration is set)
 
 0.634     2026-03-15 19:19:16Z
           - fix "hostname" test failure when Data::Validate::Domain is not
@@ -24,7 +28,8 @@ Revision history for JSON-Schema-Modern
           - new "with_defaults" option (also available in "json-schema-eval"),
             for returning a list of missing values (from "default" keywords)
             to add to the instance data, and a "jsonp_set" helper for
-            processing the defaults
+            processing the defaults (or access it directly via the "data"
+            attribute on the Result object starting with version 0.635).
 
 0.629     2025-12-12 18:17:28Z
           - "json-schema-eval" script can now accept multiple --data options,

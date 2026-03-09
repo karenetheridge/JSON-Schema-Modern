@@ -23,7 +23,7 @@ use Types::Standard qw(ArrayRef InstanceOf Enum Bool Str Maybe Tuple Map Any);
 use Types::Common::Numeric 'PositiveInt';
 use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
-use JSON::Schema::Modern::Utilities qw(true false json_pointer_type);
+use JSON::Schema::Modern::Utilities qw(true false json_pointer_type jsonp_set);
 use JSON::PP ();
 use List::Util 1.45 'uniq';
 use if "$]" < 5.041010, 'List::Util' => qw(any all);
@@ -120,6 +120,10 @@ has defaults => (
   isa => Map[json_pointer_type, Any],
 );
 
+has data => (
+  is => 'ro',
+);
+
 around BUILDARGS => sub ($orig, $class, @args) {
   my $args = $class->$orig(@args);
 
@@ -145,6 +149,10 @@ around BUILDARGS => sub ($orig, $class, @args) {
 sub BUILD ($self, $args) {
   $self->{_errors} = $args->{_errors} if exists $args->{_errors};
   $self->{_annotations} = $args->{_annotations} if exists $args->{_annotations};
+
+  if (exists $args->{data} and exists $args->{defaults}) {
+    jsonp_set($args->{data}, $args->{defaults}->%{$_}) foreach keys $args->{defaults}->%*;
+  }
 }
 
 sub format ($self, $style, $formatted_annotations = undef) {
@@ -388,8 +396,18 @@ Also available as a read/write accessor.
 
 A hashref, mapping json pointer locations in the instance data to the default value assigned
 to the property at this location, taken from C<default> keywords in the schema under C<properties>
-and C<patternProperties> keywords.  This data will also be included in the "basic" output format
-when it is defined.
+and C<patternProperties> keywords (requires the L<JSON::Schema::Modern/defaults> configuration to be
+enabled). This data will also be included in the "basic" output format when it is defined.
+
+=head2 data
+
+Contains a cloned copy of the instance data that was evaluated; includes decoded values from
+C<contentEncoding> and C<contentMediaType> keywords, and is also populated with defaults if
+L</defaults> is set (via L<JSON::Schema::Modern/with_defaults>).
+
+In results coming from L<OpenAPI::Modern>, this value may contain deserialized data from various
+parts of the HTTP message, such as path and query parameters, header values, and the deserialized
+message body. Refer to that documentation for more details.
 
 =head1 METHODS
 
