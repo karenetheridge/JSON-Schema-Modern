@@ -623,7 +623,10 @@ subtest 'format: pure_integer' => sub {
     validate_formats => 1,
     format_validations => +{
       pure_integer => +{ type => 'number', sub => sub ($value) {
-        B::svref_2object(\$value)->FLAGS & B::SVf_IOK
+        # note: Storable::dclone mutates flags: 3.0 starts off with just NOK set, but
+        # afterwards it has both NOK and IOK set
+        !(B::svref_2object(\$value)->FLAGS & B::SVf_NOK) &&
+        (B::svref_2object(\$value)->FLAGS & B::SVf_IOK)
       } },
     },
   );
