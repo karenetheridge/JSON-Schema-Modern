@@ -12,7 +12,6 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::V0 ();
 use Sereal::Decoder;
 
 use lib 't/lib';
@@ -39,7 +38,7 @@ my @serialized_attributes = sort qw(
   _metaschema_vocabulary_classes
 );
 
-my $result = subtest 'thaw object in a separate process' => sub {
+my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
   local $/;
   binmode STDIN, ':raw';
   my $thawed = Sereal::Decoder->new->decode(<>);

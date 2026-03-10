@@ -13,10 +13,10 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Test2::V0 qw(!bag !bool !warnings), -no_pragmas => 1;  # prefer Test::Deep's versions of these exports
+use Test2::V0 qw(!bag !bool !warnings !subtest), -no_pragmas => 1;  # prefer Test::Deep and Test2::Warnings versions of these exports
 use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings';
-use if $ENV{AUTHOR_TESTING} && (caller(2))[1] !~ /acceptance/, 'Test2::Plugin::BailOnFail';
-use if $ENV{AUTHOR_TESTING}, 'Test2::Plugin::SubtestFilter';
+sub subtest { Test2::V0::subtest(@_); bail_if_not_passing() if $ENV{AUTHOR_TESTING}; }
+use if $ENV{AUTHOR_TESTING} || -d '.git', 'Test2::Plugin::SubtestFilter';
 use Test::Deep qw(!array !hash !blessed); # import symbols: ignore, re etc
 use Test2::API 'context_do';
 use Test::File::ShareDir -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
@@ -63,6 +63,13 @@ sub cmp_result ($got, $expected, $test_name) {
 
 sub is_passing () {
   context_do { shift->hub->is_passing };
+}
+
+sub bail_if_not_passing {
+  context_do {
+    my $ctx = shift;
+    $ctx->bail if not $ctx->hub->is_passing;
+  }
 }
 
 1;
