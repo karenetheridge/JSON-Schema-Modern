@@ -388,22 +388,26 @@ subtest 'default handling in applicators' => sub {
 };
 
 subtest 'jsonp_set permutations' => sub {
-  my $data = '';
-  my $newdata = jsonp_set($data, '', { foo => 1 });
-  is_equal(
-    $data,
-    '',
-    'cannot overwrite a non-reference with a hashref',
-  );
-  is_equal(
-    $newdata,
-    { foo => 1 },
-    '...but the reference is returned',
-  );
+  foreach my $data (undef, '', 'foo', 3) {
+    my $orig = $data;
+    my $newdata = jsonp_set($data, '', { foo => 1 });
+    is_equal(
+      $data,
+      $orig,
+      'cannot overwrite a non-reference with a hashref',
+    );
+    is_equal(
+      $newdata,
+      { foo => 1 },
+      '...but the reference is returned in the assigned value',
+    );
+  }
+
+  my ($data, $newdata);
 
   like(
-    dies { jsonp_set($data = '', '1', 2) },
-    qr/^cannot write into non-reference in void context/,
+    dies { jsonp_set($data = '', '/1', 2) },
+    qr/^cannot write into a non-reference in void context/,
     'when root type is a non-reference, result must be assigned',
   );
 
@@ -421,7 +425,7 @@ subtest 'jsonp_set permutations' => sub {
   );
   like(
     dies { jsonp_set($data = { foo => 1 }, '', 'a') },
-    qr/^cannot write into reference of different type in void context/,
+    qr/^cannot write into a reference of a different type in void context/,
     'when root type of original and new data do not match, result must be assigned',
   );
 
@@ -439,14 +443,14 @@ subtest 'jsonp_set permutations' => sub {
   );
   like(
     dies { jsonp_set($data = [ 1, 2, 3 ], '', 'a') },
-    qr/^cannot write into reference of different type in void context/,
+    qr/^cannot write into a reference of a different type in void context/,
     'when root type of original and new data do not match, result must be assigned',
   );
 
   $data = [ 0, 1, 2 ];
   like(
     dies { jsonp_set($data, '/foo', 'foo') },
-    qr/^cannot write hashref into a reference to an array in void context/,
+    qr/^cannot write a hashref into a reference to an array in void context/,
     'cannot use a string path in an array at the top level without mutating',
   );
 
@@ -654,6 +658,14 @@ subtest 'jsonp_set permutations' => sub {
     $data,
     { a => 1, b => { c => 3, d => 5, e => 6 }, f => 7, g => { h => { i => [ undef, [ 10 ] ] } } },
     'pod example',
+  );
+
+  $data = undef;
+  $data = jsonp_set($data, $defaults->%{$_}) foreach keys %$defaults;
+  is_equal(
+    $data,
+    { b => { d => 5, e => 6 }, f => 7, g => { h => { i => [ undef, [ 10 ] ] } } },
+    'when an lvalue is used, can populate data even over top of an undefined value',
   );
 };
 

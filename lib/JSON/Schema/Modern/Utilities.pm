@@ -314,28 +314,33 @@ sub unjsonp {
 # assigns a value to a data structure at a specific json pointer location
 # operates destructively, in place, unless the root data or type is being modified
 sub jsonp_set ($data, $pointer, $value) {
-  if (not grep ref $data eq $_, qw(HASH ARRAY)) {
-    return $value if defined wantarray;
-    croak 'cannot write into non-reference in void context';
-  }
+  croak 'cannot write into a non-reference in void context'
+    if not grep ref $data eq $_, qw(HASH ARRAY) and not defined wantarray;
 
   # assigning to the root overwrites existing data
   if (not length $pointer) {
     if (ref $data eq 'HASH' and ref $value ne 'HASH'
         or ref $data eq 'ARRAY' and ref $value ne 'ARRAY') {
       return $value if defined wantarray;
-      croak 'cannot write into reference of different type in void context';
+      croak 'cannot write into a reference of a different type in void context';
     }
 
-    $data->%* = $value->%* if ref $data eq 'HASH';
-    $data->@* = $value->@* if ref $data eq 'ARRAY';
+    if (ref $value eq 'HASH') {
+      $data = {} if not ref $data;
+      $data->%* = $value->%*;
+    }
+    if (ref $value eq 'ARRAY') {
+      $data = [] if not ref $data;
+      $data->@* = $value->@*;
+    }
+
     return $data;
   }
 
   my @keys = map +(s!~0!~!gr =~ s!~1!/!gr),
     (length $pointer ? (split /\//, $pointer, -1) : ($pointer));
 
-  croak 'cannot write hashref into a reference to an array in void context'
+  croak 'cannot write a hashref into a reference to an array in void context'
     if @keys >= 2 and $keys[1] !~ /^\d+\z/a and ref $data eq 'ARRAY' and not defined wantarray;
 
   shift @keys;  # always '', indicating the root

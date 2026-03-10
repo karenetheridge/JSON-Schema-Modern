@@ -1341,7 +1341,7 @@ subtest 'overriding starting locations' => sub {
         },
       },
       beta => {
-        not => true,
+        const => 2,
       },
     },
   });
@@ -1361,9 +1361,9 @@ subtest 'overriding starting locations' => sub {
       errors => [
         {
           instanceLocation => '/html/body/div/div/h1/div/p/0',
-          keywordLocation => '/some/other/document/$ref/items/$ref/not',
-          absoluteKeywordLocation => 'https://example.com/api#/$defs/beta/not',
-          error => 'subschema is true',
+          keywordLocation => '/some/other/document/$ref/items/$ref/const',
+          absoluteKeywordLocation => 'https://example.com/api#/$defs/beta/const',
+          error => 'value does not match',
         },
         {
           instanceLocation => '/html/body/div/div/h1/div/p',
@@ -1374,6 +1374,24 @@ subtest 'overriding starting locations' => sub {
       ],
     },
     'can alter locations with data_path, traversed_keyword_path, and add_schema()',
+  );
+
+  is_equal(
+    (my $result = $js->evaluate(
+      [ 2 ],
+      'https://example.com/api#/$defs/alpha',
+      {
+        data_path => '/html/body/div/div/h1/div/p',     # reported data location
+        traversed_keyword_path => '/some/other/document/$ref',   # reported keywords passed through before we start
+      },
+    ))->TO_JSON,
+    { valid => true, },
+    'successful result with data location adjusted',
+  );
+  is_equal(
+    $result->data,
+    { html => { body => { div => { div => { h1 => { div => { p => [ 2 ] } } } } } } },
+    'data is populated into the correct location (adjusted for data_path)',
   );
 };
 

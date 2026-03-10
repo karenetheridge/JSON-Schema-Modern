@@ -37,7 +37,7 @@ use Feature::Compat::Try;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Result;
 use JSON::Schema::Modern::Document;
-use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema json_pointer_type canonical_uri_type core_types_type core_formats_type load_cached_document);
+use JSON::Schema::Modern::Utilities qw(get_type canonical_uri E abort annotate_self jsonp is_type assert_uri local_annotations is_schema json_pointer_type canonical_uri_type core_types_type core_formats_type load_cached_document jsonp_set);
 use namespace::clean;
 
 our @CARP_NOT = qw(
@@ -387,8 +387,9 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     keyword_path => '',                  # the rest of the path, since the start of evaluation or last $id or $ref
     errors => [],
     depth => 0,
-    data => ref $data ? dclone($data) : $data,
   };
+
+  $state->{data} = jsonp_set('', $state->{data_path}, ref $data ? dclone($data) : $data);
 
   my $valid;
   try {
