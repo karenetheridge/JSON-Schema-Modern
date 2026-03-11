@@ -14,7 +14,7 @@ no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Test2::V0 qw(!bag !bool !warnings !subtest), -no_pragmas => 1;  # prefer Test::Deep and Test2::Warnings versions of these exports
-use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings';
+use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings', ':report_warnings';
 sub subtest { Test2::V0::subtest(@_); bail_if_not_passing() if $ENV{AUTHOR_TESTING}; }
 use if $ENV{AUTHOR_TESTING} || -d '.git', 'Test2::Plugin::SubtestFilter';
 use Test::Deep qw(!array !hash !blessed); # import symbols: ignore, re etc
