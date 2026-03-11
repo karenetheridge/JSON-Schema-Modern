@@ -18,7 +18,7 @@ no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use B;
-use Carp 'croak';
+use Carp qw(carp croak);
 use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
@@ -302,13 +302,13 @@ sub is_elements_unique ($array, $state = {}) {
 # the first argument is an already-encoded json pointer; remaining arguments are path segments to be
 # encoded and appended
 sub jsonp {
-  warn q{first argument to jsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
+  carp q{first argument to jsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
   return join('/', shift, map s!~!~0!gr =~ s!/!~1!gr, grep defined, @_);
 }
 
 # splits a json pointer apart into its path segments
 sub unjsonp {
-  warn q{argument to unjsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
+  carp q{argument to unjsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
   return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $_[0];
 }
 
