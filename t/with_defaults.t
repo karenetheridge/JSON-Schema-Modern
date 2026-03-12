@@ -389,7 +389,7 @@ subtest 'default handling in applicators' => sub {
 
 subtest 'jsonp_set permutations' => sub {
   my $data = '';
-  my $newdata = jsonp_set($data, '', { foo => 1 }),
+  my $newdata = jsonp_set($data, '', { foo => 1 });
   is_equal(
     $data,
     '',
@@ -451,7 +451,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => 1 };
-  jsonp_set($data, '', { foo => 1 }),
+  jsonp_set($data, '', { foo => 1 });
   is_equal(
     $data,
     { foo => 1 },
@@ -459,7 +459,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = [ 1..3 ];
-  jsonp_set($data, '', [ 4..6 ]),
+  jsonp_set($data, '', [ 4..6 ]);
   is_equal(
     $data,
     [ 4..6 ],
@@ -467,7 +467,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => 1 };
-  jsonp_set($data, '/', 3),
+  jsonp_set($data, '/', 3);
   is_equal(
     $data,
     { '' => 3, a => 1 },
@@ -475,7 +475,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => 1 };
-  jsonp_set($data, '/a', 2),
+  jsonp_set($data, '/a', 2);
   is_equal(
     $data,
     { a => 2 },
@@ -483,7 +483,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => 1 };
-  jsonp_set($data, '/b', 2),
+  jsonp_set($data, '/b', 2);
   is_equal(
     $data,
     { a => 1, b => 2 },
@@ -491,7 +491,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => { b => 1 } };
-  jsonp_set($data, '/a/b', 2),
+  jsonp_set($data, '/a/b', 2);
   is_equal(
     $data,
     { a => { b => 2 } },
@@ -499,7 +499,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => { b => 1 } };
-  jsonp_set($data, '/a/c', 2),
+  jsonp_set($data, '/a/c', 2);
   is_equal(
     $data,
     { a => { b => 1, c => 2 } },
@@ -507,7 +507,7 @@ subtest 'jsonp_set permutations' => sub {
   );
 
   $data = { a => { b => 1 } };
-  jsonp_set($data, '/c/d', 2),
+  jsonp_set($data, '/c/d', 2);
   is_equal(
     $data,
     { a => { b => 1 }, c => { d => 2 } },
