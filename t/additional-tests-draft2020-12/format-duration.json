@@ -10,6 +10,11 @@
                 "valid": true
             },
             {
+                "description": "years and days cannot appear without months",
+                "data": "P1Y2D",
+                "valid": false
+            },
+            {
                 "description": "months and days can appear without years",
                 "data": "P1M2D",
                 "valid": true
@@ -20,28 +25,28 @@
                 "valid": true
             },
             {
-                "description": "minutes and seconds can appear without hour",
-                "data": "PT1M2S",
-                "valid": true
+                "description": "hours and seconds cannot appear without minutes",
+                "data": "PT1H2S",
+                "valid": false
             },
             {
-                "description": "elements may be omitted if their value is zero",
-                "data": "PT1H1S",
+                "description": "minutes and seconds can appear without hour",
+                "data": "PT1M2S",
                 "valid": true
             },
             {
                 "description": "half a year duration, with full stop decimal point",
                 "comment": "ISO 8601 revision in year 2000 added decimals",
                 "data": "P0.5Y",
-                "valid": true
+                "valid": false
             },
             {
                 "description": "half a year duration, with comma decimal point",
                 "data": "P0,5Y",
-                "valid": true
+                "valid": false
             },
             {
-                "description": "only one unit can have a non-integer quantity",
+                "description": "only one (now zero) units can have a non-integer quantity",
                 "data": "P0.5Y2.1M",
                 "valid": false
             },

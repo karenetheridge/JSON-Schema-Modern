@@ -67,20 +67,21 @@ sub keywords ($class, $spec_version) {
     my @o = split(/\./, $_[0], 5);
     @o == 4 && (grep /^(?:0|[1-9][0-9]{0,2})\z/, @o) == 4 && (grep $_ < 256, @o) == 4;
   };
-  # https://datatracker.ietf.org/doc/html/rfc3339#appendix-A with some additions for the 2000 version
-  # as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
+  # https://datatracker.ietf.org/doc/html/rfc3339#appendix-A
+  # Changes in the 2000 version as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
+  # (allowing fractional numbers) are NOT included
   my $duration_re = do {  # duration
-    my $num = qr{[0-9]+(?:[.,][0-9]+)?};
-    my $second = qr{${num}S};
-    my $minute = qr{${num}M};
-    my $hour = qr{${num}H};
-    my $time = qr{T(?=[0-9])(?:$hour)?(?:$minute)?(?:$second)?};
-    my $day = qr{${num}D};
-    my $month = qr{${num}M};
-    my $year = qr{${num}Y};
-    my $week = qr{${num}W};
-    my $date = qr{(?=[0-9])(?:$year)?(?:$month)?(?:$day)?};
-    qr{^P(?:(?=.)(?:$date)?(?:$time)?|$week)\z};
+    my $num = '[0-9]+';
+    my $second = "${num}S";
+    my $minute = "${num}M(?:$second)?";
+    my $hour = "${num}H(?:$minute)?";
+    my $time = "T(?:$hour|$minute|$second)";
+    my $day = "${num}D";
+    my $month = "${num}M(?:$day)?";
+    my $year = "${num}Y(?:$month)?";
+    my $week = "${num}W";
+    my $date = "(?:$year|$month|$day)(?:$time)?";
+    qr{^P(?:$week|$date|$time)\z};
   };
 
   my $formats = +{

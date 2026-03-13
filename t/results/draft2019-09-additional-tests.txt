@@ -11,7 +11,7 @@ badRef.json                                  3          0     0
 faux-buggy-schemas.json                      2          0     0
 format-date-time.json                        4          0     0
 format-date.json                             1          0     0
-format-duration.json                         9          0     0
+format-duration.json                        10          0     0
 format-ipv4.json                             4          0     0
 format-ipv6.json                            17          0     0
 format-relative-json-pointer.json            7          0     0
@@ -29,4 +29,4 @@ short-circuit.json                          26          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                              5          0     0
 ---------------------------------------------------------------
-TOTAL                                      992          0     0
+TOTAL                                      993          0     0
