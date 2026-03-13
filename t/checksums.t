@@ -44,7 +44,7 @@ share/draft2020-12/meta/format-assertion.json c78476a32441e52b48f13027a37fcfa6
 share/draft2020-12/meta/meta-data.json c416e310b2648f291e51992b7dc012ab
 share/draft2020-12/meta/unevaluated.json 9e4dddcbb0581b939b686048713a1b8e
 share/draft2020-12/meta/validation.json a5a6bc93fa352985fc455e6325237f9c
-share/draft2020-12/output/schema.json 6efc8e121569c98060dc754e88c52113
+share/draft2020-12/output/schema.json 3dbe61924d5510b8ed796573b152a03b
 share/draft2020-12/schema.json e32920982620b2b43803dc82d4640b50
 share/draft4/schema.json c6be0c4792c7455a526f0e0cc9eb7d25
 share/draft6/schema.json 0376a64fd48e524336d37410c50f7b74
