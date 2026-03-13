@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.633     2026-03-13 22:40:42Z
           - fix "hostname" format to reject IP addresses
           - fix "duration" format to disallow fractional units (only added in
             the ISO8601 2000 addendum, not valid in the ABNF in RFC3339), and

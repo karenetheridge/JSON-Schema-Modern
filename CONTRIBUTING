@@ -86,6 +86,10 @@ Generated files such as README, CONTRIBUTING, Makefile.PL, LICENSE etc should
 *not* be included in your pull request, as they will be updated automatically
 during the next release.
 
+I will not accept AI-generated or AI-assisted contributions unless the nature of the AI assistance
+is clearly identified with the pull request. Ignoring this request will result in a ban of future
+contributions to any of my work.
+
 If you have found a bug, but do not have an accompanying patch to fix it, you
 can submit an issue report here:
 https://github.com/karenetheridge/JSON-Schema-Modern/issues
@@ -100,4 +104,4 @@ request to the .mailmap file to contain the correct mapping.
 
 
 This file was generated via Dist::Zilla::Plugin::GenerateFile::FromShareDir 0.015
-from a template file originating in Dist-Zilla-PluginBundle-Author-ETHER-0.170.
+from a template file originating in Dist-Zilla-PluginBundle-Author-ETHER-0.171.
