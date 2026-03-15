@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.634     2026-03-15 19:19:16Z
           - fix "hostname" test failure when Data::Validate::Domain is not
             installed
