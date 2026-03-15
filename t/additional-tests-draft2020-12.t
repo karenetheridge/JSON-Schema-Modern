@@ -37,6 +37,7 @@ my @warnings = warnings {
             # these all depend on optional prereqs
             !eval { require Time::Moment; 1 } ? map "format-$_.json", qw(date-time date time) : (),
             !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
+            !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION('0.13'); 1 } ? 'format-hostname.json' : (),
           ] },
         # various edge cases that are difficult to accomodate
         JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' ? { file => 'integers.json', group_description => 'int64 range checks', test_description => 'beyond lower boundary' } : (),

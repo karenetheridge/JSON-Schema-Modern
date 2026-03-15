@@ -13,6 +13,21 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
+use if $ENV{NO_OPTIONAL_MODULES}, 'Devel::Hide', qw(
+  Time::Moment
+  DateTime::Format::RFC3339
+  Data::Validate::Domain
+  Email::Address::XS
+  Net::IDN::Encode
+  Sereal
+  Cpanel::JSON::XS
+);
+
+if ($ENV{NO_OPTIONAL_MODULES}) {
+  $ENV{AUTHOR_TESTING} = 0;   # disable official test suite tests: they require these modules
+  $ENV{RELEASE_TESTING} = 0;  # ""
+}
+
 use Test2::V0 qw(!bag !bool !warnings !subtest), -no_pragmas => 1;  # prefer Test::Deep and Test2::Warnings versions of these exports
 use if $ENV{AUTHOR_TESTING}, 'Test2::Warnings', ':report_warnings';
 sub subtest { Test2::V0::subtest(@_); bail_if_not_passing() if $ENV{AUTHOR_TESTING}; }

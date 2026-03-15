@@ -48,13 +48,13 @@ sub keywords ($class, $spec_version) {
     Email::Address::XS->parse_bare_address($_[0])->is_valid;
   };
   my $is_hostname = sub { # hostname, idn-hostname
-    # FIXME: draft7 hostname uses RFC1034, draft2019-09+ hostname uses RFC1123
-    require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13);
-
     # A dotted quad (such as 127.0.0.1) is not considered a domain, but the use of
     # domain_disable_tld_validation results in a valid result anyway.
     # see https://github.com/houseabsolute/Data-Validate-Domain/pull/15
     return 0 if $_[0] =~ /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/;
+
+    # FIXME: draft7 hostname uses RFC1034, draft2019-09+ hostname uses RFC1123
+    require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13);
 
     Data::Validate::Domain::is_domain($_[0],
       { domain_disable_tld_validation => 1, domain_allow_single_label => 1 });
