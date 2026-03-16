@@ -19,6 +19,7 @@ use if $ENV{NO_OPTIONAL_MODULES}, 'Devel::Hide', qw(
   Data::Validate::Domain
   Email::Address::XS
   Net::IDN::Encode
+  Data::Validate::URI
   Sereal
   Cpanel::JSON::XS
 );

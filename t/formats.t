@@ -23,6 +23,7 @@ use Test::Without::Module 0.19 qw(
   Data::Validate::Domain
   Email::Address::XS
   Net::IDN::Encode
+  Data::Validate::URI
 );
 
 use constant ALL_FORMATS => [ qw(

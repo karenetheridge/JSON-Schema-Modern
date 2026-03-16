@@ -16,6 +16,6 @@ json-pointer.json                           38          0     0
 unknown.json                                 7          0     0
 uri-reference.json                          15          0     0
 uri-template.json                            9          1     0
-uri.json                                    35          1     0
+uri.json                                    36          0     0
 ---------------------------------------------------------------
-TOTAL                                      229          3     0
+TOTAL                                      230          2     0

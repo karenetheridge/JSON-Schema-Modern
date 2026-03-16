@@ -32,6 +32,7 @@ if ($ENV{EXTENDED_TESTING}) {
     'DateTime::Format::RFC3339' => 0,
     'Email::Address::XS' => '1.04',
     'Data::Validate::Domain' => 0.13,
+    'Data::Validate::URI' => 0,
   };
 }
 
@@ -40,6 +41,7 @@ if ($ENV{AUTHOR_TESTING}) {
   eval { require DateTime::Format::RFC3339; 1 } or fail $@;
   eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } or fail $@;
   eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } or fail $@;
+  eval { require Data::Validate::URI; 1 } or fail $@;
 }
 
 my $version = 'draft4';
@@ -63,13 +65,13 @@ acceptance_tests(
           !$ENV{AUTHOR_TESTING} && !eval { require DateTime::Format::RFC3339; 1 } ? 'date-time.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? 'email.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } ? 'hostname.json' : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::URI; 1 } ? 'uri.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
       { file => 'hostname.json', group_description => 'validation of host names', test_description => 'trailing dot' },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
-      { file => 'uri.json',
-        test_description => 'validation of URIs',
-        test_description => 'an invalid URI with comma in scheme' },  # Mojo::URL does not fully validate
+      { file => 'uri.json', group_description => 'validation of URIs',
+        test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
     ]),
   },
 );

@@ -26,7 +26,7 @@ time.json                                   46          0     0
 unknown.json                                 7          0     0
 uri-reference.json                          15          0     0
 uri-template.json                            9          1     0
-uri.json                                    35          1     0
+uri.json                                    36          0     0
 uuid.json                                   22          0     0
 ---------------------------------------------------------------
-TOTAL                                      506         51     0
+TOTAL                                      507         50     0
