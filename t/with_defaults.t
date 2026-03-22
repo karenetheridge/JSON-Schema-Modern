@@ -667,6 +667,28 @@ subtest 'jsonp_set permutations' => sub {
     { b => { d => 5, e => 6 }, f => 7, g => { h => { i => [ undef, [ 10 ] ] } } },
     'when an lvalue is used, can populate data even over top of an undefined value',
   );
+
+  $data = 'root';
+  like(
+    dies { jsonp_set($data, '', [ 1, 2 ]) },
+    qr/^cannot write into a non-reference in void context/,
+    'when root type is a non-reference, result must be assigned',
+  );
+
+  $data = jsonp_set($data, '', [ 1, 2 ]);
+  is_equal(
+    $data,
+    [ 1, 2 ],
+    'can write a reference into a non-reference location when lvalue provided',
+  );
+
+  $data = 'root';
+  $data = jsonp_set($data, '', 'new value');
+  is_equal(
+    $data,
+    'new value',
+    'can write a non-reference into a non-reference location when lvalue provided',
+  );
 };
 
 done_testing;

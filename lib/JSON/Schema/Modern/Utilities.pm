@@ -319,8 +319,7 @@ sub jsonp_set ($data, $pointer, $value) {
 
   # assigning to the root overwrites existing data
   if (not length $pointer) {
-    if (ref $data eq 'HASH' and ref $value ne 'HASH'
-        or ref $data eq 'ARRAY' and ref $value ne 'ARRAY') {
+    if (not ref $data or ref $data ne ref $value) {
       return $value if defined wantarray;
       croak 'cannot write into a reference of a different type in void context';
     }

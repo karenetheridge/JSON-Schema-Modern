@@ -136,7 +136,7 @@ subtest 'draft2020-12 assertions' => sub {
       my $schema = {
         type => 'object',
         properties => {
-          encoded_object => {
+          encoded_object => my $subschema = {
             type => 'string',
             contentEncoding => 'base64',
             contentMediaType => 'application/json',
@@ -308,6 +308,40 @@ subtest 'draft2020-12 assertions' => sub {
       },
     },
     'result object contains the instance data with the encoded data fully deserialized',
+  );
+
+
+  is_equal(
+    ($result = $js->evaluate(
+      'eyJoaSI6IuCyoF/gsqAifQ==', # base64-encoded, json-encoded { hi => 'ಠ_ಠ' }
+      $subschema,
+      {
+        validate_content_schemas => 1,
+        callbacks => {
+          contentEncoding => sub ($self, $schema, $state) {
+            is_equal(
+              $state->{data},
+              qq!{"hi":"\xe0\xb2\xa0\x5f\xe0\xb2\xa0"}!,
+              'after contentEncoding, the instance data is a decoded string',
+            );
+          },
+          contentMediaType => sub ($self, $schema, $state) {
+            is_equal(
+              $state->{data},
+              { hi => 'ಠ_ಠ' },
+              'after contentMediaType, the instance data is a decoded object',
+            );
+          },
+        },
+      }))->TO_JSON,
+    { valid => true },
+    'decode and populate content into the top level of the result data',
+  );
+
+  is_equal(
+    $result->data,
+    { hi => 'ಠ_ಠ' },
+    'result object contains the instance data with the encoded data fully deserialized into he root',
   );
 };
 
