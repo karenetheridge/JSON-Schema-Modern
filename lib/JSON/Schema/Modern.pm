@@ -432,7 +432,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     # globally for the entire evaluation, so we store that value in a high bit.
     $state->{collect_annotations} = ($state->{collect_annotations}//0) << 8;
 
-    $valid = $self->_eval_subschema($data, $schema_info->{schema}, $state);
+    $valid = $self->_evaluate_subschema($data, $schema_info->{schema}, $state);
     warn 'result is false but there are no errors' if not $valid and not $state->{errors}->@*;
     warn 'result is true but there are errors' if $valid and $state->{errors}->@*;
   }
@@ -677,8 +677,8 @@ sub _traverse_subschema ($self, $schema, $state) {
   return $valid;
 }
 
-sub _eval_subschema ($self, $data, $schema, $state) {
-  croak '_eval_subschema called in void context' if not defined wantarray;
+sub _evaluate_subschema ($self, $data, $schema, $state) {
+  croak '_evaluate_subschema called in void context' if not defined wantarray;
 
   # callers created a new $state for us, so we do not propagate upwards changes to depth, traversed
   # paths; but annotations, errors are arrayrefs so their contents will be shared

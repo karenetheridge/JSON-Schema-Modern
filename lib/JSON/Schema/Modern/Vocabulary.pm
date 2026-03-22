@@ -70,7 +70,7 @@ sub traverse_property_schema ($class, $schema, $state, $property) {
 }
 
 sub eval ($class, $data, $schema, $state) {
-  $state->{evaluator}->_eval_subschema($data, $schema, $state);
+  $state->{evaluator}->_evaluate_subschema($data, $schema, $state);
 }
 
 sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
@@ -82,7 +82,7 @@ sub eval_subschema_at_uri ($class, $data, $schema, $state, $uri) {
   my $scope_uri = $schema_info->{canonical_uri}->clone->fragment(undef);
   push $state->{dynamic_scope}->@*, $scope_uri if $state->{dynamic_scope}->[-1] ne $scope_uri;
 
-  return $state->{evaluator}->_eval_subschema($data, $schema_info->{schema},
+  return $state->{evaluator}->_evaluate_subschema($data, $schema_info->{schema},
     +{
       %$state,
       # keyword is assumed to be json pointer-encoded (if a suffix path is needed), so we just concat
