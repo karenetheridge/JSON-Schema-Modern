@@ -24,6 +24,7 @@ use Scalar::Util 'looks_like_number';
 use Storable 'dclone';
 use Feature::Compat::Try;
 use Mojo::JSON ();
+use Mojo::JSON::Pointer ();
 use JSON::PP ();
 use Types::Standard qw(Str InstanceOf Enum);
 use Mojo::File 'path';
@@ -41,6 +42,7 @@ our @EXPORT_OK = qw(
   is_elements_unique
   jsonp
   unjsonp
+  jsonp_get
   jsonp_set
   local_annotations
   canonical_uri
@@ -309,6 +311,10 @@ sub jsonp {
 sub unjsonp {
   carp q{argument to unjsonp should be '' or start with '/'} if length($_[0]) and substr($_[0],0,1) ne '/';
   return map s!~0!~!gr =~ s!~1!/!gr, split m!/!, $_[0];
+}
+
+sub jsonp_get ($data, $pointer) {
+  Mojo::JSON::Pointer->new($data)->get($pointer);
 }
 
 # assigns a value to a data structure at a specific json pointer location
@@ -740,6 +746,11 @@ are appended.
   my @components = unjsonp('/paths/~1foo~1{foo_id}/get/responses');
 
 Splits a json pointer string into its path components, with correct unescaping.
+
+=head2 jsonp_get
+
+  # 4
+  my $val = jsonp_get({ a => 1, b => { c => 3, d => 4 } }, '/b/d');
 
 =head2 jsonp_set
 
