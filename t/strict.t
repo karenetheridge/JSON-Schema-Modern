@@ -38,13 +38,13 @@ my $schema = {
 
 my $document = $js->add_schema($schema);
 
-cmp_result(
+is_equal(
   $js->evaluate({ alpha => 1, beta => 2 }, 'my_loose_schema')->TO_JSON,
   { valid => true },
   'by default, unknown keywords are allowed in evaluate()',
 );
 
-cmp_result(
+is_equal(
   $js->evaluate({ alpha => 1, beta => 2 }, 'my_loose_schema', { strict => 1 })->TO_JSON,
   {
     valid => false,
@@ -61,13 +61,13 @@ cmp_result(
   'strict mode aborts immediately on unknown keywords during evaluation via a config override',
 );
 
-cmp_result(
+is_equal(
   $js->validate_schema($schema)->TO_JSON,
   { valid => true },
   'by default, unknown keywords are allowed in validate_schema()',
 );
 
-cmp_result(
+is_equal(
   $js->validate_schema($schema, { strict => 1 })->TO_JSON,
   my $schema_result = {
     valid => false,
@@ -92,14 +92,14 @@ cmp_result(
 
 $js = JSON::Schema::Modern->new(strict => 1);
 
-cmp_result(
+is_equal(
   $js->validate_schema($schema)->TO_JSON,
   $schema_result,
   'strict mode disallows unknown keywords in the schema data passed to validate_schema()',
 );
 
 delete $schema->{'$id'};
-cmp_result(
+is_equal(
   $js->evaluate({ alpha => 1 }, $schema)->TO_JSON,
   {
     valid => false,
@@ -131,7 +131,7 @@ my $lax_metaschema = {
 $js->add_schema($lax_metaschema);
 $schema->{'$schema'} = 'my_lax_metaschema';
 
-cmp_result(
+is_equal(
   $js->validate_schema($schema)->TO_JSON,
   {
     valid => false,
@@ -156,7 +156,7 @@ cmp_result(
 
 $schema->{'$schema'} = 'http://json-schema.org/draft-07/schema#';
 
-cmp_result(
+is_equal(
   $js->validate_schema($schema)->TO_JSON,
   {
     valid => false,
@@ -179,7 +179,7 @@ cmp_result(
 );
 
 subtest 'strict and if/then/else' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(strict => 1)->evaluate(
       $_,
       {
@@ -196,7 +196,7 @@ subtest 'strict and if/then/else' => sub {
 };
 
 subtest 'strict and short-circuit' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       { foo => 1, bar => 2 },
       {
@@ -228,7 +228,7 @@ subtest 'strict and short-circuit' => sub {
     'strict mode will work properly even when some keywords short-circuit',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       { alpha => { beta => 2, gamma => 3 } },
       # this is not a valid test, because we never preserve errors from 'if'.

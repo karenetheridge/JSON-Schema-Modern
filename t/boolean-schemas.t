@@ -51,7 +51,7 @@ foreach my $test (@tests) {
   );
 }
 
-cmp_result(
+is_equal(
   $js->evaluate('hello', [])->TO_JSON,
   {
     valid => false,
@@ -68,7 +68,7 @@ cmp_result(
 
 $js = JSON::Schema::Modern->new(scalarref_booleans => 1);
 
-cmp_result(
+is_equal(
   $js->evaluate('hello', \0)->TO_JSON,
   {
     valid => false,

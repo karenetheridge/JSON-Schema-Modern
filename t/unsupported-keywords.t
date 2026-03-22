@@ -42,7 +42,7 @@ foreach my $index (0 .. $#warnings) {
   foreach my $keyword (@$removed_keywords) {
     cmp_result(
       [ warnings {
-          cmp_result(
+          is_equal(
             $js->evaluate(true, { $keyword => $schemas{$keyword} })->TO_JSON,
             { valid => true },
             'schema with "'.$keyword.'" still validates in '.$spec_version,
@@ -60,9 +60,9 @@ foreach my $index (0 .. $#warnings) {
     local $SIG{__WARN__} = sub {
       warn @_ if $_[0] =~ /^no-longer-supported "$keyword" keyword present/;
     };
-    cmp_result(
+    is_equal(
       [ warnings {
-          cmp_result(
+          is_equal(
             $js->evaluate(true, { $keyword => $schemas{$keyword} })->TO_JSON,
             { valid => true },
             'schema with "'.$keyword.'" validates in '.$spec_version,

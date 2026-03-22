@@ -24,7 +24,7 @@ my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabular
 subtest 'load cached metaschema' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->_get_resource(METASCHEMA),
     undef,
     'this resource is not yet known',

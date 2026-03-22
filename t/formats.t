@@ -50,7 +50,7 @@ use constant ALL_FORMATS => [ qw(
 
 my ($annotation_result, $validation_result);
 subtest 'no validation' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 0)
       ->evaluate('abc', { format => 'uuid' })->TO_JSON,
     $annotation_result = {
@@ -66,7 +66,7 @@ subtest 'no validation' => sub {
     'validate_formats=0 disables format assertion behaviour; annotation is still produced',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1)
       ->evaluate('abc', { format => 'uuid' }, { validate_formats => 0 })->TO_JSON,
     $annotation_result,
@@ -77,13 +77,13 @@ subtest 'no validation' => sub {
 subtest 'simple validation' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1, validate_formats => 1);
 
-  cmp_result(
+  is_equal(
     $js->evaluate(123, { format => 'uuid' })->TO_JSON,
     $annotation_result,
     'non-string values are valid, and produce an annotation',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       '2eb8aa08-aa98-11ea-b4aa-73b441d16380',
       { format => 'uuid' },
@@ -92,7 +92,7 @@ subtest 'simple validation' => sub {
     'simple success',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate('123', { format => 'uuid' })->TO_JSON,
     $validation_result = {
       valid => false,
@@ -109,7 +109,7 @@ subtest 'simple validation' => sub {
 
   $js = JSON::Schema::Modern->new(collect_annotations => 1);
   ok(!$js->validate_formats, 'format_validation defaults to false');
-  cmp_result(
+  is_equal(
     $js->evaluate('123', { format => 'uuid' }, { validate_formats => 1 })->TO_JSON,
     $validation_result,
     'format validation can be turned on in evaluate()',
@@ -155,7 +155,7 @@ subtest 'override a format sub' => sub {
   );
 
   $js->add_format_validation(uuid => sub { $_[0] =~ /^[a-z0-9-]+\z/ });
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         0,
@@ -217,7 +217,7 @@ subtest 'override a format sub' => sub {
     'check syntax of implementation when adding a new format',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         { uuid => '2eb8aa08-aa98-11ea-b4aa-73b441d16380', mult_5 => 3 },
@@ -263,7 +263,7 @@ subtest 'override a format sub' => sub {
   # create a new format definition which uses a different type
   $js->add_format_validation(keys_mult_2 => +{ type => 'object', sub => sub { keys($_[0]->%*) > 2 } });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         {},
@@ -298,13 +298,13 @@ subtest 'toggle validate_formats after adding schema' => sub {
   my $js = JSON::Schema::Modern->new;
   my $document = $js->add_schema(my $uri = 'http://localhost:1234/ipv4', { format => 'ipv4' });
 
-  cmp_result(
+  is_equal(
     $js->evaluate('hello', $uri)->TO_JSON,
     { valid => true },
     'assertion behaviour is off initially',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate('hello', $uri, { validate_formats => 1 })->TO_JSON,
     {
       valid => false,
@@ -320,7 +320,7 @@ subtest 'toggle validate_formats after adding schema' => sub {
     'assertion behaviour can be enabled later with an already-loaded schema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate('127.0.0.1', $uri, { validate_formats => 1 })->TO_JSON,
     { valid => true },
     'valid assertion behaviour does not die',
@@ -328,7 +328,7 @@ subtest 'toggle validate_formats after adding schema' => sub {
 
   my $js2 = JSON::Schema::Modern->new(validate_formats => 1);
   $js2->add_document($uri, $document);
-  cmp_result(
+  is_equal(
     $js2->evaluate('hello', $uri)->TO_JSON,
     {
       valid => false,
@@ -344,7 +344,7 @@ subtest 'toggle validate_formats after adding schema' => sub {
     'a schema document can be used with another evaluator with assertion behaviour',
   );
 
-  cmp_result(
+  is_equal(
     $js2->evaluate('127.0.0.1', $uri)->TO_JSON,
     { valid => true },
     'valid assertion behaviour does not die',
@@ -368,7 +368,7 @@ subtest 'custom metaschemas' => sub {
     },
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'not-an-ip',
       {
@@ -392,7 +392,7 @@ subtest 'custom metaschemas' => sub {
     'custom metaschema using format-assertion=false validates formats',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'not-an-ip',
       {
@@ -420,13 +420,13 @@ subtest 'custom metaschemas' => sub {
 subtest 'core formats added after draft7' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft7', validate_formats => 1);
 
-  cmp_result(
+  is_equal(
     $js->evaluate('123', { format => 'duration' })->TO_JSON,
     { valid => true },
     'duration is not implemented in draft7',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate('123', { format => 'uuid' })->TO_JSON,
     { valid => true },
     'uuid is not implemented in draft7',
@@ -437,7 +437,7 @@ subtest 'unimplemented core formats' => sub {
   # all specification versions
   foreach my $spec_version (JSON::Schema::Modern::SPECIFICATION_VERSIONS_SUPPORTED->@*) {
     my $js = JSON::Schema::Modern->new(specification_version => $spec_version, validate_formats => 1);
-    cmp_result(
+    is_equal(
       my $res = $js->evaluate(
         'hello',
         {
@@ -464,7 +464,7 @@ subtest 'unimplemented core formats' => sub {
       '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
     });
 
-    cmp_result(
+    is_equal(
       $js->evaluate(
         'hello',
         {
@@ -484,7 +484,7 @@ subtest 'unimplemented core formats' => sub {
       $spec_version . ' with Format-Assertion vocabulary: error when using a core format that is unimplemented',
     );
 
-    cmp_result(
+    is_equal(
       $js->evaluate(
         'hello',
         {
@@ -510,7 +510,7 @@ subtest 'unimplemented core formats' => sub {
     # add uri-template definition that allows lower-cased characters
     $js->add_format_validation('uri-template' => sub { $_[0] !~ /[A-Z]/ });
 
-    cmp_result(
+    is_equal(
       $js->evaluate(
         'hello',
         {
@@ -535,7 +535,7 @@ subtest 'unknown custom formats' => sub {
       validate_formats => 1,
     );
 
-    cmp_result(
+    is_equal(
       $js->evaluate('hello', { format => 'whargarbl' })->TO_JSON,
       {
         valid => true,
@@ -580,7 +580,7 @@ subtest 'unknown custom formats' => sub {
     });
     is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using an unknown custom format');
 
-    cmp_result(
+    is_equal(
       $js->evaluate('hi', '')->TO_JSON,
       {
         valid => false,
@@ -595,7 +595,7 @@ subtest 'unknown custom formats' => sub {
       $spec_version . ': for format validation with the Format-Assertion vocabulary, unrecognized custom formats are detected at evaluation time',
     );
 
-    cmp_result(
+    is_equal(
       $js->evaluate('hello', '', { short_circuit => 1 })->TO_JSON,
       { valid => true },
       '...but this error can be avoided if the keyword is never evaluated',
@@ -634,7 +634,7 @@ subtest 'format: pure_integer' => sub {
 
   my $decoder = JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0);
   my $int = 5;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         (map $decoder->decode($_),
@@ -690,7 +690,7 @@ subtest 'format: pure_integer' => sub {
     'pure_integer format with type',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         (map $decoder->decode($_),
@@ -781,7 +781,7 @@ subtest 'formats supporting multiple core types' => sub {
   foreach my $decoder (
       JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0),
       JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0)->allow_bignum(1)) {
-    cmp_result(
+    is_equal(
       $js->evaluate(
         [ map $decoder->decode($_), @values ],
         {
@@ -820,7 +820,7 @@ subtest 'stringy numbers with a numeric format' => sub {
     },
   );
 
-  cmp_result(
+  is_equal(
     my $res = $js->evaluate(
       [
         3,
@@ -872,7 +872,7 @@ subtest 'stringy numbers with a numeric format' => sub {
     '$ref' => JSON::Schema::Modern::METASCHEMA_URIS->{$spec_version},
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         3,
@@ -916,7 +916,7 @@ subtest 'stringy numbers with a numeric format' => sub {
   # even without these dependencies installed, without throwing an exception.
 
 subtest 'annotation formats using implementations that rely on optional dependencies' => sub {
-  cmp_result(
+  is_equal(
     # relying on default format-assertion behaviour
     JSON::Schema::Modern->new->evaluate(
       [
@@ -940,7 +940,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
       validate_formats => 1,
     );
 
-    cmp_result(
+    is_equal(
       $js->evaluate(
         [
           undef,
@@ -958,7 +958,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
       $spec_version . ': for format validation with the Format-Annotation vocabulary, can assert a non-string against formats without their optional dependencies, without dying',
     );
 
-    cmp_result(
+    is_equal(
       $js->evaluate(
         '2025-01-01T00:00:00Z',
         {

@@ -39,7 +39,7 @@ subtest 'multiple types' => sub {
     'correct error generated from type',
   );
 
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -67,7 +67,7 @@ subtest 'multiple types' => sub {
 };
 
 subtest 'multipleOf' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(3, { multipleOf => 2 })->TO_JSON,
     {
       valid => false,
@@ -84,7 +84,7 @@ subtest 'multipleOf' => sub {
 };
 
 subtest 'uniqueItems' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate([qw(a b c d c)], { uniqueItems => true })->TO_JSON,
     {
       valid => false,
@@ -101,7 +101,7 @@ subtest 'uniqueItems' => sub {
 };
 
 subtest 'allOf, not, and false schema' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       my $data = 1,
       my $schema = { allOf => [ true, false, { not => { not => false } } ] },
@@ -129,7 +129,7 @@ subtest 'allOf, not, and false schema' => sub {
     'correct errors with locations; did not collect errors inside "not"',
   );
 
-  cmp_result(
+  is_equal(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
       valid => false,
@@ -151,7 +151,7 @@ subtest 'allOf, not, and false schema' => sub {
 };
 
 subtest 'anyOf keeps all errors for false paths when invalid, discards errors for false paths when valid' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       my $data = 1,
       my $schema = { anyOf => [ false, false ] },
@@ -179,13 +179,13 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
     'correct errors with locations; did not collect errors inside "not"',
   );
 
-  cmp_result(
+  is_equal(
     $js_short->evaluate($data, $schema)->TO_JSON,
     $result,
     'short-circuited results contain the same errors (short-circuiting not possible)',
   );
 
-  cmp_result(
+  is_equal(
     $result = $js->evaluate(1, { anyOf => [ false, true ], not => true })->TO_JSON,
     {
       valid => false,
@@ -200,7 +200,7 @@ subtest 'anyOf keeps all errors for false paths when invalid, discards errors fo
     'did not collect errors from failure paths from successful anyOf',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { anyOf => [ false, true ] })->TO_JSON,
     { valid => true },
     'no errors collected for true validation',
@@ -254,7 +254,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
 #   /items FAILS (across all instances)
 # entire schema FAILS
 
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -310,7 +310,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
     'collected all errors from subschemas for failing branches only (passing branches discard errors)',
   );
 
-  cmp_result(
+  is_equal(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
       valid => false,
@@ -381,7 +381,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
 #   /contains has at least 1 match; it PASSES
 # entire schema FAILS
 
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -407,7 +407,7 @@ subtest 'applicators with non-boolean subschemas, discarding intermediary errors
     'collected all errors from subschemas for failing branches only (passing branches discard errors)',
   );
 
-  cmp_result(
+  is_equal(
     $js_short->evaluate($data, $schema)->TO_JSON,
     {
       valid => false,
@@ -454,7 +454,7 @@ subtest 'errors with $refs' => sub {
   # /items/properties/x/$ref (mydef) /minimum
   # /items/properties/x/maximum
 
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -527,7 +527,7 @@ subtest 'errors with $refs' => sub {
 };
 
 subtest 'const and enum' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { a => { b => { c => { d => 1 } } } } },
       {
@@ -586,7 +586,7 @@ subtest 'exceptions' => sub {
   );
   ok($result->exception, 'exception flag is true on the result');
 
-  cmp_result(
+  is_equal(
     ($result = $js->evaluate(
       { x => 'hello' },
       {
@@ -613,7 +613,7 @@ subtest 'exceptions' => sub {
   );
   ok($result->exception, 'exception flag is true on the result');
 
-  cmp_result(
+  is_equal(
     ($result = $js->evaluate(
       1,
       {
@@ -642,7 +642,7 @@ subtest 'exceptions' => sub {
 };
 
 subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -734,7 +734,7 @@ subtest 'errors after crossing multiple $refs using $id and $anchor' => sub {
     'errors have correct absolute keyword location via $ref',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -777,7 +777,7 @@ subtest 'unresolvable $ref to a remote resource' => sub {
   # new evaluator, with no resources remembered
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     (my $result = $js->evaluate(
       1,
       {
@@ -809,7 +809,7 @@ subtest 'unresolvable $ref to a remote resource' => sub {
 };
 
 subtest 'unresolvable $ref to remote plain-name fragment' => sub {
-  cmp_result(
+  is_equal(
     (my $result = $js->evaluate(1, { '$ref' => 'http://localhost:4242#nowhere' }))->TO_JSON,
     {
       valid => false,
@@ -827,7 +827,7 @@ subtest 'unresolvable $ref to remote plain-name fragment' => sub {
 };
 
 subtest 'abort due to a schema error' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -852,7 +852,7 @@ subtest 'abort due to a schema error' => sub {
 };
 
 subtest 'sorted property names' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1, bar => 1, baz => 1, hello => 1 },
       {
@@ -971,7 +971,7 @@ subtest 'bad regex in schema' => sub {
   no warnings 'once';
   *IsFoo = sub { "0066\n006F\n" }; # accepts 'f', 'o'
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { my_runtime_pattern => 'foo' },
       $schema,
@@ -984,7 +984,7 @@ subtest 'bad regex in schema' => sub {
 };
 
 subtest 'JSON pointer escaping' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { '{}' => { 'my~tilde/slash-property' => 1 } },
       my $schema = {
@@ -1064,7 +1064,7 @@ subtest 'JSON pointer escaping' => sub {
     'JSON pointers are properly escaped; URIs doubly so',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { '{}' => { 'my~tilde/slash-property' => 1 } },
       $schema->{'$defs'}{mydef},
@@ -1115,7 +1115,7 @@ subtest 'JSON pointer escaping' => sub {
 };
 
 subtest 'absoluteKeywordLocation' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(max_traversal_depth => 1)->evaluate(
       [ [ 1 ] ],
       { items => { '$ref' => '#' } },
@@ -1134,7 +1134,7 @@ subtest 'absoluteKeywordLocation' => sub {
     'absoluteKeywordLocation is included when different from instanceLocation, even when empty',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$ref' => 'http://example.com#does_not_exist' })->TO_JSON,
     {
       valid => false,
@@ -1150,7 +1150,7 @@ subtest 'absoluteKeywordLocation' => sub {
   );
 
   $js->add_schema(false);
-  cmp_result(
+  is_equal(
     $js->evaluate(1, '#')->TO_JSON,
     {
       valid => false,
@@ -1165,7 +1165,7 @@ subtest 'absoluteKeywordLocation' => sub {
     'absoluteKeywordLocation is never "#"',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       my $schema = {
@@ -1228,7 +1228,7 @@ subtest 'absoluteKeywordLocation' => sub {
 
   $schema->{'$id'} = 'https://example.com';
   $schema->{allOf}[2]{'$id'} = '#my_anchor2';
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(1, $schema)->TO_JSON,
     {
       valid => false,
@@ -1270,7 +1270,7 @@ subtest 'absoluteKeywordLocation' => sub {
 };
 
 subtest dependentRequired => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { dependentRequired => { foo => [ 1 ] } })->TO_JSON,
     {
       valid => false,
@@ -1286,7 +1286,7 @@ subtest dependentRequired => sub {
 };
 
 subtest 'numbers in output' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       5,
       {
@@ -1347,7 +1347,7 @@ subtest 'overriding starting locations' => sub {
   });
   $js->add_document('https://example.com/api', $doc);
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 5 ],
       'https://example.com/api#/$defs/alpha',
@@ -1378,7 +1378,7 @@ subtest 'overriding starting locations' => sub {
 };
 
 subtest 'recommended_response' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern::Result->new(valid => 1)->recommended_response,
     undef,
     'recommended_response is not defined when there are no errors',
@@ -1397,7 +1397,7 @@ subtest 'recommended_response' => sub {
     },
   );
 
-  cmp_result(
+  is_equal(
     $result->recommended_response,
     [ 400, q{'/foo': value is less than 5} ],
     'recommended_response uses the first error in the result',
@@ -1405,7 +1405,7 @@ subtest 'recommended_response' => sub {
 
   my $result2 = $js->evaluate(1, { '$ref' => '#/$defs/does_not_exist' });
 
-  cmp_result(
+  is_equal(
     $result2->recommended_response,
     [ 500, 'Internal Server Error' ],
     'recommended_response indicates an exception occurred',
@@ -1429,7 +1429,7 @@ subtest 'recommended_response' => sub {
     ],
   );
 
-  cmp_result(
+  is_equal(
     $result3->recommended_response,
     [ 401, 'Unauthorized' ],
     'recommended_response uses the one from the error that is explicitly set',
@@ -1446,7 +1446,7 @@ subtest 'recommended_response' => sub {
 };
 
 subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(4, { maximum => 4, exclusiveMaximum => 4 })->TO_JSON,
     {
       valid => false,
@@ -1461,7 +1461,7 @@ subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
     'later drafts; errors are produced separately from the keywords',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(5, { maximum => 4, exclusiveMaximum => 4 })->TO_JSON,
     {
       valid => false,
@@ -1483,7 +1483,7 @@ subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
 
   my $js = JSON::Schema::Modern->new(specification_version => 'draft4');
 
-  cmp_result(
+  is_equal(
     $js->evaluate(4, { maximum => 4, exclusiveMaximum => true })->TO_JSON,
     {
       valid => false,
@@ -1498,7 +1498,7 @@ subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
     'draft4: one error comes from maximum, but includes the exclusiveMaximum check',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(5, { maximum => 4, exclusiveMaximum => true })->TO_JSON,
     {
       valid => false,
@@ -1513,13 +1513,13 @@ subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
     'draft4: maximum + exclusiveMaximum checks are combined',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(4, { maximum => 4, exclusiveMaximum => false })->TO_JSON,
     { valid => true },
     'draft4: exclusive check uses the right boundary',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(5, { maximum => 4, exclusiveMaximum => false })->TO_JSON,
     {
       valid => false,
@@ -1537,7 +1537,7 @@ subtest 'exclusiveMaximum, exclusiveMinimum across drafts' => sub {
 
 subtest 'boolean schemas in draft4' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft4', strict => 1);
-  cmp_result (
+  is_equal (
     $js->evaluate(
       1,
       {
@@ -1573,7 +1573,7 @@ subtest 'boolean schemas in draft4' => sub {
     'got all traverse errors from use of booleans in schemas for draft4',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         array => [ 1, 1 ],
@@ -1643,7 +1643,7 @@ subtest 'boolean schemas in draft4' => sub {
 
   push $schema->{allOf}->@*, false;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         array => [ 1 ],

@@ -516,7 +516,7 @@ subtest '$id with a non-empty fragment' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
@@ -529,7 +529,7 @@ subtest '$id with a non-empty fragment' => sub {
   );
 
   cmp_result($doc->canonical_uri, str('http://main.com'), 'canonical_uri');
-  cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+  is_equal([ $doc->resource_index ], [], 'nothing was indexed');
 };
 
 subtest '$anchor not conforming to syntax' => sub {
@@ -542,7 +542,7 @@ subtest '$anchor not conforming to syntax' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
@@ -552,7 +552,7 @@ subtest '$anchor not conforming to syntax' => sub {
     ],
     'did not index an $anchor with invalid characters',
   );
-  cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+  is_equal([ $doc->resource_index ], [], 'nothing was indexed');
 
   $doc = JSON::Schema::Modern::Document->new(
     specification_version => 'draft2020-12',
@@ -567,7 +567,7 @@ subtest '$anchor not conforming to syntax' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
@@ -581,7 +581,7 @@ subtest '$anchor not conforming to syntax' => sub {
     ],
     'did not index a draft2020-12 $anchor with invalid characters, or non-fragment-only $id',
   );
-  cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+  is_equal([ $doc->resource_index ], [], 'nothing was indexed');
 
   $doc = JSON::Schema::Modern::Document->new(
     specification_version => 'draft2019-09',
@@ -596,7 +596,7 @@ subtest '$anchor not conforming to syntax' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
@@ -610,7 +610,7 @@ subtest '$anchor not conforming to syntax' => sub {
     ],
     'did not index a draft2019-09 $anchor with invalid characters, or non-fragment-only $id',
   );
-  cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+  is_equal([ $doc->resource_index ], [], 'nothing was indexed');
 
   foreach my $version (qw(draft6 draft7)) {
     $doc = JSON::Schema::Modern::Document->new(
@@ -626,7 +626,7 @@ subtest '$anchor not conforming to syntax' => sub {
         },
       },
     );
-    cmp_result(
+    is_equal(
       [ map $_->TO_JSON, $doc->errors ],
       [
         {
@@ -640,7 +640,7 @@ subtest '$anchor not conforming to syntax' => sub {
       ],
       'did not index a '.$version.' fragment-only $id with invalid characters, or non-fragment-only $id',
     );
-    cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+    is_equal([ $doc->resource_index ], [], 'nothing was indexed');
   }
 
   $doc = JSON::Schema::Modern::Document->new(
@@ -653,7 +653,7 @@ subtest '$anchor not conforming to syntax' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $doc->errors ],
     [
       {
@@ -663,7 +663,7 @@ subtest '$anchor not conforming to syntax' => sub {
     ],
     'did not index a draft4 fragment-only id with invalid characters',
   );
-  cmp_result([ $doc->resource_index ], [], 'nothing was indexed');
+  is_equal([ $doc->resource_index ], [], 'nothing was indexed');
 
   $doc = JSON::Schema::Modern::Document->new(
     specification_version => 'draft4',
@@ -1063,18 +1063,18 @@ subtest 'custom metaschema_uri' => sub {
     'determined vocabularies to use for this schema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $id)->TO_JSON,
     { valid => true },
     'validation succeeds because "minimum" never gets run',
   );
-  cmp_result(
+  is_equal(
     $js->evaluate(1, Mojo::URL->new($id)->fragment('/allOf/0'))->TO_JSON,
     { valid => true },
     'can evaluate at a subschema as well, with the same vocabularies',
   );
 
-  cmp_result(
+  is_equal(
     $doc->validate->TO_JSON,
     {
       valid => false,
@@ -1089,7 +1089,7 @@ subtest 'custom metaschema_uri' => sub {
     'when not providing the original evaluator, the metaschema cannot be found (and a hint is provided)',
   );
 
-  cmp_result(
+  is_equal(
     $doc->validate(evaluator => $js)->TO_JSON,
     { valid => true },
     'using the proper evaluator, schema validates against its metaschema, and "minimum" is ignored',
@@ -1160,7 +1160,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     'evaluator has correct resources, resolved against the provided base uri',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 1 }, 'https://example.com/api/staging/alpha.json')->TO_JSON,
     {
       valid => false,
@@ -1188,7 +1188,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     'when evaluating the document using the canonical uri, error locations use the canonical uri',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 1 }, 'https://example.com/api/')->TO_JSON,
     {
       valid => false,
@@ -1246,7 +1246,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
     'document resources are added using the new base, which appears in their canonical_uri values',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 1 }, 'https://example.com/api/')->TO_JSON,
     {
       valid => false,
@@ -1276,7 +1276,7 @@ subtest 'multiple uris used for resolution and identification, and original_uri'
 
   # there are multiple resources mapped to the same document+path locations, but we want error
   # locations to be using the set that we used in the evaluation call.
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 1 }, 'file:///usr/local/share/api.json')->TO_JSON,
     {
       valid => false,
@@ -1323,7 +1323,7 @@ $defs:
       baz: { $anchor: another_subschema }
 YAML
 
-  cmp_result([ map $_->TO_JSON, $doc1->errors ], [], 'no errors from first document');
+  is_equal([ map $_->TO_JSON, $doc1->errors ], [], 'no errors from first document');
   $js->add_document($doc1);
 
   my $doc2 = JSON::Schema::Modern::Document->new(
@@ -1358,7 +1358,7 @@ $defs:
   schema28: { $dynamicRef: http://example.com/api1#foo }                    # remote DNE
 YAML
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $doc2->errors ],
     [
       {
@@ -1417,7 +1417,7 @@ YAML
     skip_ref_checks => 1,
   );
 
-  cmp_result([ map $_->TO_JSON, $doc3->errors ], [], 'no errors when skipping ref checks');
+  is_equal([ map $_->TO_JSON, $doc3->errors ], [], 'no errors when skipping ref checks');
 };
 
 done_testing;

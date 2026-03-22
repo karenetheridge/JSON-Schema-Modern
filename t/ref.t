@@ -18,7 +18,7 @@ use Helper;
 my $js = JSON::Schema::Modern->new;
 
 subtest 'local JSON pointer' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(true, { '$defs' => { true => true }, '$ref' => '#/$defs/true' })->TO_JSON,
     { valid => true },
     'can follow local $ref to a true schema',
@@ -44,7 +44,7 @@ subtest 'local JSON pointer' => sub {
 };
 
 subtest 'fragment with URI-escaped and JSON Pointer-escaped characters' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -58,7 +58,7 @@ subtest 'fragment with URI-escaped and JSON Pointer-escaped characters' => sub {
 };
 
 subtest 'local anchor' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       true,
       {
@@ -107,7 +107,7 @@ subtest 'local anchor' => sub {
 
 subtest '$id with an empty fragment' => sub {
   my $js = JSON::Schema::Modern->new(max_traversal_depth => 2);
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -149,7 +149,7 @@ subtest '$id with an empty fragment' => sub {
 
 $js = JSON::Schema::Modern->new(specification_version => 'draft2019-09');
 subtest '$recursiveRef without nesting behaves like $ref' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 'hello', baz => 1 } },
       {
@@ -239,7 +239,7 @@ subtest '$recursiveRef without nesting behaves like $ref' => sub {
 };
 
 subtest '$recursiveRef without $recursiveAnchor behaves like $ref' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       {
@@ -293,7 +293,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
     ],
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
     {
       valid => false,
@@ -310,7 +310,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
   $schema = dclone($schema);
   $schema->{'$defs'}{myobject}{'$id'} = 'myobject.json';
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 1 }, $schema)->TO_JSON,
     {
       valid => true,
@@ -318,7 +318,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
     'schema now valid when an $id is added',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -345,7 +345,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
     '$recursiveAnchor can only appear at a schema resource root',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -386,7 +386,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
     },
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -420,7 +420,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   $schema->{additionalProperties}{additionalProperties}{'$recursiveRef'} =
     delete $schema->{additionalProperties}{additionalProperties}{'$ref'};
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -440,7 +440,7 @@ subtest '$recursiveAnchor and $recursiveRef - standard usecases' => sub {
   $js->{_resource_index} = {};
   $schema->{'$recursiveAnchor'} = true;
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => true }, $schema)->TO_JSON,
     {
       valid => true,
@@ -467,7 +467,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
     ],
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       $schema,
@@ -518,7 +518,7 @@ subtest '$recursiveRef without $recursiveAnchor' => sub {
 
   $js->{_resource_index} = {};
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       $js->_json_decoder->decode($js->_json_decoder->encode($schema) =~ s/\$ref/\$recursiveRef/gr),
@@ -551,7 +551,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
     ],
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       $schema,
@@ -562,7 +562,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
     '$recursiveAnchor does not exist in the target schema - local recursion only, so integers match',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => true },
       'base',
@@ -611,7 +611,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
     '$recursiveAnchor does not exist in the target schema - no recursion',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => true } },
       'base',
@@ -681,7 +681,7 @@ subtest '$recursiveAnchor in our dynamic scope, but not in the target schema' =>
 
 $js = JSON::Schema::Modern->new;
 subtest '$dynamicRef without nesting behaves like $ref' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 'hello', baz => 1 } },
       {
@@ -771,7 +771,7 @@ subtest '$dynamicRef without nesting behaves like $ref' => sub {
 };
 
 subtest '$recursiveRef without $dynamicAnchor behaves like $ref' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       {
@@ -820,7 +820,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
     },
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -855,7 +855,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
     delete $schema->{additionalProperties}{additionalProperties}{'$ref'}; # '#'
   $errors->[0]{keywordLocation} =~ s/ref/dynamicRef/;
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -868,7 +868,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   $js->{_resource_index} = {};
   $schema->{additionalProperties}{'$dynamicAnchor'} = 'thingy';
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -882,7 +882,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#thingy';
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -897,7 +897,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
     delete $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'}; # '#thingy'
   $errors->[0]{keywordLocation} =~ s/dynamicRef/ref/;
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -914,7 +914,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   $schema->{'$dynamicAnchor'} = 'thingy';
   $errors->[0]{keywordLocation} =~ s/ref/dynamicRef/;
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -926,7 +926,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   $js->{_resource_index} = {};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#thingy';
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => true,
@@ -937,7 +937,7 @@ subtest '$dynamicAnchor and $dynamicRef - standard usecases' => sub {
   $js->{_resource_index} = {};
   delete $schema->{additionalProperties}{'$dynamicAnchor'};
   $schema->{additionalProperties}{additionalProperties}{'$dynamicRef'} = '#';
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => { bar => 1 } }, $schema)->TO_JSON,
     {
       valid => false,
@@ -972,7 +972,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
     '$ref' => 'start',
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(42, $schema)->TO_JSON,
     {
       valid => false,
@@ -991,7 +991,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
   $js->{_resource_index} = {};
   $schema->{'$defs'}{override}{'$anchor'} = 'thingy';
 
-  cmp_result(
+  is_equal(
     $js->evaluate(42, $schema)->TO_JSON,
     {
       valid => false,
@@ -1004,7 +1004,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
   delete $schema->{'$defs'}{override}{'$anchor'};
   $schema->{'$defs'}{override}{'$dynamicAnchor'} = 'some_other_thingy';
 
-  cmp_result(
+  is_equal(
     $js->evaluate(42, $schema)->TO_JSON,
     {
       valid => false,
@@ -1016,7 +1016,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
   $js->{_resource_index} = {};
   $schema->{'$defs'}{override}{'$dynamicAnchor'} = 'thingy';
 
-  cmp_result(
+  is_equal(
     $js->evaluate(42, $schema)->TO_JSON,
     {
       valid => true,
@@ -1028,7 +1028,7 @@ subtest '$dynamicRef to $dynamicAnchor not directly in the evaluation path' => s
   my $canonical_uri = delete $schema->{'$id'};
 
   $js->add_schema($canonical_uri => $schema);
-  cmp_result(
+  is_equal(
     $js->evaluate(42, $canonical_uri)->TO_JSON,
     {
       valid => true,
@@ -1086,7 +1086,7 @@ subtest 'multiple layers in the dynamic scope' => sub {
       },
     },
   };
-  cmp_result(
+  is_equal(
     $js->evaluate('hello', $schema)->TO_JSON,
     {
       valid => false,
@@ -1143,7 +1143,7 @@ subtest 'after leaving a dynamic scope, it should not be used by a $dynamicRef' 
     }
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(undef, $schema)->TO_JSON,
     {
       valid => true,
@@ -1169,7 +1169,7 @@ subtest 'anchors do not match' => sub {
     '$dynamicRef' => 'orig#thingy',
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $schema)->TO_JSON,
     {
       valid => false,
@@ -1189,7 +1189,7 @@ subtest 'anchors do not match' => sub {
   $schema->{'$defs'}{enhanced}{'$anchor'} = delete $schema->{'$defs'}{enhanced}{'$dynamicAnchor'};
   $schema->{'$defs'}{enhanced}{'$dynamicAnchor'} = 'somethingelse';
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $schema)->TO_JSON,
     {
       valid => false,
@@ -1228,7 +1228,7 @@ subtest 'reference to a non-schema location' => sub {
   $js->add_schema('http://example.com/mydoc', $schema);
   $js->add_schema({ '$id' => 'http://example.com/otherdoc', example => { not_a_schema => true } });
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ '$ref' => 1 }, $schema)->TO_JSON,
     {
       valid => false,
@@ -1243,7 +1243,7 @@ subtest 'reference to a non-schema location' => sub {
     '$ref to a non-schema is not permitted',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ '$dynamicRef' => 1 }, '')->TO_JSON,
     {
       valid => false,
@@ -1274,7 +1274,7 @@ subtest 'reference to a non-schema location' => sub {
   $js->add_schema('http://example.com/mydoc', $schema);
   $js->add_schema({ '$id' => 'http://example.com/otherdoc', example => { not_a_schema => true } });
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ '$recursiveRef' => 1 }, $schema)->TO_JSON,
     {
       valid => false,
@@ -1321,7 +1321,7 @@ subtest 'reference to a non-schema location' => sub {
     '$schema' => 'https://my_non_schema',
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $schema)->TO_JSON,
     {
       valid => false,
@@ -1341,7 +1341,7 @@ subtest 'evaluate at a non-schema location' => sub {
   $js->{_resource_index} = {};
   $js->add_schema('http://my_schema', { example => { not_a_schema => true } });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, 'http://my_schema#/example/not_a_schema')->TO_JSON,
     {
       valid => false,
@@ -1392,7 +1392,7 @@ subtest 'evaluate at a subschema, with $dynamicRef' => sub {
     },
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { name => 'hi', schema => false },
       'http://strict_metaschema#/$defs/parameter',

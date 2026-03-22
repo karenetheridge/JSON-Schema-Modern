@@ -378,7 +378,7 @@ subtest 'valid keywords' => sub {
   foreach my $spec_version (sort { length($a) <=> length($b) || $a cmp $b } keys KEYWORDS->%*) {
     foreach my $short_class (sort keys KEYWORDS->{$spec_version}->%*) {
       my $class = 'JSON::Schema::Modern::Vocabulary::'.$short_class;
-      cmp_result(
+      is_equal(
         [ $class->keywords($spec_version) ],
         KEYWORDS->{$spec_version}{$short_class},
         "$spec_version, $short_class: calculated keyword list matches hardcoded table",

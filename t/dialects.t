@@ -19,7 +19,7 @@ use Test2::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
 my $js = JSON::Schema::Modern->new(short_circuit => 0, validate_formats => 1);
 
 subtest 'invalid use of the $schema keyword' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -41,7 +41,7 @@ subtest 'invalid use of the $schema keyword' => sub {
     '$schema can only appear at the root of a schema, when there is no canonical URI',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -65,7 +65,7 @@ subtest 'invalid use of the $schema keyword' => sub {
     '$schema can only appear where the canonical URI has no fragment, when there is a canonical URI',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -93,7 +93,7 @@ subtest 'invalid use of the $schema keyword' => sub {
 };
 
 subtest 'defaults without a $schema keyword' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(1, true)->TO_JSON,
     { valid => true },
     'boolean schema: no $id, no $schema',
@@ -107,7 +107,7 @@ subtest 'defaults without a $schema keyword' => sub {
     'boolean schema: defaults to draft2020-12 without a $schema keyword',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       { unevaluatedProperties => false },
@@ -139,7 +139,7 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: defaults to draft2020-12 without a $schema keyword',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       { '$defs' => { foo => { not => 'invalid subschema' } } },
@@ -157,7 +157,7 @@ subtest 'defaults without a $schema keyword' => sub {
   );
 
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -197,7 +197,7 @@ subtest 'defaults without a $schema keyword' => sub {
 
   my $js = JSON::Schema::Modern->new(short_circuit => 0, specification_version => 'draft7');
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, true)->TO_JSON,
     { valid => true },
     'boolean schema: no $id, no $schema',
@@ -211,7 +211,7 @@ subtest 'defaults without a $schema keyword' => sub {
     'boolean schema: specification_version overridden',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       { unevaluatedProperties => 'not a schema' },
@@ -220,7 +220,7 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: no $id, no $schema, specification version overridden, other keywords are ignored during traversal',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       { unevaluatedProperties => false },
@@ -239,7 +239,7 @@ subtest 'defaults without a $schema keyword' => sub {
   );
 
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -251,7 +251,7 @@ subtest 'defaults without a $schema keyword' => sub {
     'object schema: $id, no $schema, unrecognized+invalid keywords are ignored during traversal',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -274,7 +274,7 @@ subtest 'defaults without a $schema keyword' => sub {
 };
 
 subtest 'behaviour with a $schema keyword' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -286,7 +286,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     'object schema: no $id, has $schema, unrecognized+invalid keywords are ignored during traversal',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -307,7 +307,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     'semantics can be changed to another draft version',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -328,7 +328,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     '..and is still recognized as draft7',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -341,7 +341,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     '$id and $schema, unrecognized+invalid keywords are ignored during traversal',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -366,7 +366,7 @@ subtest 'behaviour with a $schema keyword' => sub {
 
   my $js = JSON::Schema::Modern->new(short_circuit => 0, specification_version => 'draft2019-09');
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -378,7 +378,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     'no $id, specification version overridden twice; unrecognized+invalid keywords are ignored during traversal',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -400,7 +400,7 @@ subtest 'behaviour with a $schema keyword' => sub {
   );
 
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -413,7 +413,7 @@ subtest 'behaviour with a $schema keyword' => sub {
     'no $id, specification version overridden twice; unrecognized+invalid keywords are ignored during traversal',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -437,7 +437,7 @@ subtest 'behaviour with a $schema keyword' => sub {
 };
 
 subtest 'setting or changing specification versions in a single document' => sub {
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -482,7 +482,7 @@ subtest 'changing specification versions across documents' => sub {
     unevaluatedProperties => false, # this should be ignored
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 'hi' }, 'https://iam.draft2019-09.com')->TO_JSON,
     {
       valid => false,
@@ -584,7 +584,7 @@ subtest 'changing specification versions across documents' => sub {
     'no unexpected warnings',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ foo => 'hi' }, 'https://iam.draft7-2.com')->TO_JSON,
     {
       valid => false,
@@ -669,7 +669,7 @@ subtest 'changing specification versions across documents' => sub {
 
 subtest 'changing specification versions within documents' => sub {
   allow_warnings(1);
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 'hi' },
       {
@@ -773,7 +773,7 @@ subtest 'changing specification versions within documents' => sub {
   );
 
   allow_warnings(1);
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 'hi' },
       {
@@ -876,7 +876,7 @@ subtest 'changing specification versions within documents' => sub {
   );
 
   allow_warnings(1);
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 'hi' },
       {
@@ -997,7 +997,7 @@ subtest 'changing specification versions within documents' => sub {
 undef $js;
 
 subtest '$vocabulary syntax' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       1,
       {
@@ -1028,7 +1028,7 @@ subtest '$vocabulary syntax' => sub {
     '$vocabulary syntax checks',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       1,
       {
@@ -1049,7 +1049,7 @@ subtest '$vocabulary syntax' => sub {
     '$vocabulary location check - resource root',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       1,
       {
@@ -1065,7 +1065,7 @@ subtest '$vocabulary syntax' => sub {
 
 
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -1095,13 +1095,13 @@ subtest '$vocabulary syntax' => sub {
     'metaschemas are not saved on the resource',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'http://mymetaschema' })->TO_JSON,
     { valid => true },
     '..but once we use the schema as a metaschema,',
   );
 
-  cmp_result(
+  is_equal(
     $js->{_metaschema_vocabulary_classes}{'http://mymetaschema'},
     [
       'draft2020-12',
@@ -1135,7 +1135,7 @@ subtest 'changing dialects (same specification version)' => sub {
     zeta => 1,
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       {
@@ -1171,7 +1171,7 @@ subtest 'changing dialects (same specification version)' => sub {
     'evaluation of the subschema in another document correctly uses the new $id and $schema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       {
@@ -1216,7 +1216,7 @@ subtest 'changing dialects (same specification version)' => sub {
     'evaluation of the subschema in the same document via a $ref correctly uses the new $id and $schema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       {
@@ -1275,13 +1275,13 @@ subtest 'standard metaschemas' => sub {
   my $js = JSON::Schema::Modern->new;
   my ($draft202012_metaschema) = $js->get('https://json-schema.org/draft/2020-12/schema');
 
-  cmp_result(
+  is_equal(
     $js->evaluate($draft202012_metaschema, 'https://json-schema.org/draft/2020-12/schema')->TO_JSON,
     { valid => true },
     'main metaschema evaluated against its own URI',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate($draft202012_metaschema, $draft202012_metaschema)->TO_JSON,
     { valid => true },
     'main metaschema evaluated against its own content',
@@ -1289,13 +1289,13 @@ subtest 'standard metaschemas' => sub {
 
   my ($draft202012_core_metaschema) = $js->get('https://json-schema.org/draft/2020-12/meta/core');
 
-  cmp_result(
+  is_equal(
     $js->evaluate($draft202012_core_metaschema, 'https://json-schema.org/draft/2020-12/schema')->TO_JSON,
     { valid => true },
     'core metaschema evaluated against the main metaschema URI',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate($draft202012_core_metaschema, $draft202012_core_metaschema)->TO_JSON,
     { valid => true },
     'core metaschema evaluated against its own content',
@@ -1325,7 +1325,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
   is($metaschema_document->_get_resource($metaschema->{'$id'})->{specification_version}, 'draft2019-09',
     'specification version detected from standard metaschema URI');
 
-  cmp_result(
+  is_equal(
     $js->evaluate(false, 'http://localhost:1234/my-meta-schema')->TO_JSON,
     {
       valid => false,
@@ -1343,7 +1343,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
 
   # the evaluation of $recursiveAnchor in the schema proves that the proper specification version
   # was detected via the $schema keyword
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { allOf => [ false ] },
       'http://localhost:1234/my-meta-schema',
@@ -1386,13 +1386,13 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
     'custom metaschema recurses to standard metaschema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ allOf => [ {} ] }, 'http://localhost:1234/my-meta-schema')->TO_JSON,
     { valid => true },
     'objects are acceptable schemas to this metaschema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -1417,7 +1417,7 @@ subtest 'custom metaschemas, without custom vocabularies' => sub {
 subtest 'other $schema usage' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 20 })->TO_JSON,
     {
       valid => false,
@@ -1431,7 +1431,7 @@ subtest 'other $schema usage' => sub {
     '$schema values must be strings',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => '#/not_a_uri' })->TO_JSON,
     {
       valid => false,
@@ -1445,7 +1445,7 @@ subtest 'other $schema usage' => sub {
     '$schema values must be URIs',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://unknown/metaschema' })->TO_JSON,
     {
       valid => false,
@@ -1477,9 +1477,9 @@ subtest 'other $schema usage' => sub {
     '$id' => 'my_schema',
     '$schema' => 'https://example.com/hello#/$defs/metaschema'
   });
-  cmp_result([ map $_->TO_JSON, $doc->errors ], [], 'no document errors');
+  is_equal([ map $_->TO_JSON, $doc->errors ], [], 'no document errors');
 
-  cmp_result(
+  is_equal(
     $doc->validate(evaluator => $js)->TO_JSON,
     {
       valid => false,
@@ -1506,7 +1506,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/core' => true },
     },
   });
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://metaschema/with/misplaced/vocabulary/keyword/subschema' })->TO_JSON,
     {
       valid => false,
@@ -1528,7 +1528,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
 
   $js->add_schema('https://metaschema/with/no/id',
     { '$vocabulary' => { 'https://json-schema.org/draft/2020-12/vocab/core' => true } });
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://metaschema/with/no/id' })->TO_JSON,
     {
       valid => false,
@@ -1557,7 +1557,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       'https://unknown2' => false,
     },
   });
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://metaschema/with/wrong/spec' })->TO_JSON,
     {
       valid => false,
@@ -1591,7 +1591,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
     },
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://my/mismatched/metaschema' })->TO_JSON,
     {
       valid => false,
@@ -1614,7 +1614,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
     '$id' => 'https://metaschema/missing/vocabs',
     '$vocabulary' => {},
   });
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://metaschema/missing/vocabs' })->TO_JSON,
     {
       valid => false,
@@ -1639,7 +1639,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       'https://json-schema.org/draft/2020-12/vocab/applicator' => true,
     },
   });
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://metaschema/missing/core' })->TO_JSON,
     {
       valid => false,
@@ -1667,7 +1667,7 @@ subtest 'custom metaschemas, with custom vocabularies' => sub {
       # note: no validation!
     },
   });
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -1768,7 +1768,7 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
       'https://vocabulary/with/bad/evaluation/order' => true,
     },
   });
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { '$schema' => 'https://my/first/metaschema' })->TO_JSON,
     {
       valid => false,
@@ -1800,7 +1800,7 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     },
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'bloop',
       {
@@ -1845,7 +1845,7 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     },
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'bloop',
       {
@@ -1876,7 +1876,7 @@ subtest '$schema points to a boolean schema' => sub {
   my $js = JSON::Schema::Modern->new;
   $js->add_schema('https://my_boolean_schema' => true);
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -1914,7 +1914,7 @@ subtest '$ref to a different dialect' => sub {
     },
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => { bar => 1 } },
       {

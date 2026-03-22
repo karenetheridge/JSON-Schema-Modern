@@ -54,7 +54,7 @@ subtest 'traversal with callbacks' => sub {
       if => sub { $if_callback_called = 1; },
     }});
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -68,7 +68,7 @@ subtest 'traversal with callbacks' => sub {
 
   ok(!$if_callback_called, 'callback for erroneous keyword was not called');
 
-  cmp_result(
+  is_equal(
     \%refs,
     {
       '/$defs/foo/additionalProperties' => 'https://foo.com/recursive_subschema',
@@ -101,7 +101,7 @@ subtest 'errors when parsing $schema keyword' => sub {
   my $js = JSON::Schema::Modern->new;
 
   my $state = $js->traverse({ '$schema' => true });
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -113,7 +113,7 @@ subtest 'errors when parsing $schema keyword' => sub {
   );
 
   $state = $js->traverse({ '$schema' => 'whargarbl' });
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -151,7 +151,7 @@ subtest 'default metaschema' => sub {
     'dialect is properly determined',
   );
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -175,7 +175,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -211,7 +211,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
     },
   );
 
-  cmp_result($state->{errors}, [], 'no errors when parsing this schema');
+  is_equal($state->{errors}, [], 'no errors when parsing this schema');
   cmp_result(
     $state,
     superhashof({
@@ -257,7 +257,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -281,7 +281,7 @@ subtest 'traversing a dialect with different core keywords' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -307,7 +307,7 @@ subtest '$schema without an $id, below the root' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -329,7 +329,7 @@ subtest 'duplicate identifiers' => sub {
     ],
   });
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -348,7 +348,7 @@ subtest 'duplicate identifiers' => sub {
       { '$id' => 'dir2', '$anchor' => 'foo' },
     ],
   });
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [],
     'two anchors with different base uris are acceptable',
@@ -361,7 +361,7 @@ subtest 'duplicate identifiers' => sub {
       { '$anchor' => 'foo' },
     ],
   });
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -489,7 +489,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
 
   my $state = $js->traverse({}, { metaschema_uri => 'https://unknown/metaschema' });
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     my $errors = [
       {
@@ -512,7 +512,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
 
   $state = $js->traverse(true, { metaschema_uri => 'https://metaschema/with/wrong/spec' });
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     $errors = [
       {
@@ -538,7 +538,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
     { '$id' => 'https://my/bad/schema' },
     { metaschema_uri => 'https://metaschema/with/wrong/spec' });
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     $errors,
     'object schema: metaschema_uri is overridden with a bad schema: same errors are returned',
@@ -555,7 +555,7 @@ subtest 'traverse with overridden metaschema_uri' => sub {
       traversed_keyword_path => '/$ref/$ref/some_keyword/$ref/$my_dialect_is',
     });
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {
@@ -703,7 +703,7 @@ subtest 'start traversing below the document root' => sub {
     },
   );
 
-  cmp_result(
+  is_equal(
     [ map $_->TO_JSON, $state->{errors}->@* ],
     [
       {

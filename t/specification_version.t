@@ -45,7 +45,7 @@ subtest 'specification aliases' => sub {
 };
 
 subtest '$ref and older specification versions' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       true,
       {
@@ -67,7 +67,7 @@ subtest '$ref and older specification versions' => sub {
 };
 
 subtest '<= draft7: $ref in combination with any other keyword causes the other keywords to be ignored' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(
       specification_version => 'draft7',
     )->evaluate(
@@ -104,7 +104,7 @@ subtest '$ref adjacent to a path used in a $ref' => sub {
     ],
   });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(true, { '$ref' => 'http://example.com/mydoc' })->TO_JSON,
     {
       valid => false,
@@ -130,7 +130,7 @@ subtest '$defs support' => sub {
 
   $js->add_schema('http://example.com/otherdoc', { '$defs' => { foo => true } });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, 'http://example.com/mydoc')->TO_JSON,
     {
       valid => false,
@@ -146,7 +146,7 @@ subtest '$defs support' => sub {
     '$defs is not recognized in <= draft7',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft2019-09')
       ->evaluate(1, {'$defs' => 1})->TO_JSON,
     {
@@ -179,7 +179,7 @@ subtest 'definitions support' => sub {
     'warned when using no-longer-supported keyword',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, 'http://example.com/mydoc')->TO_JSON,
     {
       valid => false,
@@ -195,7 +195,7 @@ subtest 'definitions support' => sub {
     'definitions is not recognized in >= draft2019-09',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft7')->evaluate(1, $schema)->TO_JSON,
     {
       valid => false,
@@ -214,7 +214,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft2019-09');
   my $dependencies_schema;
   my @warnings = warnings {
-    cmp_result(
+    is_equal(
       $js->evaluate(
         { alpha => 1, beta => 2 },
         $dependencies_schema = {
@@ -234,7 +234,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
     'warned when using no-longer-supported keyword',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { alpha => 1, beta => 2 },
       my $dependentRequired_schema = {
@@ -261,7 +261,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
     'dependentRequired is supported in >= draft2019-09',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { alpha => 1, beta => 2 },
       my $dependentSchemas_schema = {
@@ -289,7 +289,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
   );
 
   $js = JSON::Schema::Modern->new(specification_version => 'draft7');
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { alpha => 1, beta => 2 },
       $dependencies_schema,
@@ -317,7 +317,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
     'dependencies is supported in <= draft7',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { alpha => 1, beta => 2 },
       $dependentRequired_schema,
@@ -326,7 +326,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
     'dependentRequired is not recognized in <= draft7',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { alpha => 1, beta => 2 },
       $dependentSchemas_schema,
@@ -338,7 +338,7 @@ subtest 'dependencies, dependentRequired, dependentSchemas' => sub {
 
 subtest 'prefixItems, items and additionalItems' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1, 2 ],
       {
@@ -374,7 +374,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
     'prefixitems+items works when specification_version >= draft2020-12',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1 ],
       {
@@ -394,7 +394,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
   );
 
   my @warnings = warnings {
-    cmp_result(
+    is_equal(
       $js->evaluate(
         [ 1 ],
         { additionalItems => false },
@@ -409,7 +409,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
     'warned when using no-longer-supported keyword',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft2019-09')->evaluate(
       [ 1 ],
       { prefixItems => [ { maximum => 0 } ] }
@@ -418,7 +418,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
     'prefixitems not supported when specification_version specifies other than draft2020-12',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1, 2, 3 ],
       {
@@ -439,7 +439,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
   );
 
   @warnings = warnings {
-    cmp_result(
+    is_equal(
       $js->evaluate(
         [ 1, 2, 3 ],
         {
@@ -471,7 +471,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
     'warned when using no-longer-supported keyword',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1, 2, 3 ],
       {
@@ -513,7 +513,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
   );
 
   @warnings = warnings {
-    cmp_result(
+    is_equal(
       $js->evaluate(
         [ 1, 2, 3 ],
         {
@@ -546,7 +546,7 @@ subtest 'prefixItems, items and additionalItems' => sub {
   );
 
   @warnings = warnings {
-    cmp_result(
+    is_equal(
       $js->evaluate(
         [ 1, 2, 3 ],
         {

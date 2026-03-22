@@ -55,6 +55,31 @@ sub json_sprintf {
   sprintf(shift, map +(ref($_) =~ /^Math::Big(?:Int|Float)\z/ ? ref($_).'->new(\''.$_.'\')' : $encoder->indent(0)->encode($_)), @_);
 }
 
+# deep comparison, with strict typing
+sub is_equal ($got, $expected, $test_name = undef) {
+  context_do {
+    my $ctx = shift;
+    my ($got, $expected, $test_name) = @_;
+    my $equal = JSON::Schema::Modern::Utilities::is_equal($got, $expected, my $state = {});
+    if ($equal) {
+      $ctx->pass($test_name);
+    }
+    else {
+      $ctx->fail($test_name);
+      my $method =
+        # be less noisy for expected failures
+        (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
+          : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
+
+      $ctx->$method('structures differ'.($state->{path} ? ' starting at '.$state->{path} : ''));
+      my ($equal, $stack) = Test::Deep::cmp_details($got, $expected);
+      $ctx->$method(Test::Deep::deep_diag($stack)) if not $equal;
+      $ctx->$method("got result:\n".$encoder->encode($got));
+    }
+    return $equal;
+  } $got, $expected, $test_name;
+}
+
 # deep comparison, with Test::Deep syntax sugar
 sub cmp_result ($got, $expected, $test_name) {
   context_do {

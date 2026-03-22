@@ -29,7 +29,7 @@ my %dialect = (
 
 subtest '$id sets canonical uri' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       my $schema = {
@@ -95,7 +95,7 @@ subtest '$id sets canonical uri' => sub {
 
 subtest 'anchors' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       my $schema = {
@@ -183,7 +183,7 @@ subtest 'anchors' => sub {
 
 subtest '$anchor at root without $id' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -235,7 +235,7 @@ subtest '$anchor at root without $id' => sub {
 
 subtest '$ids and $anchors in subschemas after $id changes' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -301,7 +301,7 @@ subtest '$ids and $anchors in subschemas after $id changes' => sub {
 subtest 'invalid $id and $anchor' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -340,7 +340,7 @@ subtest 'invalid $id and $anchor' => sub {
     'bad $id and $anchor are detected, even if bad definitions are not traversed',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       {
@@ -395,7 +395,7 @@ subtest 'nested $ids' => sub {
     },
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         alpha => {
@@ -497,7 +497,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
     ],
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $schema1)->TO_JSON,
     {
       valid => false,
@@ -546,7 +546,7 @@ subtest 'multiple documents, each using canonical_uri = ""' => sub {
     'resources in initial schema are indexed',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $schema2)->TO_JSON,
     {
       valid => true,
@@ -610,7 +610,7 @@ subtest 'multiple documents, each using canonical_uri = "", collisions in other 
     ],
   };
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $schema1)->TO_JSON,
     {
       valid => false,
@@ -717,7 +717,7 @@ subtest 'resource collisions in canonical uris' => sub {
 };
 
 subtest 'relative uri in $id' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       1,
       {
@@ -739,7 +739,7 @@ subtest 'relative uri in $id' => sub {
     'root schema location is correctly identified',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       [ 1, [ 2, 3 ] ],
       {

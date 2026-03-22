@@ -54,7 +54,7 @@ cmp_result(
 
 $js->add_schema('http://example.com/myschema', { '$id' => 'http://example.com/myschema', type => 'boolean' });
 
-cmp_result(
+is_equal(
   $js->validate_schema({
     '$schema' => 'http://example.com/myschema',
     type => 'bloop',
@@ -73,7 +73,7 @@ cmp_result(
   'validate_schema with custom metaschema',
 );
 
-cmp_result(
+is_equal(
   $js->validate_schema({
     '$id' => '#/$defs/foo',
     '$schema' => 'http://json-schema.org/draft-07/schema#',
@@ -90,7 +90,7 @@ cmp_result(
   'validate_schema with schema that validates against the metaschema, but fails in extra traverse checks',
 );
 
-cmp_result(
+is_equal(
   $js->validate_schema({
     'id' => 'foo',
     '$schema' => 'http://json-schema.org/draft-04/schema#',

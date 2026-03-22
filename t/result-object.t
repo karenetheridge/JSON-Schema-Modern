@@ -50,7 +50,7 @@ my $result = $js->evaluate(
 
 is($result->output_format, 'basic', 'Result object gets the output_format from the evaluator');
 
-cmp_result(
+is_equal(
   $result->TO_JSON,
   {
     valid => false,
@@ -201,7 +201,7 @@ cmp_result(
 );
 
 $result->output_format('flag');
-cmp_result(
+is_equal(
   $result->TO_JSON,
   {
     valid => false,
@@ -210,7 +210,7 @@ cmp_result(
 );
 
 $result->output_format('terse');
-cmp_result(
+is_equal(
   $result->TO_JSON,
   {
     valid => false,
@@ -322,7 +322,7 @@ $js = JSON::Schema::Modern->new(validate_formats => 1);
     { format => 'uuid'},
   );
 
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -338,7 +338,7 @@ $js = JSON::Schema::Modern->new(validate_formats => 1);
   );
 
   $result->output_format('terse');
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -351,7 +351,7 @@ $js = JSON::Schema::Modern->new(validate_formats => 1);
 subtest 'strict_basic' => sub {
   # see "JSON pointer escaping" in t/errors.t
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft2019-09', output_format => 'strict_basic')->evaluate(
       { '{}' => { 'my~tilde/slash-property' => 1 } },
       {
@@ -551,7 +551,7 @@ subtest annotations => sub {
     ],
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern::Result->new(%args)->TO_JSON,
     {
       valid => true,
@@ -566,7 +566,7 @@ subtest annotations => sub {
     'by default, annotations are included in the formatted output',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern::Result->new(%args, formatted_annotations => 0)->TO_JSON,
     { valid => true },
     'but inclusion can be disabled',

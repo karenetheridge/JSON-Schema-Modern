@@ -18,7 +18,7 @@ use Helper;
 subtest 'unrecognized encoding formats do not result in errors, when not asserting' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'hello',
       {
@@ -129,7 +129,7 @@ subtest 'media_type and encoding handlers' => sub {
 subtest 'draft2020-12 assertions' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       my $data = { encoded_object => 'eyJmb28iOiAiYmFyIn0K' },
       my $schema = {
@@ -152,7 +152,7 @@ subtest 'draft2020-12 assertions' => sub {
     'under the current spec version, content* keywords are not assertions',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { encoded_object => 'blur^p=' },  # invalid base64
       $schema,
@@ -200,7 +200,7 @@ subtest 'draft2020-12 assertions' => sub {
     'then contentMediaType parses the decoded string, erroring if it can\'t, and does not continue with the schema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
       $schema,
@@ -234,7 +234,7 @@ subtest 'draft2020-12 assertions' => sub {
     'contentSchema evaluates the decoded data',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { encoded_object => 'bnVsbA==' }, # base64-encoded, json-encoded undef
       $schema,
@@ -263,7 +263,7 @@ subtest 'draft2020-12 assertions' => sub {
     'null data is handled properly',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { encoded_object => 'eyJoaSI6IuCyoF/gsqAifQ==' }, # base64-encoded, json-encoded { hi => "ಠ_ಠ" }
       $schema,
@@ -277,7 +277,7 @@ subtest 'draft2020-12 assertions' => sub {
 subtest 'draft7 assertions' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { encoded_object => 'blur^p=' },  # invalid base64
       my $schema = {
@@ -337,7 +337,7 @@ subtest 'draft7 assertions' => sub {
     'in draft7, then contentMediaType parses the decoded string, erroring if it can\'t, and does not continue with the schema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
       $schema,
@@ -350,7 +350,7 @@ subtest 'draft7 assertions' => sub {
 subtest 'more assertions' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'a string',
       {
@@ -375,7 +375,7 @@ subtest 'more assertions' => sub {
     'evaluation aborts with an unrecognized contentEncoding',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       'a string',
       {
@@ -416,7 +416,7 @@ subtest 'use of an absolute URI and different dialect within contentSchema' => s
   });
 
   my $subschema;
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => '{"bar":1}' },
       {

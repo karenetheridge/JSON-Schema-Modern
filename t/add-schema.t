@@ -30,7 +30,7 @@ subtest 'evaluate a document' => sub {
 
   my $js = JSON::Schema::Modern->new;
   $js->add_document($document);
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $document->canonical_uri)->TO_JSON,
     {
       valid => false,
@@ -66,7 +66,7 @@ subtest 'evaluate a document' => sub {
     'resource index from the document is copied to the main object',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $document->canonical_uri)->TO_JSON,
     {
       valid => false,
@@ -79,7 +79,7 @@ subtest 'evaluate a document' => sub {
 subtest 'evaluate a uri' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
     {
       valid => false,
@@ -127,7 +127,7 @@ subtest 'evaluate a uri' => sub {
   );
 
   # and again, we can use the same resource without reloading it
-  cmp_result(
+  is_equal(
     $js->evaluate({ '$schema' => 1 }, METASCHEMA)->TO_JSON,
     {
       valid => false,
@@ -140,7 +140,7 @@ subtest 'evaluate a uri' => sub {
   # multiple things are being tested here:
   # - we can load a schema resource, or find an existing one, with a fragment
   # - the json path we used is saved in the state, for correct errors
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       'https://json-schema.org/draft/2019-09/meta/core#/properties/$schema',
@@ -159,7 +159,7 @@ subtest 'evaluate a uri' => sub {
     'evaluate against the a subschema of the metaschema',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       METASCHEMA.'#/does/not/exist',
@@ -177,7 +177,7 @@ subtest 'evaluate a uri' => sub {
     'evaluate against the a fragment of the metaschema that does not exist',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       1,
       METASCHEMA.'#does_not_exist',
@@ -199,7 +199,7 @@ subtest 'evaluate a uri' => sub {
 subtest 'add a uri resource' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     my $get_metaschema = scalar $js->get(METASCHEMA),
     my $orig_metaschema = $js->_get_resource(METASCHEMA)->{document}->schema,
     '->get in scalar context on a URI to the head of a document',
@@ -214,7 +214,7 @@ subtest 'add a uri resource' => sub {
     '->get in list context on a URI to the head of a document',
   );
 
-  cmp_result(
+  is_equal(
     scalar $js->get(METASCHEMA.'#/properties/definitions/type'),
     'object', # $document->schema->{properties}{definitions}{type}
     '->get in scalar context on a URI to inside of a document',
@@ -257,7 +257,7 @@ subtest 'add a schema associated with a uri' => sub {
     'added the schema data with an associated uri; the document does not see the overridden uri',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, 'https://bar.com#/allOf/0')->TO_JSON,
     {
       valid => false,
@@ -273,7 +273,7 @@ subtest 'add a schema associated with a uri' => sub {
     'can now evaluate using a uri to a subschema of a resource we loaded earlier',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, 'https://foo.com')->TO_JSON,
     {
       valid => false,
@@ -354,21 +354,21 @@ subtest 'add a schema associated with a uri' => sub {
 subtest 'multiple anonymous schemas' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, { minimum => 1 })->TO_JSON,
     { valid => true },
     'evaluate an anonymous schema',
   );
 
-  cmp_result([ keys $js->{_resource_index}->%* ], [ '' ], 'one resource is indexed');
+  is_equal([ keys $js->{_resource_index}->%* ], [ '' ], 'one resource is indexed');
 
-  cmp_result(
+  is_equal(
     $js->evaluate(2, { minimum => 2 })->TO_JSON,
     { valid => true },
     'evaluate another anonymous schema',
   );
 
-  cmp_result([ keys $js->{_resource_index}->%* ], [ '' ], 'still only one resource is indexed');
+  is_equal([ keys $js->{_resource_index}->%* ], [ '' ], 'still only one resource is indexed');
 };
 
 subtest 'add a document without associating it with a uri' => sub {
@@ -472,7 +472,7 @@ subtest '$ref to non-canonical uri' => sub {
   my $js = JSON::Schema::Modern->new;
   $js->add_schema('http://otherhost:4242/another_uri', $schema);
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ alpha => 1 }, 'http://otherhost:4242/another_uri')->TO_JSON,
     {
       valid => false,
@@ -494,7 +494,7 @@ subtest '$ref to non-canonical uri' => sub {
     'errors use the canonical uri, not the uri used to evaluate against',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ gamma => 1 }, 'http://otherhost:4242/beta')->TO_JSON,
     {
       valid => false,
@@ -509,7 +509,7 @@ subtest '$ref to non-canonical uri' => sub {
     'non-canonical uri is not used to resolve inner $id keywords',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ gamma => 1 }, 'http://localhost:4242/beta')->TO_JSON,
     {
       valid => false,
@@ -531,7 +531,7 @@ subtest '$ref to non-canonical uri' => sub {
     'the canonical uri is updated when use the canonical uri, not the uri used to evaluate against',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ delta => 1 }, 'http://otherhost:4242/another_uri')->TO_JSON,
     {
       valid => false,
@@ -553,7 +553,7 @@ subtest '$ref to non-canonical uri' => sub {
     'canonical_uri is not always what was in the $ref, even when no local $id is present',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, 'http://otherhost:4242/another_uri#/properties/alpha')->TO_JSON,
     {
       valid => false,
@@ -571,7 +571,7 @@ subtest '$ref to non-canonical uri' => sub {
 
   delete $schema->{properties}{beta}{'$id'};
 
-  cmp_result(
+  is_equal(
     $js->evaluate({ gamma => 1 }, 'http://otherhost:4242/another_uri#/properties/beta')->TO_JSON,
     {
       valid => false,
@@ -737,7 +737,7 @@ subtest 'register a document against multiple uris, with absolute root uri' => s
     undef,
     '->get in scalar context for a nonexistent resource returns undef',
   );
-  cmp_result(
+  is_equal(
     [ $js->get('https://foo.com#i_do_not_exist') ],
     [],
     '->get in list context for a nonexistent resource returns empty list',
@@ -1083,7 +1083,7 @@ subtest 'external resource with externally-supplied uri; main resource with mult
     },
   );
 
-  cmp_result(
+  is_equal(
     my $result = $js->evaluate('string', 'https://secondary.com')->TO_JSON,
     {
       valid => false,
@@ -1105,7 +1105,7 @@ subtest 'external resource with externally-supplied uri; main resource with mult
     'all uris in result are correct, using secondary uri as the target',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate('string', 'https://main.com')->TO_JSON,
     $result,
     'all uris in result are correct, using main uri as the target',
@@ -1121,7 +1121,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
     my $def_schema = { '$defs' => { integer => { type => 'integer' } } },
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 'string' },
       my $schema = {
@@ -1163,7 +1163,7 @@ subtest 'document with no canonical URI, but assigned a URI through add_schema' 
     }),
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 'string' },
       $schema,

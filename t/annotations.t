@@ -25,7 +25,7 @@ subtest 'draft7' => sub {
     'user cannot enable annotations for draft7',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft7')
       ->evaluate(
         1,
@@ -146,7 +146,7 @@ subtest 'allOf' => sub {
     'passing allOf: state is correct after evaluating',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(1, $pass_schema, { collect_annotations => 0 })->TO_JSON,
     { valid => true },
     'annotation collection can be turned off in evaluate()',
@@ -157,7 +157,7 @@ subtest 'allOf' => sub {
   {
     my $js = JSON::Schema::Modern->new;
     ok(!$js->collect_annotations, 'collect_annotations defaults to false');
-    cmp_result(
+    is_equal(
       $js->evaluate(1, $pass_schema, { collect_annotations => 1 })->TO_JSON,
       {
         valid => true,
@@ -338,7 +338,7 @@ subtest 'not' => sub {
     'passing not: state is correct after evaluating',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -1050,7 +1050,7 @@ subtest 'unevaluatedProperties' => sub {
 subtest 'collect_annotations and unevaluated keywords' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 0);
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1 ],
       my $schema = {
@@ -1063,7 +1063,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is explicitly set to false, unevaluatedItems can still be used (valid result, no annotations in result)',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1, 2 ],
       $schema,
@@ -1088,7 +1088,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is explicitly set to false, unevaluatedItems can still be used (invalid result)',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       $schema = {
@@ -1100,7 +1100,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     { valid => true },
     'when "collect_annotations" is explicitly set to false, unevaluatedProperties can still be used (valid result, no annotations)',
   );
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1, bar => 2 },
       $schema,
@@ -1125,7 +1125,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is explicitly set to false, unevaluatedProperties can still be used (invalid result)',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         item => [ 1 ],
@@ -1142,7 +1142,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is explicitly set to false, unevaluatedProperties still be used, even in other documents (valid result)',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         item => [ 1, 2 ],
@@ -1190,7 +1190,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
 
   $js = JSON::Schema::Modern->new(collect_annotations => 1);
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1 ],
       {
@@ -1211,7 +1211,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is set to true, unevaluatedItems works, and annotations are returned',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -1239,7 +1239,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
 
   $js = JSON::Schema::Modern->new;
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [ 1 ],
       {
@@ -1254,7 +1254,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is not set, unevaluatedItems still works, but annotations are not returned',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       { foo => 1 },
       {
@@ -1269,7 +1269,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
     'when "collect_annotations" is not set, unevaluatedProperties still works, but annotations are not returned',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         item => [ 1 ],
@@ -1292,7 +1292,7 @@ subtest 'collect_annotations and unevaluated keywords' => sub {
 
   my $doc_properties = $js->add_schema('properties.json', { properties => { foo => true } });
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       {
         item => [ 1 ],
@@ -1339,7 +1339,7 @@ subtest 'annotate unknown keywords' => sub {
     blip => [ 1, 2, 3 ],
   };
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new->evaluate(
       $data,
       $schema,
@@ -1350,7 +1350,7 @@ subtest 'annotate unknown keywords' => sub {
     'no annotations even when collect_annotations is false',
   );
 
-  cmp_result(
+  is_equal(
     (my $result = JSON::Schema::Modern->new(collect_annotations => 1)->evaluate(
       $data,
       $schema,
@@ -1412,7 +1412,7 @@ subtest 'annotate unknown keywords' => sub {
     '"unknown" keyword is set on the annotation objects for unknown keywords',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
         ->evaluate(
       $data,
@@ -1451,7 +1451,7 @@ subtest 'annotate unknown keywords' => sub {
 };
 
 subtest 'items + additionalItems, prefixItems + items' => sub {
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
         ->evaluate(
       [ 1, 2, 3 ],
@@ -1474,7 +1474,7 @@ subtest 'items + additionalItems, prefixItems + items' => sub {
     'schema-based items + additionalItems',
   );
 
-  cmp_result(
+  is_equal(
     JSON::Schema::Modern->new(collect_annotations => 1)->evaluate(
       [ 1, 2, 3 ],
       {

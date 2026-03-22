@@ -65,7 +65,7 @@ subtest 'evaluation callbacks' => sub {
     $config,
   );
   ok(!$result->valid, 'evaluation was not successful');
-  cmp_result(
+  is_equal(
     \@used_ref_at,
     [],
     'no callbacks on failure: innermost $ref failed, so all other $refs failed too',
@@ -133,7 +133,7 @@ subtest 'callbacks for keywords without eval subs' => sub {
   );
   ok($result->valid, 'evaluation was successful');
 
-  cmp_result(
+  is_equal(
     \%keywords,
     { map +($_ => 1), qw($anchor $comment $defs $dynamicAnchor if then else $schema $vocabulary) },
     'callbacks are triggered for keywords even when they lack evaluation subs',
@@ -158,7 +158,7 @@ subtest 'callbacks that produce errors' => sub {
       },
     },
   );
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,
@@ -189,7 +189,7 @@ subtest 'callbacks that produce errors' => sub {
   );
 
   $result = $js->evaluate($data, $schema, { %$configs, short_circuit => 1 });
-  cmp_result(
+  is_equal(
     $result->TO_JSON,
     {
       valid => false,

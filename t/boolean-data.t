@@ -22,7 +22,7 @@ my ($test_schema, $failure_result);
 
 subtest 'strict booleans (default)' => sub {
   my $js = JSON::Schema::Modern->new;
-  cmp_result(
+  is_equal(
     $js->evaluate($_, { type => 'boolean' })->TO_JSON,
     { valid => true },
     'in data, '.serialize($_).' is a boolean',
@@ -32,7 +32,7 @@ subtest 'strict booleans (default)' => sub {
     true,
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate($_->[1], { type => 'boolean' })->TO_JSON,
     {
       valid => false,
@@ -58,7 +58,7 @@ subtest 'strict booleans (default)' => sub {
     [ 'reference to SCALAR' => \1 ],
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       $_->[1],
       $test_schema = {
@@ -124,7 +124,7 @@ subtest 'strict booleans (default)' => sub {
 
 subtest 'scalarref_booleans = 1' => sub {
   my $js = JSON::Schema::Modern->new(scalarref_booleans => 1);
-  cmp_result(
+  is_equal(
     $js->evaluate($_, $test_schema)->TO_JSON,
     { valid => true },
     'in data, '.serialize($_).' is a boolean',
@@ -136,7 +136,7 @@ subtest 'scalarref_booleans = 1' => sub {
     \1,
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate($_->[1], $test_schema)->TO_JSON,
     {
       valid => false,
@@ -162,7 +162,7 @@ subtest 'scalarref_booleans = 1' => sub {
     [ string => 'true' ],
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate(
       [
         undef,
@@ -181,7 +181,7 @@ subtest 'scalarref_booleans = 1' => sub {
     'items are all considered unique when types differ, even when perl treats them similarly',
   );
 
-  cmp_result(
+  is_equal(
     $js->evaluate($_, { uniqueItems => true })->TO_JSON,
     {
       valid => false,

@@ -46,13 +46,13 @@ my $schema = {
 
 $js->add_schema($metaschema);
 $js->add_schema($schema);
-cmp_result(
+is_equal(
   $js->evaluate($schema, {})->TO_JSON,
   { valid => true },
   'evaluated against an empty schema',
 );
 
-cmp_result(
+is_equal(
   $js->evaluate(1, 'https://my_schema')->TO_JSON,
   my $result = {
     valid => true,
@@ -68,7 +68,7 @@ cmp_result(
   'evaluate data against schema with custom dialect; format and unknown keywords are collected as annotations',
 );
 
-cmp_result(
+is_equal(
   $js->evaluate('foo', 'https://my_schema')->TO_JSON,
   $result,
   'evaluate data against schema with custom dialect; format-annotation is used',
@@ -91,14 +91,14 @@ my @serialized_attributes = sort qw(
 );
 
 my $frozen = $js->FREEZE(undef);
-cmp_result(
+is_equal(
   [ sort keys %$frozen ],
   [ sort @serialized_attributes ],
   'frozen object contains all the right keys',
 );
 
 my $thawed = JSON::Schema::Modern->THAW(undef, $frozen);
-cmp_result(
+is_equal(
   [ sort keys %$thawed ],
   [ sort @serialized_attributes ],
   'thawed object contains all the right keys',
@@ -107,13 +107,13 @@ cmp_result(
 $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
 Sereal::Decoder->new->decode($frozen, $thawed);
 
-cmp_result(
+is_equal(
   $thawed->evaluate($schema, {})->TO_JSON,
   { valid => true },
   'evaluate again against an empty schema',
 );
 
-cmp_result(
+is_equal(
   $thawed->evaluate('hi', 'https://my_schema')->TO_JSON,
   {
     valid => true,
@@ -141,7 +141,7 @@ ok(
 
 $frozen = Sereal::Encoder->new({ freeze_callbacks => 1 })->encode($js);
 $thawed = Sereal::Decoder->new->decode($frozen);
-cmp_result(
+is_equal(
   $thawed->evaluate($schema, {})->TO_JSON,
   { valid => true },
   'evaluate again against an empty schema',
