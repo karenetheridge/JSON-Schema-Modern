@@ -154,8 +154,7 @@ sub get_type ($value, $config = {}) {
   return 'array' if ref $value eq 'ARRAY';
 
   # floats in json will always be parsed into Math::BigFloat, when allow_bignum is enabled
-  if (length ref $value) {
-    my $ref = ref $value;
+  if (length(my $ref = ref $value)) {
     return $ref eq 'Math::BigInt' ? 'integer'
       : $ref eq 'Math::BigFloat' ? (!$config->{legacy_ints} && $value->is_int ? 'integer' : 'number')
       : (defined blessed($value) ? '' : 'reference to ').$ref;
