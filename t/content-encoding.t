@@ -19,7 +19,7 @@ subtest 'unrecognized encoding formats do not result in errors, when not asserti
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);
 
   cmp_result(
-    my $result = $js->evaluate(
+    $js->evaluate(
       'hello',
       {
         contentEncoding => 'base64',
@@ -153,7 +153,7 @@ subtest 'draft2020-12 assertions' => sub {
   );
 
   cmp_result(
-    my $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'blur^p=' },  # invalid base64
       $schema,
       { validate_content_schemas => 1 },
@@ -177,7 +177,7 @@ subtest 'draft2020-12 assertions' => sub {
   );
 
   cmp_result(
-    $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'bm90IGpzb24=' }, # base64-encoded "not json"
       $schema,
       { validate_content_schemas => 1 },
@@ -201,7 +201,7 @@ subtest 'draft2020-12 assertions' => sub {
   );
 
   cmp_result(
-    $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
       $schema,
       { validate_content_schemas => 1 },
@@ -235,7 +235,7 @@ subtest 'draft2020-12 assertions' => sub {
   );
 
   cmp_result(
-    $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'bnVsbA==' }, # base64-encoded, json-encoded undef
       $schema,
       { validate_content_schemas => 1 },
@@ -264,7 +264,7 @@ subtest 'draft2020-12 assertions' => sub {
   );
 
   cmp_result(
-    $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'eyJoaSI6IuCyoF/gsqAifQ==' }, # base64-encoded, json-encoded { hi => "ಠ_ಠ" }
       $schema,
       { validate_content_schemas => 1 },
@@ -278,7 +278,7 @@ subtest 'draft7 assertions' => sub {
   my $js = JSON::Schema::Modern->new(specification_version => 'draft7');
 
   cmp_result(
-    my $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'blur^p=' },  # invalid base64
       my $schema = {
         type => 'object',
@@ -315,7 +315,7 @@ subtest 'draft7 assertions' => sub {
   );
 
   cmp_result(
-    $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'bm90IGpzb24=' }, # base64-encoded "not json"
       $schema,
     )->TO_JSON,
@@ -338,7 +338,7 @@ subtest 'draft7 assertions' => sub {
   );
 
   cmp_result(
-    $result = $js->evaluate(
+    $js->evaluate(
       { encoded_object => 'eyJoaSI6MX0=' }, # base64-encoded, json-encoded { hi => 1 }
       $schema,
     )->TO_JSON,

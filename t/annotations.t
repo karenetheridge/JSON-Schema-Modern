@@ -1413,7 +1413,7 @@ subtest 'annotate unknown keywords' => sub {
   );
 
   cmp_result(
-    $result = JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
+    JSON::Schema::Modern->new(specification_version => 'draft2019-09', collect_annotations => 1)
         ->evaluate(
       $data,
       $schema,
@@ -1475,7 +1475,7 @@ subtest 'items + additionalItems, prefixItems + items' => sub {
   );
 
   cmp_result(
-    my $result = JSON::Schema::Modern->new(collect_annotations => 1)->evaluate(
+    JSON::Schema::Modern->new(collect_annotations => 1)->evaluate(
       [ 1, 2, 3 ],
       {
         prefixItems => [ { maximum => 5 }, { maximum => 5 }, { maximum => 5 } ],

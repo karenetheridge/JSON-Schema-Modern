@@ -1877,7 +1877,7 @@ subtest '$schema points to a boolean schema' => sub {
   $js->add_schema('https://my_boolean_schema' => true);
 
   cmp_result(
-    my $result = $js->evaluate(
+    $js->evaluate(
       1,
       {
         '$id' => '/foo',

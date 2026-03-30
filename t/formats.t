@@ -782,7 +782,7 @@ subtest 'formats supporting multiple core types' => sub {
       JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0),
       JSON::Schema::Modern::_JSON_BACKEND()->new->allow_nonref(1)->utf8(0)->allow_bignum(1)) {
     cmp_result(
-      my $result = $js->evaluate(
+      $js->evaluate(
         [ map $decoder->decode($_), @values ],
         {
           items => {
