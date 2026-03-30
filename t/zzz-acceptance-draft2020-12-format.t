@@ -76,8 +76,8 @@ acceptance_tests(
       { file => 'email.json', group_description => 'validation of e-mail addresses', test_description => [ 'an invalid domain', 'an invalid IPv4-address-literal' ] },
       { file => 'hostname.json', group_description => 'validation of host names', test_description => [ 'trailing dot', 'contains "--" in the 3rd and 4th position' ] },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
-      { file => 'iri.json', group_description => 'validation of IRIs',  # see test suite issue 395
-        test_description => 'an invalid IRI based on IPv6' },
+      { file => 'iri.json', group_description => 'validation of IRIs',
+        test_description => [ 'an invalid IRI based on IPv6', 'an IPv6 address without enclosing brackets is invalid' ] },
       { file => 'idn-hostname.json',
         # IDN decoder, Data::Validate::Domain both have issues
         group_description => [ 'validation of internationalized host names', 'validation of separators in internationalized host names' ] },
