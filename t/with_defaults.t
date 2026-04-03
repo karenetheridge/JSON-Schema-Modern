@@ -689,6 +689,22 @@ subtest 'jsonp_set permutations' => sub {
     'new value',
     'can write a non-reference into a non-reference location when lvalue provided',
   );
+
+  $data = [ 0, 1, 2 ];
+  jsonp_set($data, '/-', 'foo');
+  is_equal(
+    $data,
+    [ 0, 1, 2, 'foo' ],
+    '- is accepted as an array index, referencing the item after the end of the array',
+  );
+
+  $data = '';
+  $data = jsonp_set($data, '/-', 'foo');
+  is_equal(
+    $data,
+    [ 'foo' ],
+    '- is accepted as an array index, when overwriting a string',
+  );
 };
 
 done_testing;

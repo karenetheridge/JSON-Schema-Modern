@@ -346,7 +346,7 @@ sub jsonp_set ($data, $pointer, $value) {
     (length $pointer ? (split /\//, $pointer, -1) : ($pointer));
 
   croak 'cannot write a hashref into a reference to an array in void context'
-    if @keys >= 2 and $keys[1] !~ /^\d+\z/a and ref $data eq 'ARRAY' and not defined wantarray;
+    if @keys >= 2 and $keys[1] !~ /^(?:\d+|-)\z/a and ref $data eq 'ARRAY' and not defined wantarray;
 
   shift @keys;  # always '', indicating the root
   my $curp = \$data;
@@ -355,14 +355,16 @@ sub jsonp_set ($data, $pointer, $value) {
     # if needed, first remove the existing data so we can replace with a new hash key or array index
     undef $curp->$*
       if not ref $curp->$*
-        or ref $curp->$* eq 'ARRAY' and $key !~ /^\d+\z/a;
+        or ref $curp->$* eq 'ARRAY' and $key !~ /^(?:\d+|-)\z/a;
 
     # use this existing hash key or array index location, or create new position
     use autovivification 'store';
     $curp = \(
-      ref $curp->$* eq 'HASH' || $key !~ /^\d+\z/a
+      ref $curp->$* eq 'HASH' || $key !~ /^(?:\d+|-)\z/a
         ? $curp->$*->{$key}
-        : $curp->$*->[$key]);
+        : $key =~ /^\d+\z/a
+        ? $curp->$*->[$key]
+        : $curp->$*->[$curp->$*->$#* + 1]);
   }
 
   $curp->$* = $value;
