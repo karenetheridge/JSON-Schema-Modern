@@ -14,6 +14,7 @@ use utf8;
 
 use lib 't/lib';
 use Helper;
+use Test2::Warnings qw(warnings :no_end_test had_no_warnings);
 
 subtest 'unrecognized encoding formats do not result in errors, when not asserting' => sub {
   my $js = JSON::Schema::Modern->new(collect_annotations => 1);
@@ -52,19 +53,20 @@ subtest 'unrecognized encoding formats do not result in errors, when not asserti
   );
 };
 
-subtest 'media_type and encoding handlers' => sub {
+subtest 'media_type and encoding handlers (legacy interfaces)' => sub {
   my $js = JSON::Schema::Modern->new;
 
-  like(
-    dies { $js->add_media_type('FOO/BAR' => sub { \1 }) },
-    qr!Value "FOO/BAR" did not pass type constraint !,
-    'upper-cased names are not accepted',
-  );
-
+  my @warnings = warnings {
+    cmp_result(
+      $js->get_media_type('application/json')->(\'{"alpha": "a string"}'),
+      \ { alpha => 'a string' },
+      'application/json media_type decoder',
+    );
+  };
   cmp_result(
-    $js->get_media_type('application/json')->(\'{"alpha": "a string"}'),
-    \ { alpha => 'a string' },
-    'application/json media_type decoder',
+    \@warnings,
+    [ re(qr/^\$jsm->get_media_type is deprecated; use the function in JSON::Schema::Modern::Utilities instead/) ],
+    'warned once when using deprecated get_media_type',
   );
 
   cmp_result($js->get_media_type('*/*'), undef, '*/* has no default match');
@@ -73,20 +75,37 @@ subtest 'media_type and encoding handlers' => sub {
 
   cmp_result($js->get_media_type('tExt/PLaIN')->(\'foo'), \'foo', 'getter uses the casefolded name');
 
-  $js->add_media_type('furble/*' => sub { \1 });
-  cmp_result($js->get_media_type('furble/bloop')->(\''), \'1', 'getter matches to wildcard entries');
+  @warnings = warnings {
+    $js->add_media_type('furble/*' => sub { \1 });
+  };
+  cmp_result(
+    \@warnings,
+    [ re(qr/^\$jsm->add_media_type is deprecated; use the function in JSON::Schema::Modern::Utilities instead/) ],
+    'warned once when using deprecated add_media_type',
+  );
 
-  $js->add_media_type('text/*' => sub { \'wildcard' });
-  cmp_result($js->get_media_type('TExT/plain')->(\'foo'), \'wildcard', 'getter uses new override entry for wildcard');
+  cmp_result(
+    $js->get_media_type('furble/bloop')->(\''),
+    \'1',
+    'deprecated getter matches to wildcard entries',
+  );
+  cmp_result(
+    JSON::Schema::Modern::Utilities::decode_media_type('furble/bloop', \''),
+    \'1',
+    'global decoder matches to wildcard entries',
+  );
 
-  $js->add_media_type('text/plain' => sub { \'plain' });
-  cmp_result($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter prefers case-insensitive matches to wildcard entries');
-  cmp_result($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'getter matches to wildcard entries');
-  cmp_result($js->get_media_type('TExT/*')->(\'foo'), \'wildcard', 'text/* matches itself');
+  $js->add_media_type('mytext/*' => sub { \'wildcard' });
+  cmp_result($js->get_media_type('myTExT/plain')->(\'foo'), \'wildcard', 'getter uses new override entry for wildcard');
+
+  $js->add_media_type('mytext/plain' => sub { \'plain' });
+  cmp_result($js->get_media_type('MYTExT/plain')->(\'foo'), \'plain', 'getter prefers case-insensitive matches to wildcard entries');
+  cmp_result($js->get_media_type('myTExT/blop')->(\'foo'), \'wildcard', 'getter matches to wildcard entries');
+  cmp_result($js->get_media_type('myTExT/*')->(\'foo'), \'wildcard', 'text/* matches itself');
 
   $js->add_media_type('*/*' => sub { \'wildercard' });
-  cmp_result($js->get_media_type('TExT/plain')->(\'foo'), \'plain', 'getter still prefers case-insensitive matches to wildcard entries');
-  cmp_result($js->get_media_type('TExT/blop')->(\'foo'), \'wildcard', 'text/* is preferred to */*');
+  cmp_result($js->get_media_type('myTExT/plain')->(\'foo'), \'plain', 'getter still prefers case-insensitive matches to wildcard entries');
+  cmp_result($js->get_media_type('myTExT/blop')->(\'foo'), \'wildcard', 'text/* is preferred to */*');
   cmp_result($js->get_media_type('*/*')->(\'foo'), \'wildercard', '*/* matches */*, once defined');
   cmp_result($js->get_media_type('fOO/bar')->(\'foo'), \'wildercard', '*/* is returned as a last resort');
 
@@ -109,7 +128,31 @@ subtest 'media_type and encoding handlers' => sub {
   );
 
 
-  $js = JSON::Schema::Modern->new;
+  my $js2 = JSON::Schema::Modern->new;
+
+  cmp_result(
+    $js2->get_media_type('furble/bloop')->(\''),
+    \'1',
+    'deprecated getter on second instance finds the right definition',
+  );
+
+  cmp_result(
+    $js2->get_media_type('fOO/bar')->(\''),
+    \'wildercard',
+    '*/* definition is visible to the second instance',
+  );
+
+  cmp_result(
+    JSON::Schema::Modern::Utilities::decode_media_type('myTExT/*', \'foo'),
+    \'wildcard',
+    'global decoder still exists',
+  );
+
+  JSON::Schema::Modern::Utilities::delete_media_type('furble/*');
+  JSON::Schema::Modern::Utilities::delete_media_type('*/*');
+  is($js->get_media_type('furble/bloop'), undef, 'media-type deletion is global');
+  is($js2->get_media_type('furble/bloop'), undef, 'media-type deletion is global');
+
 
   # MIME::Base64::decode("eyJmb28iOiAiYmFyIn0K") -> {"foo": "bar"}
   # Cpanel::JSON::XS->new->allow_nonref(1)->utf8(0)->decode(q!{"foo": "bar"}!) -> { foo => 'bar' }
@@ -124,6 +167,20 @@ subtest 'media_type and encoding handlers' => sub {
     $js->get_media_type('application/json')->($js->get_encoding('base64url')->(\'eyJmb28iOiJiYXIifQ')),
     \ { foo => 'bar' },
     'base64url encoding decoder + application/json media_type decoder',
+  );
+
+
+  undef $js;
+  cmp_result(
+    scalar JSON::Schema::Modern::Utilities::decode_media_type('myTExT/*', \'foo'),
+    undef,
+    'deleted JSM instances delete their media-types',
+  );
+
+  is_equal(
+    $js2->get_media_type('fOO/bar'),
+    undef,
+    '*/* definition was deleted by the evaluator instance that added it',
   );
 };
 
@@ -552,4 +609,168 @@ subtest 'use of an absolute URI and different dialect within contentSchema' => s
   );
 };
 
+subtest 'new media-type handler' => sub {
+  use JSON::Schema::Modern::Utilities qw(match_media_type add_media_type delete_media_type decode_media_type encode_media_type);
+
+  my @types = (
+    '*/*',
+    'mytext/*',
+    'mytext/plAin',
+    'mytext/foo+plain',
+    'mytext/bar+plain',
+    'mytext/plain; charset=iso8891-1',
+    'mytext/plain;charset=utf-8',
+    'mytext/PLAIN;  charset=utf-8; x=y',
+    'mytext/foo; x="\1y"',  # equivalent to text/foo; x=1y
+    'foo/bar',
+  );
+
+  my @tests = (
+    # media-type => best candidate match from media-types added above
+    [ '*/*', '*/*' ],                                             # wildcards match themselves
+    [ 'any/thing', '*/*' ],                                       # anything matches */*
+    [ 'MYTEXT/*', 'mytext/*' ],                                   # ""
+    [ 'mytext/PLaiN', 'mytext/plAin' ],                           # exact type + subtype match
+    [ 'mytext/html', 'mytext/*' ],                                # wildcard subtype match
+    [ 'myapplication/json', '*/*' ],                              # wildcard match
+    [ 'mytext/plain; x=y; charset=UtF-8', 'mytext/PLAIN;  charset=utf-8; x=y' ], # full param match (2)
+    [ 'mytext/plain; charset=UTF-8' => 'mytext/plain;charset=utf-8' ],    # full param match (1)
+    [ 'mytext/plain; a=b; charset=UtF-8', 'mytext/plain;charset=utf-8' ], # partial param match
+    [ 'mytext/foo+plain', 'mytext/foo+plain' ],                           # match with subtype qualifier
+    [ 'mytext/baz+plain', 'mytext/plAin' ],                       # subtype qualifier mismatch
+    [ 'mytext/foo; x="\1\y"', 'mytext/foo; x="\1y"' ],            # quoted-pair in parameter
+    [ 'mytext/foo; x=1y', 'mytext/foo; x="\1y"' ],                # no quotes still matches
+  );
+
+  # first, run the tests by passing in the list of candidate types
+  foreach my $test (@tests) {
+    is_equal(
+      (match_media_type($test->[0], \@types) // undef),
+      $test->[1],
+      "using ad-hoc list: $test->[0] matches $test->[1]",
+    );
+  }
+
+  # then run the tests using our global registry of types
+  add_media_type($_) foreach @types;
+
+  foreach my $test (@tests) {
+    is_equal(
+      (match_media_type($test->[0]) // undef),
+      $test->[1],
+      "using registry: $test->[0] matches $test->[1]",
+    );
+  }
+
+  delete_media_type('*/*');
+  is_equal(
+    (match_media_type('any/thing') // undef),
+    undef,
+    'after deleting */* entry, this lookup fails',
+  );
+
+  like(
+    dies { add_media_type('FOO-BAR' => sub {}) },
+    qr/bad media-type string "FOO-BAR"/,
+    'bad media-type strings are rejected',
+  );
+
+  like(
+    dies { add_media_type('MYTEXT/PLAIN; CHARSET=UTF-8' => sub {}) },
+    qr/duplicate media-type found/,
+    'cannot add a type twice (when comparing normalized forms)',
+  );
+
+  is_equal(
+    decode_media_type($_, \'{"a":1,"b":2}')->$*,
+    { a => 1, b => 2 },
+    "decoder for $_",
+  ) foreach 'application/json', 'application/json; charset=UTF-8';
+
+  is_equal(
+    encode_media_type($_, \[ 0, 1, 2, 3, 4 ])->$*,
+    '[0,1,2,3,4]',
+    "encoder for $_",
+  ) foreach 'application/json', 'application/json; charset=UTF-8';
+
+  die_result(
+    sub { decode_media_type('application/json', \'blargh') },
+    qr/malformed JSON string/,
+    'decoder for "application/json" throws an exception for bad data',
+  );
+
+  die_result(
+    sub { encode_media_type('application/json', \ sub { 1 }) },
+    qr/JSON can only represent references to arrays or hashes/,
+    'encoder for "application/json" throws an exception for bad data',
+  );
+
+  is_equal(
+    decode_media_type('text/plain', \"\xe0\xb2\xa0\x5f\xe0\xb2\xa0")->$*,
+    "\xe0\xb2\xa0\x5f\xe0\xb2\xa0",
+    'text/* decoder without charset',
+  );
+
+  is_equal(
+    decode_media_type('text/plain; charset=UTF-8', \"\xe0\xb2\xa0\x5f\xe0\xb2\xa0")->$*,
+    'ಠ_ಠ',
+    'text/* decoder with UTF-8 charset',
+  );
+
+  is_equal(
+    encode_media_type('text/plain; charset=UTF-8', \'ಠ_ಠ')->$*,
+    "\xe0\xb2\xa0\x5f\xe0\xb2\xa0",
+    'text/* encoder with UTF-8 charset',
+  );
+
+  is_equal(
+    decode_media_type('text/plain; charset=latin1', \"\xe9clair")->$*,
+    'éclair',
+    'text/* decoder with latin1 charset',
+  );
+
+  is_equal(
+    encode_media_type('text/plain; charset=latin1', \'éclair')->$*,
+    "\xe9clair",
+    'text/* encoder with latin1 charset',
+  );
+
+  is_equal(
+    decode_media_type('application/x-www-form-urlencoded', \'foo=%E0%B2%A0_%E0%B2%A0')->$*,
+    { foo => 'ಠ_ಠ' },
+    'application/x-www-form-urlencoded decoder',
+  );
+
+  is_equal(
+    encode_media_type('application/x-www-form-urlencoded', \{ foo => 'ಠ_ಠ' })->$*,
+    'foo=%E0%B2%A0_%E0%B2%A0',
+    'application/x-www-form-urlencoded encoder',
+  );
+
+  is_equal(
+    decode_media_type('application/x-ndjson', \qq!{"a":1,"b":2}\n[0,1,2,3,4]!)->$*,
+    [ { a => 1, b => 2 }, [ 0, 1, 2, 3, 4 ] ],
+    'application/x-ndjson decoder',
+  );
+
+  is_equal(
+    encode_media_type('application/x-ndjson', \[ { a => 1 }, [ 0, 1, 2, 3, 4 ] ])->$*,
+    qq!{"a":1}\n[0,1,2,3,4]!,
+    'application/x-ndjson encoder',
+  );
+
+  is_equal(
+    scalar decode_media_type('foo/bar', \'hi'),
+    undef,
+    'unknown media-type decoder returns undef, not a reference',
+  );
+
+  is_equal(
+    scalar encode_media_type('foo/bar', \'hi'),
+    undef,
+    'unknown media-type encoder returns undef, not a reference',
+  );
+};
+
+had_no_warnings if $ENV{AUTHOR_TESTING};
 done_testing;

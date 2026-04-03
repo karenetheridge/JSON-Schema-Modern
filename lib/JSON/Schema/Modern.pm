@@ -1185,52 +1185,42 @@ has _json_decoder => (
   default => sub { _JSON_BACKEND->new->allow_nonref(1)->canonical(1)->utf8(1)->allow_bignum(1)->convert_blessed(1) },
 );
 
-# since media types are case-insensitive, all type names must be casefolded on insertion.
+# since media types are case-insensitive, all legacy type names must be casefolded on insertion.
 has _media_type => (
   is => 'bare',
-  isa => my $media_type_type = Map[Str->where(q{$_ eq CORE::fc($_)}), CodeRef],
+  isa => ArrayRef[my $media_type_type = Str->where(q{$_ eq CORE::fc($_)})],
   reader => '__media_type',
   lazy => 1,
-  default => sub ($self) {
-    my $_json_media_type = sub ($content_ref) {
-      # utf-8 decoding is always done, as per the JSON spec.
-      # other charsets are not supported: see RFC8259 §11
-      \ _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->decode($content_ref->$*);
-    };
-    +{
-      (map +($_ => $_json_media_type),
-        qw(application/json application/schema+json application/schema-instance+json)),
-      (map +($_ => sub ($content_ref) { $content_ref }),
-        qw(text/* application/octet-stream)),
-      'application/x-www-form-urlencoded' => sub ($content_ref) {
-        \ Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*)->to_hash;
-      },
-      'application/x-ndjson' => sub ($content_ref) {
-        my $decoder = _JSON_BACKEND->new->allow_nonref(1)->utf8(1);
-        my $line = 0; # line numbers start at 1
-        \[ map {
-            do {
-              try { ++$line; $decoder->decode($_) }
-              catch ($e) { die 'parse error at line '.$line.': '.$e }
-            }
-          }
-          split(/\r?\n/, $content_ref->$*)
-        ];
-      },
-    };
-  },
+  default => sub ($self) { [] },
 );
 
-sub add_media_type { $media_type_type->({ @_[1..2] }); $_[0]->__media_type->{$_[1]} = $_[2]; }
+my ($warn_add_media_type, $warn_get_media_type);  # we will warn just once
 
-# get_media_type('TExT/bloop') will fall through to matching an entry for 'text/*' or '*/*'
+# deprecated interface
+sub add_media_type ($self, $media_type, $decoder) {
+  $media_type_type->($media_type);
+
+  carp '$jsm->add_media_type is deprecated; use the function in JSON::Schema::Modern::Utilities instead' if not $warn_add_media_type++;
+
+  # backcompat preservation: add to the global registry, and remove it again when this object goes
+  # out of scope
+  JSON::Schema::Modern::Utilities::add_media_type($media_type, $decoder, undef, refaddr $self);
+  push $self->__media_type->@*, $media_type;
+  return;
+}
+
+sub DESTROY ($self) {
+  foreach my $media_type (uniqstr $self->__media_type->@*) {
+    JSON::Schema::Modern::Utilities::delete_media_type($media_type, refaddr $self);
+  }
+}
+
+# deprecated interface; will use global definitions
 sub get_media_type ($self, $type) {
-  my $types = $self->__media_type;
-  my $mt = $types->{fc $type};
-  return $mt if $mt;
+  carp '$jsm->get_media_type is deprecated; use the function in JSON::Schema::Modern::Utilities instead' if not $warn_get_media_type++;
 
-  return $types->{(first { m{([^/]+)/\*\z} && fc($type) =~ m{^\Q$1\E/[^/]+\z} } keys %$types) // '*/*'};
-};
+  JSON::Schema::Modern::Utilities::_get_media_type_decoder($type);
+}
 
 has _encoding => (
   is => 'bare',
@@ -1728,7 +1718,7 @@ Vocabularies cannot be redefined; subsequent calls to add the same vocabulary wi
 
 =head2 add_media_type
 
-  $js->add_media_type('application/furble' => sub ($content_ref) {
+  $js->add_media_type('application/furble' => sub ($content_ref, @) {
     return ...;  # data representing the deserialized text for Content-Type: application/furble
   });
 
@@ -1737,34 +1727,21 @@ a reference to a string, which might contain wide characters (i.e. not octets), 
 in conjunction with L</get_encoding> below. Must return B<a reference to a value of any type> (which is
 then dereferenced for the C<contentSchema> keyword).
 
-These media types are already known:
-
-=for :list
-* C<application/json> - see L<RFC 4627|https://datatracker.ietf.org/doc/html/rfc4627>
-* C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
-* C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
-* C<application/octet-stream> - passes strings through unchanged
-* C<application/x-www-form-urlencoded>
-* C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
-* C<text/*> - passes strings through unchanged
-
-Media-type definitions can be overridden with a new call to C<add_media_type>.
-
-See the official L<OpenAPI Media Type Registry|https://spec.openapis.org/registry/media-type>
-for a registry of known and useful media types; for
-compatibility reasons, avoid defining a media type listed here with different semantics.
+This interface is B<deprecated> as of version 0.638 and may eventually be removed; use
+L<JSON::Schema::Modern::Utilities/add_media_type> instead, which supports defining an encoder as
+well, and supports media-type parameters.
 
 =head2 get_media_type
-
-Fetches a decoder sub for the indicated media type. Lookups are performed B<without case sensitivity>.
-
-=for stopwords thusly
-
-You can use it thusly:
 
   $js->add_media_type('application/furble' => sub { ... }); # as above
   my $decoder = $self->get_media_type('application/furble') or die 'cannot find media type decoder';
   my $content_ref = $decoder->(\$content_string);
+
+Fetches a decoder sub from the current object's registry for the indicated media type. Lookups are
+performed B<without case sensitivity>.
+
+This interface is B<deprecated> as of version 0.638 and may eventually be removed; use
+L<JSON::Schema::Modern::Utilities/decode_media_type> instead.
 
 =head2 add_encoding
 

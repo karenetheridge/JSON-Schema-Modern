@@ -12,6 +12,7 @@ use stable 0.031 'postderef';
 use experimental 'signatures';
 no autovivification warn => qw(fetch store exists delete);
 use if "$]" >= 5.022, experimental => 're_strict';
+use if "$]" < 5.025002, experimental => 'lexical_subs';
 no if "$]" >= 5.031009, feature => 'indirect';
 no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
@@ -21,6 +22,8 @@ use B;
 use Carp qw(carp croak);
 use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
+use if "$]" < 5.041010, 'List::Util' => 'any';
+use if "$]" >= 5.041010, experimental => 'keyword_any';
 use Storable 'dclone';
 use Feature::Compat::Try;
 use Mojo::JSON ();
@@ -65,6 +68,11 @@ our @EXPORT_OK = qw(
   core_formats_type
   register_schema
   load_cached_document
+  add_media_type
+  delete_media_type
+  decode_media_type
+  encode_media_type
+  match_media_type
 );
 
 use constant HAVE_BUILTIN => "$]" >= 5.035010;
@@ -466,6 +474,267 @@ sub core_formats_type () {
   }
 }
 
+###### media-type mayhem below!
+
+{
+  # a hashref that indexes a media-type or media-range string to a decoder, encoder, and
+  # denormalized representation of the string.
+  # prepopulated list must match the list of definitions in _predefined_media_types
+  my $MEDIA_TYPES = {
+    map +(join('/', @$_) => { type => $_->[0], subtype => $_->[1] }), (
+      [ qw(application json) ],
+      [ qw(application octet-stream) ],
+      [ qw(text *) ],
+      [ qw(application x-www-form-urlencoded) ],
+      [ qw(application x-ndjson) ],
+    )
+  };
+
+  # see RFC9110 §8.3.1 for ABNF
+  my $OWS = q{[\x09\x20]*};
+  my $TOKEN = q{[a-zA-Z0-9!#$%&'*+.^_`|~-]+};
+  my $QUOTED_STRING = q{"((?:[\x09\20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\x5C[\x09\x20-\x7E\x80-\xFF])*)"};
+
+  # parses into hashref: { type => .., subtype => .., params => { .. } }
+  my sub _parse_media_type ($media_type_string) {
+    my ($type_subtype, @params) = split /$OWS;$OWS/, $media_type_string;
+    my ($type, $subtype) = ($type_subtype//'') =~ m{^($TOKEN)/($TOKEN)\z};
+    return if not defined $type or not defined $subtype;
+
+    # RFC9110 §5.6.4: "The backslash octet ("\") can be used as a single-octet quoting mechanism
+    # within quoted-string and comment constructs. Recipients that process the value of a
+    # quoted-string MUST handle a quoted-pair as if it were replaced by the octet following the
+    # backslash."
+    my $params = {
+      map +(m{^($TOKEN)=($TOKEN|$QUOTED_STRING)\z}
+        ? (fc($1) => fc(defined $3 ? ($3 =~ s/\x5C(.)/$1/gr) : $2))
+        : ()),
+      @params
+    };
+
+    croak 'cannot parse more than 64 parameters' if keys $params->%* > 64;
+    +{
+      type => fc($type),
+      subtype => fc($subtype),
+      keys %$params ? (parameters => $params) : (),
+    };
+  }
+
+  # wrapped in a sub so we don't define them until needed
+  my sub _predefined_media_types ($media_type_string) {
+    return +{
+      type => 'application',
+      subtype => 'json',
+      # UTF-8 decoding and encoding is always done, as per the JSON spec.
+      # other charsets are not supported: see RFC8259 §11
+      decode => sub ($content_ref, @) {
+        \ _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->decode($content_ref->$*);
+      },
+      encode => sub ($content_ref, @) {
+        \ _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->allow_blessed(1)->convert_blessed(1)->encode($content_ref->$*);
+      },
+      caller_addr => 1,
+    }
+    if $media_type_string eq 'application/json';
+
+    return +{
+      type => 'application',
+      subtype => 'octet-stream',
+      (map +($_ => sub ($content_ref, @) { $content_ref }), qw(decode encode)),
+      caller_addr => 1,
+    }
+    if $media_type_string eq 'application/octet-stream';
+
+    # identity function, with charset support
+    return +{
+      type => 'text', subtype => '*',
+      decode => sub ($content_ref, $parameters = {}, @) {
+        # RFC2046 §4.1.2: charset is case-insensitive
+        return $parameters->{charset} ?
+          \ Encode::decode($parameters->{charset}, $content_ref->$*, Encode::DIE_ON_ERR | Encode::LEAVE_SRC)
+          : $content_ref;
+      },
+      encode => sub ($content_ref, $parameters = {}, @) {
+        return $parameters->{charset} ?
+          \ Encode::encode($parameters->{charset}, $content_ref->$*, Encode::DIE_ON_ERR | Encode::LEAVE_SRC)
+          : $content_ref;
+      },
+      caller_addr => 1,
+    }
+    if $media_type_string eq 'text/*';
+
+    return +{
+      type => 'application',
+      subtype => 'x-www-form-urlencoded',
+      decode => sub ($content_ref, @) {
+        \ Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*)->to_hash;
+      },
+      encode => sub ($content_ref, @) {
+        \ Mojo::Parameters->new->charset('UTF-8')->pairs([ $content_ref->$*->%* ])->to_string;
+      },
+      caller_addr => 1,
+    }
+    if $media_type_string eq 'application/x-www-form-urlencoded';
+
+    return +{
+      type => 'application',
+      subtype => 'x-ndjson',
+      decode => sub ($content_ref, @) {
+        my $decoder = _JSON_BACKEND->new->allow_nonref(1)->utf8(1);
+        my $line = 0; # line numbers start at 1
+        \[ map {
+            do {
+              try { ++$line; $decoder->decode($_) }
+              catch ($e) { die 'parse error at line '.$line.': '.$e }
+            }
+          }
+          split(/\r?\n/, $content_ref->$*)
+        ];
+      },
+      encode => sub ($content_ref, @) {
+        my $encoder = _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->allow_blessed(1)->convert_blessed(1);
+        \ join "\n", map $encoder->encode($_), $content_ref->$*->@*;
+      },
+      caller_addr => 1,
+    }
+    if $media_type_string eq 'application/x-ndjson';
+  }
+
+  # for internal use only by JSON::Schema::Modern! may be removed without notice!
+  sub _get_media_type_decoder ($media_type_string) {
+    my $matched_string = match_media_type($media_type_string);
+    return undef if not defined $matched_string;
+
+    my $definition = $MEDIA_TYPES->{$matched_string};
+    $definition = $MEDIA_TYPES->{$matched_string} = _predefined_media_types($matched_string)
+      if not exists $definition->{decode};
+
+    return $definition->{decode};
+  }
+
+  sub add_media_type ($media_type_string, $decoder_sub = undef, $encoder_sub = undef, $caller_addr = 1) {
+    croak 'decoder is not a subref' if defined $decoder_sub and ref $decoder_sub ne 'CODE';
+    croak 'encoder is not a subref' if defined $encoder_sub and ref $encoder_sub ne 'CODE';
+
+    my $type = _parse_media_type($media_type_string);
+    croak "bad media-type string \"$media_type_string\"" if not $type;
+
+    # populate the cache if it's a bundled type that hasn't been defined yet
+    _predefined_media_types($media_type_string) if not exists $MEDIA_TYPES->{$media_type_string};
+
+    if (any { is_equal($type, { $_->%{qw(type subtype parameters)} }) } values %$MEDIA_TYPES) {
+      croak 'duplicate media-type found' if $caller_addr == 1;
+
+      # track evaluator object that used the deprecated add_media_type interface
+      push $MEDIA_TYPES->{$media_type_string}{caller_addr}->@*, $caller_addr;
+      return;
+    }
+
+    $MEDIA_TYPES->{$media_type_string} = {
+      decode => $decoder_sub,
+      encode => $encoder_sub,
+      %$type,
+      caller_addr => [ $caller_addr ],    # refaddr of the evaluator object that added us
+    };
+
+    return;
+  }
+
+  sub delete_media_type ($media_type_string, $caller_addr = 1) {
+    return if not exists $MEDIA_TYPES->{$media_type_string};
+
+    delete $MEDIA_TYPES->{$media_type_string}
+      if $caller_addr == 1
+        or $MEDIA_TYPES->{$media_type_string}{caller_addr} = [
+          grep +($_ != 1 && $_ != $caller_addr), $MEDIA_TYPES->{$media_type_string}{caller_addr}->@*
+        ];
+  }
+
+  # wildcards, parameters supported
+  # always returns a reference to the decoded data, or undef if no decoder is found
+  sub decode_media_type ($media_type_string, $content_ref) {
+    die 'decoder payload must be a reference to a string' if ref $content_ref ne 'SCALAR';
+
+    my $matched_string = match_media_type($media_type_string);
+    return if not $matched_string;
+
+    my $definition = $MEDIA_TYPES->{$matched_string};
+    $definition = $MEDIA_TYPES->{$matched_string} = _predefined_media_types($matched_string)
+      if not exists $definition->{decode};
+
+    return if not $definition->{decode};
+
+    my $type = _parse_media_type($media_type_string);
+    $definition->{decode}->($content_ref, $type->{parameters}//());
+  }
+
+  # wildcards, parameters supported
+  sub encode_media_type ($media_type_string, $content_ref) {
+    die 'encoder payload must be a reference' if ref $content_ref ne 'REF' and ref $content_ref ne 'SCALAR';
+
+    my $matched_string = match_media_type($media_type_string);
+    return if not $matched_string;
+
+    my $definition = $MEDIA_TYPES->{$matched_string};
+    $definition = $MEDIA_TYPES->{$matched_string} = _predefined_media_types($matched_string)
+      if not exists $definition->{encode};
+
+    return if not $definition->{encode};
+
+    my $type = _parse_media_type($media_type_string);
+    $definition->{encode}->($content_ref, $type->{parameters}//());
+  }
+
+  # finds best match for a media-type against a list of media-types. if parameter(s) are included in
+  # the media-type to be matched, all parameters must be present in the match value.
+  sub match_media_type ($media_type_string, $media_types = []) {
+    # return immediately if exact match exists
+    return $media_type_string
+      if @$media_types and any { $_ eq $media_type_string } @$media_types
+        or not @$media_types and exists $MEDIA_TYPES->{$media_type_string};
+
+    my $mt = _parse_media_type($media_type_string);
+    return if not $mt;
+
+    my $types = @$media_types ? +{ map +($_ => _parse_media_type($_)), @$media_types } : $MEDIA_TYPES;
+
+    my @matches;  # [ rank, candidate ]
+
+    # iterate through each provided MT and compare it to the string for matchability..
+    CANDIDATE:
+    foreach my $candidate (keys %$types) {
+      # if candidate has parameters, all parameters must match; missing parameters ok.
+      # the more parameters match the higher the score.
+      my $params_matched = 0;
+      foreach my $param (keys(($types->{$candidate}{parameters}//{})->%*)) {
+        next CANDIDATE if not exists(($mt->{parameters}//{})->{$param})
+          or $types->{$candidate}{parameters}{$param} ne $mt->{parameters}{$param};
+
+        ++$params_matched;
+      }
+
+      push(@matches, [ 0+$params_matched, $candidate ]), next if $candidate eq '*/*';
+      push(@matches, [ 2**8 + $params_matched, $candidate ]), next
+        if $types->{$candidate}{subtype} eq '*'
+          and $types->{$candidate}{type} eq $mt->{type};
+
+      # exact type + subtype match: best overall
+      if ($types->{$candidate}{type} eq $mt->{type}) {
+        push(@matches, [ 2**10 + $params_matched, $candidate ]), next
+          if $types->{$candidate}{subtype} eq $mt->{subtype};
+
+        # text/foo+plain matches text/plain but not text/bar+plain
+        push(@matches, [ 2**9 + $params_matched, $candidate ]), next
+          if $mt->{subtype} =~ m{^.+\+(.+)\z} and $types->{$candidate}{subtype} eq $1;
+      }
+    }
+
+    return if not @matches;
+    my @sorted = sort { $b->[0] <=> $a->[0] } @matches;
+    return $sorted[0]->[1];
+  }
+}
+
 ######## NO PUBLIC INTERFACES FOLLOW THIS POINT ########
 
 # get all annotations produced for the current instance data location (that are visible to this
@@ -690,7 +959,7 @@ register_schema get_schema_filename
 
 =head1 FUNCTIONS
 
-=for stopwords schema metaschema dualvar jsonp unjsonp
+=for stopwords schema metaschema dualvar jsonp unjsonp OpenAPI subref
 
 =head2 is_type
 
@@ -836,5 +1105,81 @@ A L<Type::Tiny> type representing the core JSON Schema formats (across all suppo
 Loads a document object from global cache, loading data from disk if needed. This should only be
 used for officially-published schemas and metaschemas that are bundled with this distribution or
 another related one.
+
+=head2 add_media_type
+
+  add_media_type('application/my_zip', $decoder_sub, $encoder_sub);
+  add_media_type('audio/*; version=1', $decoder_sub, $encoder_sub);
+
+Adds a media-type entry to the registry, or replaces an existing one. This registry is runtime-global,
+available to any code running in this process.
+
+Either or both of the subrefs are optional (use C<undef> for the decoder sub if you only want an
+encoder); the subref is expected to have the following signature:
+
+  sub ($content_ref, $parameters = {}, @)
+
+The subref will be called with a reference to the content string, and a hashref of the parameters
+that were parsed from the C<Content-Type> header (if any). Extra arguments are allowed to allow for
+future flexibility with this interface.
+
+These media types are already defined:
+
+=for :list
+* C<application/json> - see L<RFC 4627|https://datatracker.ietf.org/doc/html/rfc4627>
+* C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
+* C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
+* C<application/octet-stream> - passes strings through unchanged
+* C<application/x-www-form-urlencoded>
+* C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
+* C<text/*> - passes strings through unchanged; supports the charset parameter
+
+Media-type definitions can be overridden with a new call to C<add_media_type>.
+
+See the official L<OpenAPI Media Type Registry|https://spec.openapis.org/registry/media-type>
+for a registry of known and useful media types; for
+compatibility reasons, avoid defining a media type listed here with different semantics.
+
+=head2 delete_media_type
+
+  delete_media_type('application/my_zip');
+
+Removes a media-type entry from the registry. The string must match exactly, including case and
+whitespace.
+
+=head2 decode_media_type
+
+  my $content_ref = decode_media_type('text/plain; charset=UTF-8', \'encoded text');
+
+Finds the best-matching media-type decoder for the given media-type and decodes the content (which
+must be passed as a reference); returns a reference to the decoded content, or C<undef> if no
+matching decoder could be found. An exception might be thrown if the data could not be successfully
+decoded.
+
+=head2 encode_media_type
+
+  my $content_ref = encode_media_type('text/plain; charset=UTF-8', \[ 'decoded content' ]);
+
+Finds the best-matching media-type encoder for the given media-type and encodes the content (which
+must be passed as a reference); returns a reference to the encoded content, or C<undef> if no
+matching encoder could be found. An exception might be thrown if the data could not be successfully
+encoded.
+
+=head2 match_media_type
+
+  my $registered_media_type = match_media_type('text/html');
+  my $ad_hoc_media_type = match_media_type('text/html', [ 'text/plain', 'text/*' ]);
+
+Finds the best match for a C<Content-Type> header value from the media-types in the registry,
+or from an ad-hoc list reference provided in the remaining arguments.
+
+Types with structured suffixes will match more generic types when an exact match is not available
+(e.g. C<application/schema+json> will match an entry for C<application/json>).
+
+Exact matches to the C<type/subtype> name are preferred over wildcard matches (e.g. C<text/*>);
+if parameters are present in the value being matched against (the list of registered media-types,
+or the list provided to this sub), all parameters must be present and match exactly.
+
+All comparisons are done case-insensitively.
 
 =cut

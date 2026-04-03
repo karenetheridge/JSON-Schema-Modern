@@ -20,7 +20,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use Storable 'dclone';
 use Feature::Compat::Try;
-use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type E abort jsonp_set);
+use JSON::Schema::Modern::Utilities qw(is_type A assert_keyword_type E abort jsonp_set decode_media_type);
 use namespace::clean;
 
 with 'JSON::Schema::Modern::Vocabulary';
@@ -71,23 +71,25 @@ sub _eval_keyword_contentMediaType ($class, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
 
   if ($state->{validate_content_schemas}) {
-    my $decoder = $state->{evaluator}->get_media_type($schema->{contentMediaType});
-    abort($state, 'cannot find decoder for contentMediaType "%s"', $schema->{contentMediaType})
-      if not $decoder;
-
     # contentEncoding failed to decode the content
     return 1 if exists $schema->{contentEncoding} and not exists $state->{_content_ref};
 
     # decode the data now, so we can report errors for the right keyword
+    my $contentref;
     try {
-      $state->{_content_ref} = $decoder->($state->{_content_ref} // \$data);
-      $state->{data} = jsonp_set($state->{data}, $state->{data_path}, $state->{_content_ref}->$*);
+      $contentref = decode_media_type($schema->{contentMediaType}, $state->{_content_ref} // \$data);
     }
     catch ($e) {
       chomp $e;
       delete $state->{_content_ref};
       return E($state, 'could not decode %s string: %s', $schema->{contentMediaType}, $e);
     }
+
+    abort($state, 'cannot find decoder for contentMediaType "%s"', $schema->{contentMediaType})
+      if not $contentref;
+
+    $state->{_content_ref} = $contentref;
+    $state->{data} = jsonp_set($state->{data}, $state->{data_path}, $state->{_content_ref}->$*);
   }
 
   return A($state, $schema->{$state->{keyword}});

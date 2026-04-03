@@ -14,7 +14,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use lib 't/lib';
 use Helper;
 use Test::Needs qw(Sereal::Encoder Sereal::Decoder);
-use Test2::Warnings qw(:no_end_test had_no_warnings);
+use Test2::Warnings qw(:no_end_test had_no_warnings allow_warnings);
 
 my $js = JSON::Schema::Modern->new(
   collect_annotations => 1,
@@ -150,7 +150,9 @@ is_equal(
 ok($thawed->_get_vocabulary_class('https://json-schema.org/draft/2020-12/vocab/core'), 'core vocabulary_class for a different spec version works in a thawed object');
 ok($thawed->_get_vocabulary_class('https://json-schema.org/draft/2020-12/vocab/format-assertion'), 'format-assertion vocabulary_class works in a thawed object');
 ok($thawed->_get_metaschema_vocabulary_classes('https://json-schema.org/draft/2020-12/schema'), 'metaschema_vocabulary_classes works in a thawed object');
+allow_warnings(1);
 ok($thawed->get_media_type('application/json'), 'media_type works in a thawed object');
+allow_warnings(0);
 ok($thawed->get_encoding('base64'), 'encoding works in a thawed object');
 
 # now try to thaw the file in a new process and run some more tests

@@ -1,6 +1,9 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - completely refactored media-type handler: now a singleton (shared
+            throughout the process), also supports charset encoding and enhanced
+            matching based on parameters
 
 0.637     2026-04-08 18:31:12Z
           - temporarily neuter a test that is sensitive to integer type
