@@ -78,6 +78,15 @@ use constant {
     : (true => JSON::PP::true, false => JSON::PP::false)
 };
 
+# Mojo::JSON::JSON_XS is false when the environment variable $MOJO_NO_JSON_XS is set
+# and also checks if Cpanel::JSON::XS is installed.
+# Mojo::JSON falls back to its own pure-perl encoder/decoder but does not support all the options
+# that we require here.
+use constant _JSON_BACKEND =>
+    Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION('4.38'); 1 } ? 'Cpanel::JSON::XS'
+  : eval { JSON::PP->VERSION('4.11'); 1 } ? 'JSON::PP'
+  : die 'Cpanel::JSON::XS 4.38 or JSON::PP 4.11 is required';
+
 # supports the six core types, plus integer (which is also a number)
 # we do NOT check stringy_numbers here -- you must do that in the caller
 # note that sometimes a value may return true for more than one type, e.g. integer+number,
