@@ -1239,13 +1239,13 @@ has _encoding => (
   lazy => 1,
   default => sub ($self) {
     +{
-      identity => sub ($content_ref) { $content_ref },
-      base64 => sub ($content_ref) {
+      identity => sub ($content_ref, @) { $content_ref },
+      base64 => sub ($content_ref, @) {
         die "invalid characters\n"
           if $content_ref->$* =~ m{[^A-Za-z0-9+/=]} or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode_base64($content_ref->$*);
       },
-      base64url => sub ($content_ref) {
+      base64url => sub ($content_ref, @) {
         die "invalid characters\n"
           if $content_ref->$* =~ m{[^A-Za-z0-9=_-]} or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode_base64url($content_ref->$*);
@@ -1768,7 +1768,7 @@ You can use it thusly:
 
 =head2 add_encoding
 
-  $js->add_encoding('bloop' => sub ($content_ref) {
+  $js->add_encoding('bloop' => sub ($content_ref, @) {
     return \ ...;  # data representing the deserialized content for Content-Transfer-Encoding: bloop
   });
 
@@ -1791,14 +1791,12 @@ See also L<HTTP::Message/encode>.
 
 =head2 get_encoding
 
+  my $decoder = $self->get_encoding('base64') or die 'cannot find encoding decoder';
+  my $content_ref = $decoder->(\$content_string);
+
 Fetches a decoder sub for the indicated encoding. Incoming values MUST be a reference to an octet
 string. Result values will be a scalar-reference to a string, which might be passed to a media_type
 decoder (see above).
-
-You can use it thusly:
-
-  my $decoder = $self->get_encoding('base64') or die 'cannot find encoding decoder';
-  my $content_ref = $decoder->(\$content_string);
 
 =head2 get
 
