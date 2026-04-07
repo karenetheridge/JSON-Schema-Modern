@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.635     2026-04-07 18:06:16Z
           - "default" data is now made directly available in the instance data
             via the "data" attribute on JSON::Schema::Modern::Result,
