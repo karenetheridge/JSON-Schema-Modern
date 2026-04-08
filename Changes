@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.636     2026-04-08 17:09:27Z
           - more diagnostics in is_equal() to diagnose a cpantesters failure
 
 0.635     2026-04-07 18:06:16Z
