@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - temporarily neuter a test that is sensitive to integer type
+            checks, pending an upstream fix
 
 0.636     2026-04-08 17:09:27Z
           - more diagnostics in is_equal() to diagnose a cpantesters failure

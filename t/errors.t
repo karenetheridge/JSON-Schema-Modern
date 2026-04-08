@@ -1415,7 +1415,7 @@ subtest 'recommended_response' => sub {
     },
   );
 
-  is_equal(
+  cmp_result(
     $result->recommended_response,
     [ 400, q{'/foo': value is less than 5} ],
     'recommended_response uses the first error in the result',
@@ -1423,7 +1423,7 @@ subtest 'recommended_response' => sub {
 
   my $result2 = $js->evaluate(1, { '$ref' => '#/$defs/does_not_exist' });
 
-  is_equal(
+  cmp_result(
     $result2->recommended_response,
     [ 500, 'Internal Server Error' ],
     'recommended_response indicates an exception occurred',
@@ -1447,7 +1447,7 @@ subtest 'recommended_response' => sub {
     ],
   );
 
-  is_equal(
+  cmp_result(
     $result3->recommended_response,
     [ 401, 'Unauthorized' ],
     'recommended_response uses the one from the error that is explicitly set',
