@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.637     2026-04-08 18:31:12Z
           - temporarily neuter a test that is sensitive to integer type
             checks, pending an upstream fix
 
