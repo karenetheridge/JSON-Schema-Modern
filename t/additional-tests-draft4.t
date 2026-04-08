@@ -37,7 +37,7 @@ acceptance_tests(
           !eval { require Time::Moment; require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
-      JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' ? (
+      JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' || $Config{nvsize} < 16 ? (
         { file => 'integers.json', group_description => 'type checks', test_description => [ 'beyond int64 lower boundary', 'beyond uint64 upper boundary' ] },
         { file => 'integers.json', group_description => 'int64 range checks', test_description => 'beyond lower boundary' },
       ) : (),
