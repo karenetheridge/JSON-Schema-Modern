@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - more diagnostics in is_equal() to diagnose a cpantesters failure
 
 0.635     2026-04-07 18:06:16Z
           - "default" data is now made directly available in the instance data
