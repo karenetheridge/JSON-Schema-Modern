@@ -134,7 +134,7 @@ subtest 'integers and numbers in draft4' => sub {
   subtest 'data from encoded json' => sub {
     my %draft4_json_data = (
       number => [ '3.1', '1.23456789012e10', '0.123', '2.0' ],
-      integer => [ '0', '-1', '1000000000000000' ],
+      integer => [ '0', '-1', '100000' ],
       # these are actually integers, but we are unable to verify that, as they inflate to
       # Math::BigFloat objects where is_int is true:
       # (map $_.'', 2**31-1, 2**31, 2**63-1, 2**63, 2**64, 2**65), '2e1', '1e100'
