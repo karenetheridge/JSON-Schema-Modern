@@ -14,7 +14,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use lib 't/lib';
 use Helper;
-use JSON::Schema::Modern::Utilities 'jsonp_set';
+use JSON::Schema::Modern::Utilities qw(jsonp_set jsonp_elements);
 
 my $js = JSON::Schema::Modern->new(with_defaults => 1);
 
@@ -704,6 +704,54 @@ subtest 'jsonp_set permutations' => sub {
     $data,
     [ 'foo' ],
     '- is accepted as an array index, when overwriting a string',
+  );
+};
+
+subtest jsonp_elements => sub {
+  is_equal(
+    jsonp_elements(1),
+    { '' => 1 },
+    'single primitive',
+  );
+
+  is_equal(
+    jsonp_elements({ a => 1 }),
+    { '/a' => 1 },
+    'single level hash with one element',
+  );
+
+  is_equal(
+    jsonp_elements({ a => 1, b => 2 }),
+    { '/a' => 1, '/b' => 2 },
+    'single level hash with two elements',
+  );
+
+  is_equal(
+    jsonp_elements([ 0 ]),
+    { '/0' => 0 },
+    'single level array with one element',
+  );
+
+  is_equal(
+    jsonp_elements([ 0, 1 ]),
+    { '/0' => 0, '/1' => 1 },
+    'single level array with two elements',
+  );
+
+  is_equal(
+    jsonp_elements({ a => { b => 'c' } }),
+    { '/a/b' => 'c' },
+    'two-level hash with one element',
+  );
+
+  is_equal(
+    jsonp_elements({ a => { b => [ 'x', 'y' ], c => { d => 'e' } } }),
+    {
+      '/a/b/0' => 'x',
+      '/a/b/1' => 'y',
+      '/a/c/d' => 'e',
+    },
+    'deep hash with multiple elements of hashes and arrays',
   );
 };
 

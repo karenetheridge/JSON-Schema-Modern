@@ -43,6 +43,7 @@ our @EXPORT_OK = qw(
   jsonp
   unjsonp
   jsonp_get
+  jsonp_elements
   jsonp_set
   local_annotations
   canonical_uri
@@ -315,6 +316,18 @@ sub unjsonp {
 
 sub jsonp_get ($data, $pointer) {
   Mojo::JSON::Pointer->new($data)->get($pointer);
+}
+
+# flatten the data structure into a hashref of { pointer => value, ... }
+# (essentially the reverse of jsonp_set($data, $foo->%{$_}) foreach keys $foo)
+sub jsonp_elements ($data, $prefix = '') {
+  # recursively walk the structure..
+  my $hash = +{
+      ref $data eq '' ? ($prefix => $data)
+    : ref $data eq 'HASH' ? map jsonp_elements($data->{$_}, $prefix.'/'.$_)->%*, keys %$data
+    : ref $data eq 'ARRAY' ? map jsonp_elements($data->[$_], $prefix.'/'.$_)->%*, 0..$data->$#*
+    : die 'unrecognized type: '. ref $data
+  };
 }
 
 # assigns a value to a data structure at a specific json pointer location
@@ -753,6 +766,19 @@ Splits a json pointer string into its path components, with correct unescaping.
 
   # 4
   my $val = jsonp_get({ a => 1, b => { c => 3, d => 4 } }, '/b/d');
+
+Fetches the value of a data structure at a particular json pointer location.
+
+=head2 jsonp_elements
+
+  # {
+  #   '/a/b/0' => 'x',
+  #   '/a/b/1' => 'y',
+  #   '/a/c/d' => 'e',
+  # }
+  jsonp_elements({ a => { b => [ 'x', 'y' ], c => { d => 'e' } } });
+
+Fetches all the ( json pointer => value ) tuples of a data structure as a hashref.
 
 =head2 jsonp_set
 
