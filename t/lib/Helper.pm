@@ -103,6 +103,36 @@ sub cmp_result ($got, $expected, $test_name) {
   } $got, $expected, $test_name;
 }
 
+sub lives_result ($sub, $test_name) {
+  context_do {
+    my ($ctx, $result) = @_;
+    if (not $ctx->ok(lives(\&$sub), $test_name)) {
+      my $method =
+        # be less noisy for expected failures
+        (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
+          : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
+      $ctx->$method("got result:\n".$encoder->encode($result));
+    }
+  } $@;
+}
+
+sub die_result ($sub, $pattern, $test_name) {
+  # we don't use Test2::Tools::Exception::dies because it tickles JSM::Result's boolean overload
+  eval { $sub->() };
+  my $result = $@;
+  return fail($test_name) if not defined $result;
+  context_do {
+    my ($ctx, $result) = @_;
+    if (not like($result, $pattern, $test_name)) {
+      my $method =
+        # be less noisy for expected failures
+        (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
+          : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
+      $ctx->$method("got result:\n".$encoder->encode($result));
+    }
+  } $result;
+}
+
 sub is_passing () {
   context_do { shift->hub->is_passing };
 }
