@@ -278,7 +278,7 @@ sub is_equal ($x, $y, $state = {}) {
     return 1;
   }
 
-  $state->{error} = 'uh oh', return 0; # should never get here
+  $state->{error} = 'got surprising type: '.$types[0], return 0; # should never get here
 }
 
 # checks array elements for uniqueness. short-circuits on first pair of matching elements

@@ -55,6 +55,11 @@ sub json_sprintf {
   sprintf(shift, map +(ref($_) =~ /^Math::Big(?:Int|Float)\z/ ? ref($_).'->new(\''.$_.'\')' : $encoder->indent(0)->encode($_)), @_);
 }
 
+sub encode ($x ) {
+  (ref $x eq 'REF' || ref $x eq 'SCALAR' ? '\\' : '')
+  .$encoder->encode(ref $x eq 'REF' || ref $x eq 'SCALAR' ? $x->$* : $x);
+}
+
 # deep comparison, with strict typing
 sub is_equal ($got, $expected, $test_name = undef) {
   context_do {
@@ -97,7 +102,7 @@ sub cmp_result ($got, $expected, $test_name) {
         (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
           : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
       $ctx->$method(Test::Deep::deep_diag($stack));
-      $ctx->$method("got result:\n".$encoder->encode($got));
+      $ctx->$method("got result:\n".encode($got));
     }
     return $equal;
   } $got, $expected, $test_name;
@@ -111,7 +116,7 @@ sub lives_result ($sub, $test_name) {
         # be less noisy for expected failures
         (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
           : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
-      $ctx->$method("got result:\n".$encoder->encode($result));
+      $ctx->$method("got result:\n".encode($result));
     }
   } $@;
 }
@@ -128,7 +133,7 @@ sub die_result ($sub, $pattern, $test_name) {
         # be less noisy for expected failures
         (grep $_->{todo}, Test2::API::test2_stack->top->{_pre_filters}->@*) ? 'note'
           : $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING} ? 'diag' : 'note';
-      $ctx->$method("got result:\n".$encoder->encode($result));
+      $ctx->$method("got result:\n".encode($result));
     }
   } $result;
 }
