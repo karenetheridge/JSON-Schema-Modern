@@ -25,7 +25,7 @@ use JSON::Schema::Modern::Annotation;
 use JSON::Schema::Modern::Error;
 use JSON::Schema::Modern::Utilities qw(true false json_pointer_type jsonp_set);
 use JSON::PP ();
-use List::Util 1.45 'uniq';
+use List::Util 1.45 'uniqstr';
 use if "$]" < 5.041010, 'List::Util' => qw(any all);
 use if "$]" >= 5.041010, experimental => qw(keyword_any keyword_all);
 use Carp 'croak';
@@ -220,7 +220,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
     # Note: this output is going to be confusing when coming from a schema with a 'oneOf', 'not',
     # etc. Perhaps generating the strings with indentation levels, as derived from a nested format,
     # might be more readable.
-    return join("\n", uniq(map $_->stringify, $self->errors));
+    return join("\n", uniqstr(map $_->stringify, $self->errors));
   }
 
   # TODO: support detailed, verbose ?

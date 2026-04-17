@@ -21,7 +21,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use Mojo::JSON ();  # for JSON_XS, MOJO_NO_JSON_XS environment variables
 use Carp qw(croak carp);
-use List::Util 1.55 qw(pairs first uniqint pairmap uniq min);
+use List::Util 1.55 qw(pairs first uniqint pairmap uniqstr min);
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
 use builtin::compat qw(refaddr load_module);
@@ -1279,7 +1279,7 @@ sub THAW ($class, $serializer, $data) {
 
   # load all vocabulary classes, both those used by loaded schemas, as well as all the core modules
   load_module($_)
-    foreach uniq(
+    foreach uniqstr(
       (map $_->{vocabularies}->@*, $self->_canonical_resources),
       (map $_->[1], values $self->__vocabulary_classes->%*));
 
