@@ -1104,7 +1104,7 @@ sub _get_or_load_resource ($self, $uri) {
 # - vocabularies: the vocabularies to use when considering schema keywords
 # creates a Document and adds it to the resource index, if not already present.
 sub _fetch_from_uri ($self, $uri_reference) {
-  $uri_reference = Mojo::URL->new($uri_reference) if not is_schema($uri_reference);
+  $uri_reference = Mojo::URL->new($uri_reference) if not ref $uri_reference;
 
   # this is *a* resource that would contain our desired location, but may not be the closest one
   my $resource = $self->_get_or_load_resource($uri_reference->clone->fragment(undef));
