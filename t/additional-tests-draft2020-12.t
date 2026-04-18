@@ -41,6 +41,8 @@ my @warnings = warnings {
           ] },
         # various edge cases that are difficult to accomodate
         JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' ? { file => 'integers.json', group_description => 'int64 range checks', test_description => 'beyond lower boundary' } : (),
+        # on older perls, very large or small integers may get their PV bit turned on
+        $] < '5.036' ? { file => 'integers.json', group_description => 'equality checks' } : (),
       ]),
     },
   );

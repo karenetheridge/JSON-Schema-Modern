@@ -44,6 +44,8 @@ acceptance_tests(
       $Config{ivsize} < 8 ? (
         { file => 'integers.json', group_description => 'type checks', test_description => [ 'beyond int32 lower boundary', 'beyond uint32 upper boundary' ] },
       ) : (),
+      # on older perls, very large or small integers may get their PV bit turned on
+      $] < '5.036' ? { file => 'integers.json', group_description => 'equality checks' } : (),
     ]),
   },
 );
