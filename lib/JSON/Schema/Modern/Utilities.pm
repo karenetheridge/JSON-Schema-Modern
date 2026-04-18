@@ -24,7 +24,7 @@ use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
-use Storable 'dclone';
+use Clone 'clone';
 use Feature::Compat::Try;
 use Mojo::JSON ();
 use Mojo::JSON::Pointer ();
@@ -80,7 +80,7 @@ use if HAVE_BUILTIN, experimental => 'builtin';
 
 use constant _BUILTIN_BOOLS => 0;
 use constant {
-  _BUILTIN_BOOLS && HAVE_BUILTIN && eval { +require Storable; Storable->VERSION(3.27); 1 }
+  _BUILTIN_BOOLS && HAVE_BUILTIN
       && Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION(4.38); 1 }
     ? (true => builtin::true, false => builtin::false)
     : (true => JSON::PP::true, false => JSON::PP::false)
@@ -915,7 +915,7 @@ sub assert_uri ($state, $schema, $override = undef) {
 # produces an annotation whose value is the same as that of the current schema keyword
 # makes a copy as this is passed back to the user, who cannot be trusted to not mutate it
 sub annotate_self ($state, $schema) {
-  A($state, ref $schema->{$state->{keyword}} ? dclone($schema->{$state->{keyword}})
+  A($state, ref $schema->{$state->{keyword}} ? clone($schema->{$state->{keyword}})
     : $schema->{$state->{keyword}});
 }
 

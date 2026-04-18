@@ -11,7 +11,7 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Storable 'dclone';
+use Clone 'clone';
 use lib 't/lib';
 use Helper;
 
@@ -307,7 +307,7 @@ subtest '$recursiveAnchor must be at a schema resource root' => sub {
     '$recursiveAnchor can only appear at a schema resource root',
   );
 
-  $schema = dclone($schema);
+  $schema = clone($schema);
   $schema->{'$defs'}{myobject}{'$id'} = 'myobject.json';
 
   is_equal(

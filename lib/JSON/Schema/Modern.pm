@@ -28,7 +28,7 @@ use builtin::compat qw(refaddr load_module);
 use Mojo::URL;
 use Safe::Isa;
 use Mojo::File 'path';
-use Storable 'dclone';
+use Clone 'clone';
 use File::ShareDir 'dist_dir';
 use MooX::TypeTiny 0.002002;
 use Types::Standard 1.016003 qw(Bool Int Str HasMethods Enum InstanceOf HashRef Dict CodeRef Optional Slurpy ArrayRef Undef ClassName Tuple Map);
@@ -389,7 +389,7 @@ sub evaluate ($self, $data, $schema_reference, $config_override = {}) {
     depth => 0,
   };
 
-  $state->{data} = jsonp_set('', $state->{data_path}, ref $data ? dclone($data) : $data);
+  $state->{data} = jsonp_set('', $state->{data_path}, ref $data ? clone($data) : $data);
 
   my $valid;
   try {
@@ -506,7 +506,7 @@ sub get ($self, $uri_reference) {
   if (wantarray) {
     my $schema_info = $self->_fetch_from_uri($uri_reference);
     return if not $schema_info;
-    my $subschema = ref $schema_info->{schema} ? dclone($schema_info->{schema}) : $schema_info->{schema};
+    my $subschema = ref $schema_info->{schema} ? clone($schema_info->{schema}) : $schema_info->{schema};
     return ($subschema, $schema_info->{canonical_uri});
   }
   else {  # abridged version of _fetch_from_uri
@@ -523,7 +523,7 @@ sub get ($self, $uri_reference) {
       return if not my $subresource = ($resource->{anchors}//{})->{$fragment};
       $schema = $resource->{document}->get($subresource->{path});
     }
-    return ref $schema ? dclone($schema) : $schema;
+    return ref $schema ? clone($schema) : $schema;
   }
 }
 
