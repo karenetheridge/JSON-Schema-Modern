@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.638     2026-04-18 19:12:38Z
           - completely refactored media-type handler: now a singleton (shared
             throughout the process), also supports charset encoding and enhanced
             matching based on parameters

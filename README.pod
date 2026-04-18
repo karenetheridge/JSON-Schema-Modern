@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.637
+version 0.638
 
 =head1 SYNOPSIS
 
@@ -548,7 +548,7 @@ Vocabularies cannot be redefined; subsequent calls to add the same vocabulary wi
 
 =head2 add_media_type
 
-  $js->add_media_type('application/furble' => sub ($content_ref) {
+  $js->add_media_type('application/furble' => sub ($content_ref, @) {
     return ...;  # data representing the deserialized text for Content-Type: application/furble
   });
 
@@ -557,61 +557,25 @@ a reference to a string, which might contain wide characters (i.e. not octets), 
 in conjunction with L</get_encoding> below. Must return B<a reference to a value of any type> (which is
 then dereferenced for the C<contentSchema> keyword).
 
-These media types are already known:
-
-=over 4
-
-=item *
-
-C<application/json> - see L<RFC 4627|https://datatracker.ietf.org/doc/html/rfc4627>
-
-=item *
-
-C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
-
-=item *
-
-C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
-
-=item *
-
-C<application/octet-stream> - passes strings through unchanged
-
-=item *
-
-C<application/x-www-form-urlencoded>
-
-=item *
-
-C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
-
-=item *
-
-C<text/*> - passes strings through unchanged
-
-=back
-
-Media-type definitions can be overridden with a new call to C<add_media_type>.
-
-See the official L<OpenAPI Media Type Registry|https://spec.openapis.org/registry/media-type>
-for a registry of known and useful media types; for
-compatibility reasons, avoid defining a media type listed here with different semantics.
+This interface is B<deprecated> as of version 0.638 and may eventually be removed; use
+L<JSON::Schema::Modern::Utilities/add_media_type> instead, which supports defining an encoder as
+well, and supports media-type parameters.
 
 =head2 get_media_type
-
-Fetches a decoder sub for the indicated media type. Lookups are performed B<without case sensitivity>.
-
-=for stopwords thusly
-
-You can use it thusly:
 
   $js->add_media_type('application/furble' => sub { ... }); # as above
   my $decoder = $self->get_media_type('application/furble') or die 'cannot find media type decoder';
   my $content_ref = $decoder->(\$content_string);
 
+Fetches a decoder sub from the current object's registry for the indicated media type. Lookups are
+performed B<without case sensitivity>.
+
+This interface is B<deprecated> as of version 0.638 and may eventually be removed; use
+L<JSON::Schema::Modern::Utilities/decode_media_type> instead.
+
 =head2 add_encoding
 
-  $js->add_encoding('bloop' => sub ($content_ref) {
+  $js->add_encoding('bloop' => sub ($content_ref, @) {
     return \ ...;  # data representing the deserialized content for Content-Transfer-Encoding: bloop
   });
 
@@ -645,14 +609,12 @@ See also L<HTTP::Message/encode>.
 
 =head2 get_encoding
 
+  my $decoder = $self->get_encoding('base64') or die 'cannot find encoding decoder';
+  my $content_ref = $decoder->(\$content_string);
+
 Fetches a decoder sub for the indicated encoding. Incoming values MUST be a reference to an octet
 string. Result values will be a scalar-reference to a string, which might be passed to a media_type
 decoder (see above).
-
-You can use it thusly:
-
-  my $decoder = $self->get_encoding('base64') or die 'cannot find encoding decoder';
-  my $content_ref = $decoder->(\$content_string);
 
 =head2 get
 
