@@ -93,7 +93,7 @@ use constant {
 use constant _JSON_BACKEND =>
     Mojo::JSON::JSON_XS && eval { Cpanel::JSON::XS->VERSION('4.38'); 1 } ? 'Cpanel::JSON::XS'
   : eval { JSON::PP->VERSION('4.11'); 1 } ? 'JSON::PP'
-  : die 'Cpanel::JSON::XS 4.38 or JSON::PP 4.11 is required';
+  : croak 'Cpanel::JSON::XS 4.38 or JSON::PP 4.11 is required';
 
 # supports the six core types, plus integer (which is also a number)
 # we do NOT check stringy_numbers here -- you must do that in the caller
@@ -343,7 +343,7 @@ sub jsonp_elements ($data, $prefix = '') {
       ref $data eq '' ? ($prefix => $data)
     : ref $data eq 'HASH' ? map jsonp_elements($data->{$_}, $prefix.'/'.$_)->%*, keys %$data
     : ref $data eq 'ARRAY' ? map jsonp_elements($data->[$_], $prefix.'/'.$_)->%*, 0..$data->$#*
-    : die 'unrecognized type: '. ref $data
+    : croak 'unrecognized type: '. ref $data
   };
 }
 
@@ -440,7 +440,7 @@ sub core_formats_type () {
     # otherwise, load it from disk using our filename cache and create the document
     if (not $document and my $filename = get_schema_filename($uri)) {
       my $file = path($filename);
-      die "uri $uri maps to file $file which does not exist" if not -f $file;
+      croak "uri $uri maps to file $file which does not exist" if not -f $file;
       my $schema = $evaluator->_json_decoder->decode($file->slurp);
 
       # avoid calling add_schema, which checksums the file to look for duplicates
@@ -585,7 +585,7 @@ sub core_formats_type () {
         \[ map {
             do {
               try { ++$line; $decoder->decode($_) }
-              catch ($e) { die 'parse error at line '.$line.': '.$e }
+              catch ($e) { croak 'parse error at line '.$line.': '.$e }
             }
           }
           split(/\r?\n/, $content_ref->$*)
@@ -653,7 +653,7 @@ sub core_formats_type () {
   # wildcards, parameters supported
   # always returns a reference to the decoded data, or undef if no decoder is found
   sub decode_media_type ($media_type_string, $content_ref) {
-    die 'decoder payload must be a reference to a string' if ref $content_ref ne 'SCALAR';
+    croak 'decoder payload must be a reference to a string' if ref $content_ref ne 'SCALAR';
 
     my $matched_string = match_media_type($media_type_string);
     return if not $matched_string;
@@ -670,7 +670,7 @@ sub core_formats_type () {
 
   # wildcards, parameters supported
   sub encode_media_type ($media_type_string, $content_ref) {
-    die 'encoder payload must be a reference' if ref $content_ref ne 'REF' and ref $content_ref ne 'SCALAR';
+    croak 'encoder payload must be a reference' if ref $content_ref ne 'REF' and ref $content_ref ne 'SCALAR';
 
     my $matched_string = match_media_type($media_type_string);
     return if not $matched_string;
