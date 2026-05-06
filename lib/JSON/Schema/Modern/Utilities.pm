@@ -533,7 +533,7 @@ sub core_formats_type () {
       encode => sub ($content_ref, @) {
         \ _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->allow_blessed(1)->convert_blessed(1)->encode($content_ref->$*);
       },
-      caller_addr => 1,
+      owner_addr => 1,
     }
     if $media_type_string eq 'application/json';
 
@@ -541,7 +541,7 @@ sub core_formats_type () {
       type => 'application',
       subtype => 'octet-stream',
       (map +($_ => sub ($content_ref, @) { $content_ref }), qw(decode encode)),
-      caller_addr => 1,
+      owner_addr => 1,
     }
     if $media_type_string eq 'application/octet-stream';
 
@@ -559,7 +559,7 @@ sub core_formats_type () {
           \ Encode::encode($parameters->{charset}, $content_ref->$*, Encode::DIE_ON_ERR | Encode::LEAVE_SRC)
           : $content_ref;
       },
-      caller_addr => 1,
+      owner_addr => 1,
     }
     if $media_type_string eq 'text/*';
 
@@ -572,7 +572,7 @@ sub core_formats_type () {
       encode => sub ($content_ref, @) {
         \ Mojo::Parameters->new->charset('UTF-8')->pairs([ $content_ref->$*->%* ])->to_string;
       },
-      caller_addr => 1,
+      owner_addr => 1,
     }
     if $media_type_string eq 'application/x-www-form-urlencoded';
 
@@ -595,7 +595,7 @@ sub core_formats_type () {
         my $encoder = _JSON_BACKEND->new->allow_nonref(1)->utf8(1)->allow_blessed(1)->convert_blessed(1);
         \ join "\n", map $encoder->encode($_), $content_ref->$*->@*;
       },
-      caller_addr => 1,
+      owner_addr => 1,
     }
     if $media_type_string eq 'application/x-ndjson';
   }
@@ -612,7 +612,7 @@ sub core_formats_type () {
     return $definition->{decode};
   }
 
-  sub add_media_type ($media_type_string, $decoder_sub = undef, $encoder_sub = undef, $caller_addr = 1) {
+  sub add_media_type ($media_type_string, $decoder_sub = undef, $encoder_sub = undef, $owner_addr = 1) {
     croak 'decoder is not a subref' if defined $decoder_sub and ref $decoder_sub ne 'CODE';
     croak 'encoder is not a subref' if defined $encoder_sub and ref $encoder_sub ne 'CODE';
 
@@ -623,10 +623,10 @@ sub core_formats_type () {
     _predefined_media_types($media_type_string) if not exists $MEDIA_TYPES->{$media_type_string};
 
     if (any { is_equal($type, { $_->%{qw(type subtype parameters)} }) } values %$MEDIA_TYPES) {
-      croak 'duplicate media-type found' if $caller_addr == 1;
+      croak 'duplicate media-type found' if $owner_addr == 1;
 
       # track evaluator object that used the deprecated add_media_type interface
-      push $MEDIA_TYPES->{$media_type_string}{caller_addr}->@*, $caller_addr;
+      push $MEDIA_TYPES->{$media_type_string}{owner_addr}->@*, $owner_addr;
       return;
     }
 
@@ -634,19 +634,19 @@ sub core_formats_type () {
       decode => $decoder_sub,
       encode => $encoder_sub,
       %$type,
-      caller_addr => [ $caller_addr ],    # refaddr of the evaluator object that added us
+      owner_addr => [ $owner_addr ],    # refaddr of the evaluator object that added us
     };
 
     return;
   }
 
-  sub delete_media_type ($media_type_string, $caller_addr = 1) {
+  sub delete_media_type ($media_type_string, $owner_addr = 1) {
     return if not exists $MEDIA_TYPES->{$media_type_string};
 
     delete $MEDIA_TYPES->{$media_type_string}
-      if $caller_addr == 1
-        or $MEDIA_TYPES->{$media_type_string}{caller_addr} = [
-          grep +($_ != 1 && $_ != $caller_addr), $MEDIA_TYPES->{$media_type_string}{caller_addr}->@*
+      if $owner_addr == 1
+        or $MEDIA_TYPES->{$media_type_string}{owner_addr} = [
+          grep +($_ != 1 && $_ != $owner_addr), $MEDIA_TYPES->{$media_type_string}{owner_addr}->@*
         ];
   }
 
