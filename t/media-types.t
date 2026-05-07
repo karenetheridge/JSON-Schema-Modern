@@ -170,6 +170,17 @@ subtest 'application/x-www-form-urlencoded'=> sub {
     'foo=%E0%B2%A0_%E0%B2%A0',
     'application/x-www-form-urlencoded encoder',
   );
+
+  is_equal(
+    decode_media_type('application/x-www-form-urlencoded', \'a=x&a=y&b=1&a=z&b=2')->$*,
+    { a => [qw(x y z)], b => [qw(1 2)] },
+    'application/x-www-form-urlencoded decoder with array values',
+  );
+  is_equal(
+    encode_media_type('application/x-www-form-urlencoded', \{ a => [qw(x y z)], b => [qw(1 2)] })->$*,
+    'a=x&a=y&a=z&b=1&b=2',
+    'application/x-www-form-urlencoded encoder with array values, normalized',
+  );
 };
 
 subtest 'application/x-ndjson' => sub {

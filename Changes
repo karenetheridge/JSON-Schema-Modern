@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix application/x-www-form-urlencoded encoding of array values
 
 0.639     2026-05-09 22:47:09Z
           - config option "max_traversal_depth" has been renamed to "max_depth"

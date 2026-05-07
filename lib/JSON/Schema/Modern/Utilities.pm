@@ -570,7 +570,8 @@ sub core_formats_type () {
         \ Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*)->to_hash;
       },
       encode => sub ($content_ref, @) {
-        \ Mojo::Parameters->new->charset('UTF-8')->pairs([ $content_ref->$*->%* ])->to_string;
+        \ Mojo::Parameters->new->charset('UTF-8')
+          ->parse(map +($_ => $content_ref->$*->{$_}), sort keys $content_ref->$*->%*)->to_string;
       },
       owner_addr => 1,
     }
