@@ -34,10 +34,6 @@ use Safe::Isa;
 use namespace::clean;
 
 use overload
-  'bool'  => sub {
-    croak 'boolean overload is deprecated and could be removed anytime after 2026-02-01';
-    $_[0]->valid;
-  },
   '&'     => \&combine,
   '""' => sub { $_[0]->stringify },
   fallback => 1;
