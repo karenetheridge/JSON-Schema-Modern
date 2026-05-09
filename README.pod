@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.638
+version 0.639
 
 =head1 SYNOPSIS
 
@@ -85,7 +85,9 @@ only some errors will be omitted from the result.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
-=head2 max_traversal_depth
+=for Pod::Coverage max_traversal_depth
+
+=head2 max_depth
 
 The maximum number of levels deep a schema evaluation may go before evaluation is halted. This is to
 protect against accidental infinite recursion, such as from two subschemas that each reference each
