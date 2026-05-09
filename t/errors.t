@@ -1116,7 +1116,7 @@ subtest 'JSON pointer escaping' => sub {
 
 subtest 'absoluteKeywordLocation' => sub {
   is_equal(
-    JSON::Schema::Modern->new(max_traversal_depth => 1)->evaluate(
+    JSON::Schema::Modern->new(max_depth => 1)->evaluate(
       [ [ 1 ] ],
       { items => { '$ref' => '#' } },
     )->TO_JSON,

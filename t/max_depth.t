@@ -15,7 +15,7 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 use lib 't/lib';
 use Helper;
 
-my $js = JSON::Schema::Modern->new(max_traversal_depth => 6);
+my $js = JSON::Schema::Modern->new(max_depth => 6);
 
 is_equal(
   $js->evaluate(

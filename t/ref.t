@@ -106,7 +106,7 @@ subtest 'local anchor' => sub {
 };
 
 subtest '$id with an empty fragment' => sub {
-  my $js = JSON::Schema::Modern->new(max_traversal_depth => 2);
+  my $js = JSON::Schema::Modern->new(max_depth => 2);
   is_equal(
     $js->evaluate(
       1,

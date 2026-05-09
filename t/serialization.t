@@ -21,7 +21,7 @@ my $js = JSON::Schema::Modern->new(
   scalarref_booleans => 1,
   stringy_numbers => 1,
   strict => 0,
-  max_traversal_depth => 42,
+  max_depth => 42,
   specification_version => 'draft2019-09',
 );
 
@@ -78,7 +78,7 @@ my @serialized_attributes = sort qw(
   specification_version
   output_format
   short_circuit
-  max_traversal_depth
+  max_depth
   validate_formats
   validate_content_schemas
   collect_annotations

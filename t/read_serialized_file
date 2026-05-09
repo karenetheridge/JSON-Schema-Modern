@@ -26,7 +26,7 @@ my @serialized_attributes = sort qw(
   specification_version
   output_format
   short_circuit
-  max_traversal_depth
+  max_depth
   validate_formats
   validate_content_schemas
   collect_annotations

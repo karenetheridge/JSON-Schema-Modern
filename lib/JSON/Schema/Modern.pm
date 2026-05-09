@@ -74,11 +74,16 @@ has short_circuit => (
   default => sub { $_[0]->output_format eq 'flag' && !$_[0]->collect_annotations },
 );
 
-has max_traversal_depth => (
+has max_depth => (
   is => 'ro',
   isa => Int,
   default => 50,
 );
+
+sub max_traversal_depth ($self) {
+  carp 'max_traversal_depth is deprecated and could be removed anytime after 2026-05-09; use max_depth instead';
+  $self->max_depth;
+}
 
 has validate_formats => (
   is => 'ro',
@@ -137,6 +142,8 @@ around BUILDARGS => sub ($orig, $class, @args) {
 
   croak 'collect_annotations cannot be used with specification_version '.$args->{specification_version}
     if $args->{collect_annotations} and ($args->{specification_version}//'') =~ /^draft[467]\z/;
+
+  $args->{max_depth} = delete $args->{max_traversal_depth} if exists $args->{max_traversal_depth};
 
   $args->{format_validations} = +{
     map +($_->[0] => ref $_->[1] eq 'HASH' ? $_->[1] : +{ type => 'string', sub => $_->[1] }),
@@ -582,8 +589,8 @@ our $vocabulary_cache = {};
 sub _traverse_subschema ($self, $schema, $state) {
   delete $state->@{'keyword', grep /^_/, keys %$state};
 
-  return E($state, 'EXCEPTION: maximum traversal depth (%d) exceeded', $self->max_traversal_depth)
-    if $state->{depth}++ > $self->max_traversal_depth;
+  return E($state, 'EXCEPTION: maximum traversal depth (%d) exceeded', $self->max_depth)
+    if $state->{depth}++ > $self->max_depth;
 
   push $state->{subschemas}->@*, $state->{traversed_keyword_path}.$state->{keyword_path};
 
@@ -688,8 +695,8 @@ sub _evaluate_subschema ($self, $data, $schema, $state) {
   $state->{dynamic_scope} = [ ($state->{dynamic_scope}//[])->@* ];
   delete $state->@{'keyword', grep /^_/, keys %$state};
 
-  abort($state, 'EXCEPTION: maximum evaluation depth (%d) exceeded', $self->max_traversal_depth)
-    if $state->{depth}++ > $self->max_traversal_depth;
+  abort($state, 'EXCEPTION: maximum evaluation depth (%d) exceeded', $self->max_depth)
+    if $state->{depth}++ > $self->max_depth;
 
   my $schema_type = get_type($schema);
   return $schema || E($state, 'subschema is false') if $schema_type eq 'boolean';
@@ -1258,6 +1265,7 @@ sub FREEZE ($self, $serializer) {
 
 # callback hook for Sereal::Decoder
 sub THAW ($class, $serializer, $data) {
+  $data->{max_depth} = delete $data->{max_traversal_depth} if exists $data->{max_traversal_depth};
   my $self = bless($data, $class);
 
   # load all vocabulary classes, both those used by loaded schemas, as well as all the core modules
@@ -1338,7 +1346,9 @@ only some errors will be omitted from the result.
 
 Defaults to true when C<output_format> is C<flag>, and false otherwise.
 
-=head2 max_traversal_depth
+=for Pod::Coverage max_traversal_depth
+
+=head2 max_depth
 
 The maximum number of levels deep a schema evaluation may go before evaluation is halted. This is to
 protect against accidental infinite recursion, such as from two subschemas that each reference each
