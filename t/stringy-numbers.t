@@ -206,12 +206,12 @@ foreach my $config (0, 1) {
         {
           instanceLocation => '',
           keywordLocation => '/enum',
-          error => 'value does not match',
+          error => 'value does not match (from enum 0: wrong type: string vs integer; from enum 1: wrong type: string vs integer)',
         },
         {
           instanceLocation => '',
           keywordLocation => '/const',
-          error => 'value does not match',
+          error => 'value does not match (wrong type: string vs integer)',
         },
       ],
     },

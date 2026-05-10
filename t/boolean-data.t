@@ -73,7 +73,8 @@ subtest 'strict booleans (default)' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/enum',
-          error => 'value does not match',
+          error => 'value does not match (from enum 0: wrong type: '.$_->[0].' vs boolean; from enum 1: wrong type: '.$_->[0].' vs boolean)',
+
         },
         {
           instanceLocation => '',
@@ -93,12 +94,12 @@ subtest 'strict booleans (default)' => sub {
         {
           instanceLocation => '',
           keywordLocation => '/anyOf/0/const',
-          error => 'value does not match',
+          error => 'value does not match (wrong type: '.$_->[0].' vs boolean)',
         },
         {
           instanceLocation => '',
           keywordLocation => '/anyOf/1/const',
-          error => 'value does not match',
+          error => 'value does not match (wrong type: '.$_->[0].' vs boolean)',
         },
         {
           instanceLocation => '',
@@ -145,7 +146,9 @@ subtest 'scalarref_booleans = 1' => sub {
           my ($type, $value) = $_->@*;
           map +{
             $_->%*,
-            $_->{keywordLocation} =~ /\/type\z/ ? (error => $_->{error} =~ s/^got .*, not/got $type, not/r) : (),
+              $_->{keywordLocation} =~ /\/type\z/ ? (error => $_->{error} =~ s/^got .*, not/got $type, not/r)
+            : $_->{keywordLocation} =~ /\/(const|enum)\z/ ? (error => $_->{error} =~ s/wrong type: \K.+? vs boolean/$type vs boolean/gr)
+            : (),
           }, $failure_result->{errors}->@*,
         },
       ],

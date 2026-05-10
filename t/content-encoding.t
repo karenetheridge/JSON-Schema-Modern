@@ -277,7 +277,7 @@ subtest 'draft2020-12 assertions' => sub {
         {
           instanceLocation => '/encoded_object/hi',
           keywordLocation => '/properties/encoded_object/contentSchema/additionalProperties/const',
-          error => 'value does not match',
+          error => 'value does not match (wrong type: integer vs string)',
         },
         {
           instanceLocation => '/encoded_object',

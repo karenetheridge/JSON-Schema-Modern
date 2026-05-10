@@ -552,7 +552,7 @@ subtest 'const and enum' => sub {
         {
           instanceLocation => '/foo',
           keywordLocation => '/properties/foo/allOf/1/enum',
-          error => 'value does not match (from enum 0 at \'\': wrong type: object vs integer; from enum 1 at \'\': wrong type: object vs string; from enum 2 at \'/a/b/c/d\': integers not equal)',
+          error => 'value does not match (from enum 0: wrong type: object vs integer; from enum 1: wrong type: object vs string; from enum 2 at \'/a/b/c/d\': integers not equal)',
         },
         {
           instanceLocation => '/foo',
@@ -1363,7 +1363,7 @@ subtest 'overriding starting locations' => sub {
           instanceLocation => '/html/body/div/div/h1/div/p/0',
           keywordLocation => '/some/other/document/$ref/items/$ref/const',
           absoluteKeywordLocation => 'https://example.com/api#/$defs/beta/const',
-          error => 'value does not match',
+          error => 'value does not match (integers not equal)',
         },
         {
           instanceLocation => '/html/body/div/div/h1/div/p',
