@@ -507,10 +507,13 @@ sub core_formats_type () {
     # backslash."
     my $params = {
       map +(m{^($TOKEN)=($TOKEN|$QUOTED_STRING)\z}
-        ? (fc($1) => fc(defined $3 ? ($3 =~ s/\x5C(.)/$1/gr) : $2))
+        ? (fc($1) => defined $3 ? ($3 =~ s/\x5C(.)/$1/gr) : $2)
         : ()),
       @params
     };
+
+    # some parameter values are case-insensitive; enumerate them here
+    $params->{$_} = fc($params->{$_}) foreach grep exists $params->{$_}, qw(charset);
 
     croak 'cannot parse more than 64 parameters' if keys $params->%* > 64;
     +{
