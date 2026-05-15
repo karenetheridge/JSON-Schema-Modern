@@ -1439,16 +1439,17 @@ This allows you to write a schema like this (which validates a string representi
 Such keywords are only applied if the value looks like a number, and do not generate a failure
 otherwise. Values are determined to be numbers via L<perlapi/looks_like_number>.
 This option is only intended to be used for evaluating data from sources that can only be strings,
-such as the extracted value of an HTTP header or query parameter (but in the OpenAPI context, it is
-preferable to use an explicit C<type> keyword in the schema to indicate the value should be
-deserialized as a number).
+such as the extracted value of an HTTP header or query parameter, or a value from an XML document.
+In the OpenAPI context, it is preferable to use an explicit C<type> keyword in the schema to
+indicate the value should be deserialized as a number).
 
 Defaults to false.
 
 =head2 strict
 
 When true, unrecognized keywords are disallowed in schemas (they will cause an immediate abort
-in L</traverse> or L</evaluate>), with the exception of keywords starting with C<x->.
+in L</traverse> or L</evaluate>), with the exception of keywords starting with C<x->. Note that
+this option is expected to become the default behaviour in future versions of JSON Schema.
 
 Defaults to false.
 
