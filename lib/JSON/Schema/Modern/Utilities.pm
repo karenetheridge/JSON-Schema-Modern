@@ -658,7 +658,9 @@ sub core_formats_type () {
   # wildcards, parameters supported
   # always returns a reference to the decoded data, or undef if no decoder is found
   sub decode_media_type ($media_type_string, $content_ref) {
-    croak 'decoder payload must be a reference to a string' if ref $content_ref ne 'SCALAR';
+    croak 'decoder payload must be a reference to a string (not ',
+        (length ref $content_ref ? ref $content_ref : 'a non-reference')
+      if ref $content_ref ne 'SCALAR';
 
     my $matched_string = match_media_type($media_type_string);
     return if not $matched_string;
