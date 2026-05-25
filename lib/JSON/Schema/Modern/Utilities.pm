@@ -487,6 +487,7 @@ sub core_formats_type () {
       [ qw(text *) ],
       [ qw(application x-www-form-urlencoded) ],
       [ qw(application x-ndjson) ],
+      # multipart/form-data and multipart/* are special-cased in OpenAPI::Modern: do not add here
     )
   };
 
@@ -604,7 +605,7 @@ sub core_formats_type () {
     if $media_type_string eq 'application/x-ndjson';
   }
 
-  # for internal use only by JSON::Schema::Modern! may be removed without notice!
+  # for internal use by JSON::Schema::Modern only! may be removed without notice!
   sub _get_media_type_decoder ($media_type_string) {
     my $matched_string = match_media_type($media_type_string);
     return undef if not defined $matched_string;
