@@ -1125,13 +1125,15 @@ future flexibility with this interface.
 
 These media types are already defined:
 
+=for stopwords WHATWG
+
 =for :list
-* C<application/json> - see L<RFC 4627|https://datatracker.ietf.org/doc/html/rfc4627>
-* C<application/schema+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
-* C<application/schema-instance+json> - see L<proposed definition|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
+* C<application/json> L<(RFC 4627)|https://datatracker.ietf.org/doc/html/rfc4627>
+* C<application/schema+json> L<(proposed definition)|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schemajson>
+* C<application/schema-instance+json> L<(proposed definition)|https://json-schema.org/draft/2020-12/json-schema-core.html#name-application-schema-instance>
 * C<application/octet-stream> - passes strings through unchanged
-* C<application/x-www-form-urlencoded>
-* C<application/x-ndjson> - see L<https://github.com/ndjson/ndjson-spec>
+* C<application/x-www-form-urlencoded> L<(WHATWG)|https://url.spec.whatwg.org/#application/x-www-form-urlencoded>
+* C<application/x-ndjson> L<(spec)|https://github.com/ndjson/ndjson-spec>
 * C<text/*> - passes strings through unchanged; supports the charset parameter
 
 Media-type definitions can be overridden with a new call to C<add_media_type>.

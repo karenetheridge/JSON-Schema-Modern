@@ -1950,6 +1950,7 @@ These specification meta-schemas are bundled with this distribution and loaded a
 * L<json-schema-eval>
 * L<https://json-schema.org>
 * L<RFC8259: The JavaScript Object Notation (JSON) Data Interchange Format|https://datatracker.ietf.org/doc/html/rfc8259>
+* L<RFC6901: JavaScript Object Notation (JSON) Pointer|https://datatracker.ietf.org/doc/html/rfc6901>
 * L<RFC3986: Uniform Resource Identifier (URI): Generic Syntax|https://datatracker.ietf.org/doc/html/rfc3986>
   dependencies and faster evaluation
 * L<https://json-schema.org/draft/2020-12>
