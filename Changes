@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.640     2026-05-30 17:45:48Z
           - fix application/x-www-form-urlencoded encoding of array values
           - media-type handling fixes in anticipation of multipart support
 
