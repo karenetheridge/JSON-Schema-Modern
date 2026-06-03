@@ -390,10 +390,8 @@ sub jsonp_set ($data, $pointer, $value) {
     # use this existing hash key or array index location, or create new position
     use autovivification 'store';
     $curp = \(
-      ref $curp->$* eq 'HASH' || $key !~ /^(?:\d+|-)\z/a
-        ? $curp->$*->{$key}
-        : $key =~ /^\d+\z/a
-        ? $curp->$*->[$key]
+      ref $curp->$* eq 'HASH' || $key !~ /^(?:\d+|-)\z/a ? $curp->$*->{$key}
+        : $key =~ /^\d+\z/a ? $curp->$*->[$key]
         : $curp->$*->[$curp->$*->$#* + 1]);
   }
 
