@@ -693,6 +693,8 @@ sub core_formats_type () {
   # finds best match for a media-type against a list of media-types. if parameter(s) are included in
   # the media-type to be matched, all parameters must be present in the match value.
   sub match_media_type ($media_type_string, $media_types = []) {
+    return if not length $media_type_string;
+
     # return immediately if exact match exists
     return $media_type_string
       if @$media_types and any { $_ eq $media_type_string } @$media_types
