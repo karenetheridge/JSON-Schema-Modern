@@ -73,7 +73,6 @@ acceptance_tests(
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::URI; 1 } ? 'uri.json' : (),
         ] },
       # various edge cases that are difficult to accomodate
-      { file => 'date.json', group_description => 'validation of date strings', test_description => 'year 0000 is a leap year (0 % 400 == 0)' },  # possibly temporary
       { file => 'hostname.json', group_description => 'validation of host names', test_description => [ 'trailing dot', 'contains "--" in the 3rd and 4th position' ] },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
       { file => 'iri.json', group_description => 'validation of IRIs',
