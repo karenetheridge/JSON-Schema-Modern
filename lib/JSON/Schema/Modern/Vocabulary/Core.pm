@@ -158,7 +158,7 @@ sub _traverse_keyword_schema ($class, $schema, $state) {
     else {
       ($spec_version, $vocabularies) = $state->{evaluator}->_fetch_vocabulary_data({ %$state,
           keyword => '$vocabulary', initial_schema_uri => Mojo::URL->new($schema->{'$schema'}),
-          traversed_keyword_path => jsonp($state->{traversed_keyword_path}.$state->{keyword_path}, $state->{keyword}) },
+          traversed_keyword_path => jsonp($state->{traversed_keyword_path}.$state->{keyword_path}, $state->{keyword}//()) },
         $schema_info);
     }
   }

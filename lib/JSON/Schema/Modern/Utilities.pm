@@ -790,7 +790,7 @@ sub E ($state, $error_string, @args) {
   my $uri = [ $state->@{qw(initial_schema_uri keyword_path)}, $state->{keyword}//(), @keyword_path_suffix ];
 
   my $keyword_location = $state->{traversed_keyword_path}
-    .jsonp($state->@{qw(keyword_path keyword)}, @keyword_path_suffix);
+    .jsonp($state->{keyword_path}, $state->{keyword}//(), @keyword_path_suffix);
 
   require JSON::Schema::Modern::Error;
   push $state->{errors}->@*, JSON::Schema::Modern::Error->new(
