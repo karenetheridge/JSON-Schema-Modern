@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - removed hard dependency on Getopt::Long::Descriptive
 
 0.640     2026-05-30 17:45:48Z
           - fix application/x-www-form-urlencoded encoding of array values
