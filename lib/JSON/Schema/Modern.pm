@@ -24,9 +24,8 @@ use Carp qw(croak carp);
 use List::Util 1.55 qw(pairs first uniqint pairmap uniqstr min);
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
-use builtin::compat qw(refaddr load_module);
+use builtin::compat qw(refaddr load_module blessed);
 use Mojo::URL;
-use Safe::Isa;
 use Mojo::File 'path';
 use Clone 'clone';
 use File::ShareDir 'dist_dir';
@@ -152,6 +151,8 @@ around BUILDARGS => sub ($orig, $class, @args) {
 
   return $args;
 };
+
+my $_isa = sub ($obj, $class) { blessed($obj) && $obj->isa($class) };
 
 sub add_schema {
   croak 'insufficient arguments' if @_ < 2;

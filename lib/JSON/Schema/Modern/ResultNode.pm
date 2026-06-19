@@ -18,7 +18,6 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
-use Safe::Isa;
 use Types::Standard qw(Str Undef InstanceOf);
 use Types::Common::Numeric 'PositiveOrZeroInt';
 use JSON::Schema::Modern::Utilities qw(jsonp json_pointer_type);

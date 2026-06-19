@@ -12,7 +12,6 @@ no if "$]" >= 5.041009, feature => 'smartmatch';
 no feature 'switch';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
-use Safe::Isa;
 use Feature::Compat::Try;
 use Mojo::File 'path';
 use builtin::compat 'blessed';
@@ -70,7 +69,7 @@ sub acceptance_tests (%options) {
       $js_short_circuit->add_document($uri => $doc) if not $ENV{NO_SHORT_CIRCUIT};
     }
     catch ($e) {
-      die $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump : $e;
+      die blessed($e) && $e->isa('JSON::Schema::Modern::Result') ? $e->dump : $e;
     }
   };
 

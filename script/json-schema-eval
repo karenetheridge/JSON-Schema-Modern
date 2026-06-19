@@ -15,9 +15,9 @@ use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
 use Getopt::Long::Descriptive;
 use Mojo::File 'path';
-use Safe::Isa;
 use Feature::Compat::Try;
 use List::Util 'max';
+use builtin::compat 'blessed';
 use JSON::Schema::Modern;
 
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
@@ -58,7 +58,7 @@ foreach my $add_schema_file (($opt->add_schema//[])->@*) {
     $js->add_schema('file://'.$add_schema_file => $schema);
   }
   catch ($e) {
-    say $e->$_isa('JSON::Schema::Modern::Result') ? $e->dump: '"'.$e.'"';
+    say blessed($e) && $e->isa('JSON::Schema::Modern::Result') ? $e->dump: '"'.$e.'"';
     exit 2;
   }
 }
