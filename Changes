@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.641     2026-06-19 20:01:55Z
           - removed hard dependency on Getopt::Long::Descriptive and all uses
             of Safe::Isa
