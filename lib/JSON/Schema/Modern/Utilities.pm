@@ -1189,6 +1189,7 @@ Exact matches to the C<type/subtype> name are preferred over wildcard matches (e
 if parameters are present in the value being matched against (the list of registered media-types,
 or the list provided to this sub), all parameters must be present and match exactly.
 
-All comparisons are done case-insensitively.
+Comparisons of type and subtype are done case-insensitively; parameter comparison is case-sensitive,
+with the exception of C<charset> in C<text/plain>.
 
 =cut
