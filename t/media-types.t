@@ -181,6 +181,19 @@ subtest 'application/x-www-form-urlencoded'=> sub {
     'a=x&a=y&a=z&b=1&b=2',
     'application/x-www-form-urlencoded encoder with array values, normalized',
   );
+
+  is_equal(
+    decode_media_type('application/x-www-form-urlencoded; type=array', \'a=x&a=y&b=1&a=z&b=2')->$*,
+    [ { a => 'x' }, { a => 'y' }, { b => '1' }, { a => 'z' }, { b => '2' } ],
+    'application/x-www-form-urlencoded decoder preserves order, when decoded to an array of tuples',
+  );
+
+  is_equal(
+    encode_media_type('application/x-www-form-urlencoded',
+      \[ { a => 'x' }, { a => 'y' }, { b => '1' }, { a => 'z' }, { b => '2' } ])->$*,
+    'a=x&a=y&b=1&a=z&b=2',
+    'application/x-www-form-urlencoded encoder, from an array of tuples',
+  );
 };
 
 subtest 'application/x-ndjson' => sub {

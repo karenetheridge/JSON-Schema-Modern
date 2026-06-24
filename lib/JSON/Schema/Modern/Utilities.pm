@@ -22,6 +22,7 @@ use B;
 use Carp qw(carp croak);
 use builtin::compat qw(blessed created_as_number);
 use Scalar::Util 'looks_like_number';
+use List::Util 'pairmap';
 use if "$]" < 5.041010, 'List::Util' => 'any';
 use if "$]" >= 5.041010, experimental => 'keyword_any';
 use Clone 'clone';
@@ -568,12 +569,31 @@ sub core_formats_type () {
     return +{
       type => 'application',
       subtype => 'x-www-form-urlencoded',
-      decode => sub ($content_ref, @) {
-        \ Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*)->to_hash;
+      decode => sub ($content_ref, $parameters = {}) {
+        my $parsed = Mojo::Parameters->new->charset('UTF-8')->parse($content_ref->$*);
+
+        if (($parameters->{type}//'object') eq 'array') {
+          \ [ pairmap { +{ $a, $b } } $parsed->pairs->@* ];
+        }
+        elsif (($parameters->{type}//'object') eq 'object') {
+          \ $parsed->to_hash;
+        }
+        else {
+          die 'unrecognized "type": ', $parameters->{type};
+        }
       },
       encode => sub ($content_ref, @) {
-        \ Mojo::Parameters->new->charset('UTF-8')
-          ->parse(map +($_ => $content_ref->$*->{$_}), sort keys $content_ref->$*->%*)->to_string;
+        if (ref $content_ref->$* eq 'ARRAY') {
+          \ Mojo::Parameters->new->charset('UTF-8')
+            ->parse(map %$_, $content_ref->$*->@*)->to_string;
+        }
+        elsif (ref $content_ref->$* eq 'HASH') {
+          \ Mojo::Parameters->new->charset('UTF-8')
+            ->parse(map +($_ => $content_ref->$*->{$_}), sort keys $content_ref->$*->%*)->to_string;
+        }
+        else {
+          die 'unrecognized data type: ', ref $content_ref->$*;
+        }
       },
       owner_addr => 1,
     }
