@@ -1708,19 +1708,19 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
 
   like(
     dies { $js->add_vocabulary('MyVocabulary::Does::Not::Exist') },
-    qr!an't locate MyVocabulary/Does/Not/Exist.pm in \@INC!,
+    qr{^Can't locate MyVocabulary/Does/Not/Exist.pm in \@INC},
     'vocabulary class must exist',
   );
 
   like(
     dies { $js->add_vocabulary('MyVocabulary::MissingRole') },
-    qr/Value "MyVocabulary::MissingRole" did not pass type constraint/,
+    qr/^Value "MyVocabulary::MissingRole" did not pass type constraint/,
     'vocabulary class must implement the role',
   );
 
   like(
     dies { $js->add_vocabulary('MyVocabulary::MissingSub') },
-    qr/Can't apply JSON::Schema::Modern::Vocabulary to MyVocabulary::MissingSub - missing vocabulary, keywords/,
+    qr/^Can't apply JSON::Schema::Modern::Vocabulary to MyVocabulary::MissingSub - missing vocabulary, keywords/,
     'vocabulary class must implement some subs',
   );
 
@@ -1728,23 +1728,23 @@ subtest 'custom vocabulary classes with add_vocabulary()' => sub {
     [ warnings {
       like(
         dies { $js->add_vocabulary('MyVocabulary::BadVocabularySub1') },
-        qr/Undef did not pass type constraint/,
+        qr/^Undef did not pass type constraint/,
         'vocabulary() sub in the vocabulary class must return uri => specification_version pairs',
       )
     } ],
-    [ re(qr/Odd number of elements in pairs/) ],
+    [ re(qr/^Odd number of elements in pairs/) ],
     'parse error from bad vocab sub',
   );
 
   like(
     dies { $js->add_vocabulary('MyVocabulary::BadVocabularySub2') },
-    qr!Value "https://some/uri#/invalid/uri" did not pass type constraint!,
+    qr!^Value "https://some/uri#/invalid/uri" did not pass type constraint!,
     'vocabulary() sub in the vocabulary class must contain valid absolute, fragmentless URIs',
   );
 
   like(
     dies { $js->add_vocabulary('MyVocabulary::BadVocabularySub3') },
-    qr/Value "wrongdraft" did not pass type constraint/,
+    qr/^Value "wrongdraft" did not pass type constraint/,
     'vocabulary() sub in the vocabulary class must reference a known specification version',
   );
 

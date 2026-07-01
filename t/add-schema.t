@@ -311,7 +311,7 @@ subtest 'add a schema associated with a uri' => sub {
 
   cmp_result(
     \@warnings,
-    [ re(qr/use of deprecated form of add_schema with document/) ],
+    [ re(qr/^use of deprecated form of add_schema with document/) ],
     'warned when using deprecated form of add_schema with URI',
   );
 
@@ -325,7 +325,7 @@ subtest 'add a schema associated with a uri' => sub {
 
   cmp_result(
     \@warnings,
-    [ re(qr/use of deprecated form of add_schema with document/) ],
+    [ re(qr/^use of deprecated form of add_schema with document/) ],
     'warned when using deprecated form of add_schema without URI',
   );
 

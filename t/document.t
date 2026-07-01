@@ -52,7 +52,7 @@ subtest 'boolean document' => sub {
         schema => false,
       )
     },
-    qr/Reference .*did not pass type constraint/,
+    qr/^Reference .*did not pass type constraint/,
     'boolean schema with invalid canonical_uri (fragment)',
   );
 

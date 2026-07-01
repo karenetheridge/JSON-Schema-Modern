@@ -253,7 +253,7 @@ subtest 'draft2020-12 assertions' => sub {
         {
           instanceLocation => '/encoded_object',
           keywordLocation => '/properties/encoded_object/contentMediaType',
-          error => re(qr!could not decode application/json string: \'null\' expected, at character offset 0!),
+          error => re(qr{^could not decode application/json string: \'null\' expected, at character offset 0}),
         },
         {
           instanceLocation => '',
@@ -453,7 +453,7 @@ subtest 'draft7 assertions' => sub {
         {
           instanceLocation => '/encoded_object',
           keywordLocation => '/properties/encoded_object/contentMediaType',
-          error => re(qr!could not decode application/json string: \'null\' expected, at character offset 0!),
+          error => re(qr{^could not decode application/json string: \'null\' expected, at character offset 0}),
         },
         {
           instanceLocation => '',

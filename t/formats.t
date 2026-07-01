@@ -124,31 +124,31 @@ subtest 'override a format sub' => sub {
         format_validations => +{ uuid => 1 },
       )
     },
-    qr/Reference .* did not pass type constraint /,
+    qr/^Reference .* did not pass type constraint /,
     'check syntax of override to existing format via constructor',
   );
 
   my $js = JSON::Schema::Modern->new(validate_formats => 1);
   like(
     dies { $js->add_format_validation([] => 1) },
-    qr/Value .* did not pass type constraint /,
+    qr/^\s*Value .* did not pass type constraint /m,
     'check syntax of override format name to existing format via setter',
   );
   like(
     dies { $js->add_format_validation(uuid => 1) },
-    qr/Value .* did not pass type constraint /,
+    qr/^\s*Value .* did not pass type constraint /m,
     'check syntax of override definition value to existing format via setter',
   );
 
   like(
     dies { $js->add_format_validation(uuid => { sub => sub { 0 }}) },
-    qr/Reference .* did not pass type constraint /,
+    qr/^Reference .* did not pass type constraint /,
     'type is required if passing a hashref',
   );
 
   like(
     dies { $js->add_format_validation(uuid => { type => 'number', sub => sub { 0 }}) },
-    qr/Type for override of format uuid does not match original type/,
+    qr/^Type for override of format uuid does not match original type/,
     'cannot override a core format to support a different data type',
   );
 
@@ -190,7 +190,7 @@ subtest 'override a format sub' => sub {
         format_validations => +{ mult_5 => 1 },
       )
     },
-    qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
+    qr/\s*Value "1" did not pass type constraint "(Dict\[|Ref").../m,
     'check syntax of implementation for a new format',
   );
 
@@ -205,13 +205,13 @@ subtest 'override a format sub' => sub {
 
   like(
     dies { $js->add_format_validation(uuid_bad => 1) },
-    qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
+    qr/^\s*Value "1" did not pass type constraint "(Dict\[|Ref").../m,
     'check syntax of implementation when adding an override to existing format',
   );
 
   like(
     dies { $js->add_format_validation(mult_5_bad => 1) },
-    qr/Value "1" did not pass type constraint "(Dict\[|Ref").../,
+    qr/^\s*Value "1" did not pass type constraint "(Dict\[|Ref").../m,
     'check syntax of implementation when adding a new format',
   );
 
@@ -606,13 +606,13 @@ subtest 'format: invalid base type(s)' => sub {
 
   like(
     dies { $js->add_format_validation(my_integer => { type => 'integer', sub => sub {} }) },
-    qr/Value .* did not pass type constraint /,
+    qr/^\s*Value .* did not pass type constraint /m,
     'integer is not a valid base type for a format validation',
   );
 
   like(
     dies { $js->add_format_validation(my_integer => { type => [qw(integer string)], sub => sub {} }) },
-    qr/Reference .* did not pass type constraint /,
+    qr/^Reference .* did not pass type constraint /,
     'integer, string is not a valid base type for a format validation',
   );
 };
@@ -1002,7 +1002,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
 
     cmp_result(
       \@warnings,
-      [ re(qr{Can't locate Data/Validate/Domain\.pm}) ],
+      [ re(qr{^Can't locate Data/Validate/Domain\.pm}) ],
       'we warn for a missing module',
     );
 

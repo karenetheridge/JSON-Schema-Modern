@@ -35,7 +35,7 @@ ok(
         errors => [
           {
             keywordLocation => '',
-            error => re(qr/malformed JSON string/),
+            error => re(qr/^malformed JSON string/),
           },
         ],
       },

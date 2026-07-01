@@ -526,7 +526,7 @@ subtest 'AND two result objects together' => sub {
 
   like(
     dies { $results[0] & 0 },
-    qr/wrong type for \& operation/,
+    qr/^wrong type for \& operation/,
     'only Result objects can be processed',
   );
 

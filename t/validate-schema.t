@@ -109,7 +109,7 @@ cmp_result(
     errors => superbagof(
       {
         instanceLocation => '/pattern',
-        keywordLocation => re(qr{/pattern/format$}),
+        keywordLocation => re(qr{/pattern/format\z}),
         absoluteKeywordLocation => 'https://json-schema.org/draft/2020-12/meta/validation#/properties/pattern/format',
         error => 'not a valid regex string',
       },

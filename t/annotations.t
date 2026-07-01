@@ -21,7 +21,7 @@ subtest 'draft7' => sub {
     dies {
       JSON::Schema::Modern->new(collect_annotations => 1, specification_version => 'draft7');
     },
-    qr/collect_annotations cannot be used with specification_version draft7/,
+    qr/^collect_annotations cannot be used with specification_version draft7/,
     'user cannot enable annotations for draft7',
   );
 
