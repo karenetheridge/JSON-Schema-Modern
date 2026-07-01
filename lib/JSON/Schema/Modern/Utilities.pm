@@ -642,6 +642,9 @@ sub core_formats_type () {
     my $type = _parse_media_type($media_type_string);
     croak "bad media-type string \"$media_type_string\"" if not $type;
 
+    croak 'multipart encoders/decoders cannot be defined here: use OpenAPI::Modern'
+      if match_media_type($media_type_string, ['multipart/*']);
+
     # populate the cache if it's a bundled type that hasn't been defined yet
     _predefined_media_types($media_type_string) if not exists $MEDIA_TYPES->{$media_type_string};
 

@@ -98,6 +98,12 @@ subtest 'new media-type handler' => sub {
     undef,
     'unknown media-type encoder returns undef, not a reference',
   );
+
+  like(
+    dies { add_media_type('multipart/furble' => sub {}) },
+    qr{^multipart encoders/decoders cannot be defined here: use OpenAPI::Modern},
+    'cannot create an entry for anything multipart here',
+  );
 };
 
 subtest 'application/json' => sub {
