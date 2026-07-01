@@ -77,13 +77,13 @@ subtest 'new media-type handler' => sub {
 
   like(
     dies { add_media_type('FOO-BAR' => sub {}) },
-    qr/bad media-type string "FOO-BAR"/,
+    qr/^bad media-type string "FOO-BAR"/,
     'bad media-type strings are rejected',
   );
 
   like(
     dies { add_media_type('MYTEXT/PLAIN; CHARSET=UTF-8' => sub {}) },
-    qr/duplicate media-type found/,
+    qr/^duplicate media-type found/,
     'cannot add a type twice (when comparing normalized forms)',
   );
 
@@ -121,7 +121,7 @@ subtest 'application/json' => sub {
 
   die_result(
     sub { decode_media_type('application/json', \'blargh') },
-    qr/malformed JSON string/,
+    qr/^malformed JSON string/,
     'decoder for "application/json" throws an exception for bad data',
   );
 
