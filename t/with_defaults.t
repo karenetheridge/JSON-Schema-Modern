@@ -705,6 +705,14 @@ subtest 'jsonp_set permutations' => sub {
     [ 'foo' ],
     '- is accepted as an array index, when overwriting a string',
   );
+
+  $data = '';
+  $data = jsonp_set($data, '/~0~1/~0', 'fo~/o');
+  is_equal(
+    $data,
+    { '~/' => { '~' => 'fo~/o' } },
+    '~ and / are properly unescaped when setting properties, but not values',
+  );
 };
 
 subtest jsonp_elements => sub {
