@@ -753,6 +753,16 @@ subtest jsonp_elements => sub {
     },
     'deep hash with multiple elements of hashes and arrays',
   );
+
+  is_equal(
+    jsonp_elements({ 'a~1' => 'fo~/o', 'b/2' => 'ba~/r', 'c~/3' => { 'ba~/z' => 'bo~0/op' } }),
+    {
+      '/a~01' => 'fo~/o',
+      '/b~12' => 'ba~/r',
+      '/c~0~13/ba~0~1z' => 'bo~0/op',
+    },
+    'properties with tilde and slash are correctly escaped',
+  );
 };
 
 done_testing;

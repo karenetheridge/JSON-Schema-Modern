@@ -342,7 +342,7 @@ sub jsonp_elements ($data, $prefix = '') {
   # recursively walk the structure..
   my $hash = +{
       ref $data eq '' ? ($prefix => $data)
-    : ref $data eq 'HASH' ? map jsonp_elements($data->{$_}, $prefix.'/'.$_)->%*, keys %$data
+    : ref $data eq 'HASH' ? map jsonp_elements($data->{$_}, $prefix.'/'.(s!~!~0!gr =~ s!/!~1!gr))->%*, keys %$data
     : ref $data eq 'ARRAY' ? map jsonp_elements($data->[$_], $prefix.'/'.$_)->%*, 0..$data->$#*
     : croak 'unrecognized type: '. ref $data
   };
