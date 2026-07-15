@@ -553,6 +553,7 @@ sub core_formats_type () {
       type => 'text', subtype => '*',
       decode => sub ($content_ref, $parameters = {}, @) {
         # RFC2046 §4.1.2: charset is case-insensitive
+        # RFC6657 §4: default charset for text/plain is "US-ASCII"
         return $parameters->{charset} ?
           \ Encode::decode($parameters->{charset}, $content_ref->$*, Encode::DIE_ON_ERR | Encode::LEAVE_SRC)
           : $content_ref;
@@ -997,7 +998,7 @@ register_schema get_schema_filename
 
 Returns a boolean indicating whether the provided value is of the specified core type (C<null>,
 C<boolean>, C<string>, C<number>, C<object>, C<array>) or C<integer>. Also optionally takes a hashref
-C<{ legacy_ints => 1 }> indicating that draft4 number semantics should apply (where unlike later
+C<< { legacy_ints => 1 } >> indicating that draft4 number semantics should apply (where unlike later
 drafts, C<2.0> is B<not> an integer).
 
 =head2 get_type
@@ -1005,7 +1006,7 @@ drafts, C<2.0> is B<not> an integer).
   my $type = get_type($value);
 
 Returns one of the core types (C<null>, C<boolean>, C<string>, C<number>, C<object>, C<array>) or
-C<integer>. Also optionally takes a hashref C<{ legacy_ints => 1 }> indicating that draft4 number
+C<integer>. Also optionally takes a hashref C<< { legacy_ints => 1 } >> indicating that draft4 number
 semantics should apply. Behaviour is consistent with L</is_type>.
 
 =head2 is_bool
@@ -1061,7 +1062,7 @@ The optional second argument hashref supports the same options as L</is_equal>, 
 
 Constructs a json pointer string from a list of path components, with correct escaping; the first
 argument must be C<''> or an already-escaped json pointer, to which the rest of the path components
-are appended.
+are appended after being escaped.
 
 =head2 unjsonp
 
@@ -1075,7 +1076,7 @@ Splits a json pointer string into its path components, with correct unescaping.
   # 4
   my $val = jsonp_get({ a => 1, b => { c => 3, d => 4 } }, '/b/d');
 
-Fetches the value of a data structure at a particular json pointer location.
+Returns the value of a data structure at a particular json pointer location.
 
 =head2 jsonp_elements
 
@@ -1086,7 +1087,7 @@ Fetches the value of a data structure at a particular json pointer location.
   # }
   jsonp_elements({ a => { b => [ 'x', 'y' ], c => { d => 'e' } } });
 
-Fetches all the ( json pointer => value ) tuples of a data structure as a hashref.
+Returns all the ( json pointer => value ) tuples of a data structure as a hashref.
 
 =head2 jsonp_set
 
@@ -1203,7 +1204,7 @@ encoded.
   my $ad_hoc_media_type = match_media_type('text/html', [ 'text/plain', 'text/*' ]);
 
 Finds the best match for a C<Content-Type> header value from the media-types in the registry,
-or from an ad-hoc list reference provided in the remaining arguments.
+or from an ad-hoc list reference provided in the second argument.
 
 Types with structured suffixes will match more generic types when an exact match is not available
 (e.g. C<application/schema+json> will match an entry for C<application/json>).
