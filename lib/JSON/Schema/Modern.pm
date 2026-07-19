@@ -1275,6 +1275,15 @@ sub THAW ($class, $serializer, $data) {
       (map $_->{vocabularies}->@*, $self->_canonical_resources),
       (map $_->[1], values $self->__vocabulary_classes->%*));
 
+  # populate the global cache from our existing resources (otherwise already-existing resources
+  # may be loaded from disk again)
+  foreach my $resource ($self->_canonical_resources) {
+    JSON::Schema::Modern::Utilities::__populate_cached_document($self, $resource->{canonical_uri}, $resource->{document});
+
+    # also update our existing resources from the global cache, to avoid future refaddr errors
+    load_cached_document($self, $resource->{canonical_uri});
+  }
+
   return $self;
 }
 

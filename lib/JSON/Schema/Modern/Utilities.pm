@@ -424,6 +424,13 @@ sub core_formats_type () {
 {
   my $document_cache = {};
 
+  # adds a document to the cache, if its URI is in the cacheable list
+  # for internal use only!!
+  sub __populate_cached_document ($evaluator, $uri, $doc) {
+    $document_cache->{$uri} = $doc
+      if not exists $document_cache->{$uri} and get_schema_filename($uri);
+  }
+
   # Fetches a document from the cache (reading it from disk and creating the document if necessary),
   # and add it to the evaluator.
   # Normally this will just be a cache of schemas that are bundled with this distribution or a related

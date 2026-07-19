@@ -3,6 +3,7 @@ Revision history for JSON-Schema-Modern
 {{$NEXT}}
           - "application/x-www-form-urlencoded" media encoder and decoders now
             support working with an arrayref of hashref tuples
+          - better handling of cached schema files via deserialization hooks
 
 0.641     2026-06-19 20:01:55Z
           - removed hard dependency on Getopt::Long::Descriptive and all uses
