@@ -107,4 +107,4 @@ request to the .mailmap file to contain the correct mapping.
 
 
 This file was generated via Dist::Zilla::Plugin::GenerateFile::FromShareDir 0.016
-from a template file originating in Dist-Zilla-PluginBundle-Author-ETHER-0.172.
+from a template file originating in Dist-Zilla-PluginBundle-Author-ETHER-0.173.
