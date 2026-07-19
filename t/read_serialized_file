@@ -96,7 +96,7 @@ my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
           instanceLocation => '',
           keywordLocation => '/format',
           absoluteKeywordLocation => 'https://my_strict_schema#/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
       ],
     },

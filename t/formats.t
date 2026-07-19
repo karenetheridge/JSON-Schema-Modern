@@ -385,7 +385,7 @@ subtest 'custom metaschemas' => sub {
           instanceLocation => '',
           keywordLocation => '/format',
           absoluteKeywordLocation => 'https://schema/ipv4/false#/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
       ],
     },
@@ -409,7 +409,7 @@ subtest 'custom metaschemas' => sub {
           instanceLocation => '',
           keywordLocation => '/format',
           absoluteKeywordLocation => 'https://schema/ipv4/true#/format',
-          error => 'not a valid ipv4',
+          error => 'not a valid ipv4 string',
         },
       ],
     },
@@ -892,12 +892,12 @@ subtest 'stringy numbers with a numeric format' => sub {
         {
           instanceLocation => '/0',
           keywordLocation => '/items/format',
-          error => 'not a valid mult_5',
+          error => 'not a valid mult_5 number',
         },
         {
           instanceLocation => '/1',
           keywordLocation => '/items/format',
-          error => 'not a valid mult_5',
+          error => 'not a valid mult_5 number',
         },
         {
           instanceLocation => '',
