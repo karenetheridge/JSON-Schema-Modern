@@ -89,7 +89,7 @@ my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
 
   cmp_result(
     $thawed->evaluate('foo', 'https://my_strict_schema')->TO_JSON,
-    {
+    my $fail_result = {
       valid => false,
       errors => [
         {
@@ -101,6 +101,13 @@ my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
       ],
     },
     'evaluate data against schema with custom dialect; format-assertion is used',
+  );
+
+  delete $fail_result->{errors}[0]{absoluteKeywordLocation};
+  cmp_result(
+    $thawed->evaluate('foo', { type => 'string', format => 'ipv4' }, { validate_formats => 1 })->TO_JSON,
+    $fail_result,
+    'evaluate data against schema with default dialect; format-assertion is used',
   );
 };
 

@@ -54,7 +54,7 @@ is_equal(
 
 is_equal(
   $js->evaluate(1, 'https://my_schema')->TO_JSON,
-  my $result = {
+  my $pass_result = {
     valid => true,
     annotations => [
       map +{
@@ -70,7 +70,7 @@ is_equal(
 
 is_equal(
   $js->evaluate('foo', 'https://my_schema')->TO_JSON,
-  $result,
+  $pass_result,
   'evaluate data against schema with custom dialect; format-annotation is used',
 );
 
