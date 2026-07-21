@@ -136,31 +136,31 @@ subtest 'text/*' => sub {
   is_equal(
     decode_media_type('text/plain', \"\xe0\xb2\xa0\x5f\xe0\xb2\xa0")->$*,
     "\xe0\xb2\xa0\x5f\xe0\xb2\xa0",
-    'text/* decoder without charset',
+    'decoder without charset',
   );
 
   is_equal(
     decode_media_type('text/plain; charset=UTF-8', \"\xe0\xb2\xa0\x5f\xe0\xb2\xa0")->$*,
     'ಠ_ಠ',
-    'text/* decoder with UTF-8 charset',
+    'decoder with UTF-8 charset',
   );
 
   is_equal(
     encode_media_type('text/plain; charset=UTF-8', \'ಠ_ಠ')->$*,
     "\xe0\xb2\xa0\x5f\xe0\xb2\xa0",
-    'text/* encoder with UTF-8 charset',
+    'encoder with UTF-8 charset',
   );
 
   is_equal(
     decode_media_type('text/plain; charset=latin1', \"\xe9clair")->$*,
     'éclair',
-    'text/* decoder with latin1 charset',
+    'decoder with latin1 charset',
   );
 
   is_equal(
     encode_media_type('text/plain; charset=latin1', \'éclair')->$*,
     "\xe9clair",
-    'text/* encoder with latin1 charset',
+    'encoder with latin1 charset',
   );
 };
 
@@ -168,37 +168,37 @@ subtest 'application/x-www-form-urlencoded'=> sub {
   is_equal(
     decode_media_type('application/x-www-form-urlencoded', \'foo=%E0%B2%A0_%E0%B2%A0')->$*,
     { foo => 'ಠ_ಠ' },
-    'application/x-www-form-urlencoded decoder',
+    'decoder',
   );
 
   is_equal(
     encode_media_type('application/x-www-form-urlencoded', \{ foo => 'ಠ_ಠ' })->$*,
     'foo=%E0%B2%A0_%E0%B2%A0',
-    'application/x-www-form-urlencoded encoder',
+    'encoder with wide characters',
   );
 
   is_equal(
     decode_media_type('application/x-www-form-urlencoded', \'a=x&a=y&b=1&a=z&b=2')->$*,
     { a => [qw(x y z)], b => [qw(1 2)] },
-    'application/x-www-form-urlencoded decoder with array values',
+    'with array values',
   );
   is_equal(
     encode_media_type('application/x-www-form-urlencoded', \{ a => [qw(x y z)], b => [qw(1 2)] })->$*,
     'a=x&a=y&a=z&b=1&b=2',
-    'application/x-www-form-urlencoded encoder with array values, normalized',
+    'encoder with array values, normalized',
   );
 
   is_equal(
     decode_media_type('application/x-www-form-urlencoded; type=array', \'a=x&a=y&b=1&a=z&b=2')->$*,
     [ { a => 'x' }, { a => 'y' }, { b => '1' }, { a => 'z' }, { b => '2' } ],
-    'application/x-www-form-urlencoded decoder preserves order, when decoded to an array of tuples',
+    'decoder preserves order, when decoded to an array of tuples',
   );
 
   is_equal(
     encode_media_type('application/x-www-form-urlencoded',
       \[ { a => 'x' }, { a => 'y' }, { b => '1' }, { a => 'z' }, { b => '2' } ])->$*,
     'a=x&a=y&b=1&a=z&b=2',
-    'application/x-www-form-urlencoded encoder, from an array of tuples',
+    'encoder, from an array of tuples',
   );
 };
 
@@ -206,13 +206,13 @@ subtest 'application/x-ndjson' => sub {
   is_equal(
     decode_media_type('application/x-ndjson', \qq!{"a":1,"b":2}\n[0,1,2,3,4]!)->$*,
     [ { a => 1, b => 2 }, [ 0, 1, 2, 3, 4 ] ],
-    'application/x-ndjson decoder',
+    'decoder',
   );
 
   is_equal(
     encode_media_type('application/x-ndjson', \[ { a => 1 }, [ 0, 1, 2, 3, 4 ] ])->$*,
     qq!{"a":1}\n[0,1,2,3,4]!,
-    'application/x-ndjson encoder',
+    'encoder',
   );
 };
 
