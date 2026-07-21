@@ -178,6 +178,36 @@ subtest 'application/x-www-form-urlencoded'=> sub {
   );
 
   is_equal(
+    encode_media_type('application/x-www-form-urlencoded', \[ map +{ (chr)x2 }, 0 .. 0x7f ])->$*,
+    join('&',
+      map join('=', $_, $_),
+      map +(m/^[A-Za-z0-9\x2A\x2D\x2E\x5F]\z/ ? $_ : sprintf('%%%02X', ord)),
+      map chr, 0 .. 0x7f
+    ),
+    'encoder for all ascii characters percent-encodes the right set, as an array of tuples',
+  );
+
+  is_equal(
+    encode_media_type('application/x-www-form-urlencoded', \{ map +((chr)x2), 0 .. 0x7f })->$*,
+    join('&',
+      map join('=', $_, $_),
+      map +(m/^[A-Za-z0-9\x2A\x2D\x2E\x5F]\z/ ? $_ : sprintf('%%%02X', ord)),
+      map chr, 0 .. 0x7f
+    ),
+    'encoder for all ascii characters percent-encodes the right set, as an object of single values',
+  );
+
+  is_equal(
+    encode_media_type('application/x-www-form-urlencoded', \{ map +((chr)x2), 0 .. 0x7f })->$*,
+    join('&',
+      map join('=', $_, $_),
+      map +(m/^[A-Za-z0-9\x2A\x2D\x2E\x5F]\z/ ? $_ : sprintf('%%%02X', ord)),
+      map chr, 0 .. 0x7f
+    ),
+    'encoder for all ascii characters percent-encodes the right set, as an object of single values',
+  );
+
+  is_equal(
     decode_media_type('application/x-www-form-urlencoded', \'a=x&a=y&b=1&a=z&b=2')->$*,
     { a => [qw(x y z)], b => [qw(1 2)] },
     'with array values',

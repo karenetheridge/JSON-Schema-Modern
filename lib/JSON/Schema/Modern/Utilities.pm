@@ -29,6 +29,7 @@ use Clone 'clone';
 use Feature::Compat::Try;
 use Mojo::JSON ();
 use Mojo::JSON::Pointer ();
+use Mojo::Util 'url_escape';
 use JSON::PP ();
 use Types::Standard qw(Str InstanceOf Enum);
 use Mojo::File 'path';
@@ -591,13 +592,25 @@ sub core_formats_type () {
         }
       },
       encode => sub ($content_ref, @) {
-        if (ref $content_ref->$* eq 'ARRAY') {
-          \ Mojo::Parameters->new->charset('UTF-8')
-            ->parse(map %$_, $content_ref->$*->@*)->to_string;
+        # WHATWG §1.3: "The application/x-www-form-urlencoded percent-encode set contains all code
+        # points, except the ASCII alphanumeric, U+002A (*), U+002D (-), U+002E (.), and U+005F
+        # (_)."
+        state sub escape ($str) {
+          url_escape(Encode::encode('UTF-8', $str, Encode::DIE_ON_ERR), '^A-Za-z0-9*\-._');
         }
-        elsif (ref $content_ref->$* eq 'HASH') {
-          \ Mojo::Parameters->new->charset('UTF-8')
-            ->parse(map +($_ => $content_ref->$*->{$_}), sort keys $content_ref->$*->%*)->to_string;
+
+        if (ref $content_ref->$* eq 'ARRAY') {    # arrayref of hashref tuples
+          \ join '&', map +(join '=', (map +(escape $_), %$_)), $content_ref->$*->@*;
+        }
+        elsif (ref $content_ref->$* eq 'HASH') {  # hashref of strings or arrayref of strings
+          \ join '&',
+            map {
+              my ($k, $ek) = ($_, escape($_));
+              ref $content_ref->$*->{$k} eq 'ARRAY'
+                ? (map +($ek.'='.escape($_)), $content_ref->$*->{$k}->@*)
+                : $ek.'='.escape($content_ref->$*->{$k})
+            }
+            sort keys $content_ref->$*->%*;
         }
         else {
           die 'unrecognized data type: ', ref $content_ref->$*;
