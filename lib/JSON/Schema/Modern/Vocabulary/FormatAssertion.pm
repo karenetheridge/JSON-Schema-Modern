@@ -84,27 +84,55 @@ sub keywords ($class, $spec_version) {
     qr{^P(?:$week|$date|$time)\z};
   };
 
+  state sub days_in_month ($month) {
+      $month == 2 ? 28
+    : $month == 4 || $month == 6 || $month == 9 || $month == 11 ? 30
+    : 31;
+  }
+
   my $formats = +{
     'date-time' => sub {
       # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6
-      $_[0] =~ m/^\d{4}-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:Z|[+-](\d\d):(\d\d))\z/ia
-        && $1 >= 1 && $1 <= 12        # date-month
-        && $2 >= 1 && $2 <= 31        # date-mday
-        && $3 <= 23                   # time-hour
-        && $4 <= 59                   # time-minute
-        && $5 <= 60                   # time-second
-        && (!defined $6 || $6 <= 23)  # time-hour in time-numoffset
+      $_[0] =~ m/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:Z|([+-]\d\d):(\d\d))\z/ia
+        && $2 >= 1 && $2 <= 12        # date-month
+        && $3 >= 1 && $3 <= 31        # date-mday
+        && $4 <= 23                   # time-hour
+        && $5 <= 59                   # time-minute
+        && $6 <= 60                   # time-second
+        && (!defined $7 || abs($7) <= 23)  # time-hour in time-numoffset
         && (!defined $7 || $7 <= 59)  # time-minute in time-numoffset
 
         # Time::Moment does month+day sanity check (with leap years), but not leap seconds
-        && ($5 <= 59
-          && do {
+        && ($6 <= 59 && do {
             require Time::Moment;
             eval { Time::Moment->from_string(uc($_[0])) };
-          } || do {
-            require DateTime::Format::RFC3339;
-            eval { DateTime::Format::RFC3339->parse_datetime($_[0]) };
-        });
+          }
+        || do {
+          my ($year, $month, $day, $hour, $minute) = ($1, $2, $3, $4, $5);
+
+          if (defined $7 && ($7 != 0 || $8 != 0)) {
+            my $mult = ($7 < 0 ? 1 : -1); # if offset is negative, we ADD; if positive, we SUBTRACT
+            $hour += $mult * abs($7);
+            $minute += $mult * $8;
+
+            $minute += 60, $hour -= 1 if $minute < 0;
+            $minute -= 60, $hour += 1 if $minute >= 60;
+
+            $hour += 24, $day -= 1 if $hour < 0;
+            $hour -= 24, $day += 1 if $hour >= 24;
+
+            $day += days_in_month(($month + 11) % 12), $month -= 1 if $day < 1;
+            $day -= days_in_month($month), $month += 1 if $day > days_in_month($month);
+
+            $month += 12, $year -= 1 if $month < 1;
+            $month -= 12, $year += 1 if $month > 12;
+          }
+
+          # a leap second can appear only as 23:59:60 UTC, and only on June 30 or December 31
+          $hour == 23 && $minute == 59
+            && (($month == 6 && $day == 30) || ($month == 12 && $day == 31));
+        }
+      );
     },
     date => sub {
       # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6 full-date
@@ -219,7 +247,7 @@ my $warnings = {
   email => sub { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 },
   hostname => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 },
   'idn-hostname' => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); require Net::IDN::Encode; 1 },
-  'date-time' => sub { require Time::Moment; require DateTime::Format::RFC3339; 1 },
+  'date-time' => sub { require Time::Moment; 1 },
   date => sub { require Time::Moment; 1 },
   uri => sub { require Data::Validate::URI; 1 },
 };

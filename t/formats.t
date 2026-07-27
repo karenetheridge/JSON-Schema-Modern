@@ -19,7 +19,6 @@ use JSON::Schema::Modern::Utilities qw(get_type);
 
 use Test::Without::Module 0.19 qw(
   Time::Moment
-  DateTime::Format::RFC3339
   Data::Validate::Domain
   Email::Address::XS
   Net::IDN::Encode

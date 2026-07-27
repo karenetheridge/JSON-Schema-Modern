@@ -24,6 +24,16 @@
                 "description": "an invalid date-time with a leap second, with minus offset",
                 "data": "1998-12-30T15:59:60.123-08:00",
                 "valid": false
+            },
+            {
+                "description": "a valid date-time with a leap second, with negative half-hour offset",
+                "data": "1998-12-31T22:29:60.123-01:30",
+                "valid": true
+            },
+            {
+                "description": "a valid date-time with a leap second, with positive half-hour offset",
+                "data": "1999-01-01T01:29:60.123+01:30",
+                "valid": true
             }
         ]
     }

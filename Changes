@@ -4,6 +4,7 @@ Revision history for JSON-Schema-Modern
           - fix the set of characters that are encoded for the
             application/x-www-form-urlencoded media-type to be spec-compliant
             (Mojolicious isn't)
+          - drop optional prereq on DateTime::Format::RFC3339
 
 0.642     2026-07-19 23:29:16Z
           - "application/x-www-form-urlencoded" media encoder and decoders now
