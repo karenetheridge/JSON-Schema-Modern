@@ -18,6 +18,7 @@ use builtin::compat 'refaddr';
 use Data::Dumper ();
 use lib 't/lib';
 use Helper;
+use JSON::Schema::Modern::Utilities 'canonicalize_uri';
 
 # spec version -> vocab classes
 my %vocabularies = unpairs(JSON::Schema::Modern->new->__all_metaschema_vocabulary_classes);
@@ -91,6 +92,12 @@ subtest '$id sets canonical uri' => sub {
   ok(!@blessed_values, 'the schema contains no blessed leaf nodes')
     or diag 'found blessed values: ',
       Data::Dumper->new([ map ref, @blessed_values ])->Indent(2)->Terse(1)->Sortkeys(1)->Dump;
+
+  is(
+    canonicalize_uri($js, '#/$defs/foo'),
+    'http://localhost:4242/my_foo',
+    'canonicalize a non-canonical json pointer URI',
+  );
 };
 
 subtest 'anchors' => sub {
@@ -178,6 +185,12 @@ subtest 'anchors' => sub {
       },
     },
     'internal resource index is correct',
+  );
+
+  is(
+    canonicalize_uri($js, 'http://localhost:4242#my_foo'),
+    'http://localhost:4242#/$defs/foo',
+    'canonicalize an anchor URI',
   );
 };
 

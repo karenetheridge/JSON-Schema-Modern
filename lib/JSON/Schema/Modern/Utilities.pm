@@ -45,6 +45,7 @@ our @EXPORT_OK = qw(
   is_bignum
   is_equal
   is_elements_unique
+  canonicalize_uri
   jsonp
   unjsonp
   jsonp_get
@@ -317,6 +318,12 @@ sub is_elements_unique ($array, $state = {}) {
     }
   }
   return 1;
+}
+
+# given a URI to a schema resource, return the canonical form of this URI
+sub canonicalize_uri ($evaluator, $uri) {
+  my $schema_resource = $evaluator->_fetch_from_uri($uri);
+  return $schema_resource ? $schema_resource->{canonical_uri} : undef;
 }
 
 # shorthand for creating and appending json pointers
@@ -1074,6 +1081,13 @@ The optional second argument hashref supports the same options as L</is_equal>, 
 =for :list
 * C<equal_indices> (populated by function): if result is false, the list of indices of the (first
   set of) equal items found.
+
+=head2 canonicalize_uri
+
+  # "https://example.com/schema#/$defs/thing"
+  my $uri = canonicalize_uri($evaluator, "https://example.com/schema#my_anchor_to_thing");
+
+Given a URI to a schema resource, returns the canonical form of this URI.
 
 =head2 jsonp
 

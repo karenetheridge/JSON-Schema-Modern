@@ -6,6 +6,7 @@ Revision history for JSON-Schema-Modern
             (Mojolicious isn't)
           - drop optional prereqs on DateTime::Format::RFC3339 and
             Time::Moment
+          - new utility function: canonicalize_uri()
 
 0.642     2026-07-19 23:29:16Z
           - "application/x-www-form-urlencoded" media encoder and decoders now
