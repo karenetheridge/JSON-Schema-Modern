@@ -48,6 +48,8 @@ if ($ENV{AUTHOR_TESTING}) {
 
 my $version = 'draft2020-12';
 
+$ENV{NO_SHORT_CIRCUIT} = 1;
+
 acceptance_tests(
   acceptance => {
     specification => $version,

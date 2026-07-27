@@ -46,6 +46,8 @@ if ($ENV{AUTHOR_TESTING}) {
 
 my $version = 'draft6';
 
+$ENV{NO_SHORT_CIRCUIT} = 1;
+
 acceptance_tests(
   acceptance => {
     specification => $version,
