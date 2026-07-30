@@ -108,11 +108,11 @@ sub _eval_keyword_unevaluatedProperties ($class, $data, $schema, $state) {
   die '"unevaluatedProperties" keyword present, but annotation collection is disabled'
     if not $state->{collect_annotations};
 
-  my @evaluated_properties = map {
+  my @evaluated_properties = map do {
     my $keyword = $_->{keyword};
     (grep $keyword eq $_, qw(properties additionalProperties patternProperties unevaluatedProperties))
       ? $_->{annotation}->@* : ();
-  } local_annotations($state);
+  }, local_annotations($state);
 
   my $valid = 1;
   my @properties;

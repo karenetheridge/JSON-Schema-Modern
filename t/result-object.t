@@ -429,7 +429,7 @@ subtest 'strict_basic' => sub {
 };
 
 subtest 'AND two result objects together' => sub {
-  my @results = map {
+  my @results = map do {
     my $count = $_;
     my $valid = $count % 2;
     JSON::Schema::Modern::Result->new(
@@ -446,7 +446,7 @@ subtest 'AND two result objects together' => sub {
       ],
       defaults => { '/a/b/'.$count => 1 },
     )
-  } 0..3;
+  }, 0..3;
 
   cmp_result(
     (my $one_true = $results[0] & $results[1]),
@@ -484,14 +484,14 @@ subtest 'AND two result objects together' => sub {
       methods(valid => bool(1)),
       listmethods(
         annotations => [
-          map {
+          map do {
             my $count = $_;
             map methods(TO_JSON => {
               instanceLocation => '/instance_location/'.$count.'-'.$_,
               keywordLocation => '/keyword_location/'.$count.'-'.$_,
               annotation => 'annotation '.$count.'-'.$_,
             }), 0..1
-          } 1,3
+          }, 1,3
         ],
       ),
     ),
@@ -510,14 +510,14 @@ subtest 'AND two result objects together' => sub {
       ),
       listmethods(
         errors => [
-          map {
+          map do {
             my $count = $_;
             map methods(TO_JSON => {
               instanceLocation => '/instance_location/'.$count.'-'.$_,
               keywordLocation => '/keyword_location/'.$count.'-'.$_,
               error => 'error '.$count.'-'.$_,
             }), 0..1
-          } 0,2
+          }, 0,2
         ],
       ),
     ),

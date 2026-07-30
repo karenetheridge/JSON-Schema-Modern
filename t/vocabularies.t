@@ -362,16 +362,16 @@ subtest 'valid keywords' => sub {
     path('lib/JSON/Schema/Modern/Vocabulary/')->list->each;
 
   my $table = {
-    map {
+    map do {
       my $spec_version = $_;
       $spec_version => {
-        map {
+        map do {
           my $class = $_;
           my @keywords = eval { $class->keywords($spec_version) };
           @keywords ? (($class =~ /::([^:]+)\z/) => \@keywords) : ();
-        } @classes,
+        }, @classes
       };
-    }
+    },
     JSON::Schema::Modern->SPECIFICATION_VERSIONS_SUPPORTED->@*
   };
 

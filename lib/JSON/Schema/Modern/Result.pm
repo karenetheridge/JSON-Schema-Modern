@@ -177,7 +177,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
   elsif ($style eq 'terse') {
     my (%instance_locations, %keyword_locations);
 
-    my @errors = grep {
+    my @errors = grep do {
       my ($keyword, $error) = ($_->keyword, $_->error);
 
       my $keep = 0+!!(
@@ -198,7 +198,7 @@ sub format ($self, $style, $formatted_annotations = undef) {
       ++$keyword_locations{$_->keyword_location} if $keep;
 
       $keep;
-    }
+    },
     $self->errors;
 
     die 'uh oh, have no errors left to report' if not $self->valid and not @errors;

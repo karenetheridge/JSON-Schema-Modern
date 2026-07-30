@@ -611,12 +611,12 @@ sub core_formats_type () {
         }
         elsif (ref $content_ref->$* eq 'HASH') {  # hashref of strings or arrayref of strings
           \ join '&',
-            map {
+            map do {
               my ($k, $ek) = ($_, escape($_));
               ref $content_ref->$*->{$k} eq 'ARRAY'
                 ? (map +($ek.'='.escape($_)), $content_ref->$*->{$k}->@*)
                 : $ek.'='.escape($content_ref->$*->{$k})
-            }
+            },
             sort keys $content_ref->$*->%*;
         }
         else {
@@ -633,12 +633,10 @@ sub core_formats_type () {
       decode => sub ($content_ref, @) {
         my $decoder = _JSON_BACKEND->new->allow_nonref(1)->utf8(1);
         my $line = 0; # line numbers start at 1
-        \[ map {
-            do {
-              try { ++$line; $decoder->decode($_) }
-              catch ($e) { croak 'parse error at line '.$line.': '.$e }
-            }
-          }
+        \[ map do {
+            try { ++$line; $decoder->decode($_) }
+            catch ($e) { croak 'parse error at line '.$line.': '.$e }
+          },
           split(/\r?\n/, $content_ref->$*)
         ];
       },
