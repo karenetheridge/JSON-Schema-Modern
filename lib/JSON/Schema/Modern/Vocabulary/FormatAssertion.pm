@@ -69,7 +69,7 @@ sub keywords ($class, $spec_version) {
   };
   # https://datatracker.ietf.org/doc/html/rfc3339#appendix-A
   # Changes in the 2000 version as defined in https://en.wikipedia.org/wiki/ISO_8601#Durations
-  # (allowing fractional numbers) are NOT included
+  # (that allow fractional numbers) are NOT included
   my $duration_re = do {  # duration
     my $num = '[0-9]+';
     my $second = "${num}S";
