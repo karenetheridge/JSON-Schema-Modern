@@ -495,7 +495,11 @@ sub validate_schema ($self, $schema, $config_override = {}) {
     : $self->METASCHEMA_URIS->{$self->specification_version // $self->SPECIFICATION_VERSION_DEFAULT};
 
   my $result = $self->evaluate($schema, $metaschema_uri,
-    { %$config_override, $self->strict || $config_override->{strict} ? (_strict_schema_data => 1) : () });
+    {
+      %$config_override,
+      $self->strict || $config_override->{strict} ? (_strict_schema_data => 1) : (),
+      validate_formats => 1,
+    });
 
   return $result if not $result->valid;
 

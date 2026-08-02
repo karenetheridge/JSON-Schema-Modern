@@ -7,6 +7,7 @@ Revision history for JSON-Schema-Modern
           - drop optional prereqs on DateTime::Format::RFC3339 and
             Time::Moment
           - new utility function: canonicalize_uri()
+          - respect format constraints in validate_schema()
 
 0.642     2026-07-19 23:29:16Z
           - "application/x-www-form-urlencoded" media encoder and decoders now

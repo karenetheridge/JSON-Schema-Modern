@@ -100,4 +100,22 @@ is_equal(
   'draft4 schemas can be validated, even though there is no representation for $ref in the metaschema',
 );
 
+cmp_result(
+  $js->validate_schema({
+    pattern => '^(abc]',
+  })->TO_JSON,
+  {
+    valid => false,
+    errors => superbagof(
+      {
+        instanceLocation => '/pattern',
+        keywordLocation => re(qr{/pattern/format$}),
+        absoluteKeywordLocation => 'https://json-schema.org/draft/2020-12/meta/validation#/properties/pattern/format',
+        error => 'not a valid regex string',
+      },
+    ),
+  },
+  'validate_schema with error in format',
+);
+
 done_testing;

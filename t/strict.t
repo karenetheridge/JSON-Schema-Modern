@@ -119,7 +119,7 @@ is_equal(
 );
 
 my $lax_metaschema = {
-  '$id' => 'my_lax_metaschema',
+  '$id' => 'https://example.com/my_lax_metaschema',
   '$schema' => 'https://json-schema.org/draft/2020-12/schema',
   '$dynamicAnchor' => 'meta',
   '$ref' => 'https://json-schema.org/draft/2020-12/schema',
@@ -129,7 +129,7 @@ my $lax_metaschema = {
 };
 
 $js->add_schema($lax_metaschema);
-$schema->{'$schema'} = 'my_lax_metaschema';
+$schema->{'$schema'} = 'https://example.com/my_lax_metaschema';
 
 is_equal(
   $js->validate_schema($schema)->TO_JSON,
@@ -139,13 +139,13 @@ is_equal(
       {
         instanceLocation => '/properties/alpha',
         keywordLocation => '',
-        absoluteKeywordLocation => 'my_lax_metaschema',
+        absoluteKeywordLocation => 'https://example.com/my_lax_metaschema',
         error => 'unknown keyword seen in schema: barf',
       },
       {
         instanceLocation => '/properties/beta',
         keywordLocation => '',
-        absoluteKeywordLocation => 'my_lax_metaschema',
+        absoluteKeywordLocation => 'https://example.com/my_lax_metaschema',
         error => 'unknown keywords seen in schema: dah, zip',
       },
     ],
