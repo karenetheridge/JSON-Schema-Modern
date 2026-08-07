@@ -1311,7 +1311,7 @@ subtest 'bad references' => sub {
   my $doc1 = JSON::Schema::Modern::Document->new(
     canonical_uri => 'http://example.com/api1',
     evaluator => $js,
-    schema => YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
+    schema => my $schema1 = YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
 $defs:
   schema00: { type: string }
   schema01: { $anchor: my_schema }
@@ -1329,7 +1329,7 @@ YAML
   my $doc2 = JSON::Schema::Modern::Document->new(
     canonical_uri => 'http://example.com/api2',
     evaluator => $js,
-    schema => my $schema = YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
+    schema => my $schema2 = YAML::PP->new(boolean => 'JSON::PP')->load_string(<<'YAML'));
 $defs:
   schema00: { type: string }
   schema01: { $anchor: my_schema }
@@ -1346,15 +1346,19 @@ $defs:
   schema16: { $ref: http://example.com/api2#my_schema }
   schema17: { $dynamicRef: '#foo' }
 
-  schema20: { $ref: http://unknown.com#/foo/bar }                           # unknown remote
+  schema20: { $ref: http://example2.com/api }                               # unknown remote
+  schema21: { $ref: http://example2.com/api#/$defs/schema00 }               # ""
+  schema22: { $ref: http://example2.com/api#my_schema }                     # ""
+  schema23: { $ref: http://example2.com/api#/$defs/does_not_exist }         # ""
+  schema24: { $ref: http://example2.com/api#does_not_exist }                # ""
 
   # invalid references
   schema30: { $ref: '#/$defs/does_not_exist' }                              # local DNE, json pointer
   schema31: { $ref: '#does_not_exist' }                                     # local DNE, anchor
-  schema32: { $ref: '#/$defs' }                                             # local bad entity
+  schema32: { $ref: '#/$defs' }                                             # local non-entity
   schema33: { $ref: http://example.com/subschema1#/$defs/does_not_exist }   # remote DNE, json pointer
   schema34: { $ref: http://example.com/subschema1#does_not_exist }          # remote DNE, anchor
-  schema35: { $ref: http://example.com/api1#/$defs/schema02/properties }    # remote bad entity
+  schema35: { $ref: http://example.com/api1#/$defs/schema02/properties }    # remote non-entity
   schema36: { $ref: http://example.com/subschema2#/$defs/schema00 }         # exists at root, not sub$id
   schema37: { $dynamicRef: '#bar' }                                         # local DNE
   schema38: { $dynamicRef: http://example.com/api1#foo }                    # remote DNE
@@ -1362,7 +1366,7 @@ YAML
 
   is_equal(
     [ map $_->TO_JSON, $doc2->errors ],
-    [
+    my $doc2_errors = [
       {
         keywordLocation => '/$defs/schema30/$ref',
         absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema30/$ref',
@@ -1412,14 +1416,58 @@ YAML
     'bad references to local and known remote destinations are identified',
   );
 
+  cmp_result(
+    $doc2->_deferred_references,
+    [
+      # keyword, path_location, abs_target, expected_entity
+      [ '$ref', '/$defs/schema20', str('http://example2.com/api'), 'schema' ],
+      [ '$ref', '/$defs/schema21', str('http://example2.com/api#/$defs/schema00'), 'schema' ],
+      [ '$ref', '/$defs/schema22', str('http://example2.com/api#my_schema'), 'schema' ],
+      [ '$ref', '/$defs/schema23', str('http://example2.com/api#/$defs/does_not_exist'), 'schema' ],
+      [ '$ref', '/$defs/schema24', str('http://example2.com/api#does_not_exist'), 'schema' ],
+    ],
+    'unresolved references to unknown documents are set aside',
+  );
+
   my $other = JSON::Schema::Modern::Document->new(
     canonical_uri => 'http://example.com/other',
     evaluator => $js,
-    schema => $schema,
+    schema => $schema2,
     skip_ref_checks => 1,
   );
 
   is_equal([ map $_->TO_JSON, $other->errors ], [], 'no errors when skipping ref checks');
+
+  my $doc3 = JSON::Schema::Modern::Document->new(
+    canonical_uri => 'http://example2.com/api',
+    evaluator => $js,
+    schema => $schema1,
+  );
+  $js->add_document($doc3);
+
+  is_equal([ map $_->TO_JSON, $other->errors ], [], 'no errors when checking this document');
+
+  $doc2->verify_references($js);
+
+  is_equal($doc2->_deferred_references, [], 'deferred references are now all undeferred');
+
+  is_equal(
+    [ map $_->TO_JSON, $doc2->errors ],
+    [
+      $doc2_errors->@*,
+      {
+        keywordLocation => '/$defs/schema23/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema23/$ref',
+        error => '$ref target "http://example2.com/api#/$defs/does_not_exist" is a non-existent location',
+      },
+      {
+        keywordLocation => '/$defs/schema24/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema24/$ref',
+        error => '$ref target "http://example2.com/api#does_not_exist" is a non-existent location',
+      },
+    ],
+    'new errors are found from the previously-deferred references',
+  );
 };
 
 done_testing;
