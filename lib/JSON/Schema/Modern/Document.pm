@@ -187,7 +187,13 @@ sub BUILD ($self, $args) {
     })
   if not $seen_root;
 
-  foreach my $ref (($state->{references}//[])->@*) {
+  $self->verify_references($args->{evaluator}, $state, $state->{references}) if $state->{references};
+
+  $self->_set_errors($state->{errors}) if $state->{errors}->@*;
+}
+
+sub verify_references ($self, $evaluator, $state, $references = []) {
+  foreach my $ref ($references->@*) {
     my ($keyword, $path_location, $abs_target, $expected_entity) = @$ref;
 
     # look for resource locally; fall back to the evaluator's index
@@ -195,7 +201,7 @@ sub BUILD ($self, $args) {
     my $document = $self;
 
     if (not $resource) {
-      $resource = $args->{evaluator}->_get_resource($uri) if $args->{evaluator};
+      $resource = $evaluator->_get_resource($uri) if $evaluator;
       next if not $resource;
       $document = $resource->{document};
     }
@@ -232,8 +238,6 @@ sub BUILD ($self, $args) {
         $keyword, $abs_target, $entity, $expected_entity), next
       if $entity ne $expected_entity;
   }
-
-  $self->_set_errors($state->{errors}) if $state->{errors}->@*;
 }
 
 # a subclass's method will override this one
