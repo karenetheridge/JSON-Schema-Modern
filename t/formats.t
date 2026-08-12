@@ -999,7 +999,8 @@ subtest 'assertion formats using implementations that rely on optional dependenc
         ],
       });
     };
-    is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using an unknown custom format');
+
+    is($doc->errors, 0, $spec_version . ': for format validation with the Format-Assertion vocabulary, no errors during traversal when using a format with missing prerequisites');
 
     cmp_result(
       \@warnings,
@@ -1019,7 +1020,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
           },
         ],
       },
-      $spec_version . ': for Format-Asertion vocabulary, we immediately abort when encountering a format that throws an exception',
+      $spec_version . ': for Format-Assertion vocabulary, we immediately abort when encountering a format that throws an exception',
     );
   }
 };
