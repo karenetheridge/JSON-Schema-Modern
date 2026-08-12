@@ -35,7 +35,7 @@ my @warnings = warnings {
       $ENV{NO_TODO} ? () : (todo_tests => [
         { file => [
             # these all depend on optional prereqs
-            !eval { require Time::Moment; 1 } ? map "format-$_.json", qw(date-time date time) : (),
+            !eval { require Time::Moment; 1 } ? map "format-$_.json", qw(date-time date) : (),
             !eval { require DateTime::Format::RFC3339; 1 } ? 'format-date-time.json' : (),
           ] },
         # various edge cases that are difficult to accomodate
