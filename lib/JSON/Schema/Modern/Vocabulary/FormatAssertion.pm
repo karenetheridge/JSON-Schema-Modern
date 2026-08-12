@@ -139,22 +139,28 @@ sub keywords ($class, $spec_version) {
           || ($2 == 2 && $3 == 29 && $1 % 4 == 0 && ($1 % 100 != 0 || $1 % 400 == 0)));
     },
     time => sub {
-      return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))\z/a
-        or $1 > 23
-        or $2 > 59
-        or $3 > 60
-        or (defined($6) and $6 > 23)
-        or (defined($7) and $7 > 59);
+      # https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6 full-time
+      $_[0] =~ m/^(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:Z|([+-]\d\d):(\d\d))\z/ia
+        && $1 <= 23                   # time-hour
+        && $2 <= 59                   # time-minute
+        && $3 <= 60                   # time-second
+        && (!defined $4 || abs($4) <= 23)  # time-hour in time-numoffset
+        && (!defined $5 || $5 <= 59)  # time-minute in time-numoffset
+        && ($3 < 60 || do {
+          my ($hour, $minute) = ($1, $2);
+          if (defined $4 && ($4 != 0 || $5 != 0)) {
+            my $mult = ($4 < 0 ? 1 : -1); # if offset is negative, we ADD; if positive, we SUBTRACT
+            $hour += $mult * abs($4);
+            $minute += $mult * $5;
 
-      return 1 if $3 <= 59;
-      return $1 == 23 && $2 == 59 if uc($4) eq 'Z';
+            $minute += 60, $hour -= 1 if $minute < 0;
+            $minute -= 60, $hour += 1 if $minute >= 60; # this line not really needed; always invalid
+          }
 
-      my $sign = $5 eq '+' ? 1 : -1;
-      my $hour_zulu = $1 - $6*$sign;
-      my $min_zulu = $2 - $7*$sign;
-      $hour_zulu -= 1 if $min_zulu < 0;
-
-      return $hour_zulu%24 == 23 && $min_zulu%60 == 59;
+          # a leap second can appear only as 23:59:60 UTC
+          $hour % 24 == 23 && $minute == 59;
+        }
+      );
     },
     duration => sub { $_[0] =~ $duration_re && $_[0] !~ m{[.,][0-9]+[A-Z].} },
     email => sub { $is_email->($_[0]) && $_[0] !~ /[^[:ascii:]]/ },

@@ -68,6 +68,11 @@
                 "description": "non-ascii digits should be rejected",
                 "data": "1২:00:00Z",
                 "valid": false
+            },
+            {
+                "description": "valid time, with negative time-offset causing hour rollover",
+                "data": "23:59:59-01:30",
+                "valid": true
             }
         ]
     }

@@ -17,7 +17,7 @@ format-hostname.json                         4          0     0
 format-ipv4.json                             4          0     0
 format-ipv6.json                            17          0     0
 format-relative-json-pointer.json            7          0     0
-format-time.json                            13          0     0
+format-time.json                            14          0     0
 formats.json                                 4          0     0
 id.json                                      6          0     0
 integers.json                               33          0     0
@@ -31,4 +31,4 @@ short-circuit.json                          34          0     0
 unknownKeyword.json                          4          0     0
 vocabulary.json                             11          0     0
 ---------------------------------------------------------------
-TOTAL                                     1096          0     0
+TOTAL                                     1097          0     0
