@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix experimental warning on earlier perls
 
 0.643     2026-08-12 17:01:19Z
           - fix the set of characters that are encoded for the
