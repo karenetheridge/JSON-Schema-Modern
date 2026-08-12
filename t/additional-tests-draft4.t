@@ -32,10 +32,6 @@ acceptance_tests(
   output_file => $version.'-additional-tests.txt',
   test => {
     $ENV{NO_TODO} ? () : (todo_tests => [
-      { file => [
-          # these depend on optional prereqs
-          !eval { require Time::Moment; 1 } ? 'format-date-time.json' : (),
-        ] },
       # various edge cases that are difficult to accomodate
       JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' || $Config{nvsize} < 16 ? (
         { file => 'integers.json', group_description => 'type checks', test_description => [ 'beyond int64 lower boundary', 'beyond uint64 upper boundary' ] },

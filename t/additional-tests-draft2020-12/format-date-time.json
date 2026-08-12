@@ -34,6 +34,38 @@
                 "description": "a valid date-time with a leap second, with positive half-hour offset",
                 "data": "1999-01-01T01:29:60.123+01:30",
                 "valid": true
+            },
+            {
+                "description": "2021 is not a leap year",
+                "data": "2021-02-29T12:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "2020 is a leap year",
+                "data": "2020-02-29T12:00:00Z",
+                "valid": true
+            },
+            {
+                "description": "2000 is a leap year",
+                "data": "2000-02-29T12:00:00Z",
+                "valid": true
+            },
+            {
+                "description": "1900 is not a leap year",
+                "data": "1900-02-29T12:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "century year 0400 is a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — 400-year cycle boundary",
+                "data": "0400-02-29T12:00:00Z",
+                "valid": true
+            },
+            {
+                "description": "century year 2100 is not a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — future century year",
+                "data": "2100-02-29T12:00:00Z",
+                "valid": false
             }
         ]
     }

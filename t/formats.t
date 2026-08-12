@@ -993,7 +993,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
       $doc = $js->add_schema({
         '$schema' => 'https://my_metaschema',
         allOf => [
-          { format => 'date-time' },
+          { format => 'hostname' },
           true,
         ],
       });
@@ -1003,8 +1003,8 @@ subtest 'assertion formats using implementations that rely on optional dependenc
 
     cmp_result(
       \@warnings,
-      [ re(qr{Can't locate Time/Moment\.pm}) ],
-      '...but we do warn for the missing module',
+      [ re(qr{Can't locate Data/Validate/Domain\.pm}) ],
+      'we warn for a missing module',
     );
 
     cmp_result(
@@ -1013,7 +1013,7 @@ subtest 'assertion formats using implementations that rely on optional dependenc
         valid => false,
         errors => [
           {
-            error => re(qr{^EXCEPTION: Can't locate Time/Moment\.pm}),
+            error => re(qr{^EXCEPTION: Can't locate Data/Validate/Domain\.pm}),
             instanceLocation => '',
             keywordLocation => '/allOf/0/format',
           },

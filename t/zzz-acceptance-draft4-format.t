@@ -61,7 +61,6 @@ acceptance_tests(
     $ENV{NO_TODO} ? () : (todo_tests => [
       { file => [
           # these all depend on optional prereqs
-          !$ENV{AUTHOR_TESTING} && !eval { require Time::Moment; 1 } ? 'date-time.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? 'email.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } ? 'hostname.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::URI; 1 } ? 'uri.json' : (),

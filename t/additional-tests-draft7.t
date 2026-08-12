@@ -35,7 +35,7 @@ my @warnings = warnings {
       $ENV{NO_TODO} ? () : (todo_tests => [
         { file => [
             # these all depend on optional prereqs
-            !eval { require Time::Moment; 1 } ? map "format-$_.json", qw(date-time date) : (),
+            !eval { require Time::Moment; 1 } ? map "format-$_.json", qw(date) : (),
           ] },
         # various edge cases that are difficult to accomodate
         JSON::Schema::Modern::_JSON_BACKEND eq 'JSON::PP' ? { file => 'integers.json', group_description => 'int64 range checks', test_description => 'beyond lower boundary' } : (),

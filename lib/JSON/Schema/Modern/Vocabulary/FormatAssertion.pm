@@ -100,14 +100,10 @@ sub keywords ($class, $spec_version) {
         && $5 <= 59                   # time-minute
         && $6 <= 60                   # time-second
         && (!defined $7 || abs($7) <= 23)  # time-hour in time-numoffset
-        && (!defined $7 || $7 <= 59)  # time-minute in time-numoffset
-
-        # Time::Moment does month+day sanity check (with leap years), but not leap seconds
-        && ($6 <= 59 && do {
-            require Time::Moment;
-            eval { Time::Moment->from_string(uc($_[0])) };
-          }
-        || do {
+        && (!defined $8 || $8 <= 59)  # time-minute in time-numoffset
+        && ($3 <= days_in_month($2)
+          || ($2 == 2 && $3 == 29 && $1 % 4 == 0 && ($1 % 100 != 0 || $1 % 400 == 0)))
+        && ($6 < 60 || do {
           my ($year, $month, $day, $hour, $minute) = ($1, $2, $3, $4, $5);
 
           if (defined $7 && ($7 != 0 || $8 != 0)) {
@@ -247,7 +243,6 @@ my $warnings = {
   email => sub { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 },
   hostname => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 },
   'idn-hostname' => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); require Net::IDN::Encode; 1 },
-  'date-time' => sub { require Time::Moment; 1 },
   date => sub { require Time::Moment; 1 },
   uri => sub { require Data::Validate::URI; 1 },
 };

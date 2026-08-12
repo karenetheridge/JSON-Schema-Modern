@@ -65,7 +65,7 @@ acceptance_tests(
           'iri-reference.json',                       # all strings are considered valid
           'uri-template.json',                        # not yet implemented
           # these all depend on optional prereqs
-          !$ENV{AUTHOR_TESTING} && !eval { require Time::Moment; 1 } ? qw(date-time.json date.json) : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Time::Moment; 1 } ? qw(date.json) : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? qw(email.json idn-email.json) : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } ? qw(hostname.json idn-hostname.json) : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
