@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.644     2026-08-12 22:40:50Z
           - fix experimental warning on earlier perls
 
