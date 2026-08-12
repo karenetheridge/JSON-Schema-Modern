@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.642
+version 0.643
 
 I use a linearly-increasing version numbering scheme. No meaning should be
 presumed or inferred from the version being less than 1.0.
@@ -785,14 +785,6 @@ validation will always succeed, unless draft2020-12 is in use with the Format-As
 declared in the metaschema, in which case use of the format will produce an error).
 
 =over 4
-
-=item *
-
-C<date-time> and C<date> require L<Time::Moment>
-
-=item *
-
-C<date-time> also requires L<DateTime::Format::RFC3339>
 
 =item *
 
