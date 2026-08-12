@@ -18,7 +18,6 @@ use Test2::Warnings qw(warnings :no_end_test had_no_warnings allow_warnings);
 use JSON::Schema::Modern::Utilities qw(get_type);
 
 use Test::Without::Module 0.19 qw(
-  Time::Moment
   Data::Validate::Domain
   Email::Address::XS
   Net::IDN::Encode

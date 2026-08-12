@@ -28,7 +28,6 @@ BEGIN {
 
 if ($ENV{EXTENDED_TESTING}) {
   test_needs {
-    'Time::Moment' => 0,
     'Email::Address::XS' => '1.04',
     'Data::Validate::Domain' => 0.13,
     'Data::Validate::URI' => 0,
@@ -36,7 +35,6 @@ if ($ENV{EXTENDED_TESTING}) {
 }
 
 if ($ENV{AUTHOR_TESTING}) {
-  eval { require Time::Moment; 1 } or fail $@;
   eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } or fail $@;
   eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } or fail $@;
   eval { require Data::Validate::URI; 1 } or fail $@;

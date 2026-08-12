@@ -135,10 +135,8 @@ sub keywords ($class, $spec_version) {
       $_[0] =~ m/^(\d{4})-(\d\d)-(\d\d)\z/a
         && $2 >= 1 && $2 <= 12        # date-month
         && $3 >= 1 && $3 <= 31        # date-mday
-        && do {
-          require Time::Moment;
-          eval { Time::Moment->new(year => $1, month => $2, day => $3) };
-        };
+        && ($3 <= days_in_month($2)
+          || ($2 == 2 && $3 == 29 && $1 % 4 == 0 && ($1 % 100 != 0 || $1 % 400 == 0)));
     },
     time => sub {
       return if $_[0] !~ /^(\d\d):(\d\d):(\d\d)(?:\.\d+)?([Zz]|([+-])(\d\d):(\d\d))\z/a
@@ -243,7 +241,6 @@ my $warnings = {
   email => sub { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 },
   hostname => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 },
   'idn-hostname' => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); require Net::IDN::Encode; 1 },
-  date => sub { require Time::Moment; 1 },
   uri => sub { require Data::Validate::URI; 1 },
 };
 $warnings->{'idn-email'} = $warnings->{email};

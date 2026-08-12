@@ -1906,7 +1906,6 @@ validation will always succeed, unless draft2020-12 is in use with the Format-As
 declared in the metaschema, in which case use of the format will produce an error).
 
 =for :list
-* C<date> requires L<Time::Moment>
 * C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (or higher)
 * C<idn-hostname> also requires L<Net::IDN::Encode>
