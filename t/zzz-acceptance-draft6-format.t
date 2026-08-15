@@ -67,7 +67,17 @@ acceptance_tests(
       # various edge cases that are difficult to accomodate
       { file => 'hostname.json', group_description => 'validation of host names', test_description => 'trailing dot' },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
-      { file => 'uri.json', test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
+      { file => 'uri.json', test_description => [
+          'lone percent sign is invalid',
+          'non-numeric port is invalid',
+          'leading zero in an embedded IPv4 address is invalid',
+        ] },
+      { file => 'uri-reference.json', test_description => [
+          'an incomplete percent-encoding',
+          'a non-numeric port in a network-path reference',
+          'a leading zero in the IPv4 part of an IPv6 literal',
+          'a colon in the first segment of a relative-path reference',
+        ] },
     ]),
   },
 );

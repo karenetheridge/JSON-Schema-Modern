@@ -71,11 +71,34 @@ acceptance_tests(
       # various edge cases that are difficult to accomodate
       { file => 'hostname.json', group_description => 'validation of host names', test_description => [ 'trailing dot', 'contains "--" in the 3rd and 4th position' ] },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
-      { file => 'iri.json', test_description => [ 'an invalid IRI based on IPv6', 'an IPv6 address without enclosing brackets is invalid' ] },
+      { file => 'iri.json', test_description => [
+          'an invalid IRI based on IPv6',
+          'an IPv6 address without enclosing brackets is invalid',
+          'an IPv6 host whose embedded IPv4 has a leading zero is invalid',
+          'a trailing newline after a valid IRI is invalid',
+        ] },
       { file => 'idn-hostname.json',
         # IDN decoder, Data::Validate::Domain both have issues
         group_description => [ 'validation of internationalized host names', 'validation of separators in internationalized host names' ] },
-      { file => 'uri.json', test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
+      { file => 'uri.json', test_description => [
+          'lone percent sign is invalid',
+          'non-numeric port is invalid',
+          'leading zero in an embedded IPv4 address is invalid',
+        ] },
+      { file => 'uri-reference.json', test_description => [
+          'an incomplete percent-encoding',
+          'a non-numeric port in a network-path reference',
+          'a leading zero in the IPv4 part of an IPv6 literal',
+          'a colon in the first segment of a relative-path reference',
+        ] },
+      { file => 'ecmascript-regex.json', group_description => '\a is not an ECMA 262 control escape', test_description => 'when used as a pattern' },
+      { file => 'ecmascript-regex.json', group_description => [
+          'Python-specific regular expression syntax is not valid ECMA 262',
+          'global inline flag groups are not valid ECMA 262',
+        ] },
+      { file => 'ecmascript-regex.json', group_description => 'ECMA 262 lookbehind is valid, including variable width', test_description => 'a variable-width lookbehind (ES2018)' },
+      { file => 'ecmascript-regex.json', group_description => 'ECMA 262 character classes and escapes',
+        test_description => [ 'an empty character class is valid ECMA 262', 'a negated empty character class is valid ECMA 262' ] },
     ]),
   },
 );

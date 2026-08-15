@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - skip more not-easily-resolveable obscure edge cases for formats in
+            acceptance tests added in TJSA 1.038
 
 0.644     2026-08-12 22:40:50Z
           - fix experimental warning on earlier perls
