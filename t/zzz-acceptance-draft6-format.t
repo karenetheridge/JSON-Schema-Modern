@@ -67,8 +67,7 @@ acceptance_tests(
       # various edge cases that are difficult to accomodate
       { file => 'hostname.json', group_description => 'validation of host names', test_description => 'trailing dot' },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
-      { file => 'uri.json', group_description => 'validation of URIs',
-        test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
+      { file => 'uri.json', test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
     ]),
   },
 );

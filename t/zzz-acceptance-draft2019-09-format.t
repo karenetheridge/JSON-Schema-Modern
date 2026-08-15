@@ -71,13 +71,11 @@ acceptance_tests(
       # various edge cases that are difficult to accomodate
       { file => 'hostname.json', group_description => 'validation of host names', test_description => [ 'trailing dot', 'contains "--" in the 3rd and 4th position' ] },
       { file => 'hostname.json', group_description => 'validation of A-label (punycode) host names' },
-      { file => 'iri.json', group_description => 'validation of IRIs',
-        test_description => [ 'an invalid IRI based on IPv6', 'an IPv6 address without enclosing brackets is invalid' ] },
+      { file => 'iri.json', test_description => [ 'an invalid IRI based on IPv6', 'an IPv6 address without enclosing brackets is invalid' ] },
       { file => 'idn-hostname.json',
         # IDN decoder, Data::Validate::Domain both have issues
         group_description => [ 'validation of internationalized host names', 'validation of separators in internationalized host names' ] },
-      { file => 'uri.json', group_description => 'validation of URIs',
-        test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
+      { file => 'uri.json', test_description => [ 'lone percent sign is invalid', 'non-numeric port is invalid' ] },
     ]),
   },
 );
