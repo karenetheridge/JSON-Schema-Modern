@@ -80,7 +80,7 @@ sub acceptance_tests (%options) {
       die 'result is not a JSON::Schema::Modern::Result object'
         if not $result->isa('JSON::Schema::Modern::Result');
 
-      note 'result: ', $result->dump;
+      note 'result: ', $result->dump if ref $schema;
 
       if (not $ENV{NO_SHORT_CIRCUIT}) {
         die 'short-circuited result is not a JSON::Schema::Modern::Result object'
