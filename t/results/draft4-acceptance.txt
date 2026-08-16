@@ -1,5 +1,6 @@
-generated with:              Test::JSON::Schema::Acceptance 1.037
-with commit:                 75995a1c8112322024d5c04a5eac27813aeb46f0 (Test-JSON-Schema-Acceptance-1.035-20-g75995a1)
+generated with:              Test::JSON::Schema::Acceptance 1.038
+on perl:                     v5.45.2
+with commit:                 6648e8194c69697b2e1a15fe76a06a480b183a51 (Test-JSON-Schema-Acceptance-1.037-124-g6648e81)
 from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft4
 optional tests included:     yes
@@ -24,9 +25,9 @@ maxProperties.json                           8          0     0
 maximum.json                                14          0     0
 minItems.json                                4          0     0
 minLength.json                               5          0     0
-minProperties.json                           6          0     0
+minProperties.json                           8          0     0
 minimum.json                                17          0     0
-multipleOf.json                             10          0     0
+multipleOf.json                             11          0     0
 not.json                                    20          0     0
 oneOf.json                                  23          0     0
 pattern.json                                 9          0     0
@@ -34,7 +35,7 @@ patternProperties.json                      18          0     0
 properties.json                             24          0     0
 ref.json                                    45          0     0
 refRemote.json                              17          0     0
-required.json                               15          0     0
+required.json                               17          0     0
 type.json                                   79          0     0
 uniqueItems.json                            69          0     0
 optional/bignum.json                         9          0     0
@@ -44,4 +45,4 @@ optional/id.json                             3          0     0
 optional/non-bmp-regex.json                 12          0     0
 optional/zeroTerminatedFloats.json           1          0     0
 ---------------------------------------------------------------
-TOTAL                                      699         14     0
+TOTAL                                      704         14     0
