@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.644
+version 0.645
 
 I use a linearly-increasing version numbering scheme. No meaning should be
 presumed or inferred from the version being less than 1.0.
