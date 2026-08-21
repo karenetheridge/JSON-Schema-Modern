@@ -107,6 +107,7 @@ has errors => (
 sub errors { ($_[0]->{errors}//[])->@* }
 sub has_errors { scalar(($_[0]->{errors}//[])->@*) }
 
+# an entity is defined as a type of location that can be addressed by a $ref in a document
 # json pointer => entity name (indexed by integer)
 has _entities => (
   is => 'ro',
