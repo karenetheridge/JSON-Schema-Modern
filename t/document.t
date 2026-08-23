@@ -1339,12 +1339,14 @@ $defs:
   # valid references
   schema10: { $ref: '#/$defs/schema00' }
   schema11: { $ref: '#my_schema' }
-  schema12: { $ref: http://example.com/api1#/$defs/schema00 }
-  schema13: { $ref: http://example.com/subschema1#another_subschema }
-  schema14: { $ref: http://example.com/api2#/$defs/schema00 }
-  schema15: { $ref: http://example.com/api2#my_schema }
-  schema16: { $ref: http://unknown.com#/foo/bar }
+  schema12: { $ref: http://example.com/api1 }
+  schema13: { $ref: http://example.com/api1#/$defs/schema00 }
+  schema14: { $ref: http://example.com/subschema1#another_subschema }
+  schema15: { $ref: http://example.com/api2#/$defs/schema00 }
+  schema16: { $ref: http://example.com/api2#my_schema }
   schema17: { $dynamicRef: '#foo' }
+
+  schema20: { $ref: http://unknown.com#/foo/bar }                           # unknown remote
 
   # invalid references
   schema30: { $ref: '#/$defs/does_not_exist' }                              # local DNE, json pointer
@@ -1410,14 +1412,14 @@ YAML
     'bad references to local and known remote destinations are identified',
   );
 
-  my $doc3 = JSON::Schema::Modern::Document->new(
-    canonical_uri => 'http://example.com/api3',
+  my $other = JSON::Schema::Modern::Document->new(
+    canonical_uri => 'http://example.com/other',
     evaluator => $js,
     schema => $schema,
     skip_ref_checks => 1,
   );
 
-  is_equal([ map $_->TO_JSON, $doc3->errors ], [], 'no errors when skipping ref checks');
+  is_equal([ map $_->TO_JSON, $other->errors ], [], 'no errors when skipping ref checks');
 };
 
 done_testing;

@@ -202,15 +202,21 @@ sub BUILD ($self, $args) {
 
     my $fragment = $abs_target->fragment;
     my $target_path;
-    if (not length $fragment or $fragment =~ m{^/}) {
+    if (not length $fragment) {
+      $target_path = '';
+    }
+    elsif ($fragment =~ m{^/}) {
+      # json pointer fragment
       ()= E({ %$state, keyword_path => $path_location, keyword => $keyword },
           '%s target "%s" is a non-existent location', $keyword, $abs_target), next
-        if not $document->contains($target_path = $resource->{path}.($fragment//''));
+        if not $document->contains($target_path = $resource->{path}.$fragment);
     }
     elsif (my $subresource = ($resource->{anchors}//{})->{$fragment}) {
+      # valid anchor
       $target_path = $subresource->{path};
     }
     else {
+      # invalid anchor
       ()= E({ %$state, keyword_path => $path_location, keyword => $keyword },
         '%s target "%s" is a non-existent location', $keyword, $abs_target);
       next;
