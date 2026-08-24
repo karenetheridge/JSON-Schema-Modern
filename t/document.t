@@ -1347,63 +1347,63 @@ $defs:
   schema17: { $dynamicRef: '#foo' }
 
   # invalid references
-  schema20: { $ref: '#/$defs/does_not_exist' }                              # local DNE, json pointer
-  schema21: { $ref: '#does_not_exist' }                                     # local DNE, anchor
-  schema22: { $ref: '#/$defs' }                                             # local bad entity
-  schema23: { $ref: http://example.com/subschema1#/$defs/does_not_exist }   # remote DNE, json pointer
-  schema24: { $ref: http://example.com/subschema1#does_not_exist }          # remote DNE, anchor
-  schema25: { $ref: http://example.com/api1#/$defs/schema02/properties }    # remote bad entity
-  schema26: { $ref: http://example.com/subschema2#/$defs/schema00 }         # exists at root, not sub$id
-  schema27: { $dynamicRef: '#bar' }                                         # local DNE
-  schema28: { $dynamicRef: http://example.com/api1#foo }                    # remote DNE
+  schema30: { $ref: '#/$defs/does_not_exist' }                              # local DNE, json pointer
+  schema31: { $ref: '#does_not_exist' }                                     # local DNE, anchor
+  schema32: { $ref: '#/$defs' }                                             # local bad entity
+  schema33: { $ref: http://example.com/subschema1#/$defs/does_not_exist }   # remote DNE, json pointer
+  schema34: { $ref: http://example.com/subschema1#does_not_exist }          # remote DNE, anchor
+  schema35: { $ref: http://example.com/api1#/$defs/schema02/properties }    # remote bad entity
+  schema36: { $ref: http://example.com/subschema2#/$defs/schema00 }         # exists at root, not sub$id
+  schema37: { $dynamicRef: '#bar' }                                         # local DNE
+  schema38: { $dynamicRef: http://example.com/api1#foo }                    # remote DNE
 YAML
 
   is_equal(
     [ map $_->TO_JSON, $doc2->errors ],
     [
       {
-        keywordLocation => '/$defs/schema20/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema20/$ref',
+        keywordLocation => '/$defs/schema30/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema30/$ref',
         error => '$ref target "http://example.com/api2#/$defs/does_not_exist" is a non-existent location',
       },
       {
-        keywordLocation => '/$defs/schema21/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema21/$ref',
+        keywordLocation => '/$defs/schema31/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema31/$ref',
         error => '$ref target "http://example.com/api2#does_not_exist" is a non-existent location',
       },
       {
-        keywordLocation => '/$defs/schema22/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema22/$ref',
+        keywordLocation => '/$defs/schema32/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema32/$ref',
         error => '$ref target "http://example.com/api2#/$defs" is not a referenceable location',
       },
       {
-        keywordLocation => '/$defs/schema23/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema23/$ref',
+        keywordLocation => '/$defs/schema33/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema33/$ref',
         error => '$ref target "http://example.com/subschema1#/$defs/does_not_exist" is a non-existent location',
       },
       {
-        keywordLocation => '/$defs/schema24/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema24/$ref',
+        keywordLocation => '/$defs/schema34/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema34/$ref',
         error => '$ref target "http://example.com/subschema1#does_not_exist" is a non-existent location',
       },
       {
-        keywordLocation => '/$defs/schema25/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema25/$ref',
+        keywordLocation => '/$defs/schema35/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema35/$ref',
         error => '$ref target "http://example.com/api1#/$defs/schema02/properties" is not a referenceable location',
       },
       {
-        keywordLocation => '/$defs/schema26/$ref',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema26/$ref',
+        keywordLocation => '/$defs/schema36/$ref',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema36/$ref',
         error => '$ref target "http://example.com/subschema2#/$defs/schema00" is a non-existent location',
       },
       {
-        keywordLocation => '/$defs/schema27/$dynamicRef',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema27/$dynamicRef',
+        keywordLocation => '/$defs/schema37/$dynamicRef',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema37/$dynamicRef',
         error => '$dynamicRef target "http://example.com/api2#bar" is a non-existent location',
       },
       {
-        keywordLocation => '/$defs/schema28/$dynamicRef',
-        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema28/$dynamicRef',
+        keywordLocation => '/$defs/schema38/$dynamicRef',
+        absoluteKeywordLocation => 'http://example.com/api2#/$defs/schema38/$dynamicRef',
         error => '$dynamicRef target "http://example.com/api1#foo" is a non-existent location',
       },
     ],
