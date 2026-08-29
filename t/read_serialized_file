@@ -43,7 +43,7 @@ my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
   binmode STDIN, ':raw';
   my $thawed = Sereal::Decoder->new->decode(<>);
 
-  cmp_result(
+  is_equal(
     [ sort keys %$thawed ],
     [ sort @serialized_attributes ],
     'thawed object in a new process contains all the right keys',
@@ -87,7 +87,7 @@ my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
   $thawed->add_schema($strict_metaschema);
   $thawed->add_schema($strict_schema);
 
-  cmp_result(
+  is_equal(
     $thawed->evaluate('foo', 'https://my_strict_schema')->TO_JSON,
     my $fail_result = {
       valid => false,
@@ -104,7 +104,7 @@ my $result = Test2::V0::subtest 'thaw object in a separate process' => sub {
   );
 
   delete $fail_result->{errors}[0]{absoluteKeywordLocation};
-  cmp_result(
+  is_equal(
     $thawed->evaluate('foo', { type => 'string', format => 'ipv4' }, { validate_formats => 1 })->TO_JSON,
     $fail_result,
     'evaluate data against schema with default dialect; format-assertion is used',
