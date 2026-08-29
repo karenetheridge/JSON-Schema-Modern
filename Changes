@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.646     2026-08-29 23:49:01Z
           - now keeping track of remote references we could not verify at
             document construction time, for later verification when other
             documents are loaded
