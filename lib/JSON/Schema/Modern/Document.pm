@@ -249,7 +249,7 @@ sub verify_references ($self, $evaluator, $state = undef, $references = undef) {
     my $fragment = $abs_target->fragment;
     my $target_path;
     if (not length $fragment) {
-      $target_path = '';
+      $target_path = $resource->{path};
     }
     elsif ($fragment =~ m{^/}) {
       # json pointer fragment
