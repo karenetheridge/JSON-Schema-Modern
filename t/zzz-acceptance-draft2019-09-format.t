@@ -113,6 +113,8 @@ acceptance_tests(
           'bracketed content that is not an address is not valid',
           'a parenthesis in an unquoted local part is not valid',
           'a parenthesis in the domain is not valid',
+          'an invalid domain',
+          'an invalid IPv4-address-literal',
         ] },
     ]),
   },
