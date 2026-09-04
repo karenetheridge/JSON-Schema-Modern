@@ -14,6 +14,6 @@ hostname.json                               29          1     0
 ipv4.json                                   41          0     0
 ipv6.json                                   40          0     0
 unknown.json                                 7          0     0
-uri.json                                    43          3     0
+uri.json                                    44          2     0
 ---------------------------------------------------------------
-TOTAL                                      213          4     0
+TOTAL                                      214          3     0

@@ -15,8 +15,8 @@ ipv4.json                                   41          0     0
 ipv6.json                                   40          0     0
 json-pointer.json                           40          0     0
 unknown.json                                 7          0     0
-uri-reference.json                          24          4     0
+uri-reference.json                          25          3     0
 uri-template.json                           25         13     0
-uri.json                                    43          3     0
+uri.json                                    44          2     0
 ---------------------------------------------------------------
-TOTAL                                      302         21     0
+TOTAL                                      304         19     0

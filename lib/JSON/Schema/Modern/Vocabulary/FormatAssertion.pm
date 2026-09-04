@@ -187,15 +187,26 @@ sub keywords ($class, $spec_version) {
         };
     },
     uri => sub {
+      return if $_[0] =~ /%.?\z/ or $_[0] =~ /%[^[:xdigit:]]/a or $_[0] =~ /%.[^[:xdigit:]]/a;
+      return if $_[0] =~ /[^[:ascii:]]/;
       my $uri = Mojo::URL->new($_[0]);
-      return if not fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs && $_[0] !~ /[^[:ascii:]]/;
+      return if not fc($uri->to_unsafe_string) eq fc($_[0]) && $uri->is_abs;
       require Data::Validate::URI;
       return Data::Validate::URI::is_uri($_[0]);
     },
     'uri-reference' => sub {
-      fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
+      return if $_[0] =~ /%.?\z/ or $_[0] =~ /%[^[:xdigit:]]/a or $_[0] =~ /%.[^[:xdigit:]]/a;
+      return if $_[0] =~ /[^[:ascii:]]/;
+      fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]);
     },
-    iri => sub { Mojo::URL->new($_[0])->is_abs },
+    iri => sub {
+      return if $_[0] =~ /%.?\z/ or $_[0] =~ /%[^[:xdigit:]]/a or $_[0] =~ /%.[^[:xdigit:]]/a;
+      Mojo::URL->new($_[0])->is_abs;
+    },
+    'iri-reference' => sub {
+      return if $_[0] =~ /%.?\z/ or $_[0] =~ /%[^[:xdigit:]]/a or $_[0] =~ /%.[^[:xdigit:]]/a;
+      return 1;
+    },
     uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}\z/a },
     'json-pointer' => sub { (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])} },
     'relative-json-pointer' => sub { $_[0] =~ m{^(?:0|[1-9][0-9]*)(?:#\z|\z|/)} && $_[0] !~ m{~(?![01])} },
@@ -203,8 +214,6 @@ sub keywords ($class, $spec_version) {
       local $SIG{__WARN__} = sub { die @_ };
       eval { qr/$_[0]/; 1 };
     },
-
-    'iri-reference' => sub { 1 },
     # uri-template is not implemented, but user can add a custom definition
   };
 
