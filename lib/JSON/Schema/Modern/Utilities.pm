@@ -507,13 +507,13 @@ sub core_formats_type () {
 
   # see RFC9110 §8.3.1 for ABNF
   my $OWS = q{[\x09\x20]*};
-  my $TOKEN = q{[a-zA-Z0-9!#$%&'*+.^_`|~-]+};
+  my $TOKEN = q{[[:alnum:]!#$%&'*+.^_`|~-]+};
   my $QUOTED_STRING = q{"((?:[\x09\20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\x5C[\x09\x20-\x7E\x80-\xFF])*)"};
 
   # parses into hashref: { type => .., subtype => .., params => { .. } }
   my sub _parse_media_type ($media_type_string) {
     my ($type_subtype, @params) = split /$OWS;$OWS/, $media_type_string;
-    my ($type, $subtype) = ($type_subtype//'') =~ m{^($TOKEN)/($TOKEN)\z};
+    my ($type, $subtype) = ($type_subtype//'') =~ m{^($TOKEN)/($TOKEN)\z}a;
     return if not defined $type or not defined $subtype;
 
     # RFC9110 §5.6.4: "The backslash octet ("\") can be used as a single-octet quoting mechanism

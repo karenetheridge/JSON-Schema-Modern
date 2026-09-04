@@ -1244,12 +1244,12 @@ has _encoding => (
       identity => sub ($content_ref, @) { $content_ref },
       base64 => sub ($content_ref, @) {
         die "invalid characters\n"
-          if $content_ref->$* =~ m{[^A-Za-z0-9+/=]} or $content_ref->$* =~ m{=(?=[^=])};
+          if $content_ref->$* =~ m{[^[:alnum:]+/=]}a or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode_base64($content_ref->$*);
       },
       base64url => sub ($content_ref, @) {
         die "invalid characters\n"
-          if $content_ref->$* =~ m{[^A-Za-z0-9=_-]} or $content_ref->$* =~ m{=(?=[^=])};
+          if $content_ref->$* =~ m{[^[:alnum:]=_-]}a or $content_ref->$* =~ m{=(?=[^=])};
         require MIME::Base64; \ MIME::Base64::decode_base64url($content_ref->$*);
       },
     };

@@ -181,7 +181,7 @@ subtest 'application/x-www-form-urlencoded'=> sub {
     encode_media_type('application/x-www-form-urlencoded', \[ map +{ (chr)x2 }, 0 .. 0x7f ])->$*,
     join('&',
       map join('=', $_, $_),
-      map +(m/^[A-Za-z0-9\x2A\x2D\x2E\x5F]\z/ ? $_ : sprintf('%%%02X', ord)),
+      map +(m/^[[:alnum:]\x2A\x2D\x2E\x5F]\z/a ? $_ : sprintf('%%%02X', ord)),
       map chr, 0 .. 0x7f
     ),
     'encoder for all ascii characters percent-encodes the right set, as an array of tuples',
@@ -191,7 +191,7 @@ subtest 'application/x-www-form-urlencoded'=> sub {
     encode_media_type('application/x-www-form-urlencoded', \{ map +((chr)x2), 0 .. 0x7f })->$*,
     join('&',
       map join('=', $_, $_),
-      map +(m/^[A-Za-z0-9\x2A\x2D\x2E\x5F]\z/ ? $_ : sprintf('%%%02X', ord)),
+      map +(m/^[[:alnum:]\x2A\x2D\x2E\x5F]\z/a ? $_ : sprintf('%%%02X', ord)),
       map chr, 0 .. 0x7f
     ),
     'encoder for all ascii characters percent-encodes the right set, as an object of single values',
@@ -201,7 +201,7 @@ subtest 'application/x-www-form-urlencoded'=> sub {
     encode_media_type('application/x-www-form-urlencoded', \{ map +((chr)x2), 0 .. 0x7f })->$*,
     join('&',
       map join('=', $_, $_),
-      map +(m/^[A-Za-z0-9\x2A\x2D\x2E\x5F]\z/ ? $_ : sprintf('%%%02X', ord)),
+      map +(m/^[[:alnum:]\x2A\x2D\x2E\x5F]\z/a ? $_ : sprintf('%%%02X', ord)),
       map chr, 0 .. 0x7f
     ),
     'encoder for all ascii characters percent-encodes the right set, as an object of single values',

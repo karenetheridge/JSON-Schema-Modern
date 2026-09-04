@@ -170,8 +170,8 @@ sub keywords ($class, $spec_version) {
     'idn-hostname' => sub { $is_hostname->($idn_decode->($_[0])) },
     ipv4 => $is_ipv4,
     ipv6 => sub {
-      ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,8}[[:xdigit:]]{0,4}\z/
-          || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){1,7}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\z/
+      ($_[0] =~ /^(?:[[:xdigit:]]{0,4}:){0,8}[[:xdigit:]]{0,4}\z/a
+          || $_[0] =~ /^(?:[[:xdigit:]]{0,4}:){1,7}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\z/a
             && $is_ipv4->($1))
         && $_[0] !~ /:::/
         && $_[0] !~ /^:[^:]/
@@ -196,7 +196,7 @@ sub keywords ($class, $spec_version) {
       fc(Mojo::URL->new($_[0])->to_unsafe_string) eq fc($_[0]) && $_[0] !~ /[^[:ascii:]]/;
     },
     iri => sub { Mojo::URL->new($_[0])->is_abs },
-    uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}\z/ },
+    uuid => sub { $_[0] =~ /^[[:xdigit:]]{8}-(?:[[:xdigit:]]{4}-){3}[[:xdigit:]]{12}\z/a },
     'json-pointer' => sub { (!length($_[0]) || $_[0] =~ m{^/}) && $_[0] !~ m{~(?![01])} },
     'relative-json-pointer' => sub { $_[0] =~ m{^(?:0|[1-9][0-9]*)(?:#\z|\z|/)} && $_[0] !~ m{~(?![01])} },
     regex => sub {
