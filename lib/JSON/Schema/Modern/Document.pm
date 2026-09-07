@@ -149,7 +149,7 @@ has _deferred_references => (
   is => 'rwp',
   isa => ArrayRef[
     my $reference_type = Tuple[
-      Str,                      # keyword
+      Str|Undef,                # keyword
       json_pointer_type,        # path location
       InstanceOf['Mojo::URL'],  # absolute target
       Str,                      # expected entity (should actually be __entity_type)
@@ -254,7 +254,7 @@ sub verify_references ($self, $evaluator, $state = undef, $references = undef) {
     elsif ($fragment =~ m{^/}) {
       # json pointer fragment
       ()= E({ %$state, keyword_path => $path_location, keyword => $keyword },
-          '%s target "%s" is a non-existent location', $keyword, $abs_target), next
+          '%s target "%s" is a non-existent location', $expected_entity, $abs_target), next
         if not $document->contains($target_path = $resource->{path}.$fragment);
     }
     elsif (my $subresource = ($resource->{anchors}//{})->{$fragment}) {
@@ -264,18 +264,18 @@ sub verify_references ($self, $evaluator, $state = undef, $references = undef) {
     else {
       # invalid anchor
       ()= E({ %$state, keyword_path => $path_location, keyword => $keyword },
-        '%s target "%s" is a non-existent location', $keyword, $abs_target);
+        '%s target "%s" is a non-existent location', $expected_entity, $abs_target);
       next;
     }
 
     my $entity = $document->get_entity_at_location($target_path);
     ()= E({ %$state, keyword_path => $path_location, keyword => $keyword },
-        '%s target "%s" is not a referenceable location', $keyword, $abs_target), next
+        '%s target "%s" is not a referenceable location', $expected_entity, $abs_target), next
       if not $entity;
 
     ()= E({ %$state, keyword_path => $path_location, keyword => $keyword },
-        '%s target "%s" is the wrong object type (%s, expecting %s)',
-        $keyword, $abs_target, $entity, $expected_entity), next
+        '%s target "%s" is the wrong object type (got %s)',
+        $expected_entity, $abs_target, $entity), next
       if $entity ne $expected_entity;
   }
 
