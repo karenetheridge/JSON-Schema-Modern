@@ -13,6 +13,7 @@ no if "$]" >= 5.033001, feature => 'multidimensional';
 no if "$]" >= 5.033006, feature => 'bareword_filehandles';
 use open ':std', ':encoding(UTF-8)'; # force stdin, stdout, stderr into utf8
 
+use if -d '.git', 'Test::File::ShareDir', -share => { -dist => { 'JSON-Schema-Modern' => 'share' } };
 use Getopt::Long::Descriptive;
 use Mojo::File 'path';
 use Feature::Compat::Try;
