@@ -47,9 +47,13 @@ acceptance_tests(
   },
   output_file => $version.'-acceptance.txt',
   test => {
-    $ENV{NO_TODO} ? () : (todo_tests => [
+    skip_tests => [
       # I am not interested in back-supporting "dependencies"
       { file => 'optional/dependencies-compatibility.json' },
+      # spec-violating things we will never do
+      { file => 'optional/refOfUnknownKeyword.json' },
+    ],
+    $ENV{NO_TODO} ? () : (todo_tests => [
       # various edge cases that are difficult to accomodate
       $Config{ivsize} < 8 ? { file => 'multipleOf.json', group_description => 'small multiple of large integer', test_description => 'any integer is a multiple of 1e-8' } : (),
       { file => 'optional/ecmascript-regex.json', group_description => '\w in patterns matches [A-Za-z0-9_], not unicode letters', test_description => [ 'literal unicode character in json string', 'unicode character in hex format in string' ] },
@@ -59,8 +63,6 @@ acceptance_tests(
       { file => 'optional/ecmascript-regex.json', group_description => [ 'ECMA 262 \d matches ascii digits only', 'ECMA 262 \D matches everything but ascii digits', 'ECMA 262 \w matches ascii letters only', 'ECMA 262 \W matches everything but ascii letters' ] }, # TODO, see test suite PR#505
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \s matches whitespace', test_description => 'zero-width whitespace matches' },
       { file => 'optional/ecmascript-regex.json', group_description => 'ECMA 262 \S matches everything but whitespace', test_description => 'zero-width whitespace does not match' },
-      # things we will never do
-      { file => 'optional/refOfUnknownKeyword.json' },
     ]),
   },
 );
