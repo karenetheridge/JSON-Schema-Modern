@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.648     2026-09-09 22:07:42Z
           - tightened validation of "uri", "uri-reference", "iri",
             "iri-reference" formats
