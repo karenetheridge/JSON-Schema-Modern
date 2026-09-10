@@ -21,6 +21,8 @@ use List::Util 'max';
 use builtin::compat 'blessed';
 use JSON::Schema::Modern;
 
+local $| = 1; # do not buffer stdout
+
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   "$0 %o",
   ['help|usage|?|h', 'print usage information and exit', { shortcircuit => 1 } ],
