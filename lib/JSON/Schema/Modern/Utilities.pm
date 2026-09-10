@@ -507,30 +507,33 @@ sub core_formats_type () {
 
   # see RFC9110 §8.3.1 for ABNF
   my $OWS = q{[\x09\x20]*};
-  my $TOKEN = q{[[:alnum:]!#$%&'*+.^_`|~-]+};
+  my $TOKEN = q{(?a:[[:alnum:]!#$%&'*+.^_`|~-]+)};
   my $QUOTED_STRING = q{"((?:[\x09\20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\x5C[\x09\x20-\x7E\x80-\xFF])*)"};
 
   # parses into hashref: { type => .., subtype => .., params => { .. } }
-  my sub _parse_media_type ($media_type_string) {
-    my ($type_subtype, @params) = split /$OWS;$OWS/, $media_type_string;
-    my ($type, $subtype) = ($type_subtype//'') =~ m{^($TOKEN)/($TOKEN)\z}a;
+  my sub _parse_media_type ($media_type_string //= '') {
+    my ($type, $subtype) = ($media_type_string =~ m{^($TOKEN)/($TOKEN)});
     return if not defined $type or not defined $subtype;
+    pos($media_type_string) = length $&;
+    my $leftovers = $';
 
     # RFC9110 §5.6.4: "The backslash octet ("\") can be used as a single-octet quoting mechanism
     # within quoted-string and comment constructs. Recipients that process the value of a
     # quoted-string MUST handle a quoted-pair as if it were replaced by the octet following the
     # backslash."
-    my $params = {
-      map +(m{^($TOKEN)=($TOKEN|$QUOTED_STRING)\z}
-        ? (fc($1) => defined $3 ? ($3 =~ s/\x5C(.)/$1/gr) : $2)
-        : ()),
-      @params
-    };
+    my $params = {};
+    while ($media_type_string =~ /\G$OWS;$OWS($TOKEN)=($TOKEN|$QUOTED_STRING)/g) {
+      my ($name, $value, $qs_value) = ($1, $2, $3);
+      $leftovers = $';
+      $params->{fc($name)} = defined $qs_value ? ($qs_value =~ s/\x5C(.)/$1/gr) : $value;
+    }
+
+    return if length $leftovers;  # junk was left over
+    croak 'cannot parse more than 64 parameters' if keys $params->%* > 64;
 
     # some parameter values are case-insensitive; enumerate them here
     $params->{$_} = fc($params->{$_}) foreach grep exists $params->{$_}, qw(charset);
 
-    croak 'cannot parse more than 64 parameters' if keys $params->%* > 64;
     +{
       type => fc($type),
       subtype => fc($subtype),

@@ -46,6 +46,17 @@ subtest 'new media-type handler' => sub {
     [ 'mytext/baz+plain', 'mytext/plAin' ],                       # subtype qualifier mismatch
     [ 'mytext/foo; x="\1\y"', 'mytext/foo; x="\1y"' ],            # quoted-pair in parameter
     [ 'mytext/foo; x=1y', 'mytext/foo; x="\1y"' ],                # no quotes still matches
+    [ 'foo/bar ; charset=blah ; furble=bloop', 'foo/bar' ],       # whitespace around ; still matches
+    [ 'foo/bar; furble="bl;oop"', 'foo/bar' ],                    # ; in quoted string still matches
+    [ 'foo/bar; foo="blah', undef ],                              # no trailing quote
+    [ 'foo/bar; junk', undef ],                                   # check for trailing junk
+    [ 'éclair/yum', undef ],                                      # non-ascii chars in type
+    [ 'yum/éclair', undef ],                                      # non-ascii chars in subtype
+    [ 'foo/bar; éclair=yum', undef ],                             # non-ascii chars in parameter name
+    [ 'foo/bar; yum=éclair', undef ],                             # non-ascii chars in parameter value
+    [ 'foo/bar; yum=ಠ_ಠ', undef ],                                # non-ascii chars in parameter value
+    [ qq{foo/bar; yum=\xE0\xB2\xA0\x5F\xE0\xB2\xA0}, undef ],     # unquoted UTF-8 chars ""
+    [ qq{foo/bar; yum="\xE0\xB2\xA0\x5F\xE0\xB2\xA0"}, 'foo/bar' ],   # quoted UTF-8 chars ""
   );
 
   # first, run the tests by passing in the list of candidate types
@@ -53,7 +64,8 @@ subtest 'new media-type handler' => sub {
     is_equal(
       scalar match_media_type($test->[0], \@types),
       $test->[1],
-      "using ad-hoc list: $test->[0] matches $test->[1]",
+      'using ad-hoc list: '
+        .(defined $test->[1] ? "$test->[0] matches $test->[1]" : "$test->[0] is not valid"),
     );
   }
 
@@ -64,7 +76,8 @@ subtest 'new media-type handler' => sub {
     is_equal(
       scalar match_media_type($test->[0]),
       $test->[1],
-      "using registry: $test->[0] matches $test->[1]",
+      'using registry: '
+        .(defined $test->[1] ? "$test->[0] matches $test->[1]" : "$test->[0] is not valid"),
     );
   }
 
