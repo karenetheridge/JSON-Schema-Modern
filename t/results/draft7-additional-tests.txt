@@ -1,4 +1,4 @@
-generated with:              Test::JSON::Schema::Acceptance 1.038
+generated with:              Test::JSON::Schema::Acceptance 1.039
 on perl:                     v5.45.2
 specification version:       draft7
 using custom test directory: t/additional-tests-draft7

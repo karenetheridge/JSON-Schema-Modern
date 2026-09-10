@@ -1,6 +1,6 @@
-generated with:              Test::JSON::Schema::Acceptance 1.038
+generated with:              Test::JSON::Schema::Acceptance 1.039
 on perl:                     v5.45.2
-with commit:                 6648e8194c69697b2e1a15fe76a06a480b183a51 (Test-JSON-Schema-Acceptance-1.037-124-g6648e81)
+with commit:                 f6fd52a0a95472e079cbfc6ef7f089702b80e045 (Test-JSON-Schema-Acceptance-1.037-169-gf6fd52a)
 from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft2019-09
 optional tests included:     yes
@@ -21,7 +21,7 @@ default.json                                 7          0     0
 defs.json                                    2          0     0
 dependentRequired.json                      20          0     0
 dependentSchemas.json                       20          0     0
-enum.json                                   51          0     0
+enum.json                                   53          0     0
 exclusiveMaximum.json                        4          0     0
 exclusiveMinimum.json                        4          0     0
 format.json                                114          0     0
@@ -57,13 +57,13 @@ vocabulary.json                              5          0     0
 optional/anchor.json                         4          0     0
 optional/bignum.json                         9          0     0
 optional/cross-draft.json                    3          0     0
-optional/dependencies-compatibility.json    22         14     0
+optional/dependencies-compatibility.json     0          0     0
 optional/ecmascript-regex.json              60         14     0
 optional/float-overflow.json                 1          0     0
 optional/id.json                             3          0     0
 optional/no-schema.json                      3          0     0
 optional/non-bmp-regex.json                 12          0     0
-optional/refOfUnknownKeyword.json            5          5     0
+optional/refOfUnknownKeyword.json            0          0     0
 optional/unknownKeyword.json                 3          0     0
 ---------------------------------------------------------------
-TOTAL                                     1384         33     0
+TOTAL                                     1359         14     0

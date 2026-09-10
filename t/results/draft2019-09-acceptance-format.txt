@@ -1,6 +1,6 @@
-generated with:              Test::JSON::Schema::Acceptance 1.038
+generated with:              Test::JSON::Schema::Acceptance 1.039
 on perl:                     v5.45.2
-with commit:                 6648e8194c69697b2e1a15fe76a06a480b183a51 (Test-JSON-Schema-Acceptance-1.037-124-g6648e81)
+with commit:                 f6fd52a0a95472e079cbfc6ef7f089702b80e045 (Test-JSON-Schema-Acceptance-1.037-169-gf6fd52a)
 from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft2019-09
 using custom test directory: <base test directory>/optional/format
@@ -8,26 +8,26 @@ optional tests included:     yes
 
 filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
-date-time.json                              33          0     0
+date-time.json                              43          0     0
 date.json                                   81          0     0
 duration.json                               52          0     0
 ecmascript-regex.json                        3          9     0
-email.json                                  20          0     0
+email.json                                  56         15     0
 hostname.json                               40         24     0
 idn-email.json                              18          0     0
-idn-hostname.json                           66         24     0
+idn-hostname.json                           74         24     0
 ipv4.json                                   41          0     0
-ipv6.json                                   40          0     0
-iri-reference.json                          11          2     0
-iri.json                                    21          3     0
+ipv6.json                                   51          0     0
+iri-reference.json                          14          4     0
+iri.json                                    24          3     0
 json-pointer.json                           40          0     0
 regex.json                                   8          0     0
 relative-json-pointer.json                  25          0     0
-time.json                                   47          0     0
+time.json                                   55          0     0
 unknown.json                                 7          0     0
-uri-reference.json                          25          3     0
-uri-template.json                           25         13     0
-uri.json                                    44          2     0
-uuid.json                                   28          0     0
+uri-reference.json                          27          3     0
+uri-template.json                           25         19     0
+uri.json                                    45          2     0
+uuid.json                                   29          0     0
 ---------------------------------------------------------------
-TOTAL                                      675         80     0
+TOTAL                                      758        103     0
