@@ -51,7 +51,7 @@ subtest 'new media-type handler' => sub {
   # first, run the tests by passing in the list of candidate types
   foreach my $test (@tests) {
     is_equal(
-      (match_media_type($test->[0], \@types) // undef),
+      scalar match_media_type($test->[0], \@types),
       $test->[1],
       "using ad-hoc list: $test->[0] matches $test->[1]",
     );
@@ -62,7 +62,7 @@ subtest 'new media-type handler' => sub {
 
   foreach my $test (@tests) {
     is_equal(
-      (match_media_type($test->[0]) // undef),
+      scalar match_media_type($test->[0]),
       $test->[1],
       "using registry: $test->[0] matches $test->[1]",
     );
