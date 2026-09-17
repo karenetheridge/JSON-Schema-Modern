@@ -1,6 +1,6 @@
 Revision history for JSON-Schema-Modern
 
-{{$NEXT}}
+0.650     2026-09-17 23:38:51Z
           - fix syntax error on older perls
 
 0.649     2026-09-17 21:44:20Z
