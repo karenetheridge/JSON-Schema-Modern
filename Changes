@@ -1,6 +1,7 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - fix syntax error on older perls
 
 0.649     2026-09-17 21:44:20Z
           - fix logic used to parse media-types, to handle more edge cases

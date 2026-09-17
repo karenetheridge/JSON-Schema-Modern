@@ -511,7 +511,7 @@ sub core_formats_type () {
   my $QUOTED_STRING = q{"((?:[\x09\20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\x5C[\x09\x20-\x7E\x80-\xFF])*)"};
 
   # parses into hashref: { type => .., subtype => .., params => { .. } }
-  my sub _parse_media_type ($media_type_string //= '') {
+  my sub _parse_media_type ($media_type_string = '') {
     my ($type, $subtype) = ($media_type_string =~ m{^($TOKEN)/($TOKEN)});
     return if not defined $type or not defined $subtype;
     pos($media_type_string) = length $&;
