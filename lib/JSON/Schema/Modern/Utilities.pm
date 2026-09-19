@@ -71,6 +71,7 @@ our @EXPORT_OK = qw(
   core_formats_type
   register_schema
   load_cached_document
+  parse_media_type
   add_media_type
   delete_media_type
   decode_media_type
@@ -510,9 +511,9 @@ sub core_formats_type () {
   my $TOKEN = q{(?a:[[:alnum:]!#$%&'*+.^_`|~-]+)};
   my $QUOTED_STRING = q{"((?:[\x09\20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\x5C[\x09\x20-\x7E\x80-\xFF])*)"};
 
-  # parses into hashref: { type => .., subtype => .., params => { .. } }
-  my sub _parse_media_type ($media_type_string = '') {
-    my ($type, $subtype) = ($media_type_string =~ m{^($TOKEN)/($TOKEN)});
+  # parses into hashref: { type => .., subtype => .., parameters => { .. } }
+  sub parse_media_type ($media_type_string) {
+    my ($type, $subtype) = (($media_type_string//'') =~ m{^($TOKEN)/($TOKEN)});
     return if not defined $type or not defined $subtype;
     pos($media_type_string) = length $&;
     my $leftovers = $';
@@ -521,6 +522,10 @@ sub core_formats_type () {
     # within quoted-string and comment constructs. Recipients that process the value of a
     # quoted-string MUST handle a quoted-pair as if it were replaced by the octet following the
     # backslash."
+    # RFC9110 §5.6.6: "Parameter names are case-insensitive. Parameter values might or might not be
+    # case-sensitive, depending on the semantics of the parameter name."
+    # RFC9110 §5.5: "A recipient SHOULD treat other allowed octets in field content (i.e., obs-text)
+    # as opaque data."
     my $params = {};
     while ($media_type_string =~ /\G$OWS;$OWS($TOKEN)=($TOKEN|$QUOTED_STRING)/g) {
       my ($name, $value, $qs_value) = ($1, $2, $3);
@@ -668,7 +673,7 @@ sub core_formats_type () {
     croak 'decoder is not a subref' if defined $decoder_sub and ref $decoder_sub ne 'CODE';
     croak 'encoder is not a subref' if defined $encoder_sub and ref $encoder_sub ne 'CODE';
 
-    my $type = _parse_media_type($media_type_string);
+    my $type = parse_media_type($media_type_string);
     croak "bad media-type string \"$media_type_string\"" if not $type;
 
     croak 'multipart encoders/decoders cannot be defined here: use OpenAPI::Modern'
@@ -721,7 +726,7 @@ sub core_formats_type () {
 
     return if not $definition->{decode};
 
-    my $type = _parse_media_type($media_type_string);
+    my $type = parse_media_type($media_type_string);
     $definition->{decode}->($content_ref, $type->{parameters}//());
   }
 
@@ -738,7 +743,7 @@ sub core_formats_type () {
 
     return if not $definition->{encode};
 
-    my $type = _parse_media_type($media_type_string);
+    my $type = parse_media_type($media_type_string);
     $definition->{encode}->($content_ref, $type->{parameters}//());
   }
 
@@ -752,10 +757,10 @@ sub core_formats_type () {
       if @$media_types and any { $_ eq $media_type_string } @$media_types
         or not @$media_types and exists $MEDIA_TYPES->{$media_type_string};
 
-    my $mt = _parse_media_type($media_type_string);
+    my $mt = parse_media_type($media_type_string);
     return if not $mt;
 
-    my $types = @$media_types ? +{ map +($_ => _parse_media_type($_)), @$media_types } : $MEDIA_TYPES;
+    my $types = @$media_types ? +{ map +($_ => parse_media_type($_)), @$media_types } : $MEDIA_TYPES;
 
     my @matches;  # [ rank, candidate ]
 
@@ -1171,6 +1176,13 @@ A L<Type::Tiny> type representing the core JSON Schema formats (across all suppo
 Loads a document object from global cache, loading data from disk if needed. This should only be
 used for officially-published schemas and metaschemas that are bundled with this distribution or
 another related one.
+
+=head2 parse_media_type
+
+  # { type => 'audio', subtype => '*', parameters => { version => '1' } }
+  my $mt = parse_media_type('audio/*; version=1');
+
+Parses a media-type string according to RFC9110 and returns a hashref of type, subtype and parameters.
 
 =head2 add_media_type
 

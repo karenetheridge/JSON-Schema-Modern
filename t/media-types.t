@@ -15,9 +15,40 @@ use utf8;
 use lib 't/lib';
 use Helper;
 
-use JSON::Schema::Modern::Utilities qw(match_media_type add_media_type delete_media_type decode_media_type encode_media_type);
+use JSON::Schema::Modern::Utilities qw(parse_media_type match_media_type add_media_type delete_media_type decode_media_type encode_media_type);
 
 subtest 'new media-type handler' => sub {
+  my @parse_types = (
+    [ '*/*',                          { type => '*', subtype => '*' } ],
+    [ 'mytext/*',                     { type => 'mytext', subtype => '*' } ],
+    [ 'mytext/plAin',                 { type => 'mytext', subtype => 'plain' } ],
+    [ 'mytext/foo+plain',             { type => 'mytext', subtype => 'foo+plain' } ],
+    [ 'mytext/plain; charset=iso8891-1', { type => 'mytext', subtype => 'plain', parameters => { charset => 'iso8891-1' } } ],
+    [ 'mytext/plain;charset=utf-8',   { type => 'mytext', subtype => 'plain', parameters => { charset => 'utf-8' } } ],
+    [ 'mytext/PLAIN;  charset=utf-8; x=y', { type => 'mytext', subtype => 'plain', parameters => { charset => 'utf-8', x => 'y' } } ],
+    [ 'mytext/foo; x="\1y"',          { type => 'mytext', subtype => 'foo', parameters => { x => '1y' } } ],
+    [ 'foo/bar',                      { type => 'foo', subtype => 'bar' } ],
+    [ 'foo/bar; foo="blah',           undef ],                    # no trailing quote
+    [ 'foo/bar; foo =blah',           undef ],                    # whitespace before =
+    [ 'foo/bar; foo= blah',           undef ],                    # whitespace after =
+    [ 'foo/bar; junk',                undef ],                    # check for trailing junk
+    [ 'éclair/yum',                   undef ],                    # non-ascii chars in type
+    [ 'yum/éclair',                   undef ],                    # non-ascii chars in subtype
+    [ 'foo/bar; éclair=yum',          undef ],                    # non-ascii chars in parameter name
+    [ 'foo/bar; yum=éclair',          undef ],                    # non-ascii chars in parameter value without quotes
+    [ 'foo/bar; yum="ಠ_ಠ"',           undef ],                    # wide chars in parameter value
+    [ qq{foo/bar; yum=\xE0\xB2\xA0\x5F\xE0\xB2\xA0}, undef ],     # unquoted UTF-8 chars ""
+    [ qq{foo/bar; yum="\xE0\xB2\xA0\x5F\xE0\xB2\xA0"}, { type => 'foo', subtype => 'bar', parameters => { yum => "\xE0\xB2\xA0\x5F\xE0\xB2\xA0" } } ],            # obs-text is opaque, not UTF-8 decoded
+  );
+
+  foreach my $type (@parse_types) {
+    is_equal(
+      scalar parse_media_type($type->[0]),
+      $type->[1],
+      qq{"$type->[0]" parses correctly},
+    );
+  }
+
   my @types = (
     '*/*',
     'mytext/*',
