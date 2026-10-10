@@ -118,6 +118,11 @@ acceptance_tests(
           'an invalid domain',
           'an invalid IPv4-address-literal',
         ] },
+      { file => 'idn-email.json', test_description => [
+          'a domain label starting with a hyphen is not valid',
+          'a domain label ending with a hyphen is not valid',
+          'a domain ending with a dot is not valid',
+        ] },
     ]),
   },
 );
