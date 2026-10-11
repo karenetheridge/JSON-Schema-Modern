@@ -355,7 +355,7 @@ __END__
 =pod
 
 =for :header
-=for stopwords subschema
+=for stopwords subschema OpenAPI referenceable
 
 =head1 SYNOPSIS
 
@@ -443,7 +443,7 @@ large documents that are known to be valid, such as specification metaschemas.
 =head1 METHODS
 
 =for Pod::Coverage FOREIGNBUILDARGS BUILDARGS BUILD FREEZE THAW traverse has_errors path_to_resource
-resource_pairs get_entity_at_location get_entity_locations retrieval_uri
+resource_pairs get_entity_at_location get_entity_locations
 
 =head2 errors
 
@@ -463,6 +463,10 @@ addressable at this location you must add it to the evaluator yourself with the 
 L<JSON::Schema::Modern/add_document>.
 
 Read-only.
+
+=head2 retrieval_uri
+
+An alias to L</original_uri>, intended to be used in an OpenAPI context.
 
 =head2 resource_index
 
@@ -519,8 +523,6 @@ Primarily for internal use.
 Returns a data structure suitable for serialization. See L</schema>.
 
 =head1 SUBCLASSING
-
-=for stopwords OpenAPI referenceable
 
 This class can be subclassed to describe documents of other types, which follow the same basic model
 (has a document-level identifier and may contain internal referenceable identifiers). The overall
