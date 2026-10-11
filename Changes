@@ -1,6 +1,10 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - JSON::Schema::Modern::Document::original_uri is now left undefined
+            if a canonical_uri was not provided as a constructor argument
+            (canonical_uri itself is still derived from the $id keyword, or
+            related keywords in subclasses)
 
 0.651     2026-10-11 00:17:02Z
           - JSON::Schema::Modern::Utilities::parse_media_type is now a public

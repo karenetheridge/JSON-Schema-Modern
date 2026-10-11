@@ -25,6 +25,7 @@ use builtin::compat qw(refaddr blessed);
 use MooX::TypeTiny;
 use Types::Standard 1.016003 qw(InstanceOf HashRef Str Map Dict Tuple ArrayRef Enum ClassName Undef Slurpy Optional Bool);
 use Types::Common::Numeric 'PositiveOrZeroInt';
+use Syntax::Operator::Equ 'is_strequ';
 use JSON::Schema::Modern::Utilities qw(json_pointer_type canonical_uri_type E);
 use namespace::clean;
 
@@ -44,10 +45,11 @@ has canonical_uri => (
 );
 
 # this is also known as the retrieval uri in the OpenAPI specification
+# it may be undefined, in which case users may wish to fall back to canonical_uri
 has original_uri => (
   is => 'rwp',
   isa => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
-  init_arg => undef,
+  init_arg => undef, # not allowed as a constructor argument, but rather populated in BUILD
 );
 *retrieval_uri = \&original_uri;
 
@@ -169,8 +171,10 @@ sub TO_JSON { shift->schema }
 
 # note that this is always called, even in subclasses
 sub BUILD ($self, $args) {
+  croak 'cannot provide "retrieval_uri"' if exists $args->{retrieval_uri};
+
   # note! not a clone! Please don't change canonical_uri in-place.
-  $self->_set_original_uri($self->canonical_uri);
+  $self->_set_original_uri($self->canonical_uri) if defined $args->{canonical_uri};
 
   # this should extract all identifiers, references, and entities, and set canonical_uri,
   # metaschema_uri
@@ -198,7 +202,7 @@ sub BUILD ($self, $args) {
 
   # we only index the original uri if nothing in the schema itself identified a root resource:
   # otherwise the top of the document would be unreferenceable.
-  $self->_add_resource($self->original_uri.'' => {
+  $self->_add_resource(($self->original_uri//'').'' => {
       path => '',
       canonical_uri => $self->canonical_uri,
       $state->%{qw(specification_version vocabularies)},
@@ -298,8 +302,8 @@ sub traverse ($self, $evaluator, $config_override = {}) {
     }
   );
 
-  die 'original_uri has changed' if $self->original_uri ne $original_uri
-    or refaddr($self->original_uri) != refaddr($original_uri);
+  die 'original_uri has changed' if not is_strequ($self->original_uri, $original_uri)
+    or (defined $self->original_uri and defined $original_uri and refaddr($self->original_uri) != refaddr($original_uri));
 
   # if the document identified a canonical uri for itself via '$id', or metaschema uri via '$schema',
   # they overrides the initial values
@@ -389,7 +393,7 @@ against this URI to determine the final value, which is then stored in this acce
 can be considered the canonical URI for the document as a whole, from which subsequent C<$ref>
 keywords are resolved.
 
-The original passed-in value is saved in L</original_uri>.
+The original passed-in value, if there was one, is saved in L</original_uri>.
 
 =head2 metaschema_uri
 
@@ -461,6 +465,9 @@ at runtime.
 This URI is B<not> added to the document's resource index, so if you want the document to be
 addressable at this location you must add it to the evaluator yourself with the two-argument form of
 L<JSON::Schema::Modern/add_document>.
+
+This value may be C<undef>; depending on the context you may wish to use C<''> or L</canonical_uri>
+as a fallback.
 
 Read-only.
 
