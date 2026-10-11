@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.651     2026-10-11 00:17:02Z
           - JSON::Schema::Modern::Utilities::parse_media_type is now a public
             sub
