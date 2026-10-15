@@ -1933,6 +1933,8 @@ However, some potentially-useful features are not yet implemented, such as:
 
 =head1 SECURITY CONSIDERATIONS
 
+=for stopwords const maxLength minLength uniqueItems
+
 The C<pattern> and C<patternProperties> keywords evaluate regular expressions from the schema,
 the C<regex> format validator evaluates regular expressions from the data, and some keywords
 in the Validation vocabulary perform floating point operations on potentially-very large numbers.
@@ -1944,6 +1946,11 @@ UNTRUSTED SOURCES.>
 (In particular, see vulnerability
 L<perl5363delta/CVE-2023-47038-Write-past-buffer-end-via-illegal-user-defined-Unicode-property>,
 which was fixed in Perl releases 5.34.3, 5.36.3 and 5.38.1.)
+
+Additionally, stringwise operations (e.g. with the "const", "enum", "uniqueItems", "pattern",
+"minLength" and "maxLength" keywords) are performed on Unicode strings, where comparisons are
+performed codepoint-for-codepoint, without normalization; this may cause issues if strings are
+compared that are in different normal forms.
 
 =head1 BUNDLED META-SCHEMAS
 
