@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.652     2026-10-23 20:26:30Z
           - JSON::Schema::Modern::Document::original_uri is now left undefined
             if a canonical_uri was not provided as a constructor argument
