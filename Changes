@@ -5,6 +5,10 @@ Revision history for JSON-Schema-Modern
             if a canonical_uri was not provided as a constructor argument
             (canonical_uri itself is still derived from the $id keyword, or
             related keywords in subclasses)
+          - POSSIBLY BREAKING CHANGE: fix handling of \d, \D, \s, \S, \w, \W
+            to be more specification-conformant (these do not match all
+            Unicode characters in the respective ranges, despite performing
+            matches using Unicode codepoints)
 
 0.651     2026-10-11 00:17:02Z
           - JSON::Schema::Modern::Utilities::parse_media_type is now a public

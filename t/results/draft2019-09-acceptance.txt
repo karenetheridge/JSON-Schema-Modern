@@ -58,7 +58,7 @@ optional/anchor.json                         4          0     0
 optional/bignum.json                         9          0     0
 optional/cross-draft.json                    3          0     0
 optional/dependencies-compatibility.json     0          0     0
-optional/ecmascript-regex.json              60         14     0
+optional/ecmascript-regex.json              66          8     0
 optional/float-overflow.json                 1          0     0
 optional/id.json                             3          0     0
 optional/no-schema.json                      3          0     0
@@ -66,4 +66,4 @@ optional/non-bmp-regex.json                 12          0     0
 optional/refOfUnknownKeyword.json            0          0     0
 optional/unknownKeyword.json                 3          0     0
 ---------------------------------------------------------------
-TOTAL                                     1359         14     0
+TOTAL                                     1365          8     0

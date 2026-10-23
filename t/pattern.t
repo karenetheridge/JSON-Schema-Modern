@@ -21,7 +21,7 @@ my $js = JSON::Schema::Modern->new;
 my $tests = sub ($char, $test_substr) {
   is_equal(
     $js->evaluate($char, { pattern => '[a-z]' })->TO_JSON,
-    {
+    my $result = {
       valid => false,
       errors => [
         {
@@ -36,10 +36,24 @@ my $tests = sub ($char, $test_substr) {
 
   is_equal(
     $js->evaluate($char, { pattern => '\w' })->TO_JSON,
+    $result,
+    $test_substr.' LATIN SMALL LETTER E WITH ACUTE does not match the "word" character class, because \w is ascii-only in ECMA-262',
+  );
+
+  is_equal(
+    $js->evaluate($char, { pattern => '(?u:\w)' })->TO_JSON,
     {
       valid => true,
     },
-    $test_substr.' LATIN SMALL LETTER E WITH ACUTE does match the "word" character class, because unicode semantics are used for matching',
+    $test_substr.' LATIN SMALL LETTER E WITH ACUTE does match the "word" character class when explicitly enabling unicode semantics in the pattern',
+  );
+
+  is_equal(
+    $js->evaluate($char, { pattern => 'é' })->TO_JSON,
+    {
+      valid => true,
+    },
+    $test_substr.' LATIN SMALL LETTER E WITH ACUTE matches itself, even though /a is applied to the pattern',
   );
 };
 

@@ -223,7 +223,8 @@ sub _traverse_keyword_pattern ($class, $schema, $state) {
 sub _eval_keyword_pattern ($class, $data, $schema, $state) {
   return 1 if not is_type('string', $data);
 
-  return 1 if $data =~ m/(?:$schema->{pattern})/;
+  # ECMA-262 restricts \d, \s, \w to ascii ranges
+  return 1 if $data =~ m/(?:$schema->{pattern})/a;
   return E($state, 'pattern does not match');
 }
 

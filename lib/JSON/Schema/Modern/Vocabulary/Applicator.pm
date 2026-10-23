@@ -463,7 +463,8 @@ sub _eval_keyword_patternProperties ($class, $data, $schema, $state) {
   my $valid = 1;
   my @properties;
   foreach my $property_pattern (sort keys $schema->{patternProperties}->%*) {
-    foreach my $property (sort grep m/(?:$property_pattern)/, keys %$data) {
+    # ECMA-262 restricts \d, \s, \w to ascii ranges
+    foreach my $property (sort grep m/(?:$property_pattern)/a, keys %$data) {
       push @properties, $property;
       if (is_type('boolean', $schema->{patternProperties}{$property_pattern})) {
         next if $schema->{patternProperties}{$property_pattern};
@@ -499,7 +500,7 @@ sub _eval_keyword_additionalProperties ($class, $data, $schema, $state) {
   foreach my $property (sort keys %$data) {
     next if exists $schema->{properties} and exists $schema->{properties}{$property};
     next if exists $schema->{patternProperties}
-      and any { $property =~ /(?:$_)/ } keys $schema->{patternProperties}->%*;
+      and any { $property =~ /(?:$_)/a } keys $schema->{patternProperties}->%*;
 
     push @properties, $property;
     if (is_type('boolean', $schema->{additionalProperties})) {
