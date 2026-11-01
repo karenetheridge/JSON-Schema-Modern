@@ -175,4 +175,38 @@ subtest 'bad regex in schema' => sub {
   );
 };
 
+subtest 'embedded code in regexes' => sub {
+  cmp_result(
+    $js->evaluate(
+      'foo',
+      {
+        type => 'string',
+        pattern => q!^(?{ die 'we should never execute this' })$!,
+      },
+    )->TO_JSON,
+    {
+      valid => false,
+      errors => [
+        {
+          keywordLocation => '/pattern',
+          error => re(qr/^Eval-group not allowed at runtime/),
+        },
+      ],
+    },
+    'code embedded in a regex in the schema is rejected at traverse time, preventing execution',
+  );
+
+  cmp_result(
+    $js->evaluate(
+      q!^(?{ die 'we should never execute this' })$!,
+      {
+        type => 'string',
+        format => 'regex',
+      },
+    )->TO_JSON,
+    { valid => true },
+    'code embedded in a regex in the data is accepted, but not executed',
+  );
+};
+
 done_testing;
