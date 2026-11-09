@@ -1,6 +1,8 @@
 Revision history for JSON-Schema-Modern
 
 {{$NEXT}}
+          - skip more obscure edge cases for formats in acceptance tests added
+            in TJSA 1.041.
 
 0.652     2026-10-23 20:26:30Z
           - JSON::Schema::Modern::Document::original_uri is now left undefined

@@ -71,6 +71,7 @@ acceptance_tests(
           'lone percent sign is invalid',
           'non-numeric port is invalid',
           'leading zero in an embedded IPv4 address is invalid',
+          'an IPv6 address without enclosing brackets is invalid',
         ] },
       { file => 'uri-reference.json', test_description => [
           'an incomplete percent-encoding',

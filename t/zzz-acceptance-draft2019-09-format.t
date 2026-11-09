@@ -76,6 +76,12 @@ acceptance_tests(
           'an IPv6 address without enclosing brackets is invalid',
           'an IPv6 host whose embedded IPv4 has a leading zero is invalid',
           'a trailing newline after a valid IRI is invalid',
+          'non-ASCII character in scheme is invalid',
+          'scheme starting with a digit is invalid',
+          'invalid character in scheme',
+          'non-numeric port is invalid',
+          'more than one at-sign in the authority is invalid',
+          'square brackets are not allowed in a path segment',
         ] },
       { file => 'idn-hostname.json',
         # IDN decoder, Data::Validate::Domain both have issues
@@ -84,6 +90,7 @@ acceptance_tests(
           'lone percent sign is invalid',
           'non-numeric port is invalid',
           'leading zero in an embedded IPv4 address is invalid',
+          'an IPv6 address without enclosing brackets is invalid',
         ] },
       { file => 'uri-reference.json', test_description => [
           'an incomplete percent-encoding',
