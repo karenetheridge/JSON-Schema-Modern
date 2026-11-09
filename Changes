@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.653     2026-11-09 22:49:09Z
           - skip more obscure edge cases for formats in acceptance tests added
             in TJSA 1.041.
