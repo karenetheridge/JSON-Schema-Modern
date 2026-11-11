@@ -285,4 +285,30 @@ subtest 'is_type and get_type for references' => sub {
   }
 };
 
+subtest 'PL_sv_zero' => sub {
+  my @empty_array;
+
+  # `PL_sv_zero`, introduced in 5.28 (5.27.10 commit 5a6c28370) has a zero numeric value and a "0"
+  # string value. Its flags did not indicate which value should be treated as authoritative when
+  # serializing or encoding to an external format -- up to 5.45.5, POK is set, causing
+  # is_type('string') to return true, and the builtin version of created_as_number to return false
+  # (but the heuristic in builtin::compat for older perls behaves correctly here).
+
+  SKIP: {
+    skip 'PL_sv_zero returns true for created_as_number() on perls between 5.35.9 and 5.45.4 due to the SVf_POK flag being set', 4
+      if "$]" >= 5.035009 and "$]" < 5.045005;
+
+    ok(is_type('integer', scalar @empty_array), 'is_type(PL_sv_zero, \'integer\') is true');
+
+    ok(is_type('number', scalar @empty_array), 'is_type(PL_sv_zero, \'number\') is true');
+
+    skip 'PL_sv_zero has the SVf_POK flag set on perls between 5.27.10 and 5.45.4', 2
+      if "$]" >= 5.027010 and "$]" < 5.045005;
+
+    ok(!is_type('string', scalar @empty_array), 'is_type(PL_sv_zero, \'string\') is false');
+
+    is(get_type(scalar @empty_array), 'integer', 'get_type(PL_sv_zero) = \'integer\'');
+  }
+};
+
 done_testing;

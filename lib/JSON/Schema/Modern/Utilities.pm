@@ -102,7 +102,7 @@ use constant _JSON_BACKEND =>
 # supports the six core types, plus integer (which is also a number)
 # we do NOT check stringy_numbers here -- you must do that in the caller
 # note that sometimes a value may return true for more than one type, e.g. integer+number,
-# or number+string, depending on its internal flags.
+# or number+string, depending on its internal flags; use get_type() to report ambiguous values.
 # pass { legacy_ints => 1 } in $config to use draft4 integer behaviour
 # behaviour is consistent with get_type() (where integers are also numbers).
 sub is_type ($type, $value, $config = {}) {
