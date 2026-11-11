@@ -1,6 +1,6 @@
-generated with:              Test::JSON::Schema::Acceptance 1.040
-on perl:                     v5.45.3
-with commit:                 7de0e6a06031ede80028583dd45d0cd41105ae5b (Test-JSON-Schema-Acceptance-1.039-10-g7de0e6a)
+generated with:              Test::JSON::Schema::Acceptance 1.041
+on perl:                     v5.45.4
+with commit:                 245a45abc90190c0bff04d97e6d2b541b4bb9f12 (Test-JSON-Schema-Acceptance-1.039-21-g245a45ab)
 from repository:             /Volumes/chambord/Users/ether/git/JSON-Schema-Test-Suite.git
 specification version:       draft6
 using custom test directory: <base test directory>/optional/format
@@ -10,13 +10,13 @@ filename                                  pass  todo-fail  fail
 ---------------------------------------------------------------
 date-time.json                              47          0     0
 email.json                                  56         15     0
-hostname.json                               30          1     0
+hostname.json                               32          1     0
 ipv4.json                                   41          0     0
 ipv6.json                                   51          0     0
 json-pointer.json                           40          0     0
 unknown.json                                 7          0     0
 uri-reference.json                          28          3     0
 uri-template.json                           27         21     0
-uri.json                                    45          2     0
+uri.json                                    45          3     0
 ---------------------------------------------------------------
-TOTAL                                      372         42     0
+TOTAL                                      374         43     0
