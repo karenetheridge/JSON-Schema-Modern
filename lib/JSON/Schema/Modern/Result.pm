@@ -112,7 +112,7 @@ has formatted_annotations => (
 
 has defaults => (
   is => 'ro',
-  isa => Map[json_pointer_type, Any],
+  isa => Map[json_pointer_type() => Any],
 );
 
 has data => (

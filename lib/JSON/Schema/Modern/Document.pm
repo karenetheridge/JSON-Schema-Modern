@@ -65,7 +65,7 @@ has metaschema_uri => (
 # https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.3.5
 has resource_index => (
   is => 'bare',
-  isa => Map[my $resource_key_type = Str->where('!/#/'), my $resource_type = Dict[
+  isa => Map[my $resource_key_type = Str->where('!/#/') => my $resource_type = Dict[
       canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
       path => json_pointer_type,  # JSON pointer relative to the document root
       specification_version => Enum[qw(draft4 draft6 draft7 draft2019-09 draft2020-12)],
@@ -114,7 +114,7 @@ sub _push_errors { push((shift->{errors}//=[])->@*, @_) }
 # json pointer => entity name (indexed by integer)
 has _entities => (
   is => 'ro',
-  isa => Map[json_pointer_type, PositiveOrZeroInt],
+  isa => Map[json_pointer_type() => PositiveOrZeroInt],
   lazy => 1,
   default => sub { {} },
 );

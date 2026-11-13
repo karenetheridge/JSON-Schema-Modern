@@ -861,7 +861,7 @@ sub _evaluate_subschema ($self, $data, $schema, $state) {
 
 has _resource_index => (
   is => 'bare',
-  isa => Map[my $resource_key_type = Str->where('!/#/'), my $resource_type = Dict[
+  isa => Map[my $resource_key_type = Str->where('!/#/') => my $resource_type = Dict[
       canonical_uri => (InstanceOf['Mojo::URL'])->where(q{not defined $_->fragment}),
       path => json_pointer_type,  # JSON pointer relative to the document root
       specification_version => my $spec_version_type = Enum(SPECIFICATION_VERSIONS_SUPPORTED),
