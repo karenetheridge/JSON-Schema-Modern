@@ -26,6 +26,7 @@ local $| = 1; # do not buffer stdout
 my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   "$0 %o",
   ['help|usage|?|h', 'print usage information and exit', { shortcircuit => 1 } ],
+  ['version|v', 'print version information and exit', { shortcircuit => 1 } ],
   [],
   ['specification-version|version=s', 'which version of the JSON Schema specification to use'],
   ['output-format=s', 'output format (flag, basic, terse)'],
@@ -45,7 +46,8 @@ my ($opt, $usage) = Getopt::Long::Descriptive::describe_options(
   ['schema=s', 'the filename to use for the schema (if not provided, STDIN is used)'],
 );
 
-print($usage->text), exit if $opt->help;
+print($usage->text, 'For more information, see `perldoc '.__FILE__, "`\n"), exit if $opt->help;
+print('json-schema-eval version ', JSON::Modern->VERSION, ' - https://github.com/karenetheridge/JSON-Schema-Modern', "\n"), exit if $opt->version;
 
 die '--validate-schema and --data should not be used together' if defined $opt->data and defined $opt->validate_schema;
 die '--validate-schema and --schema should not be used together' if defined $opt->schema and defined $opt->validate_schema;
