@@ -1,6 +1,6 @@
 # vim: set ft=perl ts=8 sts=2 sw=2 tw=100 et :
-use strictures 2;
-use 5.020;
+use strict;
+use warnings;
 package inc::TestWithoutOptionalModules;
 
 use Moose;

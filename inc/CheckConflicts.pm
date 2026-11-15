@@ -2,10 +2,11 @@
 use strict;
 use warnings;
 package inc::CheckConflicts;
-use stable 0.031 'postderef';
 
 use Moose;
 with 'Dist::Zilla::Role::InstallTool';
+
+use stable 0.031 'postderef';
 
 sub setup_installer {
   my $self = shift;
