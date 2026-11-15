@@ -1912,7 +1912,7 @@ declared in the metaschema, in which case use of the format will produce an erro
 =for :list
 * C<email> and C<idn-email> require L<Email::Address::XS> version 1.04 (or higher)
 * C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (or higher)
-* C<idn-hostname> also requires L<Net::IDN::Encode>
+* C<idn-hostname> also requires L<Net::IDN::Encode> version 2.600 (or higher)
 * C<uri> requires L<Data::Validate::URI>
 
 =head2 Specification Compliance

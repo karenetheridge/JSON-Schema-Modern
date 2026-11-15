@@ -30,7 +30,7 @@ if ($ENV{EXTENDED_TESTING}) {
   test_needs {
     'Email::Address::XS' => '1.04',
     'Data::Validate::Domain' => 0.13,
-    'Net::IDN::Encode' => 0,
+    'Net::IDN::Encode' => '2.600',
     'Data::Validate::URI' => 0,
   };
 }
@@ -38,7 +38,7 @@ if ($ENV{EXTENDED_TESTING}) {
 if ($ENV{AUTHOR_TESTING}) {
   eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } or fail $@;
   eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } or fail $@;
-  eval { require Net::IDN::Encode; 1 } or fail $@;
+  eval { require Net::IDN::Encode; Net::IDN::Encode->VERSION('2.600'); 1 } or fail $@;
   eval { require Data::Validate::URI; 1 } or fail $@;
 }
 
@@ -65,7 +65,7 @@ acceptance_tests(
           # these all depend on optional prereqs
           !$ENV{AUTHOR_TESTING} && !eval { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 } ? qw(email.json idn-email.json) : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 } ? qw(hostname.json idn-hostname.json) : (),
-          !$ENV{AUTHOR_TESTING} && !eval { require Net::IDN::Encode; 1 } ? 'idn-hostname.json' : (),
+          !$ENV{AUTHOR_TESTING} && !eval { require Net::IDN::Encode; Net::IDN::Encode->VERSION('2.600'); 1 } ? 'idn-hostname.json' : (),
           !$ENV{AUTHOR_TESTING} && !eval { require Data::Validate::URI; 1 } ? 'uri.json' : (),
         ] },
       # various edge cases that are difficult to accomodate

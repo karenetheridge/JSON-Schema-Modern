@@ -61,7 +61,7 @@ sub keywords ($class, $spec_version) {
       { domain_disable_tld_validation => 1, domain_allow_single_label => 1 });
   };
   my $idn_decode = sub {  # idn-hostname
-    require Net::IDN::Encode;
+    require Net::IDN::Encode; Net::IDN::Encode->VERSION('2.600');
     try { return Net::IDN::Encode::domain_to_ascii($_[0]) } catch ($e) { return $_[0]; }
   };
   my $is_ipv4 = sub {     # ipv4, ipv6
@@ -256,7 +256,7 @@ sub keywords ($class, $spec_version) {
 my $warnings = {
   email => sub { require Email::Address::XS; Email::Address::XS->VERSION(1.04); 1 },
   hostname => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); 1 },
-  'idn-hostname' => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); require Net::IDN::Encode; 1 },
+  'idn-hostname' => sub { require Data::Validate::Domain; Data::Validate::Domain->VERSION(0.13); require Net::IDN::Encode; Net::IDN::Encode->VERSION('2.600'); 1 },
   uri => sub { require Data::Validate::URI; 1 },
 };
 $warnings->{'idn-email'} = $warnings->{email};
