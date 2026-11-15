@@ -1,5 +1,7 @@
 Revision history for JSON-Schema-Modern
 
+{{$NEXT}}
+
 0.654     2026-11-15 21:58:49Z
           - add --version option to "json-schema-eval" script
           - bump (optional) dependency on Net::IDN::Encode for various fixes
