@@ -10,7 +10,7 @@ JSON::Schema::Modern - Validate data against a schema using a JSON Schema
 
 =head1 VERSION
 
-version 0.653
+version 0.654
 
 I use a linearly-increasing version numbering scheme. No meaning should be
 presumed or inferred from the version being less than 1.0.
@@ -796,7 +796,7 @@ C<hostname> and C<idn-hostname> require L<Data::Validate::Domain> version 0.13 (
 
 =item *
 
-C<idn-hostname> also requires L<Net::IDN::Encode>
+C<idn-hostname> also requires L<Net::IDN::Encode> version 2.600 (or higher)
 
 =item *
 
